@@ -6,7 +6,8 @@ import { internalAction, type MutationCtx } from "./_generated/server";
 /**
  * Events only the server sees (a reply landing, a quote read, a plan generated), with
  * the same rules as the app's: names and safe scalars, never content. Off until
- * POSTHOG_KEY is set on the deployment; never in a mutation's way.
+ * POSTHOG_KEY is set on the deployment; never in a mutation's way. Sent from Convex,
+ * so no visitor's IP address goes with them.
  */
 export const capture = internalAction({
   args: { event: v.string(), distinctId: v.string(), properties: v.optional(v.record(v.string(), v.union(v.string(), v.number(), v.boolean()))) },

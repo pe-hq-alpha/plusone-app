@@ -1,8 +1,8 @@
 /**
  * PostHog through our own address (/ingest), so blockers don't drop it. This runs on
- * Cloudflare, in front of both plusoneevents.site and app.plusoneevents.site, because
- * Cloudflare knows the visitor's real address and passes it on: without it PostHog
- * places every visit wherever the proxy runs, and the country of each visit is lost.
+ * Cloudflare, in front of both plusoneevents.site and app.plusoneevents.site. The
+ * visitor's IP address is not passed on: PostHog sees only Cloudflare's, so a visit's
+ * country is only as close as the nearest Cloudflare location.
  *
  * The first part of the path says which PostHog region the project lives in
  * (/ingest/eu/... or /ingest/us/...), so nothing needs configuring here.
@@ -22,13 +22,23 @@ export function upstreamUrl(url: URL): string | null {
   return `${path.startsWith("/static/") ? host.assets : host.api}${path}${url.search}`;
 }
 
-/** The headers sent upstream: the visitor's own, without cookies, and with their address. */
+/** Headers that carry the visitor's IP address; none of them goes to PostHog. */
+const IP_HEADERS = [
+  "cf-connecting-ip",
+  "cf-connecting-ipv6",
+  "cf-pseudo-ipv4",
+  "true-client-ip",
+  "x-forwarded-for",
+  "x-real-ip",
+  "forwarded",
+];
+
+/** The headers sent upstream: the visitor's own, without cookies or their IP address. */
 export function upstreamHeaders(request: Request): Headers {
   const headers = new Headers(request.headers);
   headers.delete("cookie");
   headers.delete("host");
-  const ip = request.headers.get("cf-connecting-ip");
-  if (ip) headers.set("x-forwarded-for", ip);
+  for (const name of IP_HEADERS) headers.delete(name);
   return headers;
 }
 

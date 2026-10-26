@@ -78,13 +78,20 @@ describe("the analytics proxy", () => {
     expect(upstreamUrl(new URL("https://app.plusoneevents.site/ingest/evil.example/e/"))).toBeNull();
   });
 
-  it("passes on where the visitor is and drops their cookies", () => {
+  it("drops the visitor's IP address and cookies", () => {
     const request = new Request("https://app.plusoneevents.site/ingest/eu/e/", {
       method: "POST",
-      headers: { "cf-connecting-ip": "203.0.113.7", cookie: "session=secret", "content-type": "application/json" },
+      headers: {
+        "cf-connecting-ip": "203.0.113.7",
+        "x-forwarded-for": "203.0.113.7",
+        "x-real-ip": "203.0.113.7",
+        "true-client-ip": "203.0.113.7",
+        cookie: "session=secret",
+        "content-type": "application/json",
+      },
     });
     const headers = upstreamHeaders(request);
-    expect(headers.get("x-forwarded-for")).toBe("203.0.113.7");
+    for (const name of ["cf-connecting-ip", "x-forwarded-for", "x-real-ip", "true-client-ip"]) expect(headers.get(name)).toBeNull();
     expect(headers.get("cookie")).toBeNull();
     expect(headers.get("content-type")).toBe("application/json");
   });

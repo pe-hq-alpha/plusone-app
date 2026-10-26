@@ -93,7 +93,7 @@ The rest of the app:
 - **Nobody is pestered.** Follow-ups stop after three. A vendor who asks not to be contacted is never written to again, by any event, and first emails say how to stop them.
 - **Every number has a source.** Prices link to the vendor's page or the reply they came from, and a per-plate figure is shown only when the quote's lines add up.
 - **A misread price never moves the budget by itself.** Quotes that look off wait for the host, and the rest can be undone.
-- **Usage is measured without reading what people write.** Usage events carry names and safe numbers only, and stay off until a key is set.
+- **Usage is measured without reading what people write.** Usage events carry names and safe numbers only, stay off until a key is set, and in the browser start only once the visitor allows them.
 - **Guest pages stay private.** The event page, RSVP links and shared plans use long random addresses, ask search engines not to list them, and show only the fields they need.
 - **Data is the host's to remove.** An event can be deleted from its settings and an account from the account page, with the files they stored.
 - **The demo is safe to click.** Its vendors are made up and its emails are simulated, never sent; each demo visitor gets a fresh sample of their own, with tighter rate limits.
@@ -128,7 +128,7 @@ The rest of the app:
 | Spaces | Own code, plus TikTok, Pinterest and YouTube previews and any page's own tags | The board in `src/components/board/Board.tsx`, with its geometry in `src/lib/board.ts`; `convex/spaces.ts` for pictures, links, notes, swatches, pinned vendors, previews and palettes (suggested by `claude-haiku-5-5`), with `convex/lib/links.ts`, which refuses private addresses; the phone share target in `public/manifest.webmanifest`, landing in `src/pages/SharePage.tsx` |
 | Sharing, import and export | Own code, fflate for spreadsheets, plus Claude | Read-only links in `convex/shareLinks.ts`, the one-page plan in `src/components/PlanSheet.tsx`, the full download in `convex/exports.ts`; guest-list imports in `convex/guestImport.ts` |
 | App emails | Resend, via the Convex component | The weekly update in `convex/digest.ts`, sent Fridays by `convex/crons.ts`, through the Resend client in `convex/appEmails.ts`; the +1 logo for mail apps that show one in `public/bimi.svg` |
-| Usage | PostHog | Counts what people do, never what they write, in `convex/analytics.ts` and `src/lib/analytics/`; `functions/ingest/` forwards events with each visitor's own address so countries are right |
+| Usage | PostHog | Counts what people do, never what they write, in `convex/analytics.ts` and `src/lib/analytics/`; it starts only after a visitor allows analytics on the consent bar (`src/components/ConsentBar.tsx`), with session recordings off, and `functions/ingest/` forwards events without the visitor's IP address |
 | Hosting | Cloudflare Pages and a Worker, Convex in Ireland | The built app is served from Cloudflare's edge on plusoneevents.site (home) and app.plusoneevents.site (app); `src/lib/hosts.ts` keeps each page on its own address, and `functions/geo.ts` says which country and state a visit comes from. The backend runs on Convex in Europe (Ireland) |
 
 Rate limits on searches, emails, invites, sign-ups, planning conversations, imports, links added to Spaces, palettes, RSVPs, gifts and the assistant are in `convex/rateLimits.ts`, with tighter limits for demo visitors and a daily ceiling across all events for research, the assistant and drafting.
