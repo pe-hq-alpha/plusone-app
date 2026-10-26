@@ -7,8 +7,8 @@ import { rateLimiter } from "./rateLimits";
 
 /**
  * Who visits the site: one row per page load, sent by the Cloudflare middleware
- * (functions/_middleware.ts) through POST /visit. Kept for 180 days, for analytics and
- * to spot scraping, copying and abuse.
+ * (functions/_middleware.ts) through POST /visit. Kept for 180 days, for security only:
+ * to spot scraping, copying and abuse. Never sent to analytics or used for marketing.
  *
  * Each visit carries the browser's visitor id (a first-party cookie) and, when someone
  * is signed in, their Clerk user. A browser once seen signed in is linked to that
