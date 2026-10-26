@@ -537,6 +537,9 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
     clerkId: v.optional(v.string()),
+    /** When they ticked "I agree" at sign-in, and which version of the Terms and Privacy Policy (lib/terms). */
+    termsAcceptedAt: v.optional(v.number()),
+    termsVersion: v.optional(v.string()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])

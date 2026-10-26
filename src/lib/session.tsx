@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { record } from "./analytics/client";
 import { EVENTS } from "./analytics/events";
+import { clearAgreement, pendingAgreement } from "./terms";
 import { useTheme, type Theme } from "./theme";
 
 /**
@@ -190,6 +191,16 @@ function Sessions({ client, convexUrl, children }: { client: ConvexReactClient; 
           once.setAuth(token);
           const { created } = await once.mutation(api.users.syncClerk, {});
           if (created) record(EVENTS.accountCreated, { method: "clerk" });
+          // The "I agree" box ticked on the sign-in page, recorded against the account.
+          const agreed = pendingAgreement();
+          if (agreed) {
+            try {
+              await once.mutation(api.users.acceptTerms, { version: agreed });
+              clearAgreement();
+            } catch {
+              // kept for the next visit; never a reason to sign someone out
+            }
+          }
           if (demoRef.current) saveDemo(null);
           if (live) {
             setError(null);

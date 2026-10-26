@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
+import { TERMS_VERSION } from "./lib/terms";
 
 const modules = import.meta.glob("./**/*.ts");
 const CLERK = "https://clerk.example.test";
@@ -86,5 +87,25 @@ describe("disposable email addresses", () => {
     const t = setup();
     const { created } = await clerkUser(t, "user_ok", "anita@gmail.com").mutation(api.users.syncClerk, {});
     expect(created).toBe(true);
+  });
+});
+
+describe("agreeing to the Terms at sign-in", () => {
+  test("records the current version and when, once", async () => {
+    const t = setup();
+    const { userId } = await clerkUser(t, "user_terms", "meera@example.com").mutation(api.users.syncClerk, {});
+    expect(await clerkUser(t, "user_terms").mutation(api.users.acceptTerms, { version: TERMS_VERSION })).toBe(true);
+    const first = await t.run((ctx) => ctx.db.get(userId));
+    expect(first?.termsVersion).toBe(TERMS_VERSION);
+    expect(first?.termsAcceptedAt).toBeGreaterThan(0);
+    await clerkUser(t, "user_terms").mutation(api.users.acceptTerms, { version: TERMS_VERSION });
+    expect((await t.run((ctx) => ctx.db.get(userId)))?.termsAcceptedAt).toBe(first?.termsAcceptedAt);
+  });
+
+  test("ignores a version that isn't the current one", async () => {
+    const t = setup();
+    const { userId } = await clerkUser(t, "user_old", "ravi@example.com").mutation(api.users.syncClerk, {});
+    expect(await clerkUser(t, "user_old").mutation(api.users.acceptTerms, { version: "2020-01-01" })).toBe(false);
+    expect((await t.run((ctx) => ctx.db.get(userId)))?.termsVersion).toBeUndefined();
   });
 });

@@ -6,6 +6,7 @@ import { userSummary } from "./lib/docs";
 import { clerkIssuer, currentUserId, isClerkIdentity, nameFromEmail } from "./lib/auth";
 import { isDisposableEmail } from "./lib/disposableEmail";
 import { rateLimiter } from "./rateLimits";
+import { TERMS_VERSION } from "./lib/terms";
 
 export const me = query({
   args: {},
@@ -73,6 +74,25 @@ export const deleteAccount = mutation({
 
     await deleteUserRecords(ctx, userId);
     return null;
+  },
+});
+
+/**
+ * Record that the signed-in person agreed to the Terms and Privacy Policy, from the box
+ * on the sign-in page. The time is the server's; only the current version is recorded.
+ */
+export const acceptTerms = mutation({
+  args: { version: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, args) => {
+    const userId = await currentUserId(ctx);
+    if (!userId) throw new ConvexError("Please sign in to continue.");
+    const user = await ctx.db.get(userId);
+    if (!user || user.isAnonymous || args.version !== TERMS_VERSION) return false;
+    if (user.termsVersion !== TERMS_VERSION) {
+      await ctx.db.patch(userId, { termsAcceptedAt: Date.now(), termsVersion: TERMS_VERSION });
+    }
+    return true;
   },
 });
 
