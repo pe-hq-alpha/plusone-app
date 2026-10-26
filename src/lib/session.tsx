@@ -115,9 +115,6 @@ export function SessionProvider({ client, convexUrl, children }: { client: Conve
         elements: {
           card: { boxShadow: theme === "dark" ? "0 18px 40px -24px rgba(0,0,0,.6)" : "0 10px 24px -18px rgba(21,26,43,.35)", border: `1px solid ${CLERK_COLOURS[theme].colorBorder}` },
           headerTitle: { fontFamily: '"EB Garamond Variable", "EB Garamond", Georgia, serif', fontWeight: 500, fontSize: "1.6rem" },
-          // Clerk's "Secured by" badge, hidden for now. Clerk's free plan
-          // expects it shown; the Pro plan's branding setting removes it properly.
-          footerItem: { display: "none" },
         },
       }}
     >
