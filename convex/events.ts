@@ -327,7 +327,8 @@ export async function insertEvent(
       helpWith: args.helpWith?.filter((k) => HELP_WITH_KEYS.has(k)).slice(0, HELP_WITH_KEYS.size),
       helpNotes: args.helpNotes?.trim().slice(0, 1000) || undefined,
       createdBy: userId,
-      ...(extra.demo ? { demo: true } : {}),
+      // New events hold every email for the host to read first; samples send (simulated) at once.
+      ...(extra.demo ? { demo: true } : { sendMode: "review" as const }),
     });
     // Onboarding pictures start the wedding's own Space.
     const created = await ctx.db.get(eventId);

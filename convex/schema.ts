@@ -65,7 +65,7 @@ export const eventFields = {
   styleVibes: v.optional(v.array(v.string())),
   stylePalette: v.optional(v.string()),
   styleFormality: v.optional(styleFormality),
-  /** Whether PlusOne sends the vendor emails itself. Unset means it does. */
+  /** Whether PlusOne sends the vendor emails itself. New events start in "review"; unset (older events) means it does. */
   sendMode: v.optional(sendMode),
   inboxId: v.optional(v.string()),
   inboxAddress: v.optional(v.string()),

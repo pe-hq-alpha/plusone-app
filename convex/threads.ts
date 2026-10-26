@@ -309,6 +309,23 @@ export const afterFollowUpSent = internalMutation({
   },
 });
 
+/** Review mode: a follow-up was drafted for the host to check. It counts toward the cap now. */
+export const holdFollowUp = internalMutation({
+  args: { threadId: v.id("threads") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const thread = await ctx.db.get(args.threadId);
+    if (!thread || thread.status === "booked" || thread.status === "declined") return null;
+    await ctx.db.patch(args.threadId, {
+      followUpCount: thread.followUpCount + 1,
+      status: "needs_attention",
+      attentionReason: "reply_to_review",
+      nextFollowUpAt: undefined,
+    });
+    return null;
+  },
+});
+
 /** Threads in `sent` whose follow-up time has passed. Both range ends are bounded. */
 export const listDueForFollowUp = internalQuery({
   args: { now: v.number(), limit: v.optional(v.number()) },

@@ -377,7 +377,10 @@ export const bookingWorkflow = workflow.define({
   },
 });
 
-/** Draft a nudge, queue it, send it once (no retry), then bump the counter. */
+/**
+ * Draft a nudge, queue it, send it once (no retry), then bump the counter. In review
+ * mode the nudge waits as a draft for the host, and still counts toward the cap.
+ */
 export const followUpWorkflow = workflow.define({
   args: { threadId: v.id("threads") },
   handler: async (step, args): Promise<void> => {
@@ -387,11 +390,12 @@ export const followUpWorkflow = workflow.define({
     if (thread.status === "booked" || thread.status === "declined") return;
     if (!vendor.email) return;
     const draft = await step.runAction(internal.claude.draftFollowUp, { threadId: args.threadId });
+    const review = event.sendMode === "review";
     const messageId = await step.runMutation(internal.messages.createOutboundDraft, {
       eventId: thread.eventId,
       threadId: thread._id,
       kind: "follow_up",
-      status: "queued",
+      status: review ? "draft" : "queued",
       // `process` is blanked inside workflow handlers, so no env lookup here.
       // sendOutbound resolves the real inbox (including any fallback) when it sends.
       fromAddress: event.inboxAddress ?? "",
@@ -400,6 +404,10 @@ export const followUpWorkflow = workflow.define({
       bodyText: draft.bodyText,
       idempotencyKey: `${thread._id}:follow_up:${thread.followUpCount + 1}`,
     });
+    if (review) {
+      await step.runMutation(internal.threads.holdFollowUp, { threadId: args.threadId });
+      return;
+    }
     await step.runAction(internal.agentmail.sendOutbound, { messageId }, { retry: false });
     const sent = await step.runQuery(internal.messages.getInternal, { messageId });
     if (sent?.status === "sent") {
