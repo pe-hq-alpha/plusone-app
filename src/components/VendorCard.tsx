@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BRAND } from "../lib/brand";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import { money } from "../lib/format";
@@ -155,7 +156,8 @@ export function VendorCard({
         {rank !== undefined && (
           <span
             className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent text-sm text-paper"
-            aria-label={`Ranked ${rank}`}
+            aria-label={`Ranked ${rank}, ${BRAND.name}'s estimate`}
+            title={`${BRAND.name}'s estimate`}
           >
             {rank}
           </span>
@@ -183,6 +185,7 @@ export function VendorCard({
 
       {vendor.rankReason && (
         <p className="mt-3 border-l-2 border-accent-soft pl-3 text-sm italic leading-relaxed text-muted">
+          <span className="not-italic text-xs text-quiet">{BRAND.name}&rsquo;s estimate: </span>
           {vendor.rankReason}
         </p>
       )}

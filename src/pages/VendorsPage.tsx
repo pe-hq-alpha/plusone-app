@@ -333,7 +333,7 @@ function SlotPanel({
                     <h4 className="display text-[1.15rem]">
                       {topPicks.length === 1 ? "The best match" : `The top ${topPicks.length === 2 ? "two" : "three"}`}
                     </h4>
-                    <p className="text-xs text-muted">Ranked on their reviews, their price against your budget, and how well they fit.</p>
+                    <p className="text-xs text-muted">{BRAND.name}&rsquo;s estimate, ranked on their reviews, their price against your budget, and how well they fit. Check before you choose.</p>
                   </div>
                   {canEdit && topPickable.length > 0 && (
                     <button

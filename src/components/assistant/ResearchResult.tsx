@@ -73,7 +73,7 @@ export function ResearchResult({
                 <span className="min-w-0 flex-1">
                   <span className="flex items-baseline gap-2">
                     <span className="truncate text-sm">{v.name}</span>
-                    {v.isTopPick && <span className="shrink-0 text-[11px] text-accent">top pick</span>}
+                    {v.isTopPick && <span className="shrink-0 text-[11px] text-accent" title={`${BRAND.name}'s estimate from reviews, price and fit`}>top pick, {BRAND.name}&rsquo;s estimate</span>}
                   </span>
                   <span className="block truncate text-xs text-quiet">
                     {v.rating !== undefined ? `${v.rating.toFixed(1)}★` : "no rating"}

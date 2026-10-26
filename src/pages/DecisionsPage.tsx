@@ -240,7 +240,7 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
                   <th scope="row" className="py-3.5 pl-6 pr-4 text-left font-normal align-top">
                     <span className="flex items-baseline gap-2">
                       <span className="font-medium">{v.name}</span>
-                      {v.isTopPick && <span className="text-[11px] text-accent">top pick</span>}
+                      {v.isTopPick && <span className="text-[11px] text-accent" title={`${BRAND.name}'s estimate from reviews, price and fit`}>top pick, {BRAND.name}&rsquo;s estimate</span>}
                       {v.shortlisted && <span className="text-[11px] text-accent" title="Shortlisted by you">♥ shortlisted</span>}
                     </span>
                     {v.rating !== undefined && (
