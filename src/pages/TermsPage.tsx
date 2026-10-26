@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
+import { GRIEVANCE_OFFICER } from "../lib/legal";
 
 /** The terms anyone agrees to by using PlusOne. Public, like the privacy page. */
 export function TermsPage() {
@@ -22,6 +23,8 @@ export function TermsPage() {
             <li><strong className="text-ink">You make every decision.</strong> PlusOne does not book, pay or sign anything for you unless you tell it to.</li>
             <li><strong className="text-ink">Vendors are independent.</strong> Any agreement for goods or services is between you and the vendor. We are not a party to it and are not responsible for a vendor's work, prices, availability or conduct.</li>
             <li><strong className="text-ink">Quotes are the vendors' own.</strong> We read and compare what vendors send; we can't guarantee a vendor will honour a quote.</li>
+            <li><strong className="text-ink">AI can be wrong.</strong> PlusOne uses AI to draft emails, rank vendors and estimate prices. Drafts, rankings and price estimates may be wrong or incomplete. You review what is sent in your name and you are responsible for what is sent and what you agree with a vendor.</li>
+            <li><strong className="text-ink">Vendor information comes from the web.</strong> Details PlusOne finds about vendors, such as prices, ratings and contact details, come from public web pages and may be out of date. Check them with the vendor.</li>
           </ul>
         </section>
         <section>
@@ -72,7 +75,7 @@ export function TermsPage() {
             <li>abuse the Service, its people, vendors or other users in any way; or</li>
             <li>interfere with or overload the Service.</li>
           </ul>
-          <p className="mt-2 text-muted">To keep PlusOne safe, we record visits as described on our <Link to="/privacy" className="text-accent underline underline-offset-2">Privacy</Link> page, including IP addresses linked to accounts, and we may use those records to investigate abuse and share them with the authorities where the law requires or allows.</p>
+          <p className="mt-2 text-muted">To keep PlusOne safe, we record visits as described on our <Link to="/privacy" className="text-accent underline underline-offset-2">Privacy</Link> page, including IP addresses linked to accounts, for security and to prevent abuse, never for marketing. We may use those records to investigate abuse and share them with the authorities where the law requires or allows.</p>
         </section>
         <section>
           <h2 className="display text-xl">6. Feedback</h2>
@@ -80,11 +83,12 @@ export function TermsPage() {
         </section>
         <section>
           <h2 className="display text-xl">7. Fees</h2>
-          <p className="mt-2 text-muted">The Service is free while it is in early access. If we introduce paid plans, we will show the price clearly before you are charged, and nothing will be charged without your agreement.</p>
+          <p className="mt-2 text-muted">The Service is free while it is in early access. If we introduce paid plans, we will show the price and the refund terms clearly before you are charged, and nothing will be charged without your agreement.</p>
         </section>
         <section>
           <h2 className="display text-xl">8. Other services</h2>
           <p className="mt-2 text-muted">PlusOne uses other providers to run, for example hosting, email, search and AI models. Links to vendors' and other websites are for your convenience; their own terms apply there, and we don't control them.</p>
+          <p className="mt-2 text-muted">If you are a vendor, you can stop PlusOne writing to you at any time by replying STOP to any of its emails, and you can ask us to remove your details by writing to <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a>.</p>
         </section>
         <section>
           <h2 className="display text-xl">9. No guarantees</h2>
@@ -113,6 +117,7 @@ export function TermsPage() {
         <section>
           <h2 className="display text-xl">15. Contact</h2>
           <p className="mt-2 text-muted">PlusOne Events, Chennai, India · <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a></p>
+          <p className="mt-2 text-muted">Grievance Officer: {GRIEVANCE_OFFICER.name} · <a href={`mailto:${GRIEVANCE_OFFICER.email}`} className="text-accent underline underline-offset-2">{GRIEVANCE_OFFICER.email}</a>. We acknowledge every complaint within 24 hours and resolve it within 15 days.</p>
         </section>
       </div>
 
