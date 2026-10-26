@@ -28,7 +28,22 @@ export function looksLikeOptOut(body: string): boolean {
   return PHRASES.test(own.slice(0, 800));
 }
 
-/** Added to first contact and follow-ups, so every vendor has a one-word way to stop them. */
+/** Added to first contact and follow-ups: says who drafted it, and gives every vendor a one-word way to stop them. */
 export function optOutFooter(hosts: string): string {
-  return `\n\n--\nSent with ${BRAND.name} on behalf of ${hosts}. If you would rather not hear from us, reply STOP and we will not write again.`;
+  return `\n\n--\nDrafted by ${BRAND.name}'s AI assistant on behalf of ${hosts}. If you'd rather not hear from us, reply STOP.`;
+}
+
+/** Kinds of email PlusOne writes to a vendor mid-conversation (agent.ts). */
+const AGENT_KINDS = new Set(["agent_reply", "negotiation", "booking_confirmation", "no_thanks"]);
+
+/**
+ * The line that says AI had a hand in an email, by kind. Vendors and guests both hear
+ * it; the body itself reads naturally. Words the host typed and sent as written carry
+ * no line, because nothing drafted them.
+ */
+export function disclosureFooter(kind: string, hosts: string, hostWrote = false): string {
+  if (kind === "inquiry" || kind === "follow_up") return optOutFooter(hosts);
+  if (AGENT_KINDS.has(kind)) return hostWrote ? "" : `\n\n--\nDrafted by ${BRAND.name}'s AI assistant on behalf of ${hosts}.`;
+  if (kind === "rsvp_invite") return `\n\n--\nSent with ${BRAND.name}'s AI assistant on behalf of ${hosts}.`;
+  return "";
 }

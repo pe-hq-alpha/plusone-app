@@ -8,7 +8,7 @@ import { internalAction, type ActionCtx } from "./_generated/server";
 import { extractEmail } from "./lib/text";
 import { inboxUsernames } from "./lib/inboxName";
 import { hostsLabel } from "./lib/occasion";
-import { optOutFooter } from "./lib/optOut";
+import { disclosureFooter } from "./lib/optOut";
 import { outboundPause } from "./rateLimits";
 import { workflow } from "./workflows";
 import { BRAND } from "./lib/brand";
@@ -254,11 +254,10 @@ export const sendOutbound = internalAction({
        * room, or removed at AgentMail entirely. Rather than fail a couple's email
        * because the address it was written from has gone, take a new one and send.
        */
-      // First contact and follow-ups are unsolicited, so they carry a way to stop them.
-      const bodyToSend =
-        message.kind === "inquiry" || message.kind === "follow_up"
-          ? message.bodyText + optOutFooter(hostsLabel(event))
-          : message.bodyText;
+      // Say that PlusOne's AI drafted it; first contact and follow-ups also say how to stop them.
+      // A reply the host typed and sent as written (agent.ts writeToVendorHelper) is theirs alone.
+      const hostWrote = message.idempotencyKey?.includes(":couple_wrote:") ?? false;
+      const bodyToSend = message.bodyText + disclosureFooter(message.kind, hostsLabel(event), hostWrote);
       const sendFrom = (id: string) =>
         am.inboxes.messages.send(id, { to: [message.toAddress], subject: message.subject, text: bodyToSend });
       const fresh = async () => {
@@ -284,7 +283,7 @@ export const sendOutbound = internalAction({
       let result;
       if (replyTo) {
         try {
-          result = await am.inboxes.messages.reply(from, replyTo, { text: message.bodyText });
+          result = await am.inboxes.messages.reply(from, replyTo, { text: bodyToSend });
         } catch (replyErr) {
           if (!missingInbox(replyErr)) throw replyErr;
           console.warn("original message not visible to this inbox; sending a fresh one instead");

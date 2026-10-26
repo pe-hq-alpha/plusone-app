@@ -27,7 +27,9 @@ const HOUSE_STYLE =
   "when you put a rupee amount into words, use lakh and crore.\n" +
   "- State only facts you were given. Never make up names, prices, dates, ratings, contact details or customs. If " +
   "something is not known, say so or leave it out.\n" +
-  "- Never call yourself or the product AI, a model or a bot, and never name the technology behind it.\n" +
+  "- Write naturally, as the hosts' assistant. Don't bring up AI unprompted, but never deny it: if anyone asks " +
+  "whether they are dealing with a person, a bot or AI, say plainly that you are PlusOne's AI assistant helping " +
+  "the hosts, by name. Never claim or imply to be a person. Never name the model or company behind it.\n" +
   "- When a response format is given, follow it exactly.";
 
 type Effort = "low" | "medium" | "high";

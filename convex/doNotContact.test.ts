@@ -4,7 +4,7 @@ import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { describe, expect, test } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
-import { looksLikeOptOut, optOutFooter } from "./lib/optOut";
+import { disclosureFooter, looksLikeOptOut, optOutFooter } from "./lib/optOut";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -74,9 +74,29 @@ describe("looksLikeOptOut", () => {
   });
 });
 
-test("the footer names the hosts and says how to stop", () => {
-  expect(optOutFooter("Maya")).toContain("on behalf of Maya");
+test("the footer says AI drafted it, names the hosts and says how to stop", () => {
+  expect(optOutFooter("Maya")).toContain("Drafted by PlusOne's AI assistant on behalf of Maya.");
   expect(optOutFooter("Maya")).toContain("reply STOP");
+});
+
+describe("the disclosure line", () => {
+  test("first contact and follow-ups carry the opt-out footer", () => {
+    expect(disclosureFooter("inquiry", "Maya")).toBe(optOutFooter("Maya"));
+    expect(disclosureFooter("follow_up", "Maya")).toBe(optOutFooter("Maya"));
+  });
+
+  test("PlusOne's own replies to a vendor say AI drafted them, unless the host wrote the words", () => {
+    for (const kind of ["agent_reply", "negotiation", "booking_confirmation", "no_thanks"]) {
+      expect(disclosureFooter(kind, "Maya & Sam")).toContain("Drafted by PlusOne's AI assistant on behalf of Maya & Sam.");
+      expect(disclosureFooter(kind, "Maya & Sam")).not.toContain("STOP");
+    }
+    expect(disclosureFooter("agent_reply", "Maya", true)).toBe("");
+  });
+
+  test("guest invitations say they were sent with the AI assistant", () => {
+    expect(disclosureFooter("rsvp_invite", "Maya")).toContain("Sent with PlusOne's AI assistant on behalf of Maya.");
+    expect(disclosureFooter("notification", "Maya")).toBe("");
+  });
 });
 
 describe("a vendor who asks to be left alone", () => {
