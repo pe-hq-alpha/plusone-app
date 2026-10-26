@@ -169,7 +169,8 @@ export const researchWorkflow = workflow.define({
           rating: review.rating,
           reviewCount: review.reviewCount,
           reviewSource: review.reviewSource,
-          reviewHighlights: review.highlights,
+          // Reviewers' own words are not kept, only the rating, the count and the source.
+          reviewHighlights: [],
           contactFormUrl: detail?.contactFormUrl,
           hasContactFormOnly: detail?.hasContactFormOnly,
           imageUrl: detail?.image,

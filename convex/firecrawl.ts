@@ -7,6 +7,7 @@ import { findEmails, hostOf, truncate } from "./lib/text";
 import { linkPreviewValidator, vendorDetailValidator, vendorReviewValidator, type PriceUnit, type VendorDetail, type VendorReview } from "./lib/validators";
 import { absoluteImage, previewFromScrape, type LinkPreview } from "./lib/links";
 import { isDocumentUrl, mergeByHost, searchCountry } from "./lib/searchTerms";
+import { isNoScrapeHost, robotsChecker } from "./lib/scrapePolicy";
 
 const fc = new Firecrawl({ apiKey: process.env.FIRECRAWL_API_KEY });
 
@@ -103,7 +104,7 @@ const NON_VENDOR_HOST_PATTERNS: RegExp[] = [
  * and found nothing at all for Brighton caterers or Dublin florists.
  * See docs/research/reviews-eval.json.
  */
-export const REVIEW_DOMAINS = [
+const ALL_REVIEW_DOMAINS = [
   "theknot.com",
   "weddingwire.com",
   "weddingwire.in",
@@ -129,6 +130,9 @@ export const REVIEW_DOMAINS = [
  * Measured: Portland Parks & Recreation came back 4.0/5 from Indeed — its staff rating —
  * and Tamale House East 4.5/5 from Uber Eats, which rates its takeaway, not its catering.
  */
+/** The review directories actually searched: those we may read (lib/scrapePolicy). */
+export const REVIEW_DOMAINS = ALL_REVIEW_DOMAINS.filter((d) => !isNoScrapeHost(d));
+
 const NON_VENDOR_REVIEW_HOSTS = [
   "indeed.com",
   "ubereats.com",
@@ -188,6 +192,7 @@ const MIN_RATE_USD = 5;
 type Candidate = { url: string; title?: string; description?: string; markdown?: string };
 
 export function isBlockedHost(host: string): boolean {
+  if (isNoScrapeHost(host)) return true;
   if (EXCLUDED_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`))) return true;
   return NON_VENDOR_HOST_PATTERNS.some((re) => re.test(host));
 }
@@ -327,10 +332,13 @@ export const searchVendors = internalAction({
       })
       .slice(0, limit);
 
-    // Now read only the pages that made the list. A page that fails stays a candidate without text.
+    // Now read only the pages that made the list, where the site's robots.txt allows it.
+    // A page that fails or may not be read stays a candidate without text.
+    const mayRead = robotsChecker();
     let scrapeCredits = 0;
     const candidates = await Promise.all(
       shortlist.map(async (candidate): Promise<Candidate> => {
+        if (!(await mayRead(candidate.url))) return candidate;
         try {
           const doc = await fc.scrape(candidate.url, {
             formats: ["markdown"],
@@ -421,6 +429,10 @@ export const researchVendorDetail = internalAction({
     const startedAt = Date.now();
     const host = hostOf(args.url);
     const origin = host ? `https://${host}` : args.url;
+    const mayRead = robotsChecker();
+    const nothing = (): VendorDetail => ({ url: args.url, emails: [], packages: [], pagesRead: [], markdown: "", ms: Date.now() - startedAt });
+    // A listing site we don't read, or a vendor whose robots.txt turns crawlers away.
+    if (!(await mayRead(args.url))) return nothing();
 
     // 1. Find the vendor's own contact and pricing pages.
     let links: string[] = [];
@@ -460,6 +472,7 @@ export const researchVendorDetail = internalAction({
 
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i];
+      if (i > 0 && !(await mayRead(target))) continue;
       let doc;
       try {
         doc = await fc.scrape(target, {
@@ -562,20 +575,16 @@ const REVIEW_JSON_SCHEMA = {
   properties: {
     rating: { type: ["number", "null"], description: "Average rating out of 5 shown on this page for this exact business" },
     reviewCount: { type: ["number", "null"], description: "Number of reviews shown on this page" },
-    highlights: {
-      type: "array",
-      items: { type: "string" },
-      description: "Up to 4 short phrases reviewers repeat, quoted from the page",
-    },
   },
 };
 
 /**
  * Look the vendor up on the review directories we deliberately exclude from discovery.
  *
- * Three searches, narrowing: the need and the city, then the need alone, then an
- * unrestricted one for the businesses no wedding directory lists. Every result is read
- * before one is chosen, because a rating is only worth the reviews behind it — 4.7 from
+ * Two searches, narrowing: the need and the city, then the need alone, both only on
+ * review directories we may read. Only the rating, the number of reviews and the page
+ * they came from are kept, never reviewers' words. Every result is read before one is
+ * chosen, because a rating is only worth the reviews behind it — 4.7 from
  * 19 reviews is better evidence than 5.0 from 2, and taking the first hit picked the
  * wrong one for two of sixteen vendors in testing. A rating is never invented, never
  * taken from the vendor's own site, and never taken from a page rating them as an
@@ -601,26 +610,18 @@ export const lookupReviews = internalAction({
       rating: number;
       reviewCount?: number;
       reviewSource?: string;
-      highlights: string[];
       order: number;
     };
     const candidates: Candidate[] = [];
 
-    const queries = [
-      `"${name}" ${args.need} ${args.city} reviews`,
-      `"${name}" ${args.need} reviews`,
-      `"${name}" ${args.city} rating reviews`,
-    ];
+    const queries = [`"${name}" ${args.need} ${args.city} reviews`, `"${name}" ${args.need} reviews`];
 
     for (let qi = 0; qi < queries.length; qi++) {
-      // The last attempt drops the directory filter: some real vendors are only rated
-      // on a local listing nobody would think to name in advance.
-      const unrestricted = qi === queries.length - 1;
       let results;
       try {
         results = await fc.search(queries[qi], {
           limit: 3,
-          ...(unrestricted ? {} : { includeDomains: REVIEW_DOMAINS }),
+          includeDomains: REVIEW_DOMAINS,
           scrapeOptions: {
             formats: [
               {
@@ -649,6 +650,7 @@ export const lookupReviews = internalAction({
         const host = url ? hostOf(url) : null;
         if (!host) continue;
         if (ownHost && host === ownHost) continue;
+        if (isNoScrapeHost(host)) continue;
         if (NON_VENDOR_REVIEW_HOSTS.some((b) => host === b || host.endsWith(`.${b}`))) continue;
         // The rating is the heaviest ranking signal, so only accept a page that names this business.
         const haystack = normalise(`${url ?? ""} ${meta?.title ?? ""} ${"title" in item && typeof item.title === "string" ? item.title : ""}`);
@@ -659,9 +661,6 @@ export const lookupReviews = internalAction({
           rating: Math.round(rating * 10) / 10,
           reviewCount: count,
           reviewSource: url,
-          highlights: Array.isArray(json.highlights)
-            ? (json.highlights as unknown[]).filter((h): h is string => typeof h === "string").slice(0, 4).map((h) => h.slice(0, 160))
-            : [],
           order: qi,
         });
       }
@@ -678,7 +677,7 @@ export const lookupReviews = internalAction({
       rating: best.rating,
       reviewCount: best.reviewCount,
       reviewSource: best.reviewSource,
-      highlights: best.highlights,
+      highlights: [],
       ms: Date.now() - startedAt,
     };
   },
@@ -696,6 +695,7 @@ export const scrapeVendor = internalAction({
     links: v.array(v.string()),
   }),
   handler: async (_ctx, args): Promise<{ url: string; title?: string; markdown: string; json?: unknown; emails: string[]; links: string[] }> => {
+    if (!(await robotsChecker()(args.url))) return { url: args.url, markdown: "", emails: [], links: [] };
     const doc = await fc.scrape(args.url, {
       formats: [
         "markdown",

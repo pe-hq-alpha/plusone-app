@@ -187,14 +187,6 @@ export function VendorCard({
         </p>
       )}
 
-      {vendor.reviewHighlights?.length > 0 && (
-        <ul className="mt-3 flex flex-wrap gap-1">
-          {vendor.reviewHighlights.slice(0, 3).map((h, i) => (
-            <li key={i} className="chip-quiet">“{h}”</li>
-          ))}
-        </ul>
-      )}
-
       {vendor.summary && <p className="mt-3 text-sm leading-relaxed">{vendor.summary}</p>}
 
       {vendor.packages?.length > 0 && (

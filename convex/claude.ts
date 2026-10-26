@@ -401,7 +401,6 @@ export const rankVendors = internalAction({
         `${i + 1}. ${vendor.name}${vendor.city ? ` — ${vendor.city}` : ""}${vendor.serviceArea ? ` (serves: ${vendor.serviceArea})` : ""}`,
         `   price: ${price}`,
         `   rating: ${rating}`,
-        vendor.reviewHighlights.length ? `   reviewers say: ${vendor.reviewHighlights.slice(0, 4).join("; ")}` : "",
         vendor.highlights.length ? `   site says: ${vendor.highlights.slice(0, 5).join("; ")}` : "",
         vendor.packages.length
           ? `   packages: ${vendor.packages.slice(0, 4).map((p) => `${p.name}${p.price !== undefined ? ` (${p.price})` : ""}`).join(", ")}`
