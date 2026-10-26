@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;1,400&family=Work+Sans:wght@400;500&display=block">
+<style>
+  /* DESIGN.md tokens, night theme: ink and marigold */
+  :root { --ink: #11141c; --card: #181c26; --head: #f4f5f8; --muted: #b3b7c3; --rule: #3a4051; --marigold: #f4b53a; }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 2000px; height: 800px; overflow: hidden; }
+  body { background: radial-gradient(1200px 700px at 78% 40%, #1a1f2c 0%, var(--ink) 70%);
+         font-family: "Work Sans", system-ui, sans-serif; color: var(--head); position: relative; }
+  .left { position: absolute; left: 120px; top: 0; bottom: 0; width: 900px; display: flex; flex-direction: column; justify-content: center; }
+  /* The wordmark: "Plus" + italic "One", EB Garamond 400, in marigold */
+  .mark { font-family: "EB Garamond", Georgia, serif; font-weight: 400; font-size: 72px; line-height: 1;
+          color: var(--marigold); letter-spacing: -0.01em; }
+  .mark small { display: block; font-family: "Work Sans", sans-serif; font-size: 19px; letter-spacing: 0.42em; margin: 10px 0 0 4px; }
+  h1 { font-family: "EB Garamond", Georgia, serif; font-weight: 400; font-size: 104px; line-height: 1.02;
+       letter-spacing: -0.005em; margin-top: 52px; }
+  h1 em { color: var(--marigold); }
+  p { font-size: 29px; line-height: 1.5; color: var(--muted); margin-top: 32px; max-width: 800px; text-wrap: balance; }
+  .chips { display: flex; gap: 16px; margin-top: 42px; }
+  .chip { font-size: 23px; font-weight: 500; padding: 13px 26px; border-radius: 999px; border: 2px solid var(--marigold); color: var(--marigold); }
+  .chip.solid { background: var(--marigold); color: var(--ink); }
+  .card { position: absolute; left: 1090px; top: 62px; width: 1000px; border-radius: 18px; overflow: hidden;
+          transform: rotate(-2.5deg); border: 2px solid var(--rule); box-shadow: 0 40px 90px -30px rgb(0 0 0 / 0.75), 0 0 0 1px rgb(244 181 58 / 0.18); background: var(--card); }
+  .card img { display: block; width: 100%; }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="mark">Plus<em>One</em><small>EVENTS</small></div>
+    <h1>Your plus one<br>for <em>every event.</em></h1>
+    <p>Sets out the plan, finds vendors, writes to them from your event's own inbox and lines up their quotes in one unit.</p>
+    <div class="chips"><span class="chip solid">Birthdays to offsites</span><span class="chip">Every quote per plate, per piece, per day</span></div>
+  </div>
+  <div class="card"><img src="../screens/today.jpg" alt=""></div>
+</body>
+</html>

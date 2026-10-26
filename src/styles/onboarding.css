@@ -1,0 +1,66 @@
+/* The setup form's steps, drawn as the home page's running status (styles/running-status.css):
+   one line through a node per step, green where the host has been, ink (marigold at night)
+   into the step they are on, dashed after. A rail on the left on desktop; a single line of
+   progress under "Step 3 of 7" on a phone. */
+
+.ob-rail { --ob-done: var(--color-done); --ob-gap: 6px; }
+.ob-rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ob-gap); }
+
+.ob-step { position: relative; }
+.ob-step__btn {
+  position: relative; display: grid; grid-template-columns: 36px 1fr; align-items: center; column-gap: 12px;
+  width: 100%; min-height: 52px; padding: 6px 10px 6px 0; border-radius: 10px; text-align: left;
+  color: var(--color-muted); transition: background-color 160ms ease-out, color 160ms ease-out;
+}
+.ob-step__btn:not(:disabled):hover { background: color-mix(in srgb, var(--color-cream) 70%, transparent); color: var(--color-ink); }
+.ob-step__btn:disabled { cursor: not-allowed; }
+.ob-step__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* The line: into each node from above, and out of it below. */
+.ob-step::before, .ob-step::after {
+  content: ""; position: absolute; left: 17px; width: 2px; background: var(--color-rule);
+}
+.ob-step::before { top: calc(-1 * var(--ob-gap)); height: calc(var(--ob-gap) + 50%); }
+.ob-step::after { top: 50%; height: 50%; }
+.ob-step:first-child::before, .ob-step:last-child::after { display: none; }
+.ob-step--done::before, .ob-step--done::after { background: var(--ob-done); }
+.ob-step--now::before { background: linear-gradient(var(--ob-done), var(--color-accent)); }
+.ob-step--now::after, .ob-step--next::before, .ob-step--next::after {
+  background: repeating-linear-gradient(var(--color-rule) 0 4px, transparent 4px 8px);
+}
+
+.ob-node {
+  position: relative; z-index: 1; justify-self: center; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%; background: var(--color-paper);
+  box-shadow: inset 0 0 0 1.5px var(--color-rule);
+  font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--color-quiet);
+}
+.ob-step--done .ob-node { box-shadow: inset 0 0 0 1.5px var(--ob-done); color: var(--ob-done); }
+.ob-step--now .ob-node {
+  background: var(--color-accent); color: var(--color-on-accent); font-weight: 500;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 22%, transparent), 0 0 18px 4px color-mix(in srgb, var(--color-accent) 38%, transparent);
+}
+.ob-step--next .ob-node { box-shadow: none; outline: 1.5px dashed var(--color-rule); outline-offset: -1.5px; }
+
+.ob-step__label { display: block; font-size: 0.95rem; line-height: 1.25; }
+.ob-step__state { display: block; margin-top: 2px; font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-quiet); }
+.ob-step--done .ob-step__state { color: var(--ob-done); }
+.ob-step--now .ob-step__btn { color: var(--color-ink); background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); }
+.ob-step--now .ob-step__label { font-weight: 500; }
+.ob-step--now .ob-step__state { color: var(--color-accent); }
+
+/* On a phone: where they are, in one line, and how far along. */
+.ob-progress { position: relative; height: 2px; border-radius: 2px; background: repeating-linear-gradient(90deg, var(--color-rule) 0 4px, transparent 4px 8px); }
+.ob-progress__fill {
+  position: absolute; inset: 0 auto 0 0; border-radius: 2px;
+  background: linear-gradient(90deg, var(--color-done), var(--color-accent));
+  transition: width 260ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ob-progress__fill::after {
+  content: ""; position: absolute; right: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ob-step__btn, .ob-progress__fill { transition: none; }
+}

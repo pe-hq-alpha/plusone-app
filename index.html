@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#11141c" />
+    <script>
+      // Dark unless the person chose light or the device's setting, applied before the first paint (src/lib/theme.ts).
+      (function () {
+        var c = null;
+        try { c = localStorage.getItem("plusone.theme"); } catch (e) {}
+        var dark = c === "light" ? false : c === "system" ? !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) : true;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+        if (!dark) document.querySelector('meta[name="theme-color"]').setAttribute("content", "#fefcf7");
+      })();
+    </script>
+    <link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>PlusOne Events: your plus one for every event</title>
+    <meta name="description" content="Your complete co-pilot for event planning." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PlusOne Events: your plus one for every event" />
+    <meta property="og:description" content="Your complete co-pilot for event planning." />
+    <meta property="og:image" content="/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+      <link rel="preconnect" href="%VITE_CONVEX_URL%" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

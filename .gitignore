@@ -1,0 +1,42 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.auth-keys.json
+*.local
+.DS_Store
+
+# Impeccable: downloaded binary, and the whole working directory. The mocks,
+# comps and review artifacts are large and regenerable, and the shipped design
+# lives in src/ and DESIGN.md.
+.claude/skills/impeccable/scripts/bin/
+/.impeccable/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Demo video: raw screen recordings can show personal accounts, and the edit's
+# working files are large. Neither belongs in the repository.
+/recordings/
+/docs/demo-video/
+/ElevenLabs_video_*.mp4
+/docs/research/
+/docs/superpowers/
+
+# Throwaway browser-test scripts
+.shot-tmp.mjs
+
+# Scraped and working data stays local.
+data/*
+.claude/skills/impeccable/scripts/data/
+
+# Wrangler's local cache and temp files
+.wrangler/
+
+# Reports, recordings, data and side projects for this app: kept here, never committed
+private/
+
+# Local worktrees for parallel work
+.claude/worktrees/
+assets/plates/backdrop.png

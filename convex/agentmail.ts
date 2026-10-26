@@ -1,0 +1,538 @@
+"use node";
+
+import { AgentMailClient } from "agentmail";
+import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import type { Id } from "./_generated/dataModel";
+import { internalAction, type ActionCtx } from "./_generated/server";
+import { extractEmail } from "./lib/text";
+import { inboxUsernames } from "./lib/inboxName";
+import { hostsLabel } from "./lib/occasion";
+import { optOutFooter } from "./lib/optOut";
+import { outboundPause } from "./rateLimits";
+import { workflow } from "./workflows";
+import { BRAND } from "./lib/brand";
+import { decodeEntities } from "./lib/entities";
+
+const am = new AgentMailClient({ apiKey: process.env.AGENTMAIL_API_KEY });
+
+const MAX_ATTACHMENTS = 5;
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+function fallbackInbox(): string | undefined {
+  return process.env.AGENTMAIL_FALLBACK_INBOX_ID || undefined;
+}
+
+/**
+ * The AgentMail pod this deployment keeps its inboxes in. Production and dev share one
+ * AgentMail account; a pod each, with each webhook scoped to its own pod, keeps a
+ * couple's mail from ever reaching another deployment. Unset means the account's
+ * default space, as before pods were used.
+ */
+const POD = process.env.AGENTMAIL_POD_ID || undefined;
+
+type NewInbox = Parameters<typeof am.inboxes.create>[0];
+
+function listInboxes() {
+  return POD ? am.pods.inboxes.list(POD) : am.inboxes.list();
+}
+
+function createInboxAt(request: NewInbox) {
+  return POD ? am.pods.inboxes.create(POD, request ?? {}) : am.inboxes.create(request);
+}
+
+function deleteInbox(inboxId: string) {
+  return POD ? am.pods.inboxes.delete(POD, inboxId) : am.inboxes.delete(inboxId);
+}
+
+/**
+ * How many inboxes this AgentMail plan allows. Every wedding is meant to get its own
+ * address, so on a small plan the only way to keep that promise for the next couple
+ * is to give up an inbox nobody is using.
+ */
+const INBOX_LIMIT = Number(process.env.AGENTMAIL_INBOX_LIMIT ?? 3);
+
+/**
+ * Free a slot, if one can be freed honestly.
+ *
+ * Nothing carrying real correspondence is ever deleted: an inbox is only a candidate
+ * when its wedding has never written to or heard from a vendor, and the fallback inbox
+ * is never touched. The wedding that gives one up is told, so the app stops pointing at
+ * an address that no longer exists.
+ *
+ * Only this deployment's own inboxes are ever candidates. One AgentMail account is
+ * shared by production, every developer's dev deployment and any collaborator, and each
+ * of them can only see its own weddings. An inbox this deployment does not recognise is
+ * not idle — it is someone else's, possibly a real couple's on production — so it is
+ * left alone, and the new wedding shares the fallback instead.
+ */
+async function makeRoomForInbox(ctx: ActionCtx): Promise<void> {
+  let inboxes: Array<{ inboxId?: string; createdAt?: unknown }> = [];
+  try {
+    const res = (await listInboxes()) as { inboxes?: unknown; data?: unknown };
+    inboxes = ((res.inboxes ?? res.data ?? []) as Array<{ inboxId?: string; createdAt?: unknown }>);
+  } catch (err) {
+    console.warn("agentmail.inboxes.list failed", err instanceof Error ? err.message : err);
+    return; // let the create attempt decide
+  }
+  if (inboxes.length < INBOX_LIMIT) return;
+
+  const reserved = fallbackInbox();
+  const usage = await ctx.runQuery(internal.events.inboxUsage, {});
+  const byInbox = new Map(usage.map((u) => [u.inboxId, u]));
+
+  // Oldest first, so the inbox given up is always the most stale one.
+  const candidates = inboxes
+    .filter((i): i is { inboxId: string; createdAt?: unknown } => Boolean(i.inboxId) && i.inboxId !== reserved)
+    .filter((i) => {
+      const owner = byInbox.get(i.inboxId);
+      return owner !== undefined && owner.hasTraffic === false;
+    })
+    .sort((a, b) => String(a.createdAt ?? "").localeCompare(String(b.createdAt ?? "")));
+
+  let held = inboxes.length;
+  for (const candidate of candidates) {
+    if (held < INBOX_LIMIT) break;
+    try {
+      await deleteInbox(candidate.inboxId);
+      const owner = byInbox.get(candidate.inboxId);
+      if (owner) await ctx.runMutation(internal.events.clearInbox, { eventId: owner.eventId });
+      held -= 1;
+      console.log("released an idle AgentMail inbox", candidate.inboxId);
+    } catch (err) {
+      console.warn("could not release inbox", candidate.inboxId, err instanceof Error ? err.message : err);
+    }
+  }
+}
+
+// ---- inbox ------------------------------------------------------------------
+
+/** AgentMail says "not found" when an inbox or a message is no longer there. */
+function missingInbox(err: unknown): boolean {
+  return /not_found|NotFoundError|404/.test(err instanceof Error ? err.message : String(err));
+}
+
+export const createInbox = internalAction({
+  args: { eventId: v.id("events"), replace: v.optional(v.boolean()) },
+  returns: v.union(v.string(), v.null()),
+  handler: async (ctx, args): Promise<string | null> => {
+    const event = await ctx.runQuery(internal.events.getInternal, { eventId: args.eventId });
+    if (!event) return null;
+    // `replace` is for an inbox that no longer exists at AgentMail; otherwise an
+    // existing one is kept, which also makes workflow replays safe.
+    if (event.inboxId && !args.replace) return event.inboxId;
+    // On a small plan the limit is reached quickly, and a couple with no inbox cannot be
+    // written to at all — so make room before asking, and share the fallback rather than
+    // fail if there is genuinely nothing to give up.
+    await makeRoomForInbox(ctx);
+
+    let inboxId: string | undefined;
+    let inboxAddress: string | undefined;
+    let lastErr: unknown;
+    // The first name that is free wins; a taken or rejected name moves on to the next.
+    for (const username of inboxUsernames(event.host, event.coHost, event.startDate, event._id)) {
+      try {
+        const inbox = await createInboxAt({
+          username,
+          domain: process.env.AGENTMAIL_INBOX_DOMAIN || undefined,
+          displayName: hostsLabel(event),
+          clientId: `plusone-${event._id}`,
+        });
+        inboxId = inbox.inboxId;
+        inboxAddress = inbox.email ?? inbox.inboxId;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (!/already|exist|taken|conflict|409|422|invalid|validation/i.test(err instanceof Error ? err.message : String(err))) break;
+      }
+    }
+    if (!inboxId) {
+      console.warn("agentmail.inboxes.create failed, using fallback inbox", lastErr instanceof Error ? lastErr.message : lastErr);
+      const fb = fallbackInbox();
+      if (!fb) throw lastErr;
+      inboxId = fb;
+      inboxAddress = fb;
+    }
+    await ctx.runMutation(internal.events.setInbox, { eventId: args.eventId, inboxId, inboxAddress: inboxAddress ?? inboxId });
+    return inboxId;
+  },
+});
+
+/**
+ * Who is holding the inboxes. With a small allowance it matters whether one is held by
+ * a wedding that never wrote to anyone, or by another deployment entirely.
+ *
+ * `npx convex run agentmail:inboxReport`
+ */
+export const inboxReport = internalAction({
+  args: {},
+  returns: v.array(v.object({ inboxId: v.string(), owner: v.string(), idle: v.boolean() })),
+  handler: async (ctx): Promise<{ inboxId: string; owner: string; idle: boolean }[]> => {
+    const res = (await listInboxes()) as { inboxes?: unknown; data?: unknown };
+    const inboxes = (res.inboxes ?? res.data ?? []) as Array<{ inboxId?: string }>;
+    const usage = await ctx.runQuery(internal.events.inboxUsage, {});
+    const byInbox = new Map(usage.map((u) => [u.inboxId, u]));
+    const names = await ctx.runQuery(internal.events.namesByInbox, {});
+    const nameByInbox = new Map(names.map((n) => [n.inboxId, n.name]));
+    return inboxes
+      .filter((i): i is { inboxId: string } => Boolean(i.inboxId))
+      .map((i) => ({
+        inboxId: i.inboxId,
+        owner: nameByInbox.get(i.inboxId) ?? (i.inboxId === fallbackInbox() ? "the shared fallback" : "another deployment"),
+        idle: byInbox.get(i.inboxId)?.hasTraffic === false,
+      }));
+  },
+});
+
+/**
+ * Give an inbox back. The allowance is small, so an inbox belonging to a wedding that
+ * no longer exists has to return to the pool rather than sit there forever. The shared
+ * fallback is never released.
+ */
+export const releaseInbox = internalAction({
+  args: { inboxId: v.string() },
+  returns: v.boolean(),
+  handler: async (_ctx, args): Promise<boolean> => {
+    if (!args.inboxId || args.inboxId === fallbackInbox()) return false;
+    try {
+      await deleteInbox(args.inboxId);
+      console.log("released an AgentMail inbox", args.inboxId);
+      return true;
+    } catch (err) {
+      console.warn("could not release inbox", args.inboxId, err instanceof Error ? err.message : err);
+      return false;
+    }
+  },
+});
+
+// ---- outbound ---------------------------------------------------------------
+
+/**
+ * Sends one queued message. `markSending` is a compare-and-set so a duplicate
+ * enqueue can never double-send; the workpool never retries this action.
+ */
+export const sendOutbound = internalAction({
+  args: { messageId: v.id("messages") },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const taken = await ctx.runMutation(internal.messages.markSending, { messageId: args.messageId });
+    if (!taken) return null;
+    const context = await ctx.runQuery(internal.messages.getContext, { messageId: args.messageId });
+    if (!context) return null;
+    const { message, event, thread } = context;
+    const inboxId = event.inboxId ?? fallbackInbox();
+    try {
+      // A guest's sample wedding writes to fictional vendors: record the send, never make it.
+      if (event.demo) {
+        const sentAt = Date.now();
+        await ctx.runMutation(internal.messages.markSent, {
+          messageId: args.messageId,
+          agentmailMessageId: `demo-${args.messageId}`,
+          sentAt,
+        });
+        if (thread) {
+          await ctx.runMutation(internal.threads.markSent, { threadId: thread._id, sentAt, kind: message.kind });
+        }
+        if (message.guestId) await ctx.runMutation(internal.guests.markInvited, { guestId: message.guestId, at: sentAt });
+        return null;
+      }
+      if (!inboxId) throw new Error("No inbox for this event yet");
+      if (!message.toAddress) throw new Error("Recipient has no email address");
+      // The last check before anything leaves: nobody who asked to be left alone is written to.
+      if (await ctx.runQuery(internal.doNotContact.check, { address: message.toAddress })) {
+        throw new Error("Not sent: they asked not to be contacted.");
+      }
+      // Counted here, where mail really leaves, so follow-ups and automatic replies
+      // are held to the same allowance as the Send button.
+      const pause = await outboundPause(ctx, event._id);
+      if (pause) throw new Error(pause);
+      const replyTo = message.kind === "inquiry" ? undefined : thread?.lastInboundMessageId;
+      let from = inboxId;
+
+      /**
+       * The allowance is small, so inboxes come and go: one can be released to make
+       * room, or removed at AgentMail entirely. Rather than fail a couple's email
+       * because the address it was written from has gone, take a new one and send.
+       */
+      // First contact and follow-ups are unsolicited, so they carry a way to stop them.
+      const bodyToSend =
+        message.kind === "inquiry" || message.kind === "follow_up"
+          ? message.bodyText + optOutFooter(hostsLabel(event))
+          : message.bodyText;
+      const sendFrom = (id: string) =>
+        am.inboxes.messages.send(id, { to: [message.toAddress], subject: message.subject, text: bodyToSend });
+      const fresh = async () => {
+        try {
+          return await sendFrom(from);
+        } catch (err) {
+          if (!missingInbox(err)) throw err;
+          console.warn("the event's inbox is gone at the mail provider; taking a new one");
+          const replacement = await ctx.runAction(internal.agentmail.createInbox, {
+            eventId: event._id,
+            replace: true,
+          });
+          if (!replacement) throw err;
+          from = replacement;
+          return await sendFrom(replacement);
+        }
+      };
+
+      // Replying keeps the conversation in one place, but the message being replied to
+      // belongs to whichever inbox held it at the time. A wedding that has since been
+      // given a different address cannot see it, and the reply 404s. Better a nudge in
+      // a new email than a nudge that never arrives.
+      let result;
+      if (replyTo) {
+        try {
+          result = await am.inboxes.messages.reply(from, replyTo, { text: message.bodyText });
+        } catch (replyErr) {
+          if (!missingInbox(replyErr)) throw replyErr;
+          console.warn("original message not visible to this inbox; sending a fresh one instead");
+          result = await fresh();
+        }
+      } else {
+        result = await fresh();
+      }
+      const sentAt = Date.now();
+      await ctx.runMutation(internal.messages.markSent, {
+        messageId: args.messageId,
+        agentmailMessageId: result.messageId,
+        agentmailThreadId: result.threadId,
+        sentAt,
+      });
+      if (thread) {
+        await ctx.runMutation(internal.threads.markSent, {
+          threadId: thread._id,
+          agentmailThreadId: result.threadId,
+          sentAt,
+          kind: message.kind,
+        });
+      }
+      if (message.guestId) {
+        await ctx.runMutation(internal.guests.markInvited, { guestId: message.guestId, at: sentAt });
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      await ctx.runMutation(internal.messages.markFailed, { messageId: args.messageId, error });
+      if (thread) await ctx.runMutation(internal.threads.setAttention, { threadId: thread._id, reason: "send_failed" });
+    }
+    return null;
+  },
+});
+
+export const sendInvite = internalAction({
+  args: { inviteId: v.id("invites") },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    const context = await ctx.runQuery(internal.invites.getInternal, { inviteId: args.inviteId });
+    if (!context) return null;
+    const { invite, event, inviterLabel } = context;
+    const email = invite.email;
+    if (!email || event.demo) return null; // a sample event's invites are shared by link only
+    const inboxId = event.inboxId ?? fallbackInbox();
+    if (!inboxId) return null; // link-only invite
+    const base = (process.env.SITE_URL ?? process.env.CONVEX_SITE_URL ?? "").replace(/\/$/, "");
+    const link = `${base}/join/${invite.token}`;
+    const text =
+      `Hi,\n\n${inviterLabel} has asked you to help plan ${event.name}${event.organisation?.trim() ? ` for ${event.organisation.trim()}` : ` (${hostsLabel(event)})`} ` +
+      `on ${BRAND.name}, as a ${invite.role}.\n\n` +
+      `Open this link to join: ${link}\n\nThe link works once, for the next 7 days.\n\nSee you there.`;
+    try {
+      const result = await am.inboxes.messages.send(inboxId, {
+        to: [email],
+        subject: `Help plan ${event.name}`.slice(0, 70),
+        text,
+      });
+      // Record the sent invite in the message log.
+      const messageId = await ctx.runMutation(internal.messages.createOutboundDraft, {
+        eventId: event._id,
+        kind: "invite",
+        status: "queued",
+        fromAddress: event.inboxAddress ?? inboxId,
+        toAddress: email,
+        subject: `Help plan ${event.name}`.slice(0, 70),
+        bodyText: text,
+        idempotencyKey: `${invite._id}:invite`,
+      });
+      await ctx.runMutation(internal.messages.markSent, {
+        messageId,
+        agentmailMessageId: result.messageId,
+        agentmailThreadId: result.threadId,
+        sentAt: Date.now(),
+      });
+    } catch (err) {
+      console.warn("sendInvite failed", err instanceof Error ? err.message : err);
+    }
+    return null;
+  },
+});
+
+// ---- inbound ----------------------------------------------------------------
+
+const inboundAttachment = v.object({
+  attachmentId: v.string(),
+  filename: v.optional(v.string()),
+  contentType: v.optional(v.string()),
+  size: v.optional(v.number()),
+  inline: v.optional(v.boolean()),
+});
+
+/**
+ * Runs after the webhook has claimed the event. Routing order:
+ *  1. AgentMail thread id matches a vendor thread  -> vendor reply
+ *  2. Sender is a known guest of a wedding on this inbox -> RSVP reply
+ *  3. Otherwise unknown sender (a PDF attachment still becomes a contract check)
+ */
+export const ingestInbound = internalAction({
+  args: {
+    inboundEventId: v.id("inboundEvents"),
+    eventId: v.optional(v.id("events")),
+    inboxId: v.string(),
+    messageId: v.string(),
+    threadId: v.optional(v.string()),
+    fromAddress: v.string(),
+    subject: v.string(),
+    text: v.optional(v.string()),
+    html: v.optional(v.string()),
+    extractedText: v.optional(v.string()),
+    attachments: v.array(inboundAttachment),
+  },
+  returns: v.null(),
+  handler: async (ctx, args): Promise<null> => {
+    try {
+      let bodyText = args.extractedText || args.text || "";
+      let attachments = args.attachments;
+      let toAddress = args.inboxId;
+      if (!bodyText) {
+        // Webhook payloads can omit the body; refetch.
+        const full = await am.inboxes.messages.get(args.inboxId, args.messageId);
+        bodyText = full.extractedText || full.text || stripHtml(full.html ?? "") || "";
+        toAddress = full.to?.[0] ?? toAddress;
+        if (attachments.length === 0 && full.attachments) {
+          attachments = full.attachments.map((a) => ({
+            attachmentId: a.attachmentId,
+            filename: a.filename,
+            contentType: a.contentType,
+            size: a.size,
+          }));
+        }
+      }
+      if (!bodyText && args.html) bodyText = stripHtml(args.html);
+
+      const stored: { storageId: Id<"_storage">; filename: string; contentType: string; size: number }[] = [];
+      for (const a of attachments.filter((x) => !x.inline).slice(0, MAX_ATTACHMENTS)) {
+        if ((a.size ?? 0) > MAX_ATTACHMENT_BYTES) continue;
+        try {
+          const meta = await am.inboxes.messages.getAttachment(args.inboxId, args.messageId, a.attachmentId);
+          const res = await fetch(meta.downloadUrl, { signal: AbortSignal.timeout(20_000) });
+          if (!res.ok) continue;
+          const blob = await res.blob();
+          if (blob.size > MAX_ATTACHMENT_BYTES) continue;
+          const storageId = await ctx.storage.store(blob);
+          stored.push({
+            storageId,
+            filename: a.filename ?? meta.filename ?? "attachment",
+            contentType: a.contentType ?? meta.contentType ?? blob.type ?? "application/octet-stream",
+            size: blob.size,
+          });
+        } catch (err) {
+          console.warn("attachment download failed", a.attachmentId, err instanceof Error ? err.message : err);
+        }
+      }
+
+      const fromAddress = extractEmail(args.fromAddress);
+      const receivedAt = Date.now();
+
+      // 1. Vendor thread
+      const thread = args.threadId
+        ? await ctx.runQuery(internal.threads.findByAgentmailThreadId, { agentmailThreadId: args.threadId })
+        : null;
+      if (thread) {
+        const { messageId, created } = await ctx.runMutation(internal.messages.recordInbound, {
+          eventId: thread.eventId,
+          threadId: thread._id,
+          kind: "vendor_reply",
+          fromAddress,
+          toAddress,
+          subject: args.subject,
+          bodyText,
+          agentmailMessageId: args.messageId,
+          agentmailThreadId: args.threadId,
+          attachments: stored,
+          receivedAt,
+        });
+        if (created) {
+          await ctx.runMutation(internal.threads.applyInbound, {
+            threadId: thread._id,
+            agentmailMessageId: args.messageId,
+            agentmailThreadId: args.threadId,
+            receivedAt,
+          });
+          // Any PDF is read with the reply itself: a quote's prices come out of it, and
+          // only a real contract goes on to the contract check (claude.extractReply).
+          await workflow.start(ctx, internal.workflows.inboundWorkflow, { messageId });
+        }
+        await ctx.runMutation(internal.inbound.finish, { inboundEventId: args.inboundEventId, routedAs: "vendor_reply", eventId: thread.eventId });
+        return null;
+      }
+
+      const pdf = stored.find((s) => s.contentType.includes("pdf") || s.filename.toLowerCase().endsWith(".pdf"));
+
+      // 2. Known guest, unless they are forwarding a document. A guest who forwards a
+      // contract is not answering the invitation, and reading it as an RSVP overwrote
+      // the answer they had already given.
+      const guest =
+        fromAddress && !pdf ? await ctx.runQuery(internal.inbound.findGuestByEmail, { inboxId: args.inboxId, email: fromAddress }) : null;
+      if (guest) {
+        const { messageId, created } = await ctx.runMutation(internal.messages.recordInbound, {
+          eventId: guest.eventId,
+          guestId: guest._id,
+          kind: "rsvp_reply",
+          fromAddress,
+          toAddress,
+          subject: args.subject,
+          bodyText,
+          agentmailMessageId: args.messageId,
+          agentmailThreadId: args.threadId,
+          attachments: stored,
+          receivedAt,
+        });
+        if (created) await workflow.start(ctx, internal.workflows.rsvpWorkflow, { messageId });
+        await ctx.runMutation(internal.inbound.finish, { inboundEventId: args.inboundEventId, routedAs: "guest_reply", eventId: guest.eventId });
+        return null;
+      }
+
+      // 3. A forwarded document, or an unknown sender
+      if (pdf && args.eventId) {
+        await ctx.runMutation(internal.inbound.createContractCheck, {
+          eventId: args.eventId,
+          storageId: pdf.storageId,
+          filename: pdf.filename,
+        });
+        await ctx.runMutation(internal.inbound.finish, { inboundEventId: args.inboundEventId, routedAs: "contract", eventId: args.eventId });
+        return null;
+      }
+      await ctx.runMutation(internal.inbound.finish, { inboundEventId: args.inboundEventId, routedAs: "unknown_sender", eventId: args.eventId });
+      return null;
+    } catch (err) {
+      const error = err instanceof Error ? err.message : String(err);
+      console.error("ingestInbound failed", error);
+      await ctx.runMutation(internal.inbound.finish, { inboundEventId: args.inboundEventId, routedAs: "error", eventId: args.eventId, error });
+      return null;
+    }
+  },
+});
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .split("\n")
+    .map(decodeEntities)
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}

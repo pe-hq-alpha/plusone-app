@@ -1,0 +1,19 @@
+import { defineApp } from "convex/server";
+import workflow from "@convex-dev/workflow/convex.config";
+import workpool from "@convex-dev/workpool/convex.config";
+import staticHosting from "@convex-dev/static-hosting/convex.config";
+import rateLimiter from "@convex-dev/rate-limiter/convex.config";
+import actionCache from "@convex-dev/action-cache/convex.config";
+import resend from "@convex-dev/resend/convex.config";
+
+const app = defineApp();
+app.use(workflow);
+app.use(workpool, { name: "emailPool" });
+app.use(rateLimiter);
+app.use(actionCache);
+app.use(resend);
+// No httpPrefix: the app owns root routing in convex/http.ts and mounts the
+// static catch-all last, so /agentmail/webhook and auth routes stay at root.
+app.use(staticHosting);
+
+export default app;

@@ -1,0 +1,122 @@
+/* The day, part by part: the plan's parts in time order under a quiet day heading, joined by
+   the running-status line (styles/running-status.css, styles/today.css): a node per part,
+   moss where its vendors are booked, marigold where things are moving, hollow ahead.
+   Tokens only, so the light and dark themes both hold. */
+
+.dbp { --dbp-gutter: 52px; --dbp-node: 36px; --dbp-gap: 16px; min-width: 0; }
+
+.dbp__title { margin: 0; font-size: clamp(2rem, 3.4vw, 2.4rem); line-height: 1.1; color: var(--color-ink-deep); }
+.dbp__meta { margin: 8px 0 28px; font-size: 0.9rem; line-height: 1.55; color: var(--color-muted); }
+.dbp__meta b { font-weight: 500; color: var(--color-ink); }
+
+.dbp__day + .dbp__day { margin-top: 32px; }
+.dbp__day-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 14px; }
+.dbp__day-head h2 { margin: 0; font-size: 1.4rem; font-weight: 400; color: var(--color-ink-deep); }
+.dbp__day-head span { font-size: 0.82rem; color: var(--color-quiet); }
+
+.dbp__flow { list-style: none; margin: 0; padding: 0 0 0 var(--dbp-gutter); display: grid; gap: var(--dbp-gap); }
+.dbp__part { position: relative; min-width: 0; }
+
+/* The line: from this part's node down to the next one, filled as far as its vendors are booked. */
+.dbp__part::before {
+  content: ""; position: absolute; z-index: 0;
+  left: calc(-1 * var(--dbp-gutter) + var(--dbp-node) / 2 - 1px); width: 2px;
+  top: calc(20px + var(--dbp-node) / 2);
+  bottom: calc(-1 * var(--dbp-gap) - 20px - var(--dbp-node) / 2);
+  background: linear-gradient(var(--color-done) 0 var(--fill, 0%), var(--color-rule) var(--fill, 0%) 100%);
+  border-radius: 2px;
+}
+.dbp__part:last-child::before { bottom: 24px; }
+
+.dbp__card {
+  position: relative; min-width: 0; padding: 20px 22px 18px; border-radius: 18px;
+  background: var(--color-cream); border: 1px solid var(--color-line); box-shadow: var(--shadow-card);
+}
+
+.dbp__node {
+  position: absolute; z-index: 1; left: calc(-1 * var(--dbp-gutter) - 1px); top: 20px;
+  display: grid; place-items: center; width: var(--dbp-node); height: var(--dbp-node); border-radius: 50%;
+  background: var(--color-paper); color: var(--color-quiet); box-shadow: inset 0 0 0 1.5px var(--color-rule);
+}
+.dbp__node svg { width: 18px; height: 18px; }
+.dbp__part--done .dbp__node { color: var(--color-done); box-shadow: inset 0 0 0 1.5px var(--color-done); }
+.dbp__part--now .dbp__node {
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1.5px var(--color-highlight), 0 0 0 4px color-mix(in srgb, var(--color-highlight) 14%, transparent);
+}
+
+.dbp__head { display: flex; align-items: flex-start; gap: 14px; }
+.dbp__name { margin: 0; font-size: 1.6rem; line-height: 1.15; color: var(--color-ink-deep); overflow-wrap: anywhere; }
+.dbp__facts { margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; font-size: 0.84rem; color: var(--color-muted); }
+.dbp__time {
+  display: inline-block; padding: 1px 9px; border-radius: 999px; background: var(--color-accent-soft); color: var(--color-accent);
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.dbp__open { margin-left: auto; padding-top: 4px; font-size: 0.84rem; color: var(--color-accent); white-space: nowrap; text-decoration: none; }
+.dbp__open:hover { text-decoration: underline; }
+
+.dbp__needs { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; }
+.dbp__need {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto minmax(8.5rem, auto); align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 10px; background: var(--color-soft); border: 1px solid var(--color-line);
+}
+.dbp__dot { justify-self: center; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--color-quiet); }
+.dbp__need--booked .dbp__dot { background: var(--color-done); box-shadow: none; }
+.dbp__need--compare .dbp__dot { background: var(--color-highlight); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-highlight) 18%, transparent); }
+.dbp__need--waiting .dbp__dot { width: 11px; height: 11px; box-shadow: none; border: 1.5px dashed var(--color-warn); }
+
+.dbp__what { min-width: 0; font-size: 0.92rem; color: var(--color-ink); text-decoration: none; }
+.dbp__what:hover { color: var(--color-accent); }
+.dbp__what small { display: block; margin-top: 1px; font-size: 0.78rem; line-height: 1.45; color: var(--color-quiet); }
+.dbp__state { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-quiet); white-space: nowrap; }
+.dbp__need--booked .dbp__state { color: var(--color-done); }
+.dbp__need--compare .dbp__state { color: var(--color-accent); }
+.dbp__need--waiting .dbp__state { color: var(--color-warn); }
+.dbp__compare {
+  display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--color-accent); color: var(--color-on-accent);
+  font-size: 0.75rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.dbp__compare:hover { background: var(--color-accent-deep); }
+.dbp__price { text-align: right; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--color-ink-deep); white-space: nowrap; }
+.dbp__price small { display: block; font-size: 0.7rem; color: var(--color-quiet); }
+
+.dbp__none { margin: 14px 0 0; font-size: 0.86rem; color: var(--color-quiet); }
+
+.dbp__foot { margin-top: 12px; }
+.dbp__acts { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.dbp__acts > * {
+  padding: 0; border: 0; background: none; font: inherit; font-size: 0.78rem; color: var(--color-quiet); cursor: pointer;
+  text-decoration: none; border-bottom: 1px dotted var(--color-rule);
+}
+.dbp__acts > *:hover, .dbp__acts > [aria-expanded="true"] { color: var(--color-accent); border-bottom-color: currentColor; }
+.dbp__acts > *:focus-visible, .dbp__what:focus-visible, .dbp__open:focus-visible, .dbp__compare:focus-visible {
+  outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 4px;
+}
+
+.dbp__form { margin-top: 12px; padding: 14px; border-radius: 12px; background: var(--color-soft); border: 1px solid var(--color-line);
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.dbp__field { display: grid; min-width: 0; flex: 0 1 9rem; }
+.dbp__field--wide { flex: 1 1 14rem; }
+.dbp__field .label { margin-bottom: 4px; }
+.dbp__form-buttons { display: flex; gap: 8px; }
+.dbp__error { flex-basis: 100%; margin: 0; font-size: 0.86rem; color: var(--color-bad); }
+
+/* A phone: no line; the node sits at the top of its card, and each need stacks its price under its name. */
+@media (max-width: 700px) {
+  .dbp__flow { padding-left: 0; }
+  .dbp__part::before { display: none; }
+  .dbp__card { padding: 18px 16px 16px; }
+  .dbp__node { position: static; width: 32px; height: 32px; margin-bottom: 8px; }
+  .dbp__head { flex-wrap: wrap; row-gap: 8px; }
+  .dbp__name { font-size: 1.45rem; }
+  .dbp__open { margin-left: 0; width: 100%; padding-top: 0; }
+  .dbp__need { grid-template-columns: 18px minmax(0, 1fr); row-gap: 6px; padding: 12px; }
+  .dbp__dot { align-self: start; margin-top: 6px; }
+  .dbp__need .dbp__state { display: none; }
+  .dbp__price, .dbp__compare { grid-column: 2; justify-self: start; text-align: left; white-space: normal; }
+  .dbp__price small { display: inline; margin-left: 6px; }
+}
+
+@media print {
+  .dbp__acts, .dbp__form { display: none; }
+}

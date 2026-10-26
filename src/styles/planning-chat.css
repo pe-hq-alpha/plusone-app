@@ -1,0 +1,50 @@
+/* Planning a new event as a conversation: the talk on the left, what has been gathered on
+   the right, a tick beside each line the host has confirmed. */
+
+.pc { margin-inline: auto; width: 100%; max-width: 1080px; padding: 28px clamp(16px, 4vw, 40px) 64px; }
+.pc__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.pc__grid { display: grid; gap: 28px; margin-top: 36px; }
+@media (min-width: 900px) { .pc__grid { grid-template-columns: minmax(0, 1fr) 300px; gap: 44px; align-items: start; } }
+.pc__title { font-size: clamp(2.1rem, 3.6vw, 3.2rem); line-height: 1.08; letter-spacing: -0.01em; color: var(--color-ink-deep); }
+
+.pc__messages { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 14px; }
+.pc__msg { max-width: 38rem; animation: pc-in 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+.pc__msg p { white-space: pre-wrap; font-size: 1rem; line-height: 1.6; }
+.pc__msg--plusone p { color: var(--color-ink); }
+.pc__msg--host { justify-self: end; padding: 10px 16px; border-radius: 18px; border-bottom-right-radius: 7px;
+  background: color-mix(in srgb, var(--color-highlight) 16%, var(--color-cream)); }
+.pc__msg--host p { color: var(--color-ink); }
+.pc__who { display: block; margin-bottom: 4px; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent); }
+.pc__dots { display: inline-flex; gap: 5px; padding: 6px 0; }
+.pc__dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-highlight); animation: pc-dot 1.1s ease-in-out infinite; }
+.pc__dots i:nth-child(2) { animation-delay: 0.15s; }
+.pc__dots i:nth-child(3) { animation-delay: 0.3s; }
+
+.pc__quick { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+.pc__quick button { padding: 8px 16px; border-radius: 999px; font-size: 0.93rem; color: var(--color-ink); background: var(--color-cream);
+  box-shadow: inset 0 0 0 1px var(--color-line); transition: box-shadow 140ms ease-out; }
+.pc__quick button:first-child { color: var(--color-on-highlight); background: var(--color-highlight); box-shadow: none; }
+.pc__quick button:hover { box-shadow: inset 0 0 0 1px var(--color-accent); }
+.pc__ready { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+
+.pc__compose { position: sticky; bottom: 16px; margin-top: 24px; display: flex; align-items: flex-end; gap: 10px; padding: 10px; border-radius: 18px;
+  background: var(--color-cream); box-shadow: 0 18px 44px -24px rgb(var(--shadow-rgb) / 0.6), inset 0 0 0 1px var(--color-line); }
+.pc__input { flex: 1; resize: none; border: 0; background: transparent; box-shadow: none; font-size: 1rem; line-height: 1.5; }
+.pc__input:focus { box-shadow: none; outline: none; }
+
+.pc__card { padding: 20px 22px; border-radius: 18px; background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); }
+@media (min-width: 900px) { .pc__card { position: sticky; top: 24px; margin-top: 88px; } }
+.pc__card-title { font-size: 1.3rem; }
+.pc__card ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.pc__line { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; }
+.pc__tick { width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--color-rule); }
+.pc__line.is-known .pc__tick { box-shadow: inset 0 0 0 1.5px var(--color-highlight); }
+.pc__line.is-confirmed .pc__tick { background: var(--color-done); color: var(--color-paper); box-shadow: none; }
+.pc__label { display: block; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-quiet); }
+.pc__value { display: block; font-size: 0.93rem; line-height: 1.4; color: var(--color-ink); }
+.pc__line:not(.is-known):not(.is-confirmed) .pc__value { color: var(--color-quiet); }
+.pc__hint { margin-top: 16px; font-size: 0.86rem; line-height: 1.5; color: var(--color-quiet); }
+
+@keyframes pc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes pc-dot { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .pc__msg, .pc__dots i { animation: none; } }

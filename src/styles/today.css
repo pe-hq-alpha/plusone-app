@@ -1,0 +1,79 @@
+/* Today: the co-pilot's route for one event. The same nodes and lines as the home page's
+   running status, drawn at reading size: done in moss, under way lit in marigold, over to
+   you dashed, up next hollow. */
+
+.today__head { max-width: 46rem; }
+.today__title { font-size: clamp(2.1rem, 3.6vw, 3.2rem); line-height: 1.08; letter-spacing: -0.01em; color: var(--color-ink-deep); text-wrap: balance; }
+.today__when { margin-top: 10px; font-size: 0.95rem; color: var(--color-muted); }
+
+.today__grid { display: grid; gap: 28px; margin-top: 32px; }
+@media (min-width: 1024px) { .today__grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 44px; align-items: start; } }
+
+.today__route-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; padding-bottom: 14px; border-bottom: 1px solid var(--color-line); }
+
+.route { list-style: none; margin: 8px 0 0; padding: 0; }
+.route__step { position: relative; }
+/* The line runs through every node: solid behind work that is done, dashed ahead of it. */
+.route__step::before { content: ""; position: absolute; left: 15px; top: 0; bottom: 0; width: 2px;
+  background: repeating-linear-gradient(var(--color-rule) 0 4px, transparent 4px 8px); }
+.route__step:first-child::before { top: 50%; }
+.route__step:last-child::before { bottom: 50%; }
+.route__step--done::before { background: var(--color-done); }
+.route__step--done + .route__step--now::before { background: linear-gradient(var(--color-done) 0 50%, transparent 50%), repeating-linear-gradient(var(--color-rule) 0 4px, transparent 4px 8px); }
+
+.route__row { position: relative; display: grid; grid-template-columns: 32px 92px minmax(0, 1fr) auto; align-items: center; column-gap: 14px;
+  min-height: 64px; padding: 10px 12px 10px 0; border-radius: 10px; color: inherit; text-decoration: none; }
+a.route__row { transition: background-color 180ms ease-out; }
+a.route__row:hover { background: color-mix(in srgb, var(--color-cream) 80%, transparent); }
+a.route__row:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.route__node { position: relative; z-index: 1; justify-self: center; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--color-paper); box-shadow: inset 0 0 0 2px var(--color-rule); }
+.route__step--done .route__node { background: var(--color-done); box-shadow: 0 0 0 4px var(--color-paper); }
+.route__step--now .route__node { width: 18px; height: 18px; background: var(--color-highlight);
+  box-shadow: 0 0 0 4px var(--color-paper), 0 0 0 7px color-mix(in srgb, var(--color-highlight) 22%, transparent), 0 0 18px 4px color-mix(in srgb, var(--color-highlight) 40%, transparent);
+  animation: route-breathe 3.2s ease-in-out infinite; }
+.route__step--now .route__node::after { content: ""; width: 34%; height: 34%; border-radius: 50%; background: var(--color-highlight-core); }
+.route__step--yours .route__node { width: 16px; height: 16px; box-shadow: none; outline: 2px dashed var(--color-highlight); outline-offset: -2px; }
+.route__step--next .route__node { box-shadow: inset 0 0 0 2px var(--color-rule), 0 0 0 4px var(--color-paper); }
+
+.route__state { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-quiet); }
+.route__step--done .route__state { color: var(--color-done); }
+.route__step--now .route__state, .route__step--yours .route__state { color: var(--color-accent); }
+
+.route__text { min-width: 0; display: grid; gap: 2px; }
+.route__title { font-size: 1rem; line-height: 1.4; color: var(--color-ink); }
+.route__step--done .route__title { color: var(--color-muted); }
+.route__step--yours .route__title { font-weight: 500; }
+.route__detail { font-size: 0.86rem; line-height: 1.45; color: var(--color-quiet); }
+.route__act { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 0.86rem; color: var(--color-accent); }
+.route__step--yours .route__act { padding: 6px 12px; border-radius: 999px; background: var(--color-accent); color: var(--color-on-accent); }
+a.route__row:hover .route__act { text-decoration: underline; text-underline-offset: 3px; }
+.route__step--yours a.route__row:hover .route__act { text-decoration: none; background: var(--color-accent-deep); }
+
+.route-empty { margin-top: 20px; padding: 28px; border-radius: 18px; border: 1px dashed var(--color-rule); }
+
+.today__side { display: grid; gap: 16px; }
+@media (min-width: 1024px) { .today__side { position: sticky; top: 132px; } }
+.today__panel { padding: 20px 22px; border-radius: 18px; background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); }
+.today__panel--tell { background: color-mix(in srgb, var(--color-highlight) 7%, var(--color-cream)); }
+.today__prompt { padding: 6px 11px; border-radius: 999px; font-size: 0.8rem; color: var(--color-muted); background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-line);
+  transition: color 160ms ease-out, box-shadow 160ms ease-out; }
+.today__prompt:hover:not(:disabled) { color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.today__prompt:disabled { opacity: 0.55; }
+
+@keyframes route-breathe {
+  0%, 100% { box-shadow: 0 0 0 4px var(--color-paper), 0 0 0 7px color-mix(in srgb, var(--color-highlight) 22%, transparent), 0 0 18px 4px color-mix(in srgb, var(--color-highlight) 40%, transparent); }
+  50% { box-shadow: 0 0 0 4px var(--color-paper), 0 0 0 9px color-mix(in srgb, var(--color-highlight) 14%, transparent), 0 0 26px 6px color-mix(in srgb, var(--color-highlight) 28%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .route__step--now .route__node { animation: none; } }
+
+/* On a phone the state word moves under the title, and the action sits on its own line. */
+@media (max-width: 640px) {
+  .route__row { grid-template-columns: 32px minmax(0, 1fr); grid-template-rows: auto auto auto; row-gap: 3px; padding-block: 12px; }
+  .route__node { grid-row: 1 / span 3; align-self: start; margin-top: 3px; }
+  .route__state { grid-column: 2; }
+  .route__text { grid-column: 2; }
+  .route__act { grid-column: 2; justify-self: start; margin-top: 4px; }
+  .route__step::before { left: 15px; }
+}
