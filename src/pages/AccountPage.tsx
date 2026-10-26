@@ -129,8 +129,8 @@ export function AccountPage() {
         <h2 id="delete-account-h" className="display text-xl">Delete your account</h2>
         <p className="mt-1 max-w-[40rem] text-sm leading-relaxed text-muted">
           This deletes your account and every event you own on your own, with their vendors, emails, guests and files.
-          Sessions you share with another owner, or were invited to, stay for the others and you are removed from them. It
-          cannot be undone.
+          Your chats with the assistant, your feedback and the log of your visits go too. Events you share with another
+          owner, or were invited to, stay for the others and you are removed from them. It cannot be undone.
         </p>
         <form
           className="mt-4 flex flex-wrap items-end gap-3"

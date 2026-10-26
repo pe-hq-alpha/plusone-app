@@ -2,7 +2,7 @@
 import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { describe, expect, test, vi } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
 
@@ -130,5 +130,64 @@ describe("deleting an account", () => {
     expect(after.shared).not.toBeNull();
     expect(after.sharedMembers.map((m) => m.userId)).toEqual([plannerId]);
     expect(after.other).not.toBeNull();
+  });
+
+  test("also clears their chats, feedback, visit logs and linked browsers, deletes their Clerk user, and keeps do-not-contact", async () => {
+    vi.stubEnv("CLERK_SECRET_KEY", "sk_test_example");
+    const calls: { url: string; method?: string }[] = [];
+    vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+      calls.push({ url, method: init?.method });
+      return new Response(null, { status: 200 });
+    });
+    try {
+      const t = setup();
+      const { ownerId, plannerId, shared } = await seed(t);
+      const visit = { ip: "203.0.113.7", host: "app.plusoneevents.site", path: "/", method: "GET", isBot: false, likelyProxy: false };
+      const ids = await t.run(async (ctx) => {
+        await ctx.db.patch(ownerId, { clerkId: "user_maya" });
+        await ctx.db.insert("planningChats", { userId: ownerId, messages: [], state: "{}", step: "start", updatedAt: 0 });
+        await ctx.db.insert("feedback", { userId: ownerId, category: "idea", message: "More colours" });
+        const mineChat = await ctx.db.insert("chatMessages", { eventId: shared, userId: ownerId, role: "user", content: "Find a DJ" });
+        const theirChat = await ctx.db.insert("chatMessages", { eventId: shared, userId: plannerId, role: "user", content: "And a cake" });
+        await ctx.db.insert("visits", { ...visit, at: 1, clerkUserId: "user_maya", visitorId: "browser-maya" });
+        await ctx.db.insert("visits", { ...visit, at: 2, visitorId: "browser-maya" });
+        await ctx.db.insert("visitorLinks", { visitorId: "browser-maya", clerkUserId: "user_maya", firstSeen: 1, lastSeen: 2 });
+        const someoneElse = await ctx.db.insert("visits", { ...visit, at: 3, visitorId: "browser-sam", clerkUserId: "user_sam" });
+        const blocked = await ctx.db.insert("doNotContact", { address: "dj@example.com", reason: "asked_to_stop" });
+        return { mineChat, theirChat, someoneElse, blocked };
+      });
+      await signedInAs(t, ownerId).mutation(api.users.deleteAccount, { confirm: "DELETE" });
+      await finishDeleting(t);
+      const after = await t.run(async (ctx) => ({
+        planning: await ctx.db.query("planningChats").collect(),
+        feedback: await ctx.db.query("feedback").collect(),
+        mineChat: await ctx.db.get(ids.mineChat),
+        theirChat: await ctx.db.get(ids.theirChat),
+        visits: await ctx.db.query("visits").collect(),
+        links: await ctx.db.query("visitorLinks").collect(),
+        blocked: await ctx.db.get(ids.blocked),
+      }));
+      expect(after.planning).toHaveLength(0);
+      expect(after.feedback).toHaveLength(0);
+      expect(after.mineChat).toBeNull();
+      expect(after.theirChat).not.toBeNull();
+      expect(after.visits.map((r) => r._id)).toEqual([ids.someoneElse]);
+      expect(after.links).toHaveLength(0);
+      expect(after.blocked).not.toBeNull();
+      expect(calls).toContainEqual({ url: "https://api.clerk.com/v1/users/user_maya", method: "DELETE" });
+    } finally {
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  test("skips Clerk without a secret key", async () => {
+    const t = setup();
+    const userId = await t.run((ctx) => ctx.db.insert("users", { email: "ravi@example.com", clerkId: "user_ravi" }));
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    await t.action(internal.users.deleteClerkUser, { clerkUserId: "user_ravi" });
+    expect(log).toHaveBeenCalledWith(expect.stringContaining("CLERK_SECRET_KEY not set"), "user_ravi");
+    log.mockRestore();
+    expect(await t.run((ctx) => ctx.db.get(userId))).not.toBeNull();
   });
 });

@@ -682,7 +682,7 @@ export default defineSchema({
 
   tasks: defineTable(taskFields).index("by_eventId", ["eventId"]).index("by_sessionId", ["sessionId"]),
 
-  chatMessages: defineTable(chatMessageFields).index("by_eventId", ["eventId"]),
+  chatMessages: defineTable(chatMessageFields).index("by_eventId", ["eventId"]).index("by_userId", ["userId"]),
 
   activity: defineTable(activityFields).index("by_eventId", ["eventId"]),
 

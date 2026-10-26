@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
-import { internalQuery, mutation, query } from "./_generated/server";
-import { deleteUserRecords } from "./lib/accounts";
+import { internal } from "./_generated/api";
+import { internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
+import { deleteTrailBatch, deleteUserRecords } from "./lib/accounts";
 import { startPurge } from "./maintenance";
 import { userSummary } from "./lib/docs";
 import { clerkIssuer, currentUserId, isClerkIdentity, nameFromEmail } from "./lib/auth";
@@ -46,7 +47,9 @@ export const setName = mutation({
  *
  * An event they own alone is deleted with them. An event that has another owner, or
  * that they were only invited to, stays for the others and they are removed from it.
- * Their saved onboarding draft, its pictures, and every sign-in record go too.
+ * Their saved onboarding draft, its pictures, their planning and assistant chats, their
+ * feedback, their visit logs and every sign-in record go too, and so does their Clerk
+ * user. The do-not-contact list stays, so nobody who asked to be left alone is written to.
  */
 export const deleteAccount = mutation({
   args: { confirm: v.string() },
@@ -72,7 +75,44 @@ export const deleteAccount = mutation({
       else await ctx.db.delete(mine._id);
     }
 
+    const clerkUserId = (await ctx.db.get(userId))?.clerkId;
     await deleteUserRecords(ctx, userId);
+    await ctx.scheduler.runAfter(0, internal.users.purgeTrail, { userId, clerkUserId });
+    if (clerkUserId) await ctx.scheduler.runAfter(0, internal.users.deleteClerkUser, { clerkUserId });
+    return null;
+  },
+});
+
+/** Clears a deleted account's trail a batch at a time, calling itself until nothing is left. */
+export const purgeTrail = internalMutation({
+  args: { userId: v.id("users"), clerkUserId: v.optional(v.string()) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (await deleteTrailBatch(ctx, args.userId, args.clerkUserId)) {
+      await ctx.scheduler.runAfter(0, internal.users.purgeTrail, args);
+    }
+    return null;
+  },
+});
+
+/** Deletes the person at Clerk too, so no sign-in record outlives the account. Skipped without CLERK_SECRET_KEY. */
+export const deleteClerkUser = internalAction({
+  args: { clerkUserId: v.string() },
+  returns: v.null(),
+  handler: async (_ctx, args) => {
+    const key = process.env.CLERK_SECRET_KEY;
+    if (!key) {
+      console.log("CLERK_SECRET_KEY not set; the Clerk user was not deleted", args.clerkUserId);
+      return null;
+    }
+    const res = await fetch(`https://api.clerk.com/v1/users/${encodeURIComponent(args.clerkUserId)}`, {
+      method: "DELETE",
+      headers: { authorization: `Bearer ${key}` },
+    });
+    // Already gone is as good as deleted.
+    if (!res.ok && res.status !== 404) {
+      throw new Error(`Clerk refused to delete the user (${res.status})`);
+    }
     return null;
   },
 });
