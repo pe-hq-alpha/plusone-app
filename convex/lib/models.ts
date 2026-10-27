@@ -1,6 +1,9 @@
 import type { z } from "zod";
+import { internal } from "../_generated/api";
+import type { ActionCtx } from "../_generated/server";
 import { claudeComplete } from "./claude";
 import { MetaError, metaComplete } from "./meta";
+import { callRecord } from "./modelCost";
 import { type Completion, type CompletionRequest, type Effort, type Message, ModelAnswerError, type Part, type Provider, type Tier } from "./modelShared";
 
 export { ModelAnswerError, type Completion, type Effort, type Message, type Part, type Provider, type Tier };
@@ -42,6 +45,10 @@ const HOUSE_STYLE =
   "- When a response format is given, follow it exactly.";
 
 type CallInput = {
+  /** Where the call's cost row is written; the action's own context. */
+  ctx: Pick<ActionCtx, "runMutation">;
+  /** What the call is for, as it appears in Admin's spend view, e.g. "planSearch". */
+  feature: string;
   /** The tier, `MODEL_FAST` or `MODEL_SMART`. */
   model: Tier;
   maxOutputTokens?: number;
@@ -174,15 +181,31 @@ export function parseAnswer<S extends z.ZodType>(text: string, schema: S): z.inf
 
 type Served = Pick<Completion, "provider" | "model" | "usage">;
 
+/**
+ * Run the call and write its cost row. The row is written before the answer is parsed,
+ * since an answer that fails validation was still paid for. A failed write is logged and
+ * never fails the call.
+ */
+async function completeAndRecord(input: CallInput, req: CompletionRequest): Promise<Completion> {
+  const chosen = chosenProvider();
+  const completion = await complete(req, chosen);
+  try {
+    await input.ctx.runMutation(internal.modelCalls.record, callRecord(input.feature, chosen, completion));
+  } catch (error) {
+    console.warn(`Could not record the ${input.feature} model call: ${error instanceof Error ? error.message : String(error)}`);
+  }
+  return completion;
+}
+
 /** A structured answer, validated against `schema`. */
 export async function generateObject<S extends z.ZodType>(
   input: CallInput & { schema: S },
 ): Promise<{ object: z.infer<S> } & Served> {
-  const { text, ...served } = await complete(toRequest(input, input.schema));
+  const { text, ...served } = await completeAndRecord(input, toRequest(input, input.schema));
   return { object: parseAnswer(text, input.schema), ...served };
 }
 
 /** A plain-text answer. */
 export async function generateText(input: CallInput): Promise<{ text: string } & Served> {
-  return complete(toRequest(input));
+  return completeAndRecord(input, toRequest(input));
 }

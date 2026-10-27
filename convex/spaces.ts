@@ -917,6 +917,10 @@ export const suggestPalette = action({
     if (images.length === 0) throw new ConvexError("Those pictures couldn't be read. Try adding a few of your own.");
 
     const { object } = await generateObject({
+
+      ctx,
+
+      feature: "suggestPalette",
       model: MODEL_FAST,
       schema: z.object({
         palettes: z

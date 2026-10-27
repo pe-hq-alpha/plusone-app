@@ -153,6 +153,21 @@ export const sessionFields = {
   zone: v.optional(boardRect),
 };
 
+/** One model call, written after every call through `convex/lib/models.ts`. Counts and cost only, never the prompt or the answer. */
+export const modelCallFields = {
+  /** What the call was for, e.g. "planSearch" or "readRsvp". */
+  feature: v.string(),
+  provider: v.union(v.literal("meta"), v.literal("claude")),
+  model: v.string(),
+  inputTokens: v.number(),
+  /** Includes reasoning tokens, which are billed as output. */
+  outputTokens: v.number(),
+  /** At list price; absent for a model with no known price. */
+  costUsd: v.optional(v.number()),
+  /** Meta was chosen but could not answer, so Claude did. */
+  fellBack: v.boolean(),
+};
+
 export const vendorSlotFields = {
   eventId: v.id("events"),
   sessionIds: v.array(v.id("sessions")),
@@ -702,6 +717,9 @@ export default defineSchema({
   contractChecks: defineTable(contractCheckFields).index("by_eventId", ["eventId"]),
 
   /** One page load on the site, recorded by the Cloudflare middleware; kept 180 days (see visits.ts). */
+  /** Model spend for PlusOne Admin and the field notes. */
+  modelCalls: defineTable(modelCallFields).index("by_provider", ["provider"]),
+
   visits: defineTable({
     at: v.number(),
     ip: v.string(),

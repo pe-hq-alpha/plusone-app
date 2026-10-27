@@ -91,6 +91,8 @@ export const read = internalAction({
         "Skip headers, totals, blank rows and anything that is not a guest. A row like \"Mr & Mrs Bennett (2)\" or " +
         "\"Olivia Carter + guest\" is one row with a party size of 2. Keep the order of the list.";
       const { object } = await generateObject({
+        ctx,
+        feature: "guestImport",
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: guestSchema,

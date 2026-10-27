@@ -108,6 +108,8 @@ export const summariseStyle = internalAction({
     ].filter(Boolean);
     if (!sources.length) return null;
     const { text } = await generateText({
+      ctx,
+      feature: "summariseStyle",
       model: MODEL_FAST,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       messages: [
@@ -181,6 +183,8 @@ export const planSearch = internalAction({
     let planned: { queries: string[]; category: string; budgetHint: string } | null = null;
     try {
       const { object } = await generateObject({
+        ctx,
+        feature: "planSearch",
         model: MODEL_FAST,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: z.object({
@@ -295,6 +299,8 @@ export const buildCards = internalAction({
     const cards: VendorCard[] = [];
     for (const page of args.pages.slice(0, 5)) {
       const { object } = await generateObject({
+        ctx,
+        feature: "buildCards",
         model: MODEL_FAST,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: cardSchema,
@@ -413,6 +419,8 @@ export const rankVendors = internalAction({
     });
 
     const { object } = await generateObject({
+      ctx,
+      feature: "rankVendors",
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: rankingSchema,
@@ -485,6 +493,8 @@ export const draftInquiries = internalAction({
         slotId: slot._id,
       });
       const { object } = await generateObject({
+        ctx,
+        feature: "draftInquiries",
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: z.object({ subject: z.string().max(70), bodyText: z.string() }),
@@ -528,6 +538,8 @@ export const draftFollowUp = internalAction({
     if (!context) throw new Error("Thread not found");
     const { thread, vendor, slot, event, lastOutbound } = context;
     const { object } = await generateObject({
+      ctx,
+      feature: "draftFollowUp",
       model: MODEL_FAST,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: z.object({ subject: z.string().max(70), bodyText: z.string() }),
@@ -618,6 +630,8 @@ export const decideVendorReply = internalAction({
     const { event, sessions } = context;
     const dietary = await ctx.runQuery(internal.guests.dietarySummary, { eventId: args.eventId });
     const { object } = await generateObject({
+      ctx,
+      feature: "decideVendorReply",
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: vendorDecisionSchema,
@@ -655,6 +669,8 @@ export const writeVendorReply = internalAction({
     const { event, sessions } = context;
     const dietary = await ctx.runQuery(internal.guests.dietarySummary, { eventId: args.eventId });
     const { object } = await generateObject({
+      ctx,
+      feature: "writeVendorReply",
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: z.object({ bodyText: z.string() }),
@@ -708,6 +724,8 @@ export const writeAgentEmail = internalAction({
         ? PURPOSES.negotiate(budget, formatMoney(args.quoteTotal ?? 0, event.currency))
         : PURPOSES[args.purpose]();
     const { object } = await generateObject({
+      ctx,
+      feature: "writeAgentEmail",
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: z.object({ bodyText: z.string() }),
@@ -774,7 +792,7 @@ const replySchema = z.object({
 type ReplyReading = z.infer<typeof replySchema>;
 
 /** Read a vendor reply, and its PDF when there is one: quotes often live in the attachment, not the email. */
-async function readVendorReply(args: {
+async function readVendorReply(ctx: ActionCtx, args: {
   event: Doc<"events">;
   slot: Doc<"vendorSlots"> | null;
   vendorName: string;
@@ -796,6 +814,8 @@ async function readVendorReply(args: {
       : "") +
     `\nFrom: ${args.vendorName}\nSubject: ${args.subject}\n\n${truncate(args.body, PAGE_CHARS)}`;
   const { object } = await generateObject({
+    ctx,
+    feature: "readVendorReply",
     model: MODEL_SMART,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     schema: replySchema,
@@ -827,7 +847,7 @@ export const readVendorReplySample = internalAction({
     const context = await ctx.runQuery(internal.events.getContext, { eventId: args.eventId });
     if (!context) throw new Error("Event not found.");
     const bytes = args.pdfBase64 ? Uint8Array.from(atob(args.pdfBase64), (c) => c.charCodeAt(0)).buffer : undefined;
-    return await readVendorReply({
+    return await readVendorReply(ctx, {
       event: context.event,
       slot: null,
       vendorName: args.vendorName,
@@ -849,7 +869,7 @@ export const extractReply = internalAction({
     // The first PDF is read with the email; a quote often lives only in the attachment.
     const attached = message.attachments.find((f) => f.contentType.includes("pdf") || f.filename.toLowerCase().endsWith(".pdf"));
     const blob = attached ? await ctx.storage.get(attached.storageId) : null;
-    const object = await readVendorReply({
+    const object = await readVendorReply(ctx, {
       event,
       slot,
       vendorName: vendor?.name ?? message.fromAddress,
@@ -982,6 +1002,7 @@ export type RsvpReading = {
 
 /** Read a guest's emailed reply: their answer, how many are coming, food needs, allergies and any per-session answers. */
 async function readRsvp(
+  ctx: ActionCtx,
   guest: { name: string; partySize: number; attendingCount: number },
   ceremonies: { name: string; date: string }[],
   subject: string,
@@ -997,6 +1018,8 @@ async function readRsvp(
       ? `"the keynote", "day two" or "the dinner"`
       : `"the pooja", "Sunday morning" or "the lunch"`;
   const { object } = await generateObject({
+    ctx,
+    feature: "readRsvp",
     model: MODEL_FAST,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     schema: rsvpSchema,
@@ -1063,8 +1086,8 @@ export const readRsvpReply = internalAction({
     ...rsvpReadingValidator,
     ceremonies: v.array(v.object({ ceremony: v.string(), coming: comingValidator, count: v.number() })),
   }),
-  handler: async (_ctx, args): Promise<RsvpReading> =>
-    await readRsvp({ name: args.guestName, partySize: args.partySize, attendingCount: 0 }, args.ceremonies ?? [], args.subject, args.body),
+  handler: async (ctx, args): Promise<RsvpReading> =>
+    await readRsvp(ctx, { name: args.guestName, partySize: args.partySize, attendingCount: 0 }, args.ceremonies ?? [], args.subject, args.body),
 });
 
 /** Read an emailed RSVP and match its per-session answers to the sessions this guest is invited to. */
@@ -1089,7 +1112,7 @@ export const parseRsvp = internalAction({
     const context = await ctx.runQuery(internal.guests.getContextForRsvp, { guestId: message.guestId });
     if (!context) throw new Error("Guest not found");
     const { guest, sessions } = context;
-    const reading = await readRsvp(guest, sessions, message.subject, message.bodyText, context.event);
+    const reading = await readRsvp(ctx, guest, sessions, message.subject, message.bodyText, context.event);
     return { guestId: guest._id, ...reading, ceremonies: matchCeremonies(sessions, reading.ceremonies) };
   },
 });
@@ -1286,6 +1309,8 @@ export const answerQuestion = internalAction({
       const conversation = board.recent.map((m) => `${m.role === "user" ? "Hosts" : "You"}: ${m.content}`).join("\n");
 
       const { object } = await generateObject({
+        ctx,
+        feature: "answerQuestion",
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: assistantSchema,
@@ -1383,6 +1408,8 @@ export const checkContract = internalAction({
       const bytes = await blob.arrayBuffer();
 
       const { object } = await generateObject({
+        ctx,
+        feature: "checkContract",
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: contractSchema,
@@ -1460,6 +1487,8 @@ export const draftFirstPlan = internalAction({
         .join("\n");
 
       const { object } = await generateObject({
+        ctx,
+        feature: "draftFirstPlan",
         model: MODEL_SMART,
         schema: z.object({
           ceremonies: z.array(

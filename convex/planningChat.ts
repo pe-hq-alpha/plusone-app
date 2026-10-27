@@ -172,6 +172,10 @@ export const send = action({
             : "Everything was confirmed; they may be changing something.";
 
     const { object } = await generateObject({
+
+      ctx,
+
+      feature: "planningChat",
       model: MODEL_FAST,
       schema: reading,
       prompt:
