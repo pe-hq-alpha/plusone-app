@@ -16,7 +16,7 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
     when: "a month from launch",
     includes: [
       "Talk your event through; the plan, the budget and the vendors you need are set out for you",
-      "Vendors found on the open web, with prices from their own pages",
+      `Vendors found on the open web and from the ${BRAND.name} approved vendor list, with fair pricing and comparisons`,
       "Inquiries and follow-ups sent from your event's own inbox",
       "Every quote lined up in one unit: per plate, per piece or per day",
       "Guests and RSVPs, an event page and a gift list",
