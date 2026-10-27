@@ -338,3 +338,22 @@
   .rs__fan img, .rs__plate img, .rs-close::before { animation: none; }
   .rs-photo img, .rs__fan img { transition: none; }
 }
+
+/* Boxes on the home page stand off the page: a firmer edge, a layered shadow pooled in ink
+   (never neutral grey), and a slight lift that grows a little on hover. */
+.lp {
+  --rs-edge: color-mix(in srgb, var(--color-line) 72%, var(--color-ink) 22%);
+  --rs-raise: 0 1px 2px rgb(var(--shadow-rgb) / 0.08), 0 14px 30px -14px rgb(var(--shadow-rgb) / 0.32), 0 34px 70px -34px rgb(var(--shadow-rgb) / 0.48);
+  --rs-raise-hover: 0 2px 4px rgb(var(--shadow-rgb) / 0.10), 0 20px 40px -16px rgb(var(--shadow-rgb) / 0.40), 0 44px 90px -36px rgb(var(--shadow-rgb) / 0.55);
+}
+.rs-card, .rs-compare, .rs-photo {
+  position: relative; z-index: 1;
+  border-color: var(--rs-edge); box-shadow: var(--rs-raise);
+  translate: 0 -2px;
+  transition: translate 300ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.rs-card:hover, .rs-compare:hover, .rs-photo:hover { translate: 0 -5px; box-shadow: var(--rs-raise-hover); }
+.rs__step { border-color: var(--rs-edge); box-shadow: 0 1px 2px rgb(var(--shadow-rgb) / 0.06), 0 10px 22px -14px rgb(var(--shadow-rgb) / 0.34); }
+/* The scroll-in reveal also moves these, so the lift waits until they have arrived. */
+.lp-motion .rs-reveal.rs-card:not(.is-in), .lp-motion .rs-reveal.rs-compare:not(.is-in), .lp-motion .rs-reveal.rs-photo:not(.is-in) { translate: 0 22px; }
+@media (prefers-reduced-motion: reduce) { .rs-card, .rs-compare, .rs-photo { transition: none; } }
