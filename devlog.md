@@ -33,7 +33,7 @@
 | Screenshots of the Meta features | none yet | missing |
 | Demo video | not recorded | missing |
 | Live URL with the Meta features | plusoneevents.site runs Muse Spark in production (27 Oct) | done for Muse Spark |
-| Muse Code used in the build | Everyday plan from 27 Oct; sessions logged in the Muse Code table below | missing: no sessions yet |
+| Muse Code used in the build | Everyday plan from 27 Oct; first session built the SAM 3.1 adapter (`46df7a5`), logged in the Muse Code table below | done: 1 session |
 
 ## Muse Code
 
@@ -41,11 +41,11 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 | Date | What Muse Code built | Files | Model | Prompts | Kept, edited or dropped |
 |---|---|---|---|---|---|
-| — | No sessions yet | | | | |
+| 27 Oct, 20:57–21:01 IST | The SAM 3.1 adapter: request builder for one concept or up to 16 box-and-point objects, the Responses caller with Meta's retry rules, and the mask parser on `@meta-sam/parser` 0.1.0 with a confidence floor; 11 offline tests. Found two gaps in our API notes (the parser reads Responses events, not plain text; boxes carry no size). One prompt, 30 turns, about 4 minutes | `convex/lib/sam.ts`, `convex/lib/sam.test.ts`, `package.json` | muse-spark-1.3 | 1 (41% of the 5-hour quota) | Kept; Claude Code moved the duplicated retry rules into `meta.ts`, checked it bundles in Convex, committed as `46df7a5` |
 
 ## Log
 
-### 2026-10-27 - 608627f..b5d762a
+### 2026-10-27 - 608627f..46df7a5
 - **Morning:** the Terms gained a plain confidentiality rule for what we show privately (conversations, demos, tools), with detailed protections left to a signed agreement; Privacy and Terms moved to a small line in the footer corner; the share image shows the current home page; internal working files left the repository; every green push to `main` now deploys to a staging site with its own backend (`.github/workflows/staging.yml`), while production stays a manual deploy.
 - **Meta's models, live:** every model call now goes through one wrapper (`convex/lib/models.ts`) that sends it to Meta's `muse-spark-1.3` over Chat Completions, with the same Zod schemas turned into JSON Schema for structured output, images as data URLs and PDFs as file blocks. Meta calls retry on 429, 500 and 503 and honour Retry-After; a call Meta can't answer moves to Claude and the switch is logged; Contributor model ids are refused because requests carry personal data. Production switched to Meta the same evening.
 - **Cost record:** every call writes a `modelCalls` row with its feature, provider, model, tokens, list-price cost and whether it fell back (`convex/modelCalls.ts`, prices in `convex/lib/modelCost.ts`).
@@ -55,7 +55,7 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 - **Look:** a new line drawing behind every page (marigold at night, its own ink-blue drawing by day), celebration photos on the home page and sign-in, one logo lockup everywhere, a two-column sign-in, a smaller theme switch whose choice carries between the home page and the app, gentle motion on the home page, and a bolder tab icon.
 - **Privacy:** the privacy page names Meta as the reading and writing service.
 - **Tests:** 394 passed in 42 files; typecheck clean. Every push to `main` deploys to a staging site; production is deployed by hand.
-- **Muse Code:** Everyday plan subscribed; no sessions yet.
+- **Muse Code:** Everyday plan subscribed. First session built the SAM 3.1 adapter (`convex/lib/sam.ts`, `46df7a5`): one prompt, 30 turns, 41% of a 5-hour quota; Claude Code reviewed it, shared the retry rules with `meta.ts` and committed it.
 - **Built with:** Claude Code, claude-opus-5-5.
 
 
