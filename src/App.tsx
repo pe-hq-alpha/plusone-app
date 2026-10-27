@@ -41,6 +41,7 @@ const MembersPage = page(() => import("./pages/MembersPage"), "MembersPage");
 const SettingsPage = page(() => import("./pages/SettingsPage"), "SettingsPage");
 const JoinPage = page(() => import("./pages/JoinPage"), "JoinPage");
 const HowItWorksPage = page(() => import("./pages/HowItWorksPage"), "HowItWorksPage");
+const PricingPage = page(() => import("./pages/PricingPage"), "PricingPage");
 const GuestPage = page(() => import("./pages/GuestPage"), "GuestPage");
 const AccountPage = page(() => import("./pages/AccountPage"), "AccountPage");
 const PrivacyPage = page(() => import("./pages/PrivacyPage"), "PrivacyPage");
@@ -56,6 +57,7 @@ export default function App() {
       <HostGate>
       <Routes>
         <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
         <Route path="/join/:token" element={<JoinPage />} />
         <Route path="/s/:slug" element={<SitePage />} />
         <Route path="/r/:token" element={<RsvpPage />} />
@@ -127,7 +129,7 @@ export default function App() {
 }
 
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|demo|guest|how-it-works|privacy)\/?$|^\/(join|s|r|p)\//;
+const APP_PUBLIC = /^\/(signin|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
 
 /**
  * Keeps each page on its own address. On the home address, anything that goes into

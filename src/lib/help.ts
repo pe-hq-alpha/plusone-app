@@ -190,6 +190,10 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
         answer: "No. The app does the searching, writing and reading, and a team in India is coming for the parts an app can't do: visiting venues, sitting in on tastings, negotiating and keeping vendors to their word. It helps most when you're planning from another city or country.",
       },
       {
+        ask: "What does PlusOne cost?",
+        answer: "Nothing until we launch: Co-pilot, where PlusOne plans with you and does the legwork, is free to use until then, and moves to an introductory monthly price at launch. Assisted, where a PlusOne planner plans it with you and is on call any time, opens after that. Both come with instant help from our support team. For now, PlusOne doesn't handle payments to vendors: you pay them directly. The Pricing page has the prices.",
+      },
+      {
         ask: "How do I get help from the team?",
         answer: "Reply to any email from PlusOne, or use Share feedback at the foot of the page, and tell us about your event. The first families and teams get help as the team starts.",
       },

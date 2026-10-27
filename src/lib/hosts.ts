@@ -7,7 +7,7 @@ const HOME = (import.meta.env.VITE_HOME_ORIGIN as string | undefined)?.replace(/
 const APP = (import.meta.env.VITE_APP_ORIGIN as string | undefined)?.replace(/\/$/, "");
 
 /** The pages the home address serves itself. Anything else belongs to the app. */
-export const HOME_PATHS = new Set(["/", "/how-it-works", "/privacy", "/terms"]);
+export const HOME_PATHS = new Set(["/", "/how-it-works", "/pricing", "/privacy", "/terms"]);
 
 export function onHomeHost(): boolean {
   if (!HOME || !APP) return false;

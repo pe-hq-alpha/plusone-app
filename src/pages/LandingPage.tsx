@@ -54,6 +54,7 @@ export function LandingPage() {
           </Link>
           <nav className="rs__links" aria-label="Main">
             <Link to="/how-it-works" className="rs__link">How it works</Link>
+            <Link to="/pricing" className="rs__link">Pricing</Link>
             <Link to="/signin" className="rs__link rs__link--accent">Sign in</Link>
           </nav>
         </header>
@@ -184,6 +185,8 @@ export function LandingPage() {
           <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneMark /></p>
           <p>
             <Link to="/how-it-works" className="lp-footer__link">How it works</Link>
+            <span aria-hidden="true"> · </span>
+            <Link to="/pricing" className="lp-footer__link">Pricing</Link>
           </p>
           <ThemeSwitch />
           <p className="lp-footer__legal">
