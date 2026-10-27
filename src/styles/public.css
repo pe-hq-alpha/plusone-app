@@ -28,5 +28,5 @@
   text-shadow: 0 0 6px var(--color-paper), 0 0 12px var(--color-paper), 0 0 20px var(--color-paper);
 }
 .pub-nav { position: relative; }
-.pub-nav::before { content: ""; position: absolute; inset: -26px -40px -10px; z-index: -1; pointer-events: none;
+.pub-nav::before { content: ""; position: absolute; inset: -26px 0 -10px; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, color-mix(in srgb, var(--color-paper) 85%, transparent), transparent); }

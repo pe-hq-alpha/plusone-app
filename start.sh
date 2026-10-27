@@ -39,10 +39,18 @@ fi
 
 # Only the names are read, never the values.
 set_on_deployment=$(npx convex env list 2>/dev/null | cut -d= -f1 || true)
-for key in CLERK_JWT_ISSUER_DOMAIN ANTHROPIC_API_KEY FIRECRAWL_API_KEY AGENTMAIL_API_KEY; do
+for key in CLERK_JWT_ISSUER_DOMAIN FIRECRAWL_API_KEY AGENTMAIL_API_KEY; do
   if ! grep -qx "$key" <<<"$set_on_deployment"; then
     echo "warning: $key is not set on the Convex deployment — npx convex env set $key ..." >&2
   fi
 done
+# Model calls run on Meta's Muse Spark when MODEL_PROVIDER=meta and MODEL_API_KEY are set, on Claude otherwise.
+if grep -qx MODEL_API_KEY <<<"$set_on_deployment" && grep -qx MODEL_PROVIDER <<<"$set_on_deployment"; then
+  echo "Model calls: Meta's Muse Spark (Claude as the fallback)." >&2
+elif grep -qx ANTHROPIC_API_KEY <<<"$set_on_deployment"; then
+  echo "Model calls: Claude. For Meta's models: npx convex env set MODEL_PROVIDER meta and MODEL_API_KEY ..." >&2
+else
+  echo "warning: no model key on the deployment — npx convex env set MODEL_PROVIDER meta and MODEL_API_KEY ... (or ANTHROPIC_API_KEY)" >&2
+fi
 
 exec npm run dev

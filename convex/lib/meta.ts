@@ -3,7 +3,7 @@ import { type Completion, type CompletionRequest, type Part, type Tier, filesFir
 
 /**
  * Meta's Model API through Chat Completions, where structured output is
- * `response_format: json_schema` (docs/meta-api-reference.md, Structured output).
+ * `response_format: json_schema` (https://dev.meta.ai/docs, Structured output).
  * Both tiers default to Muse Spark Standard; reasoning can't be turned off, so the
  * effort is the only dial: low for fast, medium for smart.
  */
@@ -18,7 +18,7 @@ export function metaModel(tier: Tier, env: Record<string, string | undefined> = 
   return id;
 }
 
-/** A failed Meta call, with what the caller should do about it (docs/meta-api-reference.md, Errors). */
+/** A failed Meta call, with what the caller should do about it (Meta's error docs, https://dev.meta.ai/docs). */
 export class MetaError extends Error {
   constructor(
     message: string,

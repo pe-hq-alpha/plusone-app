@@ -2,7 +2,7 @@ import { decodeMaskToRLE, formats, recordsOfKind, type RLEObject } from "@meta-s
 import { MALFORMED, MetaError, RETRYABLE, retryAfterMs } from "./meta";
 
 /**
- * SAM 3.1 through the Responses API (docs/meta-api-reference.md, SAM 3.1).
+ * SAM 3.1 through the Responses API (Meta's SAM docs, https://dev.meta.ai/docs/sam).
  * A call segments one image with either a single concept or up to 16
  * prompted objects, and the masks come back as special-token text that
  * @meta-sam/parser reads. Confidence is always requested and filtered here,

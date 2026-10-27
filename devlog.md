@@ -15,10 +15,11 @@
 - **External services:** AgentMail (event inboxes), Firecrawl (vendor search), Resend (app emails), PostHog (usage), Meta Model API (Muse Spark)
 - **AI models (product):** muse-spark-1.3 (Meta Model API, Chat Completions with JSON Schema output) for every reading and writing step, live in production since 27 Oct; claude-haiku-5-5 and claude-sonnet-5-5 as the fallback when Meta can't answer. Coming: Muse Voice Transcribe, SAM 3.1, Muse Wonder, Muse Spark Open.
 - **AI models (build):** Claude Code with claude-opus-5-5; Muse Code (Everyday plan, from 27 Oct), every session logged under Muse Code below
-- **Track:** Startup
+- **Track:** Startup ("open to technical founders building a product"): the rules let a startup build on its existing product, provided what is new during the event is clearly identified, which this log and the cutoff above do
 - **Meta models used:** Muse Spark 1.3 (live); planned: Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Spark Open; Muse Code for building
 - **Credits spent:** under $0.01 of $150 in our own measured runs (27 Oct); every call is recorded in `modelCalls`, to be reconciled with Meta Billing
-- **Started:** 2026-09-15T20:55:44+05:30
+- **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
+- **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
 - **Last updated:** 2026-10-27T20:55:00+05:30
 
 ## Evidence
@@ -70,7 +71,7 @@ Groundwork on trust and privacy, made the afternoon before kickoff; none of it i
 - **Privacy and Terms:** the operator, a Grievance Officer, how AI is used, rights, retention and cookies; the visit log is for security only.
 - **Built with:** Claude Code, claude-opus-5-5.
 
-### 2026-10-25 - 1e6c63b (tag `pre-hackathon`)
+### 2026-10-26, 14:58 IST - 06fa77b (tag `pre-hackathon`)
 The starting point for the hackathon. PlusOne Events is an early-stage startup built in semi-stealth, so this repository begins from one snapshot of the earlier private work; every later commit is hackathon work. What the snapshot holds:
 
 - **Today:** an event opens on the co-pilot's route (done, under way, over to you, up next), read from the plan by `convex/copilot.ts`, with a box to tell it anything; a slim top bar with four lanes (Today, Plan, Vendors, People), each lane's pages as stops on a line, and a dock on phones.

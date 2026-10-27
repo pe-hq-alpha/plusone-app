@@ -175,7 +175,7 @@ npm run dev               # the app on http://localhost:5173, and the backend wa
 
 Or run `./start.sh`, which checks Node, installs what's missing, warns about any backend key not yet set on the deployment, and then starts both.
 
-Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. To deploy:
+Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **To run on Meta's models**, also set `npx convex env set MODEL_PROVIDER meta` and `npx convex env set MODEL_API_KEY …` (a Meta Model API key); without them every call runs on Claude. The minimum to try it: `CLERK_JWT_ISSUER_DOMAIN`, `JWT_PRIVATE_KEY`, `JWKS` and `SITE_URL`, a model key (`MODEL_API_KEY` with `MODEL_PROVIDER=meta`, or `ANTHROPIC_API_KEY`), `FIRECRAWL_API_KEY` for vendor search, and `VITE_CLERK_PUBLISHABLE_KEY` in `.env.local`. To deploy:
 
 ```bash
 npx convex deploy -y                                                    # the backend
@@ -188,7 +188,7 @@ node scripts/agentmail-setup.mjs https://<deployment>.convex.site <pod-id>   # o
 
 The app can also be served by Convex itself: `npm run deploy`.
 
-Every push to `main` that passes typecheck and tests also goes to a staging site with its own backend (`.github/workflows/staging.yml`). Production is deployed by hand.
+Every push to `main` runs typecheck and tests in CI. A staging workflow (`.github/workflows/staging.yml`) deploys each green push to a separate backend and site once its deploy keys are set as repository secrets; production is deployed by hand.
 
 | Variable | For |
 |---|---|
@@ -238,7 +238,7 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 
 ## Repository
 
-**History.** PlusOne Events is an early-stage startup being built in semi-stealth, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (25 October 2026), is the product as it stood before the hackathon; every commit after it was made during the hackathon, from 26 October. The earlier history is kept privately.
+**History.** PlusOne Events is an early-stage startup being built in semi-stealth, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (26 October 2026, 14:58 IST), is the product as it stood before the hackathon. Kickoff was 26 October at 9:30 PM IST: eleven commits made that afternoon, before kickoff, are privacy and trust groundwork, and every commit from 27 October (`608627f`) on was made during the hackathon. [`devlog.md`](devlog.md) sets out each day's work. The earlier history is kept privately.
 
 
 | Path | What it is |
