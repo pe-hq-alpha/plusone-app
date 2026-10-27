@@ -16,7 +16,7 @@
 - **AI models (product):** claude-sonnet-5-5 for plans, vendor emails, quote reading, imports and the assistant; claude-haiku-5-5 for the planning conversation, link and palette reading and other quick reads. Moving the visible steps to Meta's models during the hackathon.
 - **AI models (build):** Claude Code with claude-opus-5-5 (earlier sessions not recorded)
 - **Track:** Startup
-- **Meta models used:** none yet (planned: Muse Spark, SAM 3.1, Muse Image, an open-weights model; see `docs/ideas.md`)
+- **Meta models used:** none yet (planned: Muse Spark, Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Spark Open)
 - **Credits spent:** $0 of $150
 - **Started:** 2026-09-15T20:55:44+05:30
 - **Last updated:** 2026-10-25T13:46:00+05:30
@@ -29,7 +29,7 @@
 | SAM 3.1 turns inspiration photos into decorator briefs | none yet | missing |
 | Decor shown on the real venue | none yet | missing |
 | Open-weights model for cheap calls | none yet | missing |
-| Credits spent per run | `docs/field-notes.md` has no rows yet | missing |
+| Credits spent per run | No paid runs yet | missing |
 | Screenshots of the Meta features | none yet | missing |
 | Demo video | not recorded | missing |
 | Live URL with the Meta features | plusoneevents.site runs the pre-hackathon build | missing |

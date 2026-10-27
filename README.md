@@ -208,7 +208,6 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 | `src/components/` | Shared pieces: the four-lane layout (`EventLayout.tsx`), the guided tour, the wordmark in `src/components/brand/` |
 | `convex/` | The backend: `schema.ts` and one file per area, with tests beside them |
 | `convex/lib/` | Pure rules shared with the app: quote comparison, the planning conversation's rules, event types and their words, templates, inbox names, search terms |
-| `DESIGN.md`, `PRODUCT.md` | The design system (colours, type, components) and the product brief |
 | `scripts/` | `agentmail-setup.mjs` registers a deployment's inbox webhook; `fake-webhook.mjs` sends a signed test email to it |
 | `functions/` | Cloudflare Pages Functions: `geo.ts` for a visit's country and state, `ingest/` for analytics |
 | `public/` | Icons, the install manifest, the share image and the mail logo |
