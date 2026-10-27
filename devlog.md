@@ -37,7 +37,7 @@
 
 ## Muse Code
 
-Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2026 (Muse Spark, Muse Wonder and Muse Image; 10 to 50 prompts every 5 hours; voice mode; web search), run in Standard mode with Contributor off, so our code and prompts are not used for training. One founder uses it. It builds bounded pieces, each reviewed and tested before it is committed; Claude Code does the rest. Every session gets a row here.
+Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2026 (Muse Spark, Muse Wonder and Muse Image; 10 to 50 prompts every 5 hours; voice mode; web search), with Contributor mode on from 27 Oct for more turns (its session content may be used by Meta to improve its products); briefs keep it away from secrets and private notes. One founder uses it. It builds bounded pieces, each reviewed and tested before it is committed; Claude Code does the rest. Every session gets a row here.
 
 | Date | What Muse Code built | Files | Model | Prompts | Kept, edited or dropped |
 |---|---|---|---|---|---|
