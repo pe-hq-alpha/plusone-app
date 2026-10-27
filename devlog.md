@@ -45,7 +45,8 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-10-27 - 2e4efb9..ab6c255 (43 commits since `pre-hackathon`)
+### 2026-10-27 - 608627f..b5d762a
+- **Morning:** the Terms gained a plain confidentiality rule for what we show privately (conversations, demos, tools), with detailed protections left to a signed agreement; Privacy and Terms moved to a small line in the footer corner; the share image shows the current home page; internal working files left the repository; every green push to `main` now deploys to a staging site with its own backend (`.github/workflows/staging.yml`), while production stays a manual deploy.
 - **Meta's models, live:** every model call now goes through one wrapper (`convex/lib/models.ts`) that sends it to Meta's `muse-spark-1.3` over Chat Completions, with the same Zod schemas turned into JSON Schema for structured output, images as data URLs and PDFs as file blocks. Meta calls retry on 429, 500 and 503 and honour Retry-After; a call Meta can't answer moves to Claude and the switch is logged; Contributor model ids are refused because requests carry personal data. Production switched to Meta the same evening.
 - **Cost record:** every call writes a `modelCalls` row with its feature, provider, model, tokens, list-price cost and whether it fell back (`convex/modelCalls.ts`, prices in `convex/lib/modelCost.ts`).
 - **Measured:** a production RSVP read on `muse-spark-1.3` was correct first time (2 coming, peanut allergy caught), 1,214 tokens in and 880 out, $0.0053. Reasoning can't be turned off and counts as output: at a 400-token limit a one-line answer came back empty, so every call allows 16,000.
@@ -57,6 +58,16 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 - **Muse Code:** Everyday plan subscribed; no sessions yet.
 - **Built with:** Claude Code, claude-opus-5-5.
 
+
+### 2026-10-26 - ab4d141..d4e1712 (before kickoff, which was 26 Oct at 9:30 PM IST)
+Groundwork on trust and privacy, made the afternoon before kickoff; none of it is a demo feature.
+- **Emails say they are drafted by an assistant** and never claim to be a person; new events start in review mode, so the people planning read every email, follow-ups included, before it goes.
+- **Sign-in asks for agreement** with a ticked box and records it against the account.
+- **Analytics only with consent:** a consent bar, no session recordings, and visitors' IP addresses no longer passed to PostHog (`src/components/ConsentBar.tsx`, `functions/ingest/`).
+- **Polite vendor search:** robots.txt respected, listing and review sites never read, no reviewer quotes kept (`convex/lib/scrapePolicy.ts`, with tests); rankings and top picks labelled as PlusOne's estimate.
+- **Deletion:** deleting an account also clears its chats, visit logs and the Clerk sign-in record.
+- **Privacy and Terms:** the operator, a Grievance Officer, how AI is used, rights, retention and cookies; the visit log is for security only.
+- **Built with:** Claude Code, claude-opus-5-5.
 
 ### 2026-10-25 - 1e6c63b (tag `pre-hackathon`)
 The starting point for the hackathon. PlusOne Events is an early-stage startup built in semi-stealth, so this repository begins from one snapshot of the earlier private work; every later commit is hackathon work. What the snapshot holds:
