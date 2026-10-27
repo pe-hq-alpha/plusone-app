@@ -31,8 +31,8 @@ const HOW = [
 ];
 
 const KINDS = [
-  { group: "Family functions", items: ["Housewarming and griha pravesam", "Naming ceremony", "Birthdays and sixtieths", "Pooja at home", "Baby shower and valaikappu", "Anniversaries"] },
-  { group: "Work and community", items: ["Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
+  { group: "Family and friends", items: ["Weddings and engagements", "Birthdays and milestone birthdays", "Anniversaries", "Housewarmings", "Baby showers and naming ceremonies", "Religious and cultural celebrations"] },
+  { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
 ];
 
 export function LandingPage() {
@@ -134,7 +134,7 @@ export function LandingPage() {
         <div className="rs-wrap rs-split">
           <div>
             <h2 id="events-title" className="rs-h2">For the events <em>people actually hold</em></h2>
-            <p className="rs-lede">Family functions at home and big days at work. Talk it through with {BRAND.name} and it sets out the sessions, the vendors each one needs, and a budget.</p>
+            <p className="rs-lede">Celebrations with family and friends, and big days at work. Talk it through with {BRAND.name} and it sets out the sessions, the vendors each one needs, and a budget.</p>
           </div>
           <div className="rs-kinds">
             {KINDS.map((k) => (

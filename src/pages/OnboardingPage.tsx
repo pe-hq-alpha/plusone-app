@@ -555,7 +555,7 @@ export function OnboardingPage() {
               <p className="-mt-1 text-xs text-quiet">It sets the parts of the day and the vendors {BRAND.name} starts you with.</p>
               {(["family", "work", "other"] as const).map((g) => (
                 <div key={g} className="mt-3">
-                  <p className="text-xs text-quiet">{g === "family" ? "Family functions" : g === "work" ? "Work and community" : "Something else"}</p>
+                  <p className="text-xs text-quiet">{g === "family" ? "Family and friends" : g === "work" ? "Work and community" : "Something else"}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {EVENT_TYPES.filter((t) => t.group === g).map((t) => (
                       <button
