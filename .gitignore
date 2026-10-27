@@ -34,7 +34,7 @@ data/*
 # Wrangler's local cache and temp files
 .wrangler/
 
-# Reports, recordings, data and side projects for this app: kept here, never committed
+# Reports, recordings, data for this app: kept here, never committed
 private/
 
 # Local worktrees for parallel work
