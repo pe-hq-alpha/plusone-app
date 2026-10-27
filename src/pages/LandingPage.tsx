@@ -184,12 +184,13 @@ export function LandingPage() {
           <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneMark /></p>
           <p>
             <Link to="/how-it-works" className="lp-footer__link">How it works</Link>
-            <span aria-hidden="true"> · </span>
+          </p>
+          <ThemeSwitch />
+          <p className="lp-footer__legal">
             <Link to="/privacy" className="lp-footer__link">Privacy</Link>
             <span aria-hidden="true"> · </span>
             <Link to="/terms" className="lp-footer__link">Terms</Link>
           </p>
-          <ThemeSwitch />
         </div>
       </footer>
     </div>

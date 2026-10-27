@@ -50,3 +50,4 @@
 
 .lp-footer__link { color: inherit; text-underline-offset: 3px; }
 .lp-footer__link:hover { color: var(--accent); }
+.lp-footer__legal { flex-basis: 100%; margin: 0; font-size: 0.72rem; opacity: 0.6; text-align: right; }
