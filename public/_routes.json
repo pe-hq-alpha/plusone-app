@@ -4,6 +4,7 @@
   "exclude": [
     "/assets/*",
     "/plates/*",
+    "/photos/*",
     "/favicon.ico",
     "/favicon-32.png",
     "/favicon-48.png",

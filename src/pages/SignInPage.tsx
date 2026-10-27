@@ -4,7 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { PlusOneMark } from "../components/brand/Wordmarks";
 import { useAuthActions } from "../lib/session";
 import { BRAND } from "../lib/brand";
-import { ThemeFooter } from "../components/ui/ThemeFooter";
+import { PublicNav } from "../components/public/PublicNav";
 import { pendingAgreement, rememberAgreement, TERMS_VERSION } from "../lib/terms";
 import { Backdrop } from "../components/ui/Backdrop";
 
@@ -28,19 +28,37 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
   };
 
   return (
-    <main id="main" className="relative isolate grid min-h-screen place-items-center px-4 py-10">
-      <Backdrop />
-      <div className="w-full max-w-md">
-        <p className="display text-4xl tracking-tight">
-          <PlusOneMark />
-        </p>
-        <h1 className="mt-4 text-2xl">Your plus one for the perfect event.</h1>
-        <p className="mt-2 text-sm text-muted">
+    <main id="main" className="grid min-h-screen lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      {/* A celebration on the left on wide screens; the form on the right, so it all fits without scrolling. */}
+      <aside className="photo-panel relative hidden overflow-hidden lg:block">
+        <img src="/photos/diwali.jpg" alt="A family lighting diyas together on a terrace at Diwali" className="absolute inset-0 size-full object-cover" />
+        <div className="photo-scrim absolute inset-0" aria-hidden="true" />
+        <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
+          <Link to="/" className="display text-4xl tracking-tight" aria-label={`${BRAND.name} home`}>
+            <PlusOneMark />
+          </Link>
+          <div className="max-w-lg">
+            <p className="display text-[2.6rem] leading-tight">Your plus one for every event.</p>
+            <p className="mt-3 text-base opacity-90">
+              {BRAND.name} finds vendors, writes to them from your event&rsquo;s own inbox and reads their quotes into your
+              budget, so the legwork is done and the choices stay yours.
+            </p>
+          </div>
+        </div>
+      </aside>
+      <div className="relative isolate flex min-h-screen flex-col">
+        <Backdrop contained />
+        <PublicNav signIn={false} brand={false} />
+        <div className="grid flex-1 place-items-center px-4 py-8">
+        <div className="w-full max-w-md">
+        <p className="pub-eyebrow">{newHere ? "Create your account" : "Sign in"}</p>
+        <h1 className="pub-title !text-[2.4rem]">{newHere ? <>Let&rsquo;s plan <em>your event</em></> : <>Welcome <em>back</em></>}</h1>
+        <p className="mt-2 text-sm text-muted lg:hidden">
           {BRAND.name} finds vendors, writes to them from your event&rsquo;s own inbox and reads their quotes into your budget,
-          so the legwork is done and the choices stay yours. <Link to="/how-it-works" className="underline">How it works</Link>
+          so the legwork is done and the choices stay yours.
         </p>
         {error && <p role="alert" className="mt-4 rounded-[12px] bg-bad-bg px-4 py-3 text-sm text-bad">{error}</p>}
-        <label className="mt-6 flex items-start gap-3 rounded-[12px] border border-line bg-cream px-4 py-3 text-sm leading-relaxed">
+        <label className="mt-5 flex items-start gap-3 rounded-[12px] border border-line bg-cream px-4 py-3 text-sm leading-relaxed">
           <input
             type="checkbox"
             required
@@ -57,7 +75,7 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
         </label>
         {!agreed && <p className="mt-2 text-xs text-muted">Tick the box to sign in or create an account.</p>}
         <div
-          className={`mt-6 flex justify-center transition-opacity ${agreed ? "" : "pointer-events-none opacity-50"}`}
+          className={`mt-4 flex justify-center transition-opacity ${agreed ? "" : "pointer-events-none opacity-50"}`}
           inert={!agreed}
           aria-disabled={!agreed}
         >
@@ -74,7 +92,8 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
           </Link>{" "}
           first. No sign-up.
         </p>
-        <ThemeFooter className="mt-8" />
+        </div>
+        </div>
       </div>
     </main>
   );

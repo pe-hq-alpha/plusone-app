@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { GRIEVANCE_OFFICER, LEGAL_EFFECTIVE, PRIVACY_UPDATED } from "../lib/legal";
 import { setConsent, useConsent } from "../lib/analytics/consent";
 import { ANALYTICS_ENABLED } from "../lib/analytics/client";
-import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { Backdrop } from "../components/ui/Backdrop";
+import { PublicNav } from "../components/public/PublicNav";
 
 function Mail({ to }: { to: string }) {
   return (
@@ -33,11 +32,10 @@ export function PrivacyPage() {
   const consent = useConsent();
   const hello = `hello@${BRAND.domain}`;
   return (
-    <main id="main" className="isolate mx-auto w-full max-w-[44rem] px-5 py-12 md:px-8">
+    <div className="relative isolate min-h-screen">
       <Backdrop />
-      <Link to="/" className="display text-2xl tracking-tight text-accent" aria-label={`${BRAND.name} home`}>
-        <PlusOneMark />
-      </Link>
+      <PublicNav />
+    <main id="main" className="mx-auto w-full max-w-[44rem] px-5 pb-12 pt-10 md:px-8">
       <h1 className="mt-6 text-[2.2rem] leading-tight">Privacy</h1>
       <p className="mt-2 text-sm text-muted">Effective {LEGAL_EFFECTIVE}. Last updated {PRIVACY_UPDATED}.</p>
 
@@ -204,7 +202,7 @@ export function PrivacyPage() {
       </div>
 
       <Link to="/" className="btn-quiet btn-sm mt-10">Back to {BRAND.name}</Link>
-      <ThemeFooter className="mt-12" />
     </main>
+    </div>
   );
 }

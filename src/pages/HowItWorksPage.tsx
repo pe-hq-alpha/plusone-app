@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { useRegion } from "../lib/region";
 import { examplesFor } from "../lib/regionExamples";
-import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { Backdrop } from "../components/ui/Backdrop";
+import { PublicHero, PublicNav } from "../components/public/PublicNav";
 
 const steps = (search: string) => [
   { t: "Talk it through", d: `Say what you're planning in your own words. ${BRAND.name} asks for whatever it still needs, reads it all back for you to confirm, and points out anything that can't be right. Then it sets out each day or session, splits the budget and lists the vendors you'll need.` },
@@ -16,25 +15,31 @@ const steps = (search: string) => [
 export function HowItWorksPage() {
   const { search } = examplesFor(useRegion());
   return (
-    <main id="main" className="isolate mx-auto max-w-3xl px-4 py-10">
+    <div className="relative isolate min-h-screen">
       <Backdrop />
-      <Link to="/" className="display text-2xl tracking-tight" aria-label={`${BRAND.name} home`}>
-        <PlusOneMark />
-      </Link>
-      <h1 className="mt-6 text-3xl">How {BRAND.name} works</h1>
-      <ol className="mt-6 space-y-4">
-        {steps(search).map((s, i) => (
-          <li key={s.t} className="card flex gap-4 p-5">
-            <span className="display text-3xl text-accent">{i + 1}</span>
-            <div>
-              <h2 className="text-lg">{s.t}</h2>
-              <p className="mt-1 text-sm text-muted">{s.d}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <Link to="/" className="btn-primary mt-6">Start planning</Link>
-      <ThemeFooter className="mt-12" />
-    </main>
+      <PublicNav />
+      <main id="main" className="mx-auto max-w-5xl px-4 pb-16">
+        <PublicHero
+          eyebrow="How it works"
+          title={<>From the first conversation <em>to the day itself</em></>}
+          lede={`You make the decisions. ${BRAND.name} does the searching, writing, reading and chasing in between, and tells you where things stand.`}
+        />
+        <ol className="grid gap-4 md:grid-cols-2">
+          {steps(search).map((s, i) => (
+            <li key={s.t} className="card flex gap-4 p-6">
+              <span className="display text-4xl leading-none text-accent">{i + 1}</span>
+              <div>
+                <h2 className="text-lg">{s.t}</h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted">{s.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Link to="/signin?new=1" className="btn-primary">Plan an event</Link>
+          <Link to="/demo" className="btn-ghost">See the demo</Link>
+        </div>
+      </main>
+    </div>
   );
 }

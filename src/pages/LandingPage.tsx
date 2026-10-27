@@ -30,6 +30,14 @@ const HOW = [
   { title: "You choose", text: "Book the ones you like; the co-pilot keeps the rest of the plan moving." },
 ];
 
+/** Celebrations, Western and Indian, under the events list. Generated images, not customers' events. */
+const PHOTOS = [
+  { src: "/photos/birthday.jpg", label: "A garden birthday", alt: "A family birthday dinner at dusk under string lights, a cake with candles carried to the table" },
+  { src: "/photos/haldi.jpg", label: "A haldi morning", alt: "A bride in yellow laughing as her family apply turmeric at a haldi, marigolds all around" },
+  { src: "/photos/wedding.jpg", label: "A wedding reception", alt: "A couple's first dance on a lawn under festoon lights, guests clapping" },
+  { src: "/photos/office.jpg", label: "An office year-end", alt: "Colleagues at a rooftop celebration at dusk, a buffet and festoon lights" },
+];
+
 const KINDS = [
   { group: "Family and friends", items: ["Birthdays and milestone birthdays", "Weddings and engagements", "Anniversaries", "Housewarmings", "Baby showers and naming ceremonies", "Religious and cultural celebrations"] },
   { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
@@ -145,6 +153,16 @@ export function LandingPage() {
             ))}
           </div>
         </div>
+        <div className="rs-wrap">
+          <div className="rs-photos">
+            {PHOTOS.map((p) => (
+              <figure key={p.src} className="rs-photo">
+                <img src={p.src} alt={p.alt} loading="lazy" decoding="async" width={800} height={1000} />
+                <figcaption>{p.label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section className="rs-sec rs-sec--wash rs-sec--plate-right" aria-labelledby="compare-title">
@@ -188,7 +206,7 @@ export function LandingPage() {
             <span aria-hidden="true"> · </span>
             <Link to="/pricing" className="lp-footer__link">Pricing</Link>
           </p>
-          <ThemeSwitch />
+          <ThemeSwitch compact />
           <p className="lp-footer__legal">
             <Link to="/privacy" className="lp-footer__link">Privacy</Link>
             <span aria-hidden="true"> · </span>

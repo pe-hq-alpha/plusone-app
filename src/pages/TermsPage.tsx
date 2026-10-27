@@ -1,18 +1,16 @@
 import { Link } from "react-router-dom";
-import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
-import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { GRIEVANCE_OFFICER } from "../lib/legal";
 import { Backdrop } from "../components/ui/Backdrop";
+import { PublicNav } from "../components/public/PublicNav";
 
 /** The terms anyone agrees to by using PlusOne. Public, like the privacy page. */
 export function TermsPage() {
   return (
-    <main id="main" className="isolate mx-auto w-full max-w-[44rem] px-5 py-12 md:px-8">
+    <div className="relative isolate min-h-screen">
       <Backdrop />
-      <Link to="/" className="display text-2xl tracking-tight text-accent" aria-label={`${BRAND.name} home`}>
-        <PlusOneMark />
-      </Link>
+      <PublicNav />
+    <main id="main" className="mx-auto w-full max-w-[44rem] px-5 pb-12 pt-10 md:px-8">
       <h1 className="mt-6 text-[2.2rem] leading-tight">Terms of Use</h1>
       <p className="mt-2 text-sm text-muted">Effective 26 October 2026. Last updated 27 October 2026.</p>
 
@@ -132,7 +130,7 @@ export function TermsPage() {
       </div>
 
       <Link to="/" className="btn-quiet btn-sm mt-10">Back to {BRAND.name}</Link>
-      <ThemeFooter className="mt-12" />
     </main>
+    </div>
   );
 }

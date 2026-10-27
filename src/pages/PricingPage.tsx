@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
-import { PlusOneMark } from "../components/brand/Wordmarks";
-import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { BRAND } from "../lib/brand";
 import { money } from "../lib/format";
 import { monthlyPrice, type PlanId } from "../lib/pricing";
 import { useRegion } from "../lib/region";
 import { Backdrop } from "../components/ui/Backdrop";
+import { PublicHero, PublicNav } from "../components/public/PublicNav";
 
 const PLANS: { id: PlanId; name: string; line: string; status: string; when: string; includes: string[] }[] = [
   {
@@ -47,15 +46,17 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
 export function PricingPage() {
   const region = useRegion();
   return (
-    <main id="main" className="isolate mx-auto max-w-4xl px-4 py-10">
+    <div className="relative isolate min-h-screen">
       <Backdrop />
-      <Link to="/" className="display text-2xl tracking-tight" aria-label={`${BRAND.name} home`}>
-        <PlusOneMark />
-      </Link>
-      <h1 className="mt-6 text-3xl">Pricing</h1>
-      <p className="mt-2 max-w-2xl text-muted">Two ways to plan: an all-in-one planner app, fully powered by AI, or someone from the {BRAND.name} team planning it with you.</p>
+      <PublicNav />
+    <main id="main" className="mx-auto max-w-4xl px-4 pb-16">
+      <PublicHero
+        eyebrow="Pricing"
+        title={<>Two ways <em>to plan</em></>}
+        lede={`An all-in-one planner app, fully powered by AI, or someone from the ${BRAND.name} team planning it with you.`}
+      />
 
-      <section className="card mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="free-now">
+      <section className="card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="free-now">
         <div>
           <span className="chip-ok">Free until launch</span>
           <h2 id="free-now" className="mt-2 text-lg">Co-pilot is free to use until we launch.</h2>
@@ -102,7 +103,7 @@ export function PricingPage() {
         <p>For now, {BRAND.name} doesn&rsquo;t handle payments to vendors: you pay your vendors directly.</p>
         <p>Introductory prices at launch, shown in rupees in India and in US dollars elsewhere.</p>
       </div>
-      <ThemeFooter className="mt-12" />
     </main>
+    </div>
   );
 }

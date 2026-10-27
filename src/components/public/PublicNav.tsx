@@ -1,0 +1,39 @@
+import type { ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { BRAND } from "../../lib/brand";
+import { ThemeSwitch } from "../ui/ThemeSwitch";
+import "../../styles/public.css";
+
+/**
+ * The home page's top bar, for the other public pages: the lockup, How it works, Pricing, Sign in and a
+ * small theme switch. `brand={false}` hides the lockup on wide screens, where something beside it shows it.
+ */
+export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; brand?: boolean }) {
+  const { pathname } = useLocation();
+  const here = (path: string) => (pathname === path ? "page" : undefined);
+  return (
+    <header className={`pub-nav${brand ? "" : " pub-nav--no-brand"}`}>
+      <Link to="/" className="pub-brand" aria-label={`${BRAND.name} Events home`}>
+        <span className="pub-brand__mark">Plus<em>One</em></span>
+        <span className="pub-brand__events">Events</span>
+      </Link>
+      <nav className="pub-links" aria-label="Main">
+        <Link to="/how-it-works" className="pub-link pub-link--hide-sm" aria-current={here("/how-it-works")}>How it works</Link>
+        <Link to="/pricing" className="pub-link" aria-current={here("/pricing")}>Pricing</Link>
+        {signIn && <Link to="/signin" className="pub-link pub-link--accent">Sign in</Link>}
+        <ThemeSwitch compact className="ml-2" />
+      </nav>
+    </header>
+  );
+}
+
+/** A centred page heading in the home page's type: a small label, the title with one italic phrase, a line under it. */
+export function PublicHero({ eyebrow, title, lede }: { eyebrow: string; title: ReactNode; lede?: ReactNode }) {
+  return (
+    <div className="pub-hero">
+      <p className="pub-eyebrow">{eyebrow}</p>
+      <h1 className="pub-title">{title}</h1>
+      {lede && <p className="pub-lede">{lede}</p>}
+    </div>
+  );
+}
