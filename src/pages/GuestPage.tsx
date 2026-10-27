@@ -3,7 +3,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { useAuthActions } from "../lib/session";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
-import { PlusOneMark } from "../components/brand/Wordmarks";
+import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 
@@ -62,8 +62,8 @@ export function GuestPage() {
   return (
     <main id="main" className="grid min-h-screen place-items-center px-5 text-center">
       <div>
-        <p className="display text-4xl tracking-tight">
-          <PlusOneMark />
+        <p className="text-4xl">
+          <PlusOneLockup />
         </p>
         {error ? (
           <>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Icon } from "../components/landing/Icon";
 import "../landing.css";
 import "../styles/running-status.css";
-import { PlusOneMark } from "../components/brand/Wordmarks";
+import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { useRegion } from "../lib/region";
 import { examplesFor } from "../lib/regionExamples";
@@ -28,6 +28,13 @@ const HOW = [
   { title: "Vendors found and written to", text: "From the event's own inbox, with follow-ups for anyone who goes quiet." },
   { title: "Replies read for you", text: "Prices pulled out and made comparable, every number linked to its reply." },
   { title: "You choose", text: "Book the ones you like; the co-pilot keeps the rest of the plan moving." },
+];
+
+/** Three celebrations fanned under the hero's actions. Generated images, not customers' events. */
+const FAN = [
+  { src: "/photos/firstbday.jpg", alt: "A toddler reaching for a small cake at a first birthday in the garden, family laughing around" },
+  { src: "/photos/sangeet.jpg", alt: "Family dancing at a sangeet night under marigold garlands and fairy lights" },
+  { src: "/photos/anniversary.jpg", alt: "An older couple laughing at the head of a candlelit anniversary dinner with their family" },
 ];
 
 /** Celebrations, Western and Indian, under the events list. Generated images, not customers' events. */
@@ -82,6 +89,9 @@ export function LandingPage() {
               <Link to="/signin?new=1" className="rs__pill rs__pill--solid">Plan an event</Link>
               <Link to="/demo" className="rs__pill rs__pill--outline">See the demo</Link>
             </div>
+            <div className="rs__fan">
+              {FAN.map((p) => <img key={p.src} src={p.src} alt={p.alt} width={560} height={700} decoding="async" />)}
+            </div>
           </div>
 
           <section className="rs__status" aria-labelledby="status-title">
@@ -105,7 +115,7 @@ export function LandingPage() {
         </main>
       </section>
 
-      <section id="how" className="rs-sec rs-sec--plate-left" aria-labelledby="how-title">
+      <section id="how" className="rs-sec" aria-labelledby="how-title">
         <div className="rs-wrap">
           <h2 id="how-title" className="rs-h2">From the first conversation <em>to the day itself</em></h2>
           <p className="rs-lede">You make the decisions. {BRAND.name} does the searching, writing, reading and chasing in between, and tells you where things stand.</p>
@@ -165,7 +175,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="rs-sec rs-sec--wash rs-sec--plate-right" aria-labelledby="compare-title">
+      <section className="rs-sec rs-sec--wash rs-sec--plate-left" aria-labelledby="compare-title">
         <div className="rs-wrap rs-split rs-split--reverse">
           <div>
             <h2 id="compare-title" className="rs-h2">Every reply in its own shape. <em>One answer.</em></h2>
@@ -200,7 +210,7 @@ export function LandingPage() {
 
       <footer className="foot">
         <div className="wrap foot__inner">
-          <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneMark /></p>
+          <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneLockup /></p>
           <p>
             <Link to="/how-it-works" className="lp-footer__link">How it works</Link>
             <span aria-hidden="true"> · </span>

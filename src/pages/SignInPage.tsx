@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { SignIn, SignUp } from "@clerk/react";
 import { Link, useSearchParams } from "react-router-dom";
-import { PlusOneMark } from "../components/brand/Wordmarks";
+import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { useAuthActions } from "../lib/session";
 import { BRAND } from "../lib/brand";
 import { PublicNav } from "../components/public/PublicNav";
@@ -35,7 +35,7 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
         <div className="photo-scrim absolute inset-0" aria-hidden="true" />
         <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
           <Link to="/" className="display text-4xl tracking-tight" aria-label={`${BRAND.name} home`}>
-            <PlusOneMark />
+            <PlusOneLockup />
           </Link>
           <div className="max-w-lg">
             <p className="display text-[2.6rem] leading-tight">Your plus one for every event.</p>

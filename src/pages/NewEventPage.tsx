@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { toCreateArgs, withDefaults, type Facts } from "../../convex/lib/wizard";
-import { PlusOneMark } from "../components/brand/Wordmarks";
+import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { BRAND } from "../lib/brand";
@@ -95,8 +95,8 @@ export function NewEventPage() {
   return (
     <main id="main" className="pc">
       <header className="pc__top">
-        <Link to="/" className="display text-[1.3rem] text-accent" aria-label={`${BRAND.name} home`}>
-          <PlusOneMark />
+        <Link to="/" className="text-[1.3rem]" aria-label={`${BRAND.name} home`}>
+          <PlusOneLockup />
         </Link>
         <div className="flex items-center gap-4 text-sm">
           {started && (

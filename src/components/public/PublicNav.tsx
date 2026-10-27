@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { BRAND } from "../../lib/brand";
+import { PlusOneLockup } from "../brand/Wordmarks";
 import { ThemeSwitch } from "../ui/ThemeSwitch";
 import "../../styles/public.css";
 
@@ -14,8 +15,7 @@ export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; b
   return (
     <header className={`pub-nav${brand ? "" : " pub-nav--no-brand"}`}>
       <Link to="/" className="pub-brand" aria-label={`${BRAND.name} Events home`}>
-        <span className="pub-brand__mark">Plus<em>One</em></span>
-        <span className="pub-brand__events">Events</span>
+        <PlusOneLockup className="text-[1.9rem]" />
       </Link>
       <nav className="pub-links" aria-label="Main">
         <Link to="/how-it-works" className="pub-link pub-link--hide-sm" aria-current={here("/how-it-works")}>How it works</Link>

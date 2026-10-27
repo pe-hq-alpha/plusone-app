@@ -9,7 +9,7 @@ import type { EventType } from "../../convex/lib/validators";
 import { Icon } from "./ui/Icon";
 import { AccountMenu } from "./AccountMenu";
 import { Walkthrough, shouldOfferWalkthrough } from "./Walkthrough";
-import { PlusOneMark } from "./brand/Wordmarks";
+import { PlusOneLockup } from "./brand/Wordmarks";
 import { PlanReady } from "./PlanReady";
 import { FeedbackBox } from "./FeedbackBox";
 import { AssistantDrawer } from "./assistant/AssistantDrawer";
@@ -153,8 +153,8 @@ export function EventLayout() {
       <Backdrop quiet />
       <header className="shell-bar no-print sticky top-0 z-30">
         <div className="mx-auto flex h-14 max-w-[1240px] items-center gap-3 px-4 md:gap-5 md:px-6">
-          <Link to="/" className="display shrink-0 text-[1.3rem] tracking-tight text-accent" aria-label={`${BRAND.name}: all your events`}>
-            <PlusOneMark />
+          <Link to="/" className="shrink-0 text-[1.3rem]" aria-label={`${BRAND.name}: all your events`}>
+            <PlusOneLockup />
           </Link>
           <span className="hidden h-6 w-px shrink-0 bg-line sm:block" aria-hidden="true" />
           <Link to="" className="min-w-0 flex-1 md:flex-none" title="Today">

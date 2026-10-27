@@ -22,7 +22,7 @@
 .rs__plate img { position: absolute; inset: 0; width: 100%; height: 100%;
   -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); }
 .rs__plate img { object-fit: cover; object-position: center; display: block; opacity: 1; }
-:root:not([data-theme="dark"]) .rs__plate img { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15) brightness(1.04); opacity: 0.8; }
+:root:not([data-theme="dark"]) .rs__plate img { filter: invert(1) hue-rotate(180deg) saturate(1.7) contrast(1.6) brightness(1.12); mix-blend-mode: multiply; opacity: 1; }
 
 .rs__nav { position: absolute; inset: 0 0 auto 0; height: 0; }
 .rs__brand {
@@ -37,10 +37,10 @@
 }
 .rs__links {
   position: absolute; right: 3%; top: calc(57 / 20.48 * 1cqw);
-  display: flex; align-items: center; gap: calc(36 / 20.48 * 1cqw);
+  display: flex; align-items: center; gap: calc(26 / 20.48 * 1cqw);
 }
-.rs__links .rs__link + .rs__link { padding-left: calc(36 / 20.48 * 1cqw); border-left: 1px solid var(--rs-rule); }
-.rs__link { font-size: calc(26 / 20.48 * 1cqw); letter-spacing: -0.01em; color: var(--color-ink); text-decoration: none; }
+.rs__links .rs__link + .rs__link { padding-left: calc(26 / 20.48 * 1cqw); border-left: 1px solid var(--rs-rule); }
+.rs__link { font-size: clamp(0.85rem, calc(20 / 20.48 * 1cqw), 0.95rem); letter-spacing: -0.005em; color: var(--color-ink); text-decoration: none; }
 .rs__link:hover { color: var(--color-accent); }
 .rs__link--accent { color: var(--color-accent); }
 
@@ -130,9 +130,9 @@
   .rs__brand, .rs__links { position: static; }
   .rs__mark { font-size: 1.75rem; }
   .rs__events { font-size: 0.62rem; margin: 2px 0 0 1.55rem; }
-  .rs__links { gap: 18px; }
-  .rs__links .rs__link + .rs__link { padding-left: 18px; }
-  .rs__link { font-size: 0.98rem; }
+  .rs__links { gap: 14px; }
+  .rs__links .rs__link + .rs__link { padding-left: 14px; }
+  .rs__link { font-size: 0.86rem; }
   .rs__body { display: grid; gap: 40px; padding-top: 28px; }
   .rs__body > * { position: static; width: auto; }
   .rs__title { font-size: clamp(2.6rem, 9vw, 4rem); }
@@ -193,7 +193,7 @@
   -webkit-mask-image: radial-gradient(120% 100% at 0% 100%, #000 18%, transparent 58%); mask-image: radial-gradient(120% 100% at 0% 100%, #000 18%, transparent 58%); }
 .rs-sec--plate-right::before { right: 0; background-position: right bottom;
   -webkit-mask-image: radial-gradient(120% 100% at 100% 100%, #000 18%, transparent 58%); mask-image: radial-gradient(120% 100% at 100% 100%, #000 18%, transparent 58%); }
-:root:not([data-theme="dark"]) .rs-sec--plate-left::before, :root:not([data-theme="dark"]) .rs-sec--plate-right::before { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15); opacity: 0.5; }
+:root:not([data-theme="dark"]) .rs-sec--plate-left::before, :root:not([data-theme="dark"]) .rs-sec--plate-right::before { filter: invert(1) hue-rotate(180deg) saturate(1.7) contrast(1.6) brightness(1.12); mix-blend-mode: multiply; opacity: 0.85; }
 
 /* Two ways to plan. */
 .rs-ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 36px; }
@@ -230,7 +230,7 @@
 /* The close: the hero's promise once more, with its one action. */
 .rs-close { position: relative; padding-block: clamp(88px, 10vw, 148px); background: var(--color-paper); border-top: 1px solid var(--color-line); overflow: hidden; }
 .rs-close::before { content: ""; position: absolute; inset: auto 0 0 0; height: 70%; background: url("/plates/backdrop-1920.jpg") center bottom / cover no-repeat; opacity: 0.6; pointer-events: none; -webkit-mask-image: linear-gradient(transparent, #000 60%); mask-image: linear-gradient(transparent, #000 60%); }
-:root:not([data-theme="dark"]) .rs-close::before { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15); opacity: 0.5; }
+:root:not([data-theme="dark"]) .rs-close::before { filter: invert(1) hue-rotate(180deg) saturate(1.7) contrast(1.6) brightness(1.12); mix-blend-mode: multiply; opacity: 0.85; }
 .rs-close__inner { position: relative; display: grid; justify-items: center; text-align: center; }
 .rs-close__inner .rs-lede { margin-inline: auto; }
 .rs-close__cta { margin-top: 32px; height: 52px; min-width: 0; padding: 0 30px; font-size: 1.05rem; }
@@ -284,3 +284,16 @@
 .rs-photo figcaption { position: absolute; left: 12px; bottom: 12px; padding: 5px 12px; border-radius: 999px; font-size: 0.8rem;
   background: color-mix(in srgb, var(--color-paper) 86%, transparent); color: var(--color-ink); }
 @media (max-width: 860px) { .rs-photos { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+
+/* Three celebrations fanned under the hero's actions: a first birthday, a sangeet, an anniversary. */
+.rs__fan { position: relative; height: calc(250 / 20.48 * 1cqw); margin-top: calc(52 / 20.48 * 1cqw); }
+.rs__fan img { position: absolute; top: 0; width: calc(180 / 20.48 * 1cqw); aspect-ratio: 4 / 5; object-fit: cover;
+  border-radius: calc(16 / 20.48 * 1cqw); border: 3px solid var(--color-paper); box-shadow: var(--shadow-card); }
+.rs__fan img:nth-child(1) { left: 0; transform: rotate(-6deg); top: calc(12 / 20.48 * 1cqw); }
+.rs__fan img:nth-child(2) { left: calc(150 / 20.48 * 1cqw); transform: rotate(2deg); z-index: 1; }
+.rs__fan img:nth-child(3) { left: calc(300 / 20.48 * 1cqw); transform: rotate(7deg); top: calc(16 / 20.48 * 1cqw); }
+@media (max-width: 1100px) {
+  .rs__fan { display: flex; gap: 10px; height: auto; margin-top: 28px; }
+  .rs__fan img { position: static; width: calc((100% - 20px) / 3); max-width: 170px; border-radius: 14px; }
+  .rs__fan img:nth-child(n) { transform: none; }
+}

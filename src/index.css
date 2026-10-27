@@ -241,13 +241,14 @@ a { text-underline-offset: 0.2em; }
   -webkit-mask-image: radial-gradient(72% 70% at 50% 42%, transparent 48%, #000 96%);
   mask-image: radial-gradient(72% 70% at 50% 42%, transparent 48%, #000 96%);
 }
-:root:not([data-theme="dark"]) .backdrop { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15); opacity: 0.55; }
+:root:not([data-theme="dark"]) .backdrop { filter: invert(1) hue-rotate(180deg) saturate(1.7) contrast(1.6) brightness(1.12); mix-blend-mode: multiply; opacity: 0.9; }
 .backdrop--quiet { opacity: 0.35; }
 .backdrop--contained { position: absolute; }
-:root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.3; }
+:root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.45; }
 @media (min-width: 1600px) { .backdrop { background-image: url("/plates/backdrop-3840.jpg"); } }
 
 /* A photo panel (sign-in): always dark over the photo, whichever theme is on. */
 .photo-panel { color: #f4f5f8; }
-.photo-panel .po-mark, .photo-panel .po-mark em { color: #f4b53a; }
+.photo-panel .po-lockup__mark { color: #f4f5f8; }
+.photo-panel .po-lockup__mark em, .photo-panel .po-lockup__events { color: #f4b53a; }
 .photo-scrim { background: linear-gradient(to top, rgb(17 20 28 / 0.88) 0%, rgb(17 20 28 / 0.35) 45%, rgb(17 20 28 / 0.55) 100%); }

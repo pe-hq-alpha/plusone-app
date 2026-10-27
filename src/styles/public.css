@@ -3,12 +3,9 @@
 .pub-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px;
   width: 100%; max-width: 1180px; margin: 0 auto; padding: 26px 24px 0; }
 .pub-brand { display: grid; justify-items: start; text-decoration: none; line-height: 1; }
-.pub-brand__mark { font-family: var(--font-display); font-size: 1.9rem; color: var(--color-ink-deep); letter-spacing: -0.01em; }
-.pub-brand__mark em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-accent); }
-.pub-brand__events { margin: 4px 0 0 2px; font-size: 0.62rem; letter-spacing: 0.42em; text-transform: uppercase; color: var(--color-accent); }
 @media (min-width: 1024px) { .pub-nav--no-brand { justify-content: flex-end; } .pub-nav--no-brand .pub-brand { display: none; } }
 .pub-links { display: flex; align-items: center; gap: 0; }
-.pub-link { padding: 4px 16px; font-size: 0.98rem; color: var(--color-ink); text-decoration: none; }
+.pub-link { padding: 4px 14px; font-size: 0.9rem; color: var(--color-ink); text-decoration: none; }
 .pub-link + .pub-link { border-left: 1px solid var(--color-line); }
 .pub-link:hover, .pub-link[aria-current="page"] { color: var(--color-accent); }
 .pub-link--accent { color: var(--color-accent); }
@@ -22,6 +19,6 @@
 @media (max-width: 640px) {
   .pub-nav { padding-top: 18px; }
   .pub-brand__mark { font-size: 1.6rem; }
-  .pub-link { padding: 4px 10px; font-size: 0.9rem; }
+  .pub-link { padding: 4px 9px; font-size: 0.82rem; }
   .pub-link--hide-sm { display: none; }
 }

@@ -16,6 +16,23 @@ export function PlusOneMark({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * The site's logo: "Plus" in heading ink, "One" in the italic accent, and EVENTS in small capitals
+ * under "One", as at the top of the home page. Used wherever the logo stands for the site, so it
+ * reads the same on every page. Sized from the surrounding font size.
+ */
+export function PlusOneLockup({ className = "" }: { className?: string }) {
+  return (
+    <span className={`po-lockup ${className}`}>
+      <span className="sr-only">{BRAND.name} Events</span>
+      <span aria-hidden="true" className="po-lockup__mark">
+        Plus<em>One</em>
+      </span>
+      <span aria-hidden="true" className="po-lockup__events">Events</span>
+    </span>
+  );
+}
+
 /** The stroked plus (M14 33h20 M24 23v20 on a 64 grid), cropped to its own box. */
 export function PlusGlyph({ className = "" }: { className?: string }) {
   return (

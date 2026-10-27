@@ -6,7 +6,7 @@ import { longDate, money } from "../lib/format";
 import { Icon } from "../components/ui/Icon";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { UserChip } from "../components/ui/UserChip";
-import { PlusOneMark } from "../components/brand/Wordmarks";
+import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { occasionNoun } from "../../convex/lib/occasion";
 import { Backdrop } from "../components/ui/Backdrop";
@@ -213,8 +213,8 @@ function Row({ label, value }: { label: string; value: string }) {
 function Header({ onSignOut }: { onSignOut: () => void }) {
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 px-5 py-6 md:px-8">
-      <Link to="/" className="display text-2xl tracking-tight text-accent" aria-label={`${BRAND.name} home`}>
-        <PlusOneMark />
+      <Link to="/" className="text-2xl" aria-label={`${BRAND.name} home`}>
+        <PlusOneLockup />
       </Link>
       <div className="flex min-w-0 items-center gap-2">
       <UserChip to="/account" className="hidden max-w-[15rem] sm:inline-flex" />
