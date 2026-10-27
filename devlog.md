@@ -47,7 +47,7 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-10-27 - 608627f..96a4c0d
+### 2026-10-27 - 608627f..b623a3c
 - **Morning:** the Terms gained a plain confidentiality rule for what we show privately (conversations, demos, tools), with detailed protections left to a signed agreement; Privacy and Terms moved to a small line in the footer corner; the share image shows the current home page; internal working files left the repository; every green push to `main` now deploys to a staging site with its own backend (`.github/workflows/staging.yml`), while production stays a manual deploy.
 - **Meta's models, live:** every model call now goes through one wrapper (`convex/lib/models.ts`) that sends it to Meta's `muse-spark-1.3` over Chat Completions, with the same Zod schemas turned into JSON Schema for structured output, images as data URLs and PDFs as file blocks. Meta calls retry on 429, 500 and 503 and honour Retry-After; a call Meta can't answer moves to Claude and the switch is logged; Contributor model ids are refused because requests carry personal data. Production switched to Meta the same evening.
 - **Cost record:** every call writes a `modelCalls` row with its feature, provider, model, tokens, list-price cost and whether it fell back (`convex/modelCalls.ts`, prices in `convex/lib/modelCost.ts`).
@@ -56,9 +56,11 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 - **Planning conversation:** asks what the event is called and whose it is, not who is hosting; events with nobody named sign their emails with the account holder's name.
 - **Look:** a new line drawing behind every page (marigold at night, its own ink-blue drawing by day), celebration photos on the home page and sign-in, one logo lockup everywhere, a two-column sign-in, a smaller theme switch whose choice carries between the home page and the app, gentle motion on the home page, and a bolder tab icon.
 - **Privacy:** the privacy page names Meta as the reading and writing service.
-- **Tests:** 394 passed in 42 files; typecheck clean. Every push to `main` deploys to a staging site; production is deployed by hand.
+- **Tests:** 409 passed in 44 files; typecheck clean. Every push to `main` deploys to a staging site; production is deployed by hand.
 - **Critic review (evening):** scored 6.0 / 10 as a judge would (`docs/reviews/2026-10-27.md` in the team's notes): Meta's models invisible to judges and the new features not built yet. Fixed the same evening: the hackathon cutoff stated accurately, Meta setup steps in the README, no sideways scroll on phones, the guest demo no longer opens its tour by itself, the assistant now changes headcounts and start times when told ("we're now 140 people", "move lunch to 1 pm") instead of asking, and an **Under the hood** panel lists every model call for an event, with the model, time and cost (`src/components/UnderTheHood.tsx`, `convex/modelCalls.ts`).
 - **Muse Code:** Everyday plan subscribed. First session built the SAM 3.1 adapter (`convex/lib/sam.ts`, `46df7a5`): one prompt, 30 turns, 41% of a 5-hour quota; Claude Code reviewed it, shared the retry rules with `meta.ts` and committed it. A second session (Muse Wonder) fixed event cards cropping their photos (`96a4c0d`) and used up the rest of the 5-hour quota.
+- **Night:** event cards fit the screen with every face in the photo; home page boxes stand off the page; a softer blue drawing by day so text over it stays clear; the hero photos pop out on hover.
+- **What we are building, stated plainly:** the README now opens with the pitch (a standardised way to plan and buy events in India, where quotes can't be compared, what's included is unclear and vendors are fragmented), the three layers (Co-pilot, Assisted with a real person, Partner for vendors), Chennai as the first city and India as the beachhead. A **For the judges** section lists what was built during the hackathon with each item's status and maps every judging criterion to evidence; **The business** sets out the four revenue streams. The rest of the week's plan centres on one brief and comparable offers: a standard sheet per kind of vendor, missing charges flagged, the market range, and Partner vendors answering the same brief.
 - **Built with:** Claude Code, claude-opus-5-5.
 
 
