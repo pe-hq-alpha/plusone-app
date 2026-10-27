@@ -12,7 +12,7 @@ export function TermsPage() {
         <PlusOneMark />
       </Link>
       <h1 className="mt-6 text-[2.2rem] leading-tight">Terms of Use</h1>
-      <p className="mt-2 text-sm text-muted">Effective 26 October 2026. Last updated 26 October 2026.</p>
+      <p className="mt-2 text-sm text-muted">Effective 26 October 2026. Last updated 27 October 2026.</p>
 
       <div className="mt-8 grid gap-6 text-[0.98rem] leading-relaxed">
         <p className="text-muted">PlusOne has been built and run by its founders since September 2026; these terms set out the rules for using it from 26 October 2026. These terms are an agreement between you and PlusOne Events ("PlusOne", "we", "us"), run from Chennai, India. They cover plusoneevents.site, app.plusoneevents.site and everything you reach through them (together, the "Service"). By opening an account or using the Service, you accept them. If you don't accept them, please don't use the Service.</p>
@@ -40,82 +40,98 @@ export function TermsPage() {
         <section>
           <h2 className="display text-xl">3. Your content</h2>
           <p className="mt-2 text-muted">What you put into PlusOne — your event details, guest list, notes, files and messages — stays yours. You give us permission to store, process and send it only as needed to run the Service for you, including sending messages to vendors and guests that you approve. Our Privacy page explains how we handle personal data.</p>
-          <p className="mt-2 text-muted">You confirm you have the right to share any personal details you add about other people, such as guests or family members.</p>
+          <p className="mt-2 text-muted">You confirm you are allowed to share any personal details you add about other people, such as guests or family members.</p>
         </section>
         <section>
           <h2 className="display text-xl">4. Our intellectual property</h2>
-          <p className="mt-2 text-muted">PlusOne and everything in it, other than your content, belongs to PlusOne Events or its licensors. That includes the software and code; the <strong className="text-ink">design, layout, look and feel, screen flows and user experience</strong>, its architecture, technology stack, integrations, prompts and models, and how they are combined; the text, illustrations, icons, images and videos; the way the Service organises events, vendors and quotes; data compilations; and the PlusOne and PlusOne Events names, the "+1" mark and other brand features.</p>
+          <p className="mt-2 text-muted">PlusOne and everything in it, other than your content, belongs to PlusOne Events or its licensors. That includes the software and code; the <strong className="text-ink">design, layout, look and feel, screen flows and user experience</strong>, its architecture, technology stack, integrations, prompts and models, and how they are combined; the text, illustrations, icons, images and videos; the way the Service organises events, vendors and quotes; the collections of information it builds; and the PlusOne and PlusOne Events names, the "+1" mark and other brand features.</p>
           <p className="mt-2 text-muted">You may use the Service only to plan your own events. <strong className="text-ink">Without our prior written permission</strong>, you may not, and may not help anyone else to:</p>
           <ol className="mt-2 grid gap-1.5 pl-5 text-muted list-decimal">
-            <li>copy, reproduce, republish, sell or distribute any part of the Service;</li>
+            <li>copy, republish, sell or hand out the Service or anything in it;</li>
             <li><strong className="text-ink">copy, imitate or recreate its design, layout, look and feel, screen flows, features or wording</strong>, in whole or in substantial part, in another product, website or app;</li>
-            <li>modify the Service, or create derivative works based on it;</li>
-            <li>reverse-engineer, decompile or disassemble any part of it, or try to obtain its source code or to identify, map or recreate its technology stack, architecture or integrations;</li>
+            <li>alter the Service, or make anything that is based on it, built from it or a version of it;</li>
+            <li>take apart any part of it to work out how it is made, or try to obtain its source code or to identify, map or recreate its technology stack, architecture or integrations;</li>
             <li>inspect, probe, monitor or analyse the Service's code, network requests, APIs, architecture, technology stack, integrations, prompts or model use — including through browser developer tools, proxies or automated tools — to learn how it is built, or use anything learned that way to design, build or improve another product;</li>
             <li>use the Service, its content or any information from it to build, train, benchmark or improve a competing product or service, or any AI model;</li>
             <li>give the Service, or any part of it — its address, pages, screenshots, screen recordings, images, text, designs or descriptions of how it works — to an AI model, AI agent, code-generation or design tool, or any other person or service, in order to copy, recreate, imitate or build something like it, or instruct any of them to do so;</li>
-            <li>scrape, crawl, mine or extract data from the Service by automated or manual means;</li>
-            <li>frame or mirror the Service, or remove or alter any notice of ownership; or</li>
+            <li>harvest or pull information out of the Service in bulk, whether by software or by hand;</li>
+            <li>show the Service inside another site or app, run a copy of it, or hide or change any statement of who owns it; or</li>
             <li>use our names, marks or logos, or suggest that we endorse or are affiliated with you.</li>
           </ol>
           <p className="mt-2 text-muted">Written permission means a signed letter, or an email from <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a>, from PlusOne Events or its authorised representative, that names what is permitted. Nothing else counts: not silence, a demo, a conversation, a video call, or anything said by anyone at PlusOne, including a representative, unless it is confirmed in writing in that way.</p>
         </section>
         <section>
-          <h2 className="display text-xl">5. Using the Service fairly</h2>
+          <h2 className="display text-xl">5. Conversations, demos and introductions</h2>
+          <p className="mt-2 text-muted">These rules apply to everyone who accepts these terms, about everything PlusOne Events, its founders, staff, developers or representatives have shown or told them, before or after accepting, in any way: chat or messaging apps such as WhatsApp, calls and video calls, meetings, email, decks, documents, demos, prototypes, test accounts, repositories, recordings and screenshots ("PlusOne Material").</p>
+          <ol className="mt-2 grid gap-1.5 pl-5 text-muted list-decimal">
+            <li><strong className="text-ink">PlusOne Material is confidential</strong> unless we made it public ourselves. Keep it to yourself, and use it only to discuss working with us.</li>
+            <li><strong className="text-ink">Don't build on it.</strong> Don't use PlusOne Material, or anything you worked out from it, to design, build, change or promote any product, service, feature, workflow or business, or to brief any person, AI model, agent or tool to do so.</li>
+            <li><strong className="text-ink">Tools and methods we introduced.</strong> If we named, recommended, demonstrated or explained a tool, service, provider, model, data source, integration or way of combining them that you did not already use for that purpose, don't adopt it for the same or a similar purpose in a product or service that competes with PlusOne for three years from when we introduced it, without our written permission. The tools themselves stay free for anyone who found them on their own; what this protects is what you learned from us.</li>
+            <li><strong className="text-ink">Prior knowledge has to be shown.</strong> If a product or service of yours turns out to resemble PlusOne in its features, flows, design, wording, tools or the way they are combined, in ways you did not have before PlusOne Material reached you, the resemblance is treated as coming from PlusOne Material and as a breach of this section, unless you show from records dated before then that you had it independently, or that it came from a public source unconnected with us.</li>
+            <li><strong className="text-ink">Return and delete.</strong> When we ask, or when talks with us end, return or delete PlusOne Material and confirm it in writing.</li>
+          </ol>
+          <p className="mt-2 text-muted">Saying nothing, a friendly conversation, a joint demo, family or personal ties, or our having shared something openly with you does not make PlusOne Material free to use. Only written permission, as described in section 4, does.</p>
+        </section>
+        <section>
+          <h2 className="display text-xl">6. Using the Service fairly</h2>
           <p className="mt-2 text-muted">You agree not to:</p>
           <ul className="mt-2 grid gap-1.5 pl-5 text-muted list-disc">
-            <li>use bots, scripts, crawlers or other automated means to access, monitor or test the Service;</li>
-            <li>probe, scan or test its security, or get around any limit, sign-in or protection;</li>
+            <li>let software, rather than a person, open, watch or test the Service;</li>
+            <li>look for weaknesses in how it is protected, or get around any limit, sign-in or protection;</li>
             <li>record, log or analyse the Service's network traffic, or call its back-end APIs other than through the Service itself;</li>
             <li>use a VPN, proxy, Tor or any other means to hide or disguise your identity or location while using the Service, or to get around a block or limit;</li>
             <li>pretend to be someone else, or misstate your connection with anyone;</li>
-            <li>send spam or unwanted messages to vendors or guests, or use the Service for anything unlawful, abusive, harassing or misleading;</li>
-            <li>collect other users' personal details;</li>
-            <li>upload anything harmful, such as malware;</li>
+            <li>message vendors or guests who have not asked to hear from you about something they did not ask for, or use the Service for anything against the law, abusive, harassing or misleading;</li>
+            <li>gather details about other people who use PlusOne;</li>
+            <li>put anything into it that could damage devices, data or systems;</li>
             <li>abuse the Service, its people, vendors or other users in any way; or</li>
-            <li>interfere with or overload the Service.</li>
+            <li>slow the Service down, put it under strain or stop it working for others.</li>
           </ul>
           <p className="mt-2 text-muted">To keep PlusOne safe, we record visits as described on our <Link to="/privacy" className="text-accent underline underline-offset-2">Privacy</Link> page, including IP addresses linked to accounts, for security and to prevent abuse, never for marketing. We may use those records to investigate abuse and share them with the authorities where the law requires or allows.</p>
         </section>
         <section>
-          <h2 className="display text-xl">6. Feedback</h2>
-          <p className="mt-2 text-muted">If you send us ideas or suggestions, we may use them freely, without paying or crediting you.</p>
+          <h2 className="display text-xl">7. What you share with us</h2>
+          <p className="mt-2 text-muted">Unless we have agreed otherwise in a signed written agreement, anything you share with PlusOne Events, its founders, staff, developers or representatives — ideas, suggestions, feedback, plans, examples, contacts or anything else, in any way, including chat, calls, meetings and email — is not confidential to you, and we may use it freely, for any purpose, without paying or crediting you. This does not cover personal data, which our Privacy page governs, or your content in the Service, which section 3 governs.</p>
         </section>
         <section>
-          <h2 className="display text-xl">7. Fees</h2>
+          <h2 className="display text-xl">8. Fees</h2>
           <p className="mt-2 text-muted">The Service is free while it is in early access. If we introduce paid plans, we will show the price and the refund terms clearly before you are charged, and nothing will be charged without your agreement.</p>
         </section>
         <section>
-          <h2 className="display text-xl">8. Other services</h2>
+          <h2 className="display text-xl">9. Other services</h2>
           <p className="mt-2 text-muted">PlusOne uses other providers to run, for example hosting, email, search and AI models. Links to vendors' and other websites are for your convenience; their own terms apply there, and we don't control them.</p>
           <p className="mt-2 text-muted">If you are a vendor, you can stop PlusOne writing to you at any time by replying STOP to any of its emails, and you can ask us to remove your details by writing to <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a>.</p>
         </section>
         <section>
-          <h2 className="display text-xl">9. No guarantees</h2>
-          <p className="mt-2 text-muted">We work hard to keep PlusOne accurate and available, but the Service is provided "as is" and "as available". To the extent the law allows, we make no promises that it will always be uninterrupted, error-free or fit for a particular purpose, or that information from vendors or found on the web is correct.</p>
+          <h2 className="display text-xl">10. No guarantees</h2>
+          <p className="mt-2 text-muted">We work hard to keep PlusOne accurate and available, but the Service is offered in the state it is in, whenever it happens to be running. To the extent the law allows, we make no promises that it will always run without breaks or mistakes, or suit any particular purpose, or that information from vendors or found on the web is correct.</p>
         </section>
         <section>
-          <h2 className="display text-xl">10. Limits on our liability</h2>
-          <p className="mt-2 text-muted">To the extent the law allows, PlusOne Events is not liable for any indirect or consequential loss, lost profits or lost data, or for anything a vendor does or fails to do. Our total liability to you for any claim about the Service is limited to the amount you paid us in the 12 months before the claim, or ₹1,000 if you paid nothing. Nothing in these terms limits liability that cannot be limited by law.</p>
+          <h2 className="display text-xl">11. Limits on our liability</h2>
+          <p className="mt-2 text-muted">To the extent the law allows, PlusOne Events will not pay for indirect or consequential loss, lost profits or lost data, or for anything a vendor does or fails to do. The most we will pay you, for all claims about the Service together, is the amount you paid us in the 12 months before the claim, or ₹1,000 if you paid nothing. Nothing in these terms limits liability that cannot be limited by law.</p>
         </section>
         <section>
-          <h2 className="display text-xl">11. If you break these terms</h2>
-          <p className="mt-2 text-muted">You agree to cover our reasonable losses and costs, including legal costs, that arise from your breach of these terms or your misuse of the Service. We may suspend or close your account, remove content, and take legal action, including seeking an injunction to stop any copying or misuse of our intellectual property.</p>
+          <h2 className="display text-xl">12. If you break these terms</h2>
+          <p className="mt-2 text-muted">You agree to cover our reasonable losses and costs, including legal costs, that arise because you broke these terms or misused of the Service. We may suspend or close your account, remove content, and take legal action, including seeking an injunction to stop any copying or misuse of our intellectual property.</p>
         </section>
         <section>
-          <h2 className="display text-xl">12. Ending</h2>
-          <p className="mt-2 text-muted">You can stop using PlusOne and delete your account at any time from your account page. We may suspend or end your access if you break these terms, if the law requires it, or to protect the Service or other people. Sections 3 to 6 and 9 to 13 continue after your account ends.</p>
+          <h2 className="display text-xl">13. Ending</h2>
+          <p className="mt-2 text-muted">You can stop using PlusOne and delete your account whenever you like, from your account page. We may suspend or end your access if you break these terms, if the law requires it, or to protect the Service or other people. Sections 3 to 7 and 10 to 15 continue after your account ends, and section 5 also binds anyone who received PlusOne Material without opening an account.</p>
         </section>
         <section>
-          <h2 className="display text-xl">13. Law and disputes</h2>
+          <h2 className="display text-xl">14. Law and disputes</h2>
           <p className="mt-2 text-muted">These terms are governed by the laws of India. The courts at Chennai, Tamil Nadu have exclusive jurisdiction over any dispute about them or the Service, except that we may seek urgent relief to protect our intellectual property in any court.</p>
         </section>
         <section>
-          <h2 className="display text-xl">14. Changes</h2>
+          <h2 className="display text-xl">15. If part of these terms fails</h2>
+          <p className="mt-2 text-muted">If a court finds any part of these terms unenforceable, that part is applied to the greatest extent the law allows, and the rest of the terms stay in force. Our not enforcing a term straight away does not waive it.</p>
+        </section>
+        <section>
+          <h2 className="display text-xl">16. Changes</h2>
           <p className="mt-2 text-muted">We may update these terms. If a change matters, we will tell you in the app or by email before it takes effect. Continuing to use the Service after that means you accept the new terms.</p>
         </section>
         <section>
-          <h2 className="display text-xl">15. Contact</h2>
+          <h2 className="display text-xl">17. Contact</h2>
           <p className="mt-2 text-muted">PlusOne Events, Chennai, India · <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a></p>
           <p className="mt-2 text-muted">Grievance Officer: {GRIEVANCE_OFFICER.name} · <a href={`mailto:${GRIEVANCE_OFFICER.email}`} className="text-accent underline underline-offset-2">{GRIEVANCE_OFFICER.email}</a>. We acknowledge every complaint within 24 hours and resolve it within 15 days.</p>
         </section>
