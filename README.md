@@ -71,6 +71,17 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 **Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th in Chennai with no sign-up. Start on **Today**. Press **Under the hood** in the top bar to see each step's Meta model, time and cost. Type "We're now 140 people" in the box and press the card it offers. Then follow **Vendors → Compare** to see three catering quotes read into one price per plate.
 
+### The theme: Build for Your World
+
+> "Bring Meta's models into your domain. Solve a problem you know firsthand, free up time and mental space, and make something possible that wasn't before."
+
+| The theme asks | PlusOne's answer |
+|---|---|
+| **Bring Meta's models into your domain** | Events in India, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English; Muse Voice Transcribe hears a spoken brief that switches between the two; SAM 3.1 works on the family's own venue photo; Muse Wonder checks a vendor's evidence; Muse Spark Open pools quotes into market ranges |
+| **A problem you know firsthand** | The founders are in Chennai, where PlusOne starts, and know this from planning events in their own families: quotes that can't be compared, charges that turn up later, vendors spread across calls and chats. PlusOne began as a planner for exactly that |
+| **Free up time and mental space** | The Co-pilot does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
+| **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers in the same lines, missing charges flagged and the market range. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
+
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
 | What | Meta model | Status |
