@@ -46,6 +46,8 @@
 
 PlusOne Events is a co-pilot for planning any event, for people who plan from anywhere. Tell PlusOne about the event in your own words and, once it has checked everything with you, it sets out the plan: the functions or sessions, the vendors each one needs and a budget. Then it does the slow part. It finds vendors on the open web, writes to them from the event's own inbox, chases the ones who go quiet, and lines up their quotes in one unit, per plate, per piece or per day. The host makes every decision.
 
+It works for vendors too. Many good caterers, decorators and photographers have no website or listing to be found by, and prices are hard to see. PlusOne Partner, being built during the hackathon, gives a vendor without an online identity a place to register, show what they charge in the units families compare, get verified, and be found.
+
 It is built for the events families and teams actually hold: birthdays and sixtieths, housewarmings and griha pravesams, naming ceremonies, poojas at home, baby showers, anniversaries and engagements; office parties, team offsites, product launches, conferences, college fests and community festivals. Weddings are one of the sixteen types too.
 
 Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), with no sign-up. Three sample events open there, all in rupees: Amma's 60th birthday in Chennai (the default), a griha pravesam in Bengaluru (`/demo?sample=housewarming`) and an office Diwali party in Gurugram with no alcohol (`/demo?sample=office`). Their vendors are made up, so nothing is really sent.
