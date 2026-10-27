@@ -9,6 +9,7 @@ import { BRAND } from "../lib/brand";
 import { useRegion } from "../lib/region";
 import { examplesFor } from "../lib/regionExamples";
 import { ThemeSwitch } from "../components/ui/ThemeSwitch";
+import { useTheme } from "../lib/theme";
 
 type StepState = "done" | "now" | "waiting" | "next";
 const STATE_LABEL: Record<StepState, string> = { done: "Done", now: "Now", waiting: "Waiting", next: "Next" };
@@ -85,6 +86,8 @@ function useReveal() {
 
 export function LandingPage() {
   const ex = examplesFor(useRegion());
+  // Marigold on ink at night; by day its own ink-blue drawing, which reads far better on ivory than gold.
+  const plate = useTheme() === "dark" ? "backdrop" : "backdrop-light";
   useReveal();
 
   return (
@@ -93,8 +96,8 @@ export function LandingPage() {
       <section className="rs" aria-labelledby="hero-title">
         {/* The event, drawn in fine line behind the promise: lanterns, string lights, a long dinner table. */}
         <picture className="rs__plate" aria-hidden="true">
-          <source media="(min-width: 1600px)" srcSet="/plates/backdrop-3840.jpg" />
-          <img src="/plates/backdrop-1920.jpg" alt="" fetchPriority="high" />
+          <source media="(min-width: 1600px)" srcSet={`/plates/${plate}-3840.jpg`} />
+          <img src={`/plates/${plate}-1920.jpg`} alt="" fetchPriority="high" />
         </picture>
         <header className="rs__nav">
           <Link to="/" className="rs__brand" aria-label={`${BRAND.name} Events home`}>

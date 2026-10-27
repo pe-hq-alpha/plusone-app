@@ -22,3 +22,11 @@
   .pub-link { padding: 4px 9px; font-size: 0.82rem; }
   .pub-link--hide-sm { display: none; }
 }
+
+/* The drawing's corners sit behind the top bar; a soft halo in the page colour keeps the bar readable. */
+.pub-nav .po-lockup, .pub-link {
+  text-shadow: 0 0 6px var(--color-paper), 0 0 12px var(--color-paper), 0 0 20px var(--color-paper);
+}
+.pub-nav { position: relative; }
+.pub-nav::before { content: ""; position: absolute; inset: -26px -40px -10px; z-index: -1; pointer-events: none;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--color-paper) 85%, transparent), transparent); }
