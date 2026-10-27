@@ -3,7 +3,7 @@
 - **Project:** PlusOne Events
 - **Event:** Meta Global AI Developer Hackathon (Cerebral Valley), 26 Oct – 4 Nov 2026
 - **Team:** two founders
-- **What it does:** A co-pilot for planning events in India: it talks the plan through with the host, sets out the parts of the event, the vendors each needs and a budget, then finds vendors, writes to them from the event's own inbox, chases replies and lines their quotes up in one unit, while the host makes every decision.
+- **What it does:** A co-pilot for planning any event (a birthday, a wedding, an office party): it talks the plan through, sets out the parts of the event, the vendors each needs and a budget, then finds vendors, writes to them from the event's own inbox, chases replies and lines their quotes up in one unit, while the people planning make every decision.
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable.
 - **Status:** deployed
 - **Live app:** https://plusoneevents.site
@@ -12,29 +12,51 @@
 - **Stack:** TypeScript, React 19, React Router 7, Vite 8, Tailwind CSS 4, Convex 1.45 (database, functions, crons, workflow, workpool, rate-limiter and action-cache components)
 - **Hosting:** Cloudflare Pages for the app; Convex (Ireland) for the backend
 - **Auth:** Clerk; Convex Auth guest sessions for the sample events
-- **External services:** AgentMail (event inboxes), Firecrawl (vendor search), Resend (app emails), PostHog (usage)
-- **AI models (product):** claude-sonnet-5-5 for plans, vendor emails, quote reading, imports and the assistant; claude-haiku-5-5 for the planning conversation, link and palette reading and other quick reads. Moving the visible steps to Meta's models during the hackathon.
-- **AI models (build):** Claude Code with claude-opus-5-5 (earlier sessions not recorded)
+- **External services:** AgentMail (event inboxes), Firecrawl (vendor search), Resend (app emails), PostHog (usage), Meta Model API (Muse Spark)
+- **AI models (product):** muse-spark-1.3 (Meta Model API, Chat Completions with JSON Schema output) for every reading and writing step, live in production since 27 Oct; claude-haiku-5-5 and claude-sonnet-5-5 as the fallback when Meta can't answer. Coming: Muse Voice Transcribe, SAM 3.1, Muse Wonder, Muse Spark Open.
+- **AI models (build):** Claude Code with claude-opus-5-5; Muse Code (Everyday plan, from 27 Oct), every session logged under Muse Code below
 - **Track:** Startup
-- **Meta models used:** none yet (planned: Muse Spark, Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Spark Open)
-- **Credits spent:** $0 of $150
+- **Meta models used:** Muse Spark 1.3 (live); planned: Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Spark Open; Muse Code for building
+- **Credits spent:** under $0.01 of $150 in our own measured runs (27 Oct); every call is recorded in `modelCalls`, to be reconciled with Meta Billing
 - **Started:** 2026-09-15T20:55:44+05:30
-- **Last updated:** 2026-10-25T13:46:00+05:30
+- **Last updated:** 2026-10-27T20:55:00+05:30
 
 ## Evidence
 
 | Claim | Evidence | Status |
 |---|---|---|
-| Muse Spark runs the agent | none yet | missing |
+| Muse Spark runs the agent | Every call site goes through `convex/lib/models.ts`; production runs `muse-spark-1.3` since 27 Oct; a production RSVP read on 27 Oct returned a correct structured answer (field notes) | partial: end-to-end runs on real events still to record |
 | SAM 3.1 turns inspiration photos into decorator briefs | none yet | missing |
 | Decor shown on the real venue | none yet | missing |
 | Open-weights model for cheap calls | none yet | missing |
-| Credits spent per run | No paid runs yet | missing |
+| Credits spent per run | `modelCalls` records feature, model, tokens and list-price cost for every call; first production call $0.0053 (1,214 in, 880 out) | partial: per-feature totals still to report |
 | Screenshots of the Meta features | none yet | missing |
 | Demo video | not recorded | missing |
-| Live URL with the Meta features | plusoneevents.site runs the pre-hackathon build | missing |
+| Live URL with the Meta features | plusoneevents.site runs Muse Spark in production (27 Oct) | done for Muse Spark |
+| Muse Code used in the build | Everyday plan from 27 Oct; sessions logged in the Muse Code table below | missing: no sessions yet |
+
+## Muse Code
+
+Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2026 (Muse Spark, Muse Wonder and Muse Image; 10 to 50 prompts every 5 hours; voice mode; web search), run in Standard mode with Contributor off, so our code and prompts are not used for training. One founder uses it. It builds bounded pieces, each reviewed and tested before it is committed; Claude Code does the rest. Every session gets a row here.
+
+| Date | What Muse Code built | Files | Model | Prompts | Kept, edited or dropped |
+|---|---|---|---|---|---|
+| — | No sessions yet | | | | |
 
 ## Log
+
+### 2026-10-27 - 2e4efb9..ab6c255 (43 commits since `pre-hackathon`)
+- **Meta's models, live:** every model call now goes through one wrapper (`convex/lib/models.ts`) that sends it to Meta's `muse-spark-1.3` over Chat Completions, with the same Zod schemas turned into JSON Schema for structured output, images as data URLs and PDFs as file blocks. Meta calls retry on 429, 500 and 503 and honour Retry-After; a call Meta can't answer moves to Claude and the switch is logged; Contributor model ids are refused because requests carry personal data. Production switched to Meta the same evening.
+- **Cost record:** every call writes a `modelCalls` row with its feature, provider, model, tokens, list-price cost and whether it fell back (`convex/modelCalls.ts`, prices in `convex/lib/modelCost.ts`).
+- **Measured:** a production RSVP read on `muse-spark-1.3` was correct first time (2 coming, peanut allergy caught), 1,214 tokens in and 880 out, $0.0053. Reasoning can't be turned off and counts as output: at a 400-token limit a one-line answer came back empty, so every call allows 16,000.
+- **Pricing page:** Co-pilot free until launch, then an introductory monthly price in rupees or dollars; Assisted, with a person from the team, after launch (`src/pages/PricingPage.tsx`, `src/lib/pricing.ts`).
+- **Planning conversation:** asks what the event is called and whose it is, not who is hosting; events with nobody named sign their emails with the account holder's name.
+- **Look:** a new line drawing behind every page (marigold at night, its own ink-blue drawing by day), celebration photos on the home page and sign-in, one logo lockup everywhere, a two-column sign-in, a smaller theme switch whose choice carries between the home page and the app, gentle motion on the home page, and a bolder tab icon.
+- **Privacy:** the privacy page names Meta as the reading and writing service.
+- **Tests:** 394 passed in 42 files; typecheck clean. Every push to `main` deploys to a staging site; production is deployed by hand.
+- **Muse Code:** Everyday plan subscribed; no sessions yet.
+- **Built with:** Claude Code, claude-opus-5-5.
+
 
 ### 2026-10-25 - 1e6c63b (tag `pre-hackathon`)
 The starting point for the hackathon. PlusOne Events is an early-stage startup built in semi-stealth, so this repository begins from one snapshot of the earlier private work; every later commit is hackathon work. What the snapshot holds:
