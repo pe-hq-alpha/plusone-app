@@ -4,7 +4,7 @@
 
 .rs {
   --rs-done: var(--color-done);
-  --rs-row: color-mix(in srgb, var(--color-cream) 72%, transparent);
+  --rs-row: color-mix(in srgb, var(--color-cream) 90%, transparent);
   --rs-rule: var(--color-line);
   position: relative;
   container-type: inline-size;
@@ -68,23 +68,23 @@
 .rs__pill--outline:hover { background: var(--color-accent-soft); }
 .rs a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 999px; }
 
-.rs__status { left: 56%; top: calc(196 / 20.48 * 1cqw); width: 35.6%; }
-.rs__status-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: calc(34 / 20.48 * 1cqw); line-height: 1.1; color: var(--color-ink-deep); }
+.rs__status { left: 55%; top: calc(250 / 20.48 * 1cqw); width: 38%; }
+.rs__status-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: calc(40 / 20.48 * 1cqw); line-height: 1.1; color: var(--color-ink-deep); }
 .rs__example { margin: calc(16 / 20.48 * 1cqw) 0 0; font-size: calc(20 / 20.48 * 1cqw); color: var(--color-accent); }
-.rs__event { margin: calc(4 / 20.48 * 1cqw) 0 0; font-size: calc(24 / 20.48 * 1cqw); color: var(--color-quiet); }
+.rs__event { margin: calc(4 / 20.48 * 1cqw) 0 0; font-size: calc(26 / 20.48 * 1cqw); color: var(--color-quiet); }
 .rs__event span { color: var(--color-muted); }
 .rs__lede-strong { color: var(--color-ink); }
 
-.rs__route { list-style: none; margin: calc(16 / 20.48 * 1cqw) 0 0; padding: 0; display: grid; gap: calc(11 / 20.48 * 1cqw); position: relative; }
+.rs__route { list-style: none; margin: calc(18 / 20.48 * 1cqw) 0 0; padding: 0; display: grid; gap: calc(14 / 20.48 * 1cqw); position: relative; }
 .rs__step {
-  position: relative; display: grid; grid-template-columns: calc(70 / 20.48 * 1cqw) calc(102 / 20.48 * 1cqw) 1fr; align-items: center;
-  height: calc(74 / 20.48 * 1cqw); padding-right: calc(14 / 20.48 * 1cqw);
+  position: relative; display: grid; grid-template-columns: calc(70 / 20.48 * 1cqw) calc(118 / 20.48 * 1cqw) 1fr; align-items: center;
+  height: calc(102 / 20.48 * 1cqw); padding-right: calc(14 / 20.48 * 1cqw);
   background: var(--rs-row); border: 1px solid var(--rs-rule); border-radius: calc(8 / 20.48 * 1cqw);
 }
 /* The route: one line through every node, green where the co-pilot has been, marigold into now, faint after. */
 .rs__step::before {
   content: ""; position: absolute; left: calc(34 / 20.48 * 1cqw); width: calc(2 / 20.48 * 1cqw);
-  top: calc(-11 / 20.48 * 1cqw - 1px); height: calc(11 / 20.48 * 1cqw + 1px + 50%);
+  top: calc(-14 / 20.48 * 1cqw - 1px); height: calc(14 / 20.48 * 1cqw + 1px + 50%);
   background: var(--rs-rule);
 }
 .rs__step:first-child::before { display: none; }
@@ -113,10 +113,10 @@
 .rs__step--now .rs__node::after { content: ""; width: 34%; height: 34%; border-radius: 50%; background: var(--color-highlight-core); }
 .rs__step--waiting .rs__node { box-shadow: none; outline: calc(2 / 20.48 * 1cqw) dashed var(--color-rule); outline-offset: calc(-2 / 20.48 * 1cqw); }
 
-.rs__state { font-size: calc(20 / 20.48 * 1cqw); letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-quiet); }
+.rs__state { font-size: calc(21 / 20.48 * 1cqw); letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-quiet); }
 .rs__step--done .rs__state { color: var(--rs-done); }
 .rs__step--now .rs__state { color: var(--color-accent); }
-.rs__text { font-size: calc(21.5 / 20.48 * 1cqw); letter-spacing: -0.005em; color: var(--color-ink); white-space: nowrap; }
+.rs__text { font-size: calc(23.5 / 20.48 * 1cqw); letter-spacing: -0.005em; color: var(--color-ink); white-space: nowrap; }
 
 /* The NOW node breathes once a few seconds; the page otherwise holds still. */
 @keyframes rs-breathe { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
@@ -294,6 +294,6 @@
 .rs__fan img:nth-child(3) { left: calc(300 / 20.48 * 1cqw); transform: rotate(7deg); top: calc(16 / 20.48 * 1cqw); }
 @media (max-width: 1100px) {
   .rs__fan { display: flex; gap: 10px; height: auto; margin-top: 28px; }
-  .rs__fan img { position: static; width: calc((100% - 20px) / 3); max-width: 170px; border-radius: 14px; }
+  .rs__fan img { position: static; width: calc((100% - 20px) / 3); max-height: 300px; border-radius: 14px; }
   .rs__fan img:nth-child(n) { transform: none; }
 }
