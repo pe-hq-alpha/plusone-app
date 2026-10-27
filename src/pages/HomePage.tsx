@@ -120,7 +120,7 @@ export function HomePage() {
                   style={{ transform: `rotate(${TILTS[i % TILTS.length]})` }}
                 >
                   {/* A celebration photo for the kind of event, with the kind on it, so no card opens blank. */}
-                  <span aria-hidden="true" className="relative block aspect-[16/7] overflow-hidden rounded-[3px] bg-accent-soft/70">
+                  <span aria-hidden="true" className="relative block aspect-[4/5] overflow-hidden rounded-[3px] bg-accent-soft/70">
                     <img src={eventCover(event.eventType)} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
                     <span className="absolute bottom-2 left-2 rounded-full bg-paper/85 px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.12em] text-ink">
                       {event.occasionLabel?.trim() || occasionNoun(event)}
