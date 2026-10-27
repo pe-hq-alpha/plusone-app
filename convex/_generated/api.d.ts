@@ -69,6 +69,7 @@ import type * as lib_pools from "../lib/pools.js";
 import type * as lib_quoteHold from "../lib/quoteHold.js";
 import type * as lib_regions from "../lib/regions.js";
 import type * as lib_rsvp from "../lib/rsvp.js";
+import type * as lib_sam from "../lib/sam.js";
 import type * as lib_scrapePolicy from "../lib/scrapePolicy.js";
 import type * as lib_searchTerms from "../lib/searchTerms.js";
 import type * as lib_sessionOrder from "../lib/sessionOrder.js";
@@ -174,6 +175,7 @@ declare const fullApi: ApiFromModules<{
   "lib/quoteHold": typeof lib_quoteHold;
   "lib/regions": typeof lib_regions;
   "lib/rsvp": typeof lib_rsvp;
+  "lib/sam": typeof lib_sam;
   "lib/scrapePolicy": typeof lib_scrapePolicy;
   "lib/searchTerms": typeof lib_searchTerms;
   "lib/sessionOrder": typeof lib_sessionOrder;

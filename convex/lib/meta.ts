@@ -33,11 +33,11 @@ export class MetaError extends Error {
   }
 }
 
-const RETRYABLE = new Set([429, 500, 503]);
+export const RETRYABLE = new Set([429, 500, 503]);
 /** Our request was wrong; moving it to Claude would only hide the bug. */
-const MALFORMED = new Set([400, 413, 415, 422]);
+export const MALFORMED = new Set([400, 413, 415, 422]);
 
-function retryAfterMs(header: string | null): number | undefined {
+export function retryAfterMs(header: string | null): number | undefined {
   if (!header) return undefined;
   const seconds = Number(header);
   if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);

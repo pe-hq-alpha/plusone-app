@@ -30,6 +30,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/eb-garamond": "^5.3.0",
     "@fontsource-variable/work-sans": "^5.3.0",
+    "@meta-sam/parser": "^0.1.0",
     "agentmail": "^0.5.25",
     "convex": "^1.45.0",
     "fflate": "^0.8.3",
