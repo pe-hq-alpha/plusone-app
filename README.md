@@ -65,7 +65,7 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 
 ## How it works
 
-<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, beside an example of the co-pilot at work for Mom's 60th in Austin">
+<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, beside an example of the co-pilot at work for Mia's 1st birthday in Austin">
 
 1. **Talk it through.** "Amma's 60th in Chennai, a homam at home and lunch for about 120." PlusOne asks for whatever it still needs, one thing at a time, reads everything back for you to confirm, and points out anything that can't be right, like a weekday that doesn't match the date or a budget missing a zero. It builds the plan only once every line is confirmed. The model only reads each message; what to ask next and when the plan is ready are fixed rules (`/new`, `convex/planningChat.ts`, with the rules in `convex/lib/planningChat.ts`). A manual form at `/new/manual` does the same step by step.
 2. **Open on Today.** The app opens on the co-pilot's route through the event: what is **done**, what is **under way**, what is **over to you** and what is **up next**, each with the button that finishes it. It is read straight from the plan, so it is instant and never disagrees with the pages it links to (`src/pages/TodayPage.tsx`, `convex/copilot.ts`). A box beside it takes a change or a question in plain words: "we're now 140 people", "find us a photographer".
