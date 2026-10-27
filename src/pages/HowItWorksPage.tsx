@@ -4,6 +4,7 @@ import { BRAND } from "../lib/brand";
 import { useRegion } from "../lib/region";
 import { examplesFor } from "../lib/regionExamples";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
+import { Backdrop } from "../components/ui/Backdrop";
 
 const steps = (search: string) => [
   { t: "Talk it through", d: `Say what you're planning in your own words. ${BRAND.name} asks for whatever it still needs, reads it all back for you to confirm, and points out anything that can't be right. Then it sets out each day or session, splits the budget and lists the vendors you'll need.` },
@@ -15,7 +16,8 @@ const steps = (search: string) => [
 export function HowItWorksPage() {
   const { search } = examplesFor(useRegion());
   return (
-    <main id="main" className="mx-auto max-w-3xl px-4 py-10">
+    <main id="main" className="isolate mx-auto max-w-3xl px-4 py-10">
+      <Backdrop />
       <Link to="/" className="display text-2xl tracking-tight" aria-label={`${BRAND.name} home`}>
         <PlusOneMark />
       </Link>

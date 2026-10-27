@@ -8,6 +8,8 @@ import { sampleFor } from "../../convex/lib/regions";
  */
 
 export type RegionExamples = {
+  /** The home page's example event at the top, and the first line of its running status. */
+  hero: { event: string; city: string; people: number; plan: string };
   /** A search as a host there would ask it. */
   search: string;
   /** One need's quotes, read into the same unit, and the spread between them. */
@@ -19,6 +21,7 @@ export type RegionExamples = {
 };
 
 const ELSEWHERE: RegionExamples = {
+  hero: { event: "Mom's 60th", city: "Austin", people: 80, plan: "Plan set out: drinks at 6:00, dinner at 7:30" },
   search: "venues near Austin for a two-day team offsite for 40",
   compare: {
     title: "Catering · team offsite dinner for 80",
@@ -37,6 +40,7 @@ const ELSEWHERE: RegionExamples = {
 };
 
 const CHENNAI: RegionExamples = {
+  hero: { event: "Anjali's 30th", city: "Chennai", people: 80, plan: "Plan set out: drinks at 7:00, dinner at 8:30" },
   search: "caterers in Chennai for a 60th birthday lunch, under ₹500 a plate",
   compare: {
     title: "Catering · housewarming lunch for 150",
@@ -55,6 +59,7 @@ const CHENNAI: RegionExamples = {
 };
 
 const DELHI: RegionExamples = {
+  hero: { event: "Rohan's 30th", city: "New Delhi", people: 80, plan: "Plan set out: drinks at 7:00, dinner at 8:30" },
   search: "banquet halls in Gurugram for an office Diwali party for 120",
   compare: {
     title: "Catering · office Diwali dinner for 150",

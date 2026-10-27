@@ -6,6 +6,7 @@ import { BRAND } from "../lib/brand";
 import { money } from "../lib/format";
 import { monthlyPrice, type PlanId } from "../lib/pricing";
 import { useRegion } from "../lib/region";
+import { Backdrop } from "../components/ui/Backdrop";
 
 const PLANS: { id: PlanId; name: string; line: string; status: string; when: string; includes: string[] }[] = [
   {
@@ -46,7 +47,8 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
 export function PricingPage() {
   const region = useRegion();
   return (
-    <main id="main" className="mx-auto max-w-4xl px-4 py-10">
+    <main id="main" className="isolate mx-auto max-w-4xl px-4 py-10">
+      <Backdrop />
       <Link to="/" className="display text-2xl tracking-tight" aria-label={`${BRAND.name} home`}>
         <PlusOneMark />
       </Link>

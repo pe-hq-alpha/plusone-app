@@ -9,6 +9,7 @@ import { UserChip } from "../components/ui/UserChip";
 import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { occasionNoun } from "../../convex/lib/occasion";
+import { Backdrop } from "../components/ui/Backdrop";
 
 /** Each card is nudged a degree or two off square, like prints on a board. */
 const TILTS = ["-2.5deg", "1.8deg", "-1.2deg", "2.4deg", "-1.9deg", "1.3deg"];
@@ -91,7 +92,8 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-paper">
+    <div className="isolate min-h-[100dvh] bg-paper">
+      <Backdrop quiet />
       {/* One quiet marigold wash at the top, and nothing else behind the prints. */}
       <div
         aria-hidden="true"

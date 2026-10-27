@@ -21,8 +21,8 @@
 /* Full bleed, fading out at the foot so the hero runs into the next section rather than stopping. */
 .rs__plate img { position: absolute; inset: 0; width: 100%; height: 100%;
   -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); }
-.rs__plate img { object-fit: cover; object-position: center; display: block; opacity: 0.85; }
-:root:not([data-theme="dark"]) .rs__plate img { filter: invert(1) hue-rotate(180deg) saturate(0.6) brightness(1.04); opacity: 0.55; }
+.rs__plate img { object-fit: cover; object-position: center; display: block; opacity: 1; }
+:root:not([data-theme="dark"]) .rs__plate img { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15) brightness(1.04); opacity: 0.8; }
 
 .rs__nav { position: absolute; inset: 0 0 auto 0; height: 0; }
 .rs__brand {
@@ -153,7 +153,7 @@
   .rs__step--waiting .rs__node { outline-width: 2px; outline-offset: -2px; }
   .rs__state { font-size: 0.72rem; }
   .rs__text { font-size: 0.92rem; white-space: normal; }
-  .rs__plate img { object-position: 22% bottom; opacity: 0.6;
+  .rs__plate img { object-position: 22% bottom; opacity: 0.85;
     -webkit-mask-image: linear-gradient(transparent 38%, #000 70%, #000 88%, transparent); mask-image: linear-gradient(transparent 38%, #000 70%, #000 88%, transparent); }
 }
 @media (max-width: 520px) {
@@ -171,6 +171,7 @@
 .rs-h2 em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-accent); }
 .rs-lede { margin: 0; max-width: 38rem; font-size: clamp(1.05rem, 1.3vw, 1.2rem); line-height: 1.65; color: var(--color-muted); }
 .rs-note { margin: 22px 0 0; font-size: 0.95rem; color: var(--color-quiet); }
+.rs-note a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 2px; }
 .rs-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
 .rs-split--reverse > :first-child { order: 2; }
 
@@ -186,13 +187,13 @@
 .rs-sec { position: relative; isolation: isolate; overflow: hidden; }
 .rs-sec--plate-left::before, .rs-sec--plate-right::before {
   content: ""; position: absolute; z-index: -1; bottom: 0; width: min(42vw, 620px); height: 85%;
-  background: url("/plates/backdrop-1920.jpg") no-repeat; background-size: auto 160%; opacity: 0.4; pointer-events: none;
+  background: url("/plates/backdrop-1920.jpg") no-repeat; background-size: auto 160%; opacity: 0.65; pointer-events: none;
 }
 .rs-sec--plate-left::before { left: 0; background-position: left bottom;
   -webkit-mask-image: radial-gradient(120% 100% at 0% 100%, #000 35%, transparent 75%); mask-image: radial-gradient(120% 100% at 0% 100%, #000 35%, transparent 75%); }
 .rs-sec--plate-right::before { right: 0; background-position: right bottom;
   -webkit-mask-image: radial-gradient(120% 100% at 100% 100%, #000 35%, transparent 75%); mask-image: radial-gradient(120% 100% at 100% 100%, #000 35%, transparent 75%); }
-:root:not([data-theme="dark"]) .rs-sec--plate-left::before, :root:not([data-theme="dark"]) .rs-sec--plate-right::before { filter: invert(1) hue-rotate(180deg) saturate(0.6); opacity: 0.25; }
+:root:not([data-theme="dark"]) .rs-sec--plate-left::before, :root:not([data-theme="dark"]) .rs-sec--plate-right::before { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15); opacity: 0.5; }
 
 /* Two ways to plan. */
 .rs-ways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 36px; }
@@ -228,8 +229,8 @@
 
 /* The close: the hero's promise once more, with its one action. */
 .rs-close { position: relative; padding-block: clamp(88px, 10vw, 148px); background: var(--color-paper); border-top: 1px solid var(--color-line); overflow: hidden; }
-.rs-close::before { content: ""; position: absolute; inset: auto 0 0 0; height: 70%; background: url("/plates/backdrop-1920.jpg") center bottom / cover no-repeat; opacity: 0.35; pointer-events: none; -webkit-mask-image: linear-gradient(transparent, #000 60%); mask-image: linear-gradient(transparent, #000 60%); }
-:root:not([data-theme="dark"]) .rs-close::before { filter: invert(1) hue-rotate(180deg) saturate(0.6); opacity: 0.25; }
+.rs-close::before { content: ""; position: absolute; inset: auto 0 0 0; height: 70%; background: url("/plates/backdrop-1920.jpg") center bottom / cover no-repeat; opacity: 0.6; pointer-events: none; -webkit-mask-image: linear-gradient(transparent, #000 60%); mask-image: linear-gradient(transparent, #000 60%); }
+:root:not([data-theme="dark"]) .rs-close::before { filter: invert(1) hue-rotate(180deg) saturate(1.1) contrast(1.15); opacity: 0.5; }
 .rs-close__inner { position: relative; display: grid; justify-items: center; text-align: center; }
 .rs-close__inner .rs-lede { margin-inline: auto; }
 .rs-close__cta { margin-top: 32px; height: 52px; min-width: 0; padding: 0 30px; font-size: 1.05rem; }
@@ -262,3 +263,8 @@
 }
 .rs-foot-mark { display: inline-flex; align-items: center; gap: 10px; }
 .rs-foot-mark img { border-radius: 7px; }
+
+/* With the drawing at full strength, text that sits on its lines gets a soft halo in the page colour. */
+.rs__brand, .rs__link, .rs__status-title, .rs__example, .rs__event, .rs-line__title, .rs-line__text {
+  text-shadow: 0 0 6px var(--color-paper), 0 0 12px var(--color-paper), 0 0 20px var(--color-paper);
+}

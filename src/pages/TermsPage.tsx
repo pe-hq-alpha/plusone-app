@@ -3,11 +3,13 @@ import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { GRIEVANCE_OFFICER } from "../lib/legal";
+import { Backdrop } from "../components/ui/Backdrop";
 
 /** The terms anyone agrees to by using PlusOne. Public, like the privacy page. */
 export function TermsPage() {
   return (
-    <main id="main" className="mx-auto w-full max-w-[44rem] px-5 py-12 md:px-8">
+    <main id="main" className="isolate mx-auto w-full max-w-[44rem] px-5 py-12 md:px-8">
+      <Backdrop />
       <Link to="/" className="display text-2xl tracking-tight text-accent" aria-label={`${BRAND.name} home`}>
         <PlusOneMark />
       </Link>

@@ -15,6 +15,7 @@ import { FeedbackBox } from "./FeedbackBox";
 import { AssistantDrawer } from "./assistant/AssistantDrawer";
 import { BRAND } from "../lib/brand";
 import { PartWord, PeopleWord } from "../lib/words";
+import { Backdrop } from "./ui/Backdrop";
 
 /** The sample events, by kind, for the demo banner's links. */
 const SAMPLES = [
@@ -148,7 +149,8 @@ export function EventLayout() {
   );
 
   return (
-    <div className="min-h-screen pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0 print:pb-0">
+    <div className="isolate min-h-screen pb-[calc(64px+env(safe-area-inset-bottom))] md:pb-0 print:pb-0">
+      <Backdrop quiet />
       <header className="shell-bar no-print sticky top-0 z-30">
         <div className="mx-auto flex h-14 max-w-[1240px] items-center gap-3 px-4 md:gap-5 md:px-6">
           <Link to="/" className="display shrink-0 text-[1.3rem] tracking-tight text-accent" aria-label={`${BRAND.name}: all your events`}>

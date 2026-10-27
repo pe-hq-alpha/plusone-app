@@ -13,8 +13,8 @@ type StepState = "done" | "now" | "waiting" | "next";
 const STATE_LABEL: Record<StepState, string> = { done: "Done", now: "Now", waiting: "Waiting", next: "Next" };
 
 /** The example event's running status: what the co-pilot has done, is doing and will do next. */
-const ROUTE: { state: StepState; text: string }[] = [
-  { state: "done", text: "Plan set out: pooja at 9:00, lunch at 12:30" },
+const route = (plan: string): { state: StepState; text: string }[] => [
+  { state: "done", text: plan },
   { state: "done", text: "Found 8 caterers, 5 decorators and 3 photographers" },
   { state: "done", text: "Wrote to 6 of them from your event’s inbox" },
   { state: "now", text: "3 replies in, quotes lined up for you" },
@@ -31,7 +31,7 @@ const HOW = [
 ];
 
 const KINDS = [
-  { group: "Family and friends", items: ["Weddings and engagements", "Birthdays and milestone birthdays", "Anniversaries", "Housewarmings", "Baby showers and naming ceremonies", "Religious and cultural celebrations"] },
+  { group: "Family and friends", items: ["Birthdays and milestone birthdays", "Weddings and engagements", "Anniversaries", "Housewarmings", "Baby showers and naming ceremonies", "Religious and cultural celebrations"] },
   { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
 ];
 
@@ -42,7 +42,7 @@ export function LandingPage() {
     <div className="lp">
       <a href="#main" className="lp-skip">Skip to content</a>
       <section className="rs" aria-labelledby="hero-title">
-        {/* The event, drawn in fine line behind the promise: lanterns, a lamp and kolam, a long lunch. */}
+        {/* The event, drawn in fine line behind the promise: lanterns, string lights, a long dinner table. */}
         <picture className="rs__plate" aria-hidden="true">
           <source media="(min-width: 1600px)" srcSet="/plates/backdrop-3840.jpg" />
           <img src="/plates/backdrop-1920.jpg" alt="" fetchPriority="high" />
@@ -80,10 +80,10 @@ export function LandingPage() {
             <h2 id="status-title" className="rs__status-title">The co-pilot at work</h2>
             <p className="rs__example">Example</p>
             <p className="rs__event">
-              <span>Amma&rsquo;s 60th</span> · <span>Chennai</span> · <span>Sat 24 Jan</span> · about 120 people
+              <span>{ex.hero.event}</span> · <span>{ex.hero.city}</span> · <span>Sat 24 Jan</span> · about {ex.hero.people} people
             </p>
             <ol className="rs__route">
-              {ROUTE.map((s, i) => (
+              {route(ex.hero.plan).map((s, i) => (
                 <li key={s.text} className={`rs__step rs__step--${s.state}`} style={{ "--i": i } as React.CSSProperties} aria-current={s.state === "now" ? "step" : undefined}>
                   <span className="rs__node" aria-hidden="true">
                     {s.state === "done" ? <Icon name="check" size={16} /> : null}
@@ -126,7 +126,7 @@ export function LandingPage() {
               <p className="rs-card__text">Everything the co-pilot does, plus people who plan it with you and are on the ground when the day needs them.</p>
             </article>
           </div>
-          <p className="rs-note">Both are coming soon.</p>
+          <p className="rs-note">Your co-pilot is free to use until launch; our team joins after launch. <Link to="/pricing">See pricing</Link>.</p>
         </div>
       </section>
 

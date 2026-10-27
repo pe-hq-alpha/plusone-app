@@ -6,6 +6,7 @@ import { useAuthActions } from "../lib/session";
 import { BRAND } from "../lib/brand";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { pendingAgreement, rememberAgreement, TERMS_VERSION } from "../lib/terms";
+import { Backdrop } from "../components/ui/Backdrop";
 
 /**
  * Sign in or create an account. The form itself is Clerk's (email and password, a code
@@ -27,7 +28,8 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
   };
 
   return (
-    <main id="main" className="grid min-h-screen place-items-center px-4 py-10">
+    <main id="main" className="relative isolate grid min-h-screen place-items-center px-4 py-10">
+      <Backdrop />
       <div className="w-full max-w-md">
         <p className="display text-4xl tracking-tight">
           <PlusOneMark />
