@@ -55,7 +55,7 @@ export type Required = "eventType" | "city" | "date" | "host";
 export function missing(f: Facts): Required[] {
   const out: Required[] = [];
   if (!f.eventType) out.push("eventType");
-  if (!f.host.trim() && !f.organisation.trim()) out.push("host");
+  if (!f.name.trim() && !f.host.trim() && !f.organisation.trim()) out.push("host");
   if (!f.city.trim()) out.push("city");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(f.date)) out.push("date");
   return out;

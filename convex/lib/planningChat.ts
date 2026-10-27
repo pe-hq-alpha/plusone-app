@@ -32,7 +32,8 @@ export function has(f: Facts, field: Field): boolean {
     case "eventType":
       return Boolean(f.eventType);
     case "host":
-      return Boolean(f.host.trim() || f.organisation.trim());
+      // What the event is called or whose it is: "Paddy and Sharmila's wedding", "Amma's 60th", a company's party.
+      return Boolean(f.name.trim() || f.host.trim() || f.organisation.trim());
     case "city":
       return Boolean(f.city.trim());
     case "date":
@@ -48,6 +49,7 @@ export function has(f: Facts, field: Field): boolean {
 const FIELD_OF: Partial<Record<keyof Facts, Field>> = {
   eventType: "eventType",
   occasionLabel: "eventType",
+  name: "host",
   host: "host",
   coHost: "host",
   organisation: "host",
@@ -186,6 +188,7 @@ export function line(f: Facts, field: Field, unsure: Field[]): string {
       return label && label.toLowerCase() !== noun.toLowerCase() ? `${label} (${noun})` : cap(noun);
     }
     case "host":
+      if (f.name.trim()) return `Called ${f.name.trim()}`;
       if (f.organisation.trim() && !f.host.trim()) return `Held by ${f.organisation.trim()}`;
       return `Hosted by ${[f.host.trim(), f.coHost.trim()].filter(Boolean).join(" and ")}${f.organisation.trim() ? ` for ${f.organisation.trim()}` : ""}`;
     case "city":
@@ -203,8 +206,8 @@ const QUESTION: Record<Field, (f: Facts) => string> = {
   eventType: () => "What are you planning, and who is it for? A 60th birthday, a griha pravesam, an office party: in your own words.",
   host: (f) =>
     isWork(f.eventType)
-      ? "Which company, team or college is holding it, and who is organising it?"
-      : "Who's hosting? Your name, and anyone hosting with you.",
+      ? "What should we call it? Usually the company, team or college and the occasion, like the Acme Diwali party."
+      : "What should we call it? Whose event is it, like Paddy and Sharmila's wedding or Amma's 60th.",
   city: () => "Which city is it in? The neighbourhood helps too, if you know it.",
   date: () => "When is it? A date if you have one, or the month if it isn't fixed yet.",
   guests: () => "Roughly how many people are you expecting? \"Not sure\" is fine.",

@@ -10,6 +10,7 @@ import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
 import { occasionNoun } from "../../convex/lib/occasion";
 import { Backdrop } from "../components/ui/Backdrop";
+import { eventCover } from "../lib/eventCover";
 
 /** Each card is nudged a degree or two off square, like prints on a board. */
 const TILTS = ["-2.5deg", "1.8deg", "-1.2deg", "2.4deg", "-1.9deg", "1.3deg"];
@@ -118,10 +119,10 @@ export function HomePage() {
                   className="polaroid group block w-[21rem] hover:-translate-y-1.5 hover:rotate-0 hover:shadow-[0_30px_56px_-22px_rgb(var(--shadow-rgb)/0.5)]"
                   style={{ transform: `rotate(${TILTS[i % TILTS.length]})` }}
                 >
-                  {/* A quiet monogram rather than a stock photograph: the event's initial and its kind. */}
-                  <span aria-hidden="true" className="flex aspect-[16/7] flex-col items-center justify-center gap-1 rounded-[3px] bg-accent-soft/70">
-                    <span className="display text-[2.6rem] leading-none text-accent">{event.name.trim().charAt(0).toUpperCase() || "+"}</span>
-                    <span className="text-[0.72rem] uppercase tracking-[0.14em] text-quiet">
+                  {/* A celebration photo for the kind of event, with the kind on it, so no card opens blank. */}
+                  <span aria-hidden="true" className="relative block aspect-[16/7] overflow-hidden rounded-[3px] bg-accent-soft/70">
+                    <img src={eventCover(event.eventType)} alt="" loading="lazy" decoding="async" className="size-full object-cover" />
+                    <span className="absolute bottom-2 left-2 rounded-full bg-paper/85 px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.12em] text-ink">
                       {event.occasionLabel?.trim() || occasionNoun(event)}
                     </span>
                   </span>

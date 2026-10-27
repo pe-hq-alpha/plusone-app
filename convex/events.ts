@@ -4,7 +4,7 @@ import { ConvexError, v, type ObjectType } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query, type MutationCtx } from "./_generated/server";
-import { logActivity, requireAccount, requireMember, requireUserId } from "./lib/auth";
+import { logActivity, requireAccount, requireMember, requireUserId, nameFromEmail } from "./lib/auth";
 import { rebalanceEventBudget } from "./lib/budget";
 import { clearDraft } from "./drafts";
 import { INBOX_READY_TEXT } from "./activity";
@@ -302,9 +302,15 @@ export async function insertEvent(
       if (!file?.contentType?.startsWith("image/")) throw new ConvexError("Inspiration uploads must be pictures.");
     }
 
+    // Nobody named in it ("our office party"): emails are signed with the account holder's own name.
+    let host = args.host.trim();
+    if (!host && !args.coHost.trim()) {
+      const user = await ctx.db.get("users", userId);
+      host = (user?.name?.trim() || nameFromEmail(user?.email) || "").split(/\s+/)[0] ?? "";
+    }
     const eventId = await ctx.db.insert("events", {
       name: args.name.trim(),
-      host: args.host.trim(),
+      host,
       coHost: args.coHost.trim(),
       startDate: args.startDate,
       endDate: args.endDate,
