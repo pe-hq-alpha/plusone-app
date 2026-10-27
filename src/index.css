@@ -241,7 +241,7 @@ a { text-underline-offset: 0.2em; }
   -webkit-mask-image: radial-gradient(72% 70% at 50% 42%, transparent 48%, #000 96%);
   mask-image: radial-gradient(72% 70% at 50% 42%, transparent 48%, #000 96%);
 }
-:root:not([data-theme="dark"]) .backdrop { filter: invert(1) hue-rotate(180deg) saturate(1.7) contrast(1.6) brightness(1.12); mix-blend-mode: multiply; opacity: 0.9; }
+:root:not([data-theme="dark"]) .backdrop { filter: invert(1) hue-rotate(20deg) saturate(0.9) contrast(1.8) brightness(1.1); mix-blend-mode: multiply; opacity: 0.9; }
 .backdrop--quiet { opacity: 0.35; }
 .backdrop--contained { position: absolute; }
 :root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.45; }
