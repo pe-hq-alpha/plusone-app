@@ -298,3 +298,41 @@
   .rs__fan img { position: static; width: calc((100% - 20px) / 3); max-height: 300px; border-radius: 14px; }
   .rs__fan img:nth-child(n) { transform: none; }
 }
+
+/* ---- Motion ---------------------------------------------------------------------------
+   The hero rises in on arrival, the three photos are dealt in and then float, the drawing
+   drifts slowly, and each section below rises into place as it scrolls into view. Under
+   reduced motion all of it is simply there. */
+@keyframes rs-rise { from { opacity: 0; translate: 0 16px; } to { opacity: 1; translate: 0 0; } }
+@keyframes rs-deal { from { opacity: 0; translate: 0 40px; scale: 0.92; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes rs-float { from { translate: 0 0; } to { translate: 0 -7px; } }
+@keyframes rs-drift { from { scale: 1; translate: 0 0; } to { scale: 1.045; translate: -0.8% -1%; } }
+
+.rs__title, .rs__lede, .rs__actions, .rs__status-title, .rs__example, .rs__event {
+  animation: rs-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rs__lede { animation-delay: 140ms; }
+.rs__actions { animation-delay: 280ms; }
+.rs__status-title { animation-delay: 80ms; }
+.rs__example, .rs__event { animation-delay: 160ms; }
+
+.rs__fan img { animation: rs-deal 900ms cubic-bezier(0.16, 1, 0.3, 1) both, rs-float 5.5s ease-in-out infinite alternate; transition: scale 300ms ease; }
+.rs__fan img:nth-child(1) { animation-delay: 420ms, 1.4s; }
+.rs__fan img:nth-child(2) { animation-delay: 540ms, 2.2s; animation-duration: 900ms, 6.4s; }
+.rs__fan img:nth-child(3) { animation-delay: 660ms, 1.8s; animation-duration: 900ms, 5.9s; }
+.rs__fan img:hover { scale: 1.04; z-index: 2; }
+
+.rs__plate img, .rs-close::before { animation: rs-drift 38s ease-in-out infinite alternate; transform-origin: 50% 70%; }
+
+.rs-photo img { transition: scale 700ms cubic-bezier(0.16, 1, 0.3, 1); }
+.rs-photo:hover img { scale: 1.06; }
+
+/* Set by the page once it knows motion is welcome (LandingPage), so nothing is hidden without it. */
+.lp-motion .rs-reveal { opacity: 0; translate: 0 22px; transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1), translate 800ms cubic-bezier(0.16, 1, 0.3, 1); transition-delay: var(--rs-d, 0ms); }
+.lp-motion .rs-reveal.is-in { opacity: 1; translate: 0 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rs__title, .rs__lede, .rs__actions, .rs__status-title, .rs__example, .rs__event,
+  .rs__fan img, .rs__plate img, .rs-close::before { animation: none; }
+  .rs-photo img, .rs__fan img { transition: none; }
+}

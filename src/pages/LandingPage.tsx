@@ -1,4 +1,5 @@
 import type React from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Icon } from "../components/landing/Icon";
 import "../landing.css";
@@ -50,8 +51,41 @@ const KINDS = [
   { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
 ];
 
+/** What rises into place as it scrolls into view, and the parent whose children step in one after another. */
+const REVEAL = ".rs-sec .rs-h2, .rs-sec .rs-lede, .rs-line__stop, .rs-card, .rs-kinds__group, .rs-photo, .rs-compare, .rs-close__inner > *";
+
+/** Sections rise into place as they come into view; nothing is hidden when motion is unwelcome or unsupported. */
+function useReveal() {
+  useEffect(() => {
+    const root = document.querySelector(".lp");
+    if (!root || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const items = [...root.querySelectorAll<HTMLElement>(REVEAL)];
+    items.forEach((el) => {
+      const siblings = [...(el.parentElement?.children ?? [])].filter((c) => c.matches(REVEAL));
+      el.style.setProperty("--rs-d", `${Math.max(0, siblings.indexOf(el)) * 90}ms`);
+      el.classList.add("rs-reveal");
+    });
+    const seen = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("is-in");
+        seen.unobserve(e.target);
+      }),
+      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" },
+    );
+    root.classList.add("lp-motion");
+    items.forEach((el) => seen.observe(el));
+    return () => {
+      seen.disconnect();
+      root.classList.remove("lp-motion");
+      items.forEach((el) => el.classList.remove("rs-reveal", "is-in"));
+    };
+  }, []);
+}
+
 export function LandingPage() {
   const ex = examplesFor(useRegion());
+  useReveal();
 
   return (
     <div className="lp">
