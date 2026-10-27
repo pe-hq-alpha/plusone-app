@@ -14,7 +14,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-389_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-394_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -65,7 +65,7 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 
 ## How it works
 
-<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' beside an example of the co-pilot at work for Amma's 60th in Chennai">
+<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, beside an example of the co-pilot at work for Mom's 60th in Austin">
 
 1. **Talk it through.** "Amma's 60th in Chennai, a homam at home and lunch for about 120." PlusOne asks for whatever it still needs, one thing at a time, reads everything back for you to confirm, and points out anything that can't be right, like a weekday that doesn't match the date or a budget missing a zero. It builds the plan only once every line is confirmed. The model only reads each message; what to ask next and when the plan is ready are fixed rules (`/new`, `convex/planningChat.ts`, with the rules in `convex/lib/planningChat.ts`). A manual form at `/new/manual` does the same step by step.
 2. **Open on Today.** The app opens on the co-pilot's route through the event: what is **done**, what is **under way**, what is **over to you** and what is **up next**, each with the button that finishes it. It is read straight from the plan, so it is instant and never disagrees with the pages it links to (`src/pages/TodayPage.tsx`, `convex/copilot.ts`). A box beside it takes a change or a question in plain words: "we're now 140 people", "find us a photographer".
@@ -101,7 +101,8 @@ The rest of the app:
 - **People planning together:** owner, planner and viewer roles, with single-use invite links that can be revoked.
 - **Emails from PlusOne:** a weekly update on Fridays that skips quiet weeks, with a way to stop it.
 - **A guided tour**, "Show me around", that points at the real controls on each page.
-- **Dark ink and marigold by default**, with a light theme of ink blue on ivory; pick Light, Dark or Device. A new event's currency follows where the visitor is, so money shows in rupees in India and dollars in the US.
+- **Dark ink and marigold by default**, with a light theme of ink blue on ivory; pick Light, Dark or Device, and the choice carries between the home page and the app. The same gold line drawing frames the home page, sign-in and the public pages, and sits faintly behind the app. A new event's currency, and the home page's example, follow where the visitor is, so money shows in rupees in India and dollars in the US.
+- **Pricing**, at [/pricing](https://plusoneevents.site/pricing): Co-pilot is free to use until launch, then ₹1,000 or $10 a month; Assisted, where a person from the PlusOne team plans with you and is on call any time, opens after launch at ₹2,500 or $25 a month (`src/pages/PricingPage.tsx`, prices in `src/lib/pricing.ts`).
 - **It installs on a phone like an app**, and a link shared to it from another app lands in a Space.
 
 ## Care taken
@@ -123,7 +124,7 @@ The rest of the app:
 |---|---|---|---|
 | Muse Spark in production | A made-up guest reply ("Both of us will come. My husband is allergic to peanuts.") read by `muse-spark-1.3` through the production backend: coming, 2 people, the peanut allergy caught, valid structured output first time; 1,214 tokens in, 880 out, $0.0053, written to `modelCalls` | 27 Oct 2026 | `npx convex run claude:readRsvpReply` against production |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 389 passed in 40 files, including the quote comparison, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 27 Oct 2026 | `npm test` |
+| Tests | 394 passed in 42 files, including the quote comparison, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 27 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 27 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
