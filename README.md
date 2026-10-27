@@ -14,7 +14,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-394_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-405_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -62,9 +62,10 @@ PlusOne placed second at Convex's All Gas hackathon. For the Meta Global AI Deve
 |---|---|---|
 | **Muse Spark 1.3** (Meta Model API) | Every reading and writing step: the planning conversation, search plans and vendor ranking, inquiries and follow-ups, quotes in replies and PDFs, RSVPs, guest-list imports, palettes and the "Tell PlusOne" box. Structured answers come back as JSON Schema, checked against the same Zod schemas | Live in production since 27 Oct 2026 |
 | **Muse Voice Transcribe** | The voice brief: a family speaks the plan in Tamil, Hindi or English; a vendor talks through what they offer | Hackathon build |
-| **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Hackathon build |
+| **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Adapter built and tested (`convex/lib/sam.ts`: one concept or up to 16 tapped objects, masks read with `@meta-sam/parser`); the venue view is next |
 | **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Hackathon build |
 | **Muse Spark Open** (open weights, on Baseten) | Batch jobs: seeding the vendor directory from public listings, and turning pooled quotes, without names, into market ranges | Hackathon build |
+| **Muse Code** (Meta's coding agent) | Builds bounded pieces of PlusOne from a written brief, which are then reviewed and tested before they are committed; the first was the SAM 3.1 adapter. Every session is logged in [`devlog.md`](devlog.md#muse-code) | In use since 27 Oct 2026 |
 
 Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=meta` with a Model API key sends it to Meta; calls retry on 429, 500 and 503, honouring `Retry-After`, and a call Meta can't answer moves to Claude, with the switch logged. A request Meta rejects as malformed is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and list-price cost, so spend is known per feature and per day.
 
@@ -129,7 +130,7 @@ The rest of the app:
 |---|---|---|---|
 | Muse Spark in production | A made-up guest reply ("Both of us will come. My husband is allergic to peanuts.") read by `muse-spark-1.3` through the production backend: coming, 2 people, the peanut allergy caught, valid structured output first time; 1,214 tokens in, 880 out, $0.0053, written to `modelCalls` | 27 Oct 2026 | `npx convex run claude:readRsvpReply` against production |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 394 passed in 42 files, including the quote comparison, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 27 Oct 2026 | `npm test` |
+| Tests | 405 passed in 43 files, including the quote comparison, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 27 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 27 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
