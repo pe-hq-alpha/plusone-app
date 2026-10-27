@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { internal } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
 import type { ActionCtx } from "../_generated/server";
 import { claudeComplete } from "./claude";
 import { MetaError, metaComplete } from "./meta";
@@ -49,6 +50,8 @@ type CallInput = {
   ctx: Pick<ActionCtx, "runMutation">;
   /** What the call is for, as it appears in Admin's spend view, e.g. "planSearch". */
   feature: string;
+  /** The event it is for, when there is one, so the event's "Under the hood" view can list it. */
+  eventId?: Id<"events">;
   /** The tier, `MODEL_FAST` or `MODEL_SMART`. */
   model: Tier;
   maxOutputTokens?: number;
@@ -188,9 +191,13 @@ type Served = Pick<Completion, "provider" | "model" | "usage">;
  */
 async function completeAndRecord(input: CallInput, req: CompletionRequest): Promise<Completion> {
   const chosen = chosenProvider();
+  const started = Date.now();
   const completion = await complete(req, chosen);
   try {
-    await input.ctx.runMutation(internal.modelCalls.record, callRecord(input.feature, chosen, completion));
+    await input.ctx.runMutation(
+      internal.modelCalls.record,
+      callRecord(input.feature, chosen, completion, { eventId: input.eventId, durationMs: Date.now() - started }),
+    );
   } catch (error) {
     console.warn(`Could not record the ${input.feature} model call: ${error instanceof Error ? error.message : String(error)}`);
   }

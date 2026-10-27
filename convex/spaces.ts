@@ -921,6 +921,8 @@ export const suggestPalette = action({
       ctx,
 
       feature: "suggestPalette",
+
+      eventId: args.eventId,
       model: MODEL_FAST,
       schema: z.object({
         palettes: z

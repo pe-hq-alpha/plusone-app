@@ -110,6 +110,7 @@ export const summariseStyle = internalAction({
     const { text } = await generateText({
       ctx,
       feature: "summariseStyle",
+      eventId: args.eventId,
       model: MODEL_FAST,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       messages: [
@@ -185,6 +186,7 @@ export const planSearch = internalAction({
       const { object } = await generateObject({
         ctx,
         feature: "planSearch",
+        eventId: args.eventId,
         model: MODEL_FAST,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: z.object({
@@ -301,6 +303,7 @@ export const buildCards = internalAction({
       const { object } = await generateObject({
         ctx,
         feature: "buildCards",
+        eventId: args.eventId,
         model: MODEL_FAST,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: cardSchema,
@@ -421,6 +424,7 @@ export const rankVendors = internalAction({
     const { object } = await generateObject({
       ctx,
       feature: "rankVendors",
+      eventId: slot.eventId,
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: rankingSchema,
@@ -495,6 +499,7 @@ export const draftInquiries = internalAction({
       const { object } = await generateObject({
         ctx,
         feature: "draftInquiries",
+        eventId: slot.eventId,
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: z.object({ subject: z.string().max(70), bodyText: z.string() }),
@@ -632,6 +637,7 @@ export const decideVendorReply = internalAction({
     const { object } = await generateObject({
       ctx,
       feature: "decideVendorReply",
+      eventId: args.eventId,
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: vendorDecisionSchema,
@@ -671,6 +677,7 @@ export const writeVendorReply = internalAction({
     const { object } = await generateObject({
       ctx,
       feature: "writeVendorReply",
+      eventId: args.eventId,
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: z.object({ bodyText: z.string() }),
@@ -726,6 +733,7 @@ export const writeAgentEmail = internalAction({
     const { object } = await generateObject({
       ctx,
       feature: "writeAgentEmail",
+      eventId: args.eventId,
       model: MODEL_SMART,
       maxOutputTokens: MAX_OUTPUT_TOKENS,
       schema: z.object({ bodyText: z.string() }),
@@ -816,6 +824,7 @@ async function readVendorReply(ctx: ActionCtx, args: {
   const { object } = await generateObject({
     ctx,
     feature: "readVendorReply",
+    eventId: args.event._id,
     model: MODEL_SMART,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
     schema: replySchema,
@@ -1124,7 +1133,7 @@ export const parseRsvp = internalAction({
  * outputs handle `oneOf` badly, and the codebase already leans on nullable fields.
  */
 const proposalSchema = z.object({
-  kind: z.enum(["add_guest", "add_need", "research", "set_budget", "add_session", "write_vendor"]),
+  kind: z.enum(["add_guest", "add_need", "research", "set_budget", "add_session", "set_guests", "set_time", "write_vendor"]),
   label: z.string().describe("one short line naming the action, e.g. 'Add Meera Iyer to the guest list'"),
   why: z.string().nullable().describe("one sentence on why you are offering it, from what they just said"),
 
@@ -1156,7 +1165,8 @@ const proposalSchema = z.object({
 
   // add_event
   date: z.string().nullable().describe("for add_session: the date as YYYY-MM-DD"),
-  guestCount: z.number().nullable().describe("for add_session: roughly how many people"),
+  guestCount: z.number().nullable().describe("for add_session: roughly how many people; for set_guests: the new number of people expected"),
+  startTime: z.string().nullable().describe("for set_time: the new start time as 24-hour HH:MM, e.g. 13:00 for 1 pm"),
   budgetShare: z.number().nullable().describe("for add_session: roughly what share of the budget; a weight, not an amount"),
 
   // write_vendor
@@ -1246,6 +1256,22 @@ function resolveProposal(p: Proposal, board: BoardContext): Record<string, unkno
       }
       return { ...base, budgetTarget: "total", amount };
     }
+    case "set_guests": {
+      const count = p.guestCount;
+      if (count === null || !Number.isFinite(count) || count < 1 || count > 100_000) return null;
+      // No days named means every day, so the card always says which days it changes.
+      const days = sessions.length ? sessions : board.sessions;
+      if (!days.length) return null;
+      return { ...base, guestCount: Math.round(count), sessionIds: days.map((e) => e.sessionId), sessionNames: days.map((e) => e.name) };
+    }
+    case "set_time": {
+      const time = p.startTime?.trim() ?? "";
+      if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return null;
+      // A time belongs to one part; with none named it is only clear when there is just one.
+      const day = sessions[0] ?? matchByName(board.sessions, p.sessionName, (e) => e.name) ?? (board.sessions.length === 1 ? board.sessions[0] : undefined);
+      if (!day) return null;
+      return { ...base, startTime: time, sessionIds: [day.sessionId], sessionNames: [day.name] };
+    }
     case "add_session": {
       const name = (p.sessionName ?? p.title)?.trim();
       if (!name || !p.date || !/^\d{4}-\d{2}-\d{2}$/.test(p.date)) return null;
@@ -1311,6 +1337,7 @@ export const answerQuestion = internalAction({
       const { object } = await generateObject({
         ctx,
         feature: "answerQuestion",
+        eventId: args.eventId,
         model: MODEL_SMART,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: assistantSchema,
@@ -1323,9 +1350,12 @@ export const answerQuestion = internalAction({
           (board.context
             ? `They asked while looking at ${board.context}, so read short or vague questions as being about that.\n\n`
             : "") +
-          `You can offer to do six things, as proposals: add a guest, add a vendor need, search the web for vendors for ` +
-          `an existing need, change a budget (the total, one day, or one need), add a day to the plan, or write to a ` +
-          `vendor you are already emailing. You never do any of them yourself — each becomes a card the hosts press ` +
+          `You can offer to do eight things, as proposals: add a guest, add a vendor need, search the web for vendors for ` +
+          `an existing need, change a budget (the total, one day, or one need), add a day to the plan, change how many ` +
+          `people are expected (set_guests, for named parts or, with none named, all of them), change when a part starts ` +
+          `(set_time, naming the part), or write to a vendor you are already emailing. When they state a new fact about ` +
+          `the plan ("we're now 140 people", "move lunch to 1 pm"), propose the change rather than asking whether they ` +
+          `want it. You never do any of them yourself — each becomes a card the hosts press ` +
           `to confirm, and they can edit it first. Only propose what they clearly asked for, at most two or three at a ` +
           `time, and say in one line what you are offering. Name an existing need, day or vendor EXACTLY as it appears ` +
           `below, or the card cannot be made.\n` +
@@ -1489,6 +1519,7 @@ export const draftFirstPlan = internalAction({
       const { object } = await generateObject({
         ctx,
         feature: "draftFirstPlan",
+        eventId: args.eventId,
         model: MODEL_SMART,
         schema: z.object({
           ceremonies: z.array(

@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { callRecord, costUsd } from "./lib/modelCost";
 import { generateText } from "./lib/models";
 import schema from "./schema";
@@ -92,5 +92,32 @@ describe("the cost record", () => {
     expect(text).toBe("Warm and simple.");
     expect(warn).toHaveBeenCalledWith(expect.stringContaining("summariseStyle"));
     warn.mockRestore();
+  });
+});
+
+describe("under the hood", () => {
+  it("lists an event's calls, newest first, with the model, time and cost, to people on the event only", async () => {
+    const t = convexTest(schema, modules);
+    const { eventId, memberId, strangerId } = await t.run(async (ctx) => {
+      const memberId = await ctx.db.insert("users", { email: "meera@example.com", name: "Meera" });
+      const strangerId = await ctx.db.insert("users", { email: "someone@example.com", name: "Someone" });
+      const eventId = await ctx.db.insert("events", {
+        name: "Aarav's 1st birthday", host: "Meera", coHost: "", startDate: "2027-01-24", endDate: "2027-01-24", city: "Mumbai",
+        currency: "INR", totalBudget: 300000, eventType: "birthday", createdBy: memberId,
+      });
+      await ctx.db.insert("members", { eventId, userId: memberId, role: "viewer" });
+      return { eventId, memberId, strangerId };
+    });
+    const ctx = { runMutation: (_ref: unknown, row: Record<string, unknown>) => t.mutation(internal.modelCalls.record, row as never) };
+    metaAnswers("Planned.");
+    await generateText({ ctx: ctx as never, feature: "draftFirstPlan", eventId, model: "fast", prompt: "Plan it." });
+    metaAnswers("Answered.");
+    await generateText({ ctx: ctx as never, feature: "answerQuestion", eventId, model: "smart", prompt: "What next?" });
+
+    const calls = await t.withIdentity({ subject: `${memberId}|s` }).query(api.modelCalls.forEvent, { eventId });
+    expect(calls.map((c) => c.feature)).toEqual(["answerQuestion", "draftFirstPlan"]);
+    expect(calls[0]).toMatchObject({ provider: "meta", model: "muse-spark-1.3", inputTokens: 2_000, outputTokens: 500, fellBack: false });
+    expect(calls[0].durationMs).toBeGreaterThanOrEqual(0);
+    await expect(t.withIdentity({ subject: `${strangerId}|s` }).query(api.modelCalls.forEvent, { eventId })).rejects.toThrow();
   });
 });

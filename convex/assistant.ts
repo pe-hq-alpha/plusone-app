@@ -31,6 +31,7 @@ const proposalEdits = v.object({
   sessionName: v.optional(v.string()),
   date: v.optional(v.string()),
   guestCount: v.optional(v.number()),
+  startTime: v.optional(v.string()),
   budgetShare: v.optional(v.number()),
   message: v.optional(v.string()),
   asWritten: v.optional(v.boolean()),
@@ -273,6 +274,37 @@ export const runProposal = mutation({
         tab = "";
         break;
       }
+      case "set_guests": {
+        const count = Math.round(Number(p.guestCount));
+        if (!Number.isFinite(count) || count < 1) throw new ConvexError("That number of people doesn't look right.");
+        const ids = (p.sessionIds as Id<"sessions">[] | undefined) ?? [];
+        if (!ids.length) throw new ConvexError("Pick at least one part of the event.");
+        const names: string[] = [];
+        for (const id of ids) {
+          const session = await ctx.db.get(id);
+          if (!session || session.eventId !== args.eventId) continue;
+          await ctx.db.patch(id, { guestCount: count });
+          names.push(session.name);
+        }
+        if (!names.length) throw new ConvexError("Those parts aren't in your plan any more.");
+        const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+        await logActivity(ctx, { eventId: args.eventId, actorUserId: userId, type: "note", text: `planned ${list} for ${count} people.` });
+        done = `${list} ${names.length === 1 ? "is" : "are"} now planned for ${count} people. Quotes compare at the new number.`;
+        tab = "";
+        break;
+      }
+      case "set_time": {
+        const time = String(p.startTime ?? "");
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) throw new ConvexError("Times are written as HH:MM.");
+        const id = ((p.sessionIds as Id<"sessions">[] | undefined) ?? [])[0];
+        const session = id ? await ctx.db.get(id) : null;
+        if (!session || session.eventId !== args.eventId) throw new ConvexError("That part isn't in your plan any more.");
+        await ctx.db.patch(session._id, { startTime: time });
+        await logActivity(ctx, { eventId: args.eventId, actorUserId: userId, type: "note", text: `moved ${session.name} to ${time}.`, refs: { sessionId: session._id } });
+        done = `${session.name} now starts at ${time}.`;
+        tab = "";
+        break;
+      }
       case "write_vendor": {
         const thread = await ctx.db.get(p.threadId as Id<"threads">);
         if (!thread || thread.eventId !== args.eventId) {
@@ -324,6 +356,8 @@ const OVERRIDABLE: Record<string, string[]> = {
   research: ["query"],
   set_budget: ["amount"],
   add_session: ["sessionName", "date", "guestCount", "budgetShare"],
+  set_guests: ["guestCount", "sessionIds"],
+  set_time: ["startTime"],
   write_vendor: ["message", "asWritten"],
 };
 

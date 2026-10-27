@@ -166,6 +166,10 @@ export const modelCallFields = {
   costUsd: v.optional(v.number()),
   /** Meta was chosen but could not answer, so Claude did. */
   fellBack: v.boolean(),
+  /** The event the call was for, when there is one; "Under the hood" lists an event's calls. */
+  eventId: v.optional(v.id("events")),
+  /** How long the call took, retries and fallback included. */
+  durationMs: v.optional(v.number()),
 };
 
 export const vendorSlotFields = {
@@ -718,7 +722,7 @@ export default defineSchema({
 
   /** One page load on the site, recorded by the Cloudflare middleware; kept 180 days (see visits.ts). */
   /** Model spend for PlusOne Admin and the field notes. */
-  modelCalls: defineTable(modelCallFields).index("by_provider", ["provider"]),
+  modelCalls: defineTable(modelCallFields).index("by_provider", ["provider"]).index("by_eventId", ["eventId"]),
 
   visits: defineTable({
     at: v.number(),

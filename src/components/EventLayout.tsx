@@ -4,7 +4,7 @@ import { NavLink, Outlet, useParams, Link, useLocation, useSearchParams } from "
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { longDate } from "../lib/format";
-import { CalendarDays, Compass, LifeBuoy, Store, Users, type LucideIcon } from "lucide-react";
+import { CalendarDays, Compass, Cpu, LifeBuoy, Store, Users, type LucideIcon } from "lucide-react";
 import type { EventType } from "../../convex/lib/validators";
 import { Icon } from "./ui/Icon";
 import { AccountMenu } from "./AccountMenu";
@@ -16,6 +16,7 @@ import { AssistantDrawer } from "./assistant/AssistantDrawer";
 import { BRAND } from "../lib/brand";
 import { PartWord, PeopleWord } from "../lib/words";
 import { Backdrop } from "./ui/Backdrop";
+import { UnderTheHood } from "./UnderTheHood";
 
 /** The sample events, by kind, for the demo banner's links. */
 const SAMPLES = [
@@ -87,6 +88,7 @@ export function EventLayout() {
   const { eventId } = useParams<{ eventId: string }>();
   const data = useQuery(api.events.get, eventId ? { eventId: eventId as Id<"events"> } : "skip");
   const [walking, setWalking] = useState(false);
+  const [hood, setHood] = useState(false);
   const [feedback, setFeedback] = useState(false);
   const [params, setParams] = useSearchParams();
   const { pathname } = useLocation();
@@ -112,9 +114,10 @@ export function EventLayout() {
   }, [waiting]);
 
   // Shown once, and only once the event is actually on screen: a tour that points at
-  // empty space explains nothing.
+  // empty space explains nothing. Never on its own in a sample event: someone trying the
+  // demo wants to look around first, and "Show me around" is one click away.
   useEffect(() => {
-    if (!data || welcoming || !shouldOfferWalkthrough()) return;
+    if (!data || welcoming || data.event.demo || !shouldOfferWalkthrough()) return;
     const t = setTimeout(() => setWalking(true), 900);
     return () => clearTimeout(t);
   }, [data, welcoming]);
@@ -183,6 +186,9 @@ export function EventLayout() {
             {/* Anyone new, signed up or in the demo, should be able to find the tour at once. */}
             <button type="button" onClick={() => setWalking(true)} title="A quick tour of the whole plan" aria-label="Show me around" className="shell-tool">
               <Icon name="star" size={17} />
+            </button>
+            <button type="button" onClick={() => setHood(true)} title="Under the hood: which model ran each step" aria-label="Under the hood" className="shell-tool">
+              <Cpu size={17} strokeWidth={1.5} aria-hidden="true" />
             </button>
             <Link to="help" title="Help" aria-label="Help" className="shell-tool">
               <LifeBuoy size={17} strokeWidth={1.5} aria-hidden="true" />
@@ -263,6 +269,7 @@ export function EventLayout() {
       </nav>
 
       {walking && <Walkthrough base={`/e/${event._id}`} eventType={event.eventType} onClose={() => setWalking(false)} />}
+      {hood && <UnderTheHood eventId={event._id} onClose={() => setHood(false)} />}
       {feedback && <FeedbackBox eventId={event._id as Id<"events">} onClose={() => setFeedback(false)} />}
     </div>
   );

@@ -24,6 +24,8 @@ const KIND_ICON: Record<string, Parameters<typeof Icon>[0]["name"]> = {
   research: "search",
   set_budget: "pen",
   add_session: "calendar",
+  set_guests: "guests",
+  set_time: "calendar",
   write_vendor: "mail",
 };
 
@@ -143,6 +145,19 @@ export function ProposalCard({
                   <Field label="Date" value={String(value("date") ?? "")} onChange={(v) => set("date", v)} type="date" />
                   <NumberField label="Headcount" value={Number(value("guestCount") ?? 0)} onChange={(v) => set("guestCount", v)} step={10} />
                   <p className="text-xs text-quiet">Its budget is a share of your total, so every other day moves a little.</p>
+                </>
+              )}
+              {kind === "set_guests" && (
+                <>
+                  <NumberField label="People expected" value={Number(value("guestCount") ?? 0)} onChange={(v) => set("guestCount", v)} step={10} />
+                  <Days sessions={sessions} selected={value("sessionIds") as string[] | undefined} onChange={(ids) => set("sessionIds", ids)} />
+                  <p className="text-xs text-quiet">Quotes are compared at the new number; nothing is sent to vendors.</p>
+                </>
+              )}
+              {kind === "set_time" && (
+                <>
+                  <p className="text-xs text-muted">{String((p.sessionNames as string[] | undefined)?.[0] ?? "This part")}</p>
+                  <Field label="Starts at" value={String(value("startTime") ?? "")} onChange={(v) => set("startTime", v)} type="time" />
                 </>
               )}
               {kind === "write_vendor" && (

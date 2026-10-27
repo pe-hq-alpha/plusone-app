@@ -1,8 +1,9 @@
+import type { Id } from "../_generated/dataModel";
 import type { Completion, Provider } from "./modelShared";
 
 /**
- * List prices per million tokens, in US dollars. Meta's are from docs/meta-api-reference.md
- * (Price table, re-read 27 Oct); reasoning tokens are billed as output there. Claude's are
+ * List prices per million tokens, in US dollars. Meta's are from https://dev.meta.ai/docs/pricing-rate-limits
+ * (re-read 27 Oct); reasoning tokens are billed as output there. Claude's are
  * Anthropic's first-party rates. A model that isn't listed is recorded without a cost.
  */
 type Price = { input: number; output: number; /** Above this many input tokens, `long` applies. */ longAfter?: number; long?: { input: number; output: number } };
@@ -25,7 +26,12 @@ export function costUsd(model: string, usage: Completion["usage"]): number | und
 }
 
 /** The `modelCalls` row for a finished call. */
-export function callRecord(feature: string, chosen: Provider, served: Completion) {
+export function callRecord(
+  feature: string,
+  chosen: Provider,
+  served: Completion,
+  extra: { eventId?: Id<"events">; durationMs?: number } = {},
+) {
   const cost = costUsd(served.model, served.usage);
   return {
     feature,
@@ -35,5 +41,7 @@ export function callRecord(feature: string, chosen: Provider, served: Completion
     outputTokens: served.usage.outputTokens,
     ...(cost === undefined ? {} : { costUsd: cost }),
     fellBack: chosen === "meta" && served.provider === "claude",
+    ...(extra.eventId ? { eventId: extra.eventId } : {}),
+    ...(extra.durationMs !== undefined ? { durationMs: Math.round(extra.durationMs) } : {}),
   };
 }
