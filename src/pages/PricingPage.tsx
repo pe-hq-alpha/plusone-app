@@ -11,7 +11,7 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
   {
     id: "copilot",
     name: "Co-pilot",
-    line: `${BRAND.name} plans with you and does the legwork.`,
+    line: "An all-in-one planner app, fully powered by AI: it plans with you and does the legwork.",
     status: "Free until launch",
     when: "a month from launch",
     includes: [
@@ -51,7 +51,7 @@ export function PricingPage() {
         <PlusOneMark />
       </Link>
       <h1 className="mt-6 text-3xl">Pricing</h1>
-      <p className="mt-2 max-w-2xl text-muted">Two ways to plan: do it yourself with the co-pilot, or have someone from the {BRAND.name} team do it with you.</p>
+      <p className="mt-2 max-w-2xl text-muted">Two ways to plan: an all-in-one planner app, fully powered by AI, or someone from the {BRAND.name} team planning it with you.</p>
 
       <section className="card mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="free-now">
         <div>
