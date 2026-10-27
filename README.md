@@ -19,23 +19,28 @@
 
 <table align="center">
 <tr>
-<td align="center" width="190"><img src="assets/logos/meta.svg" width="56" height="56" alt="Meta"><br><b>Meta Muse Spark</b><br><sub>The reading and writing. Plans, vendor emails, quotes and replies, on Meta's Model API.</sub></td>
-<td align="center" width="190"><img src="assets/logos/convex.svg" width="56" height="56" alt="Convex"><br><b>Convex</b><br><sub>The platform. Database, server functions, workflows, scheduling and webhooks in one.</sub></td>
-<td align="center" width="190"><img src="assets/logos/firecrawl.png" width="56" height="56" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>The search. Reads vendors' own websites, down to their pricing pages.</sub></td>
-<td align="center" width="190"><img src="assets/logos/agentmail.png" width="56" height="56" alt="AgentMail"><br><b>AgentMail</b><br><sub>The event's inbox. Every event gets its own address.</sub></td>
+<td align="center" width="200"><img src="assets/logos/meta.svg" width="52" height="52" alt="Meta"><br><b>Meta Muse Spark</b><br><sub>The reading and writing. Plans, vendor emails, quotes and replies, on Meta's Model API.</sub></td>
+<td align="center" width="200"><img src="assets/logos/claude.svg" width="52" height="52" alt="Claude"><br><b>Claude</b><br><sub>The fallback. Takes any call Meta can't answer, so nothing stalls.</sub></td>
+<td align="center" width="200"><img src="assets/logos/convex.svg" width="52" height="52" alt="Convex"><br><b>Convex</b><br><sub>The platform. Database, server functions, workflows, scheduling and webhooks in one.</sub></td>
+</tr>
+<tr>
+<td align="center" width="200"><img src="assets/logos/firecrawl.png" width="52" height="52" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>The search. Reads vendors' own websites, down to their pricing pages.</sub></td>
+<td align="center" width="200"><img src="assets/logos/agentmail.png" width="52" height="52" alt="AgentMail"><br><b>AgentMail</b><br><sub>The event's inbox. Every event gets its own address.</sub></td>
+<td align="center" width="200"><img src="assets/logos/clerk.svg" width="52" height="52" alt="Clerk"><br><b>Clerk</b><br><sub>The sign-in. One account for planners, and later for vendors and staff.</sub></td>
+</tr>
+<tr>
+<td align="center" width="200"><img src="assets/logos/resend.svg" width="52" height="52" alt="Resend"><br><b>Resend</b><br><sub>The app's own email. The weekly update and account mail.</sub></td>
+<td align="center" width="200"><img src="assets/logos/posthog.svg" width="52" height="52" alt="PostHog"><br><b>PostHog</b><br><sub>The usage counts. What people do, never what they write, only with consent.</sub></td>
+<td align="center" width="200"><img src="assets/logos/cloudflare.svg" width="52" height="52" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>The edge. Serves the site fast from India and everywhere else.</sub></td>
 </tr>
 </table>
 
 ![Muse Spark](https://img.shields.io/badge/Muse_Spark-1.3-0467df?style=flat-square&logo=meta&logoColor=white&labelColor=11141c)
-![Claude](https://img.shields.io/badge/Claude-fallback-d97757?style=flat-square&logo=claude&logoColor=white&labelColor=11141c)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react&logoColor=white&labelColor=11141c)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat-square&logo=typescript&logoColor=white&labelColor=11141c)
 ![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat-square&logo=vite&logoColor=white&labelColor=11141c)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white&labelColor=11141c)
 ![Convex](https://img.shields.io/badge/Convex-1.45-ee342f?style=flat-square&labelColor=11141c)
-![Clerk](https://img.shields.io/badge/Clerk-sign--in-6c47ff?style=flat-square&logo=clerk&logoColor=white&labelColor=11141c)
-![Resend](https://img.shields.io/badge/Resend-app_email-000000?style=flat-square&logo=resend&logoColor=white&labelColor=11141c)
-![PostHog](https://img.shields.io/badge/PostHog-usage-f54e00?style=flat-square&logo=posthog&logoColor=white&labelColor=11141c)
 
 </div>
 
@@ -65,7 +70,7 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 
 ## How it works
 
-<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, beside an example of the co-pilot at work for Mia's 1st birthday in Austin">
+<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, with three celebration photos under the buttons, beside an example of the co-pilot at work for Mia's 1st birthday in Austin">
 
 1. **Talk it through.** "Amma's 60th in Chennai, a homam at home and lunch for about 120." PlusOne asks for whatever it still needs, one thing at a time, reads everything back for you to confirm, and points out anything that can't be right, like a weekday that doesn't match the date or a budget missing a zero. It builds the plan only once every line is confirmed. The model only reads each message; what to ask next and when the plan is ready are fixed rules (`/new`, `convex/planningChat.ts`, with the rules in `convex/lib/planningChat.ts`). A manual form at `/new/manual` does the same step by step.
 2. **Open on Today.** The app opens on the co-pilot's route through the event: what is **done**, what is **under way**, what is **over to you** and what is **up next**, each with the button that finishes it. It is read straight from the plan, so it is instant and never disagrees with the pages it links to (`src/pages/TodayPage.tsx`, `convex/copilot.ts`). A box beside it takes a change or a question in plain words: "we're now 140 people", "find us a photographer".
@@ -101,7 +106,7 @@ The rest of the app:
 - **People planning together:** owner, planner and viewer roles, with single-use invite links that can be revoked.
 - **Emails from PlusOne:** a weekly update on Fridays that skips quiet weeks, with a way to stop it.
 - **A guided tour**, "Show me around", that points at the real controls on each page.
-- **Dark ink and marigold by default**, with a light theme of ink blue on ivory; pick Light, Dark or Device, and the choice carries between the home page and the app. The same gold line drawing frames the home page, sign-in and the public pages, and sits faintly behind the app. A new event's currency, and the home page's example, follow where the visitor is, so money shows in rupees in India and dollars in the US.
+- **Dark ink and marigold by default**, with a light theme of ink blue on ivory; pick Light, Dark or Device, and the choice carries between the home page and the app. The same line drawing, marigold at night and ink blue by day, frames the home page, sign-in and the public pages, and sits faintly behind the app; the home page moves gently, with the hero rising in and sections rising into view. A new event's currency, and the home page's example, follow where the visitor is, so money shows in rupees in India and dollars in the US.
 - **Pricing**, at [/pricing](https://plusoneevents.site/pricing): Co-pilot is free to use until launch, then ₹1,000 or $10 a month; Assisted, where a person from the PlusOne team plans with you and is on call any time, opens after launch at ₹2,500 or $25 a month (`src/pages/PricingPage.tsx`, prices in `src/lib/pricing.ts`).
 - **It installs on a phone like an app**, and a link shared to it from another app lands in a Space.
 
