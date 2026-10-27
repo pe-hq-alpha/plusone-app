@@ -9,3 +9,6 @@ export const GRIEVANCE_OFFICER = {
 
 /** The date the current Privacy Policy and Terms took effect. */
 export const LEGAL_EFFECTIVE = "26 October 2026";
+
+/** The last change to the Privacy Policy: Meta reads and writes, with Anthropic as a backup. */
+export const PRIVACY_UPDATED = "27 October 2026";

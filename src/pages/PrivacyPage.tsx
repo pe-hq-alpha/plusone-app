@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { PlusOneMark } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
-import { GRIEVANCE_OFFICER, LEGAL_EFFECTIVE } from "../lib/legal";
+import { GRIEVANCE_OFFICER, LEGAL_EFFECTIVE, PRIVACY_UPDATED } from "../lib/legal";
 import { setConsent, useConsent } from "../lib/analytics/consent";
 import { ANALYTICS_ENABLED } from "../lib/analytics/client";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
@@ -37,7 +37,7 @@ export function PrivacyPage() {
         <PlusOneMark />
       </Link>
       <h1 className="mt-6 text-[2.2rem] leading-tight">Privacy</h1>
-      <p className="mt-2 text-sm text-muted">Effective {LEGAL_EFFECTIVE}. Last updated {LEGAL_EFFECTIVE}.</p>
+      <p className="mt-2 text-sm text-muted">Effective {LEGAL_EFFECTIVE}. Last updated {PRIVACY_UPDATED}.</p>
 
       <div className="mt-8 grid gap-6 text-[0.98rem] leading-relaxed">
         <Section title="Who we are">
@@ -63,8 +63,8 @@ export function PrivacyPage() {
         <Section title="Allergies and dietary needs">
           <p className="mt-2 text-muted">
             A guest&rsquo;s allergies and dietary needs are health information. They are used only to brief the vendors who
-            serve food and drink, as numbers and allergens, never with a guest&rsquo;s name. Anthropic handles them only to
-            read guests&rsquo; replies and, as those counts without names, to write to food vendors.
+            serve food and drink, as numbers and allergens, never with a guest&rsquo;s name. Meta, or Anthropic as a backup,
+            handles them only to read guests&rsquo; replies and, as those counts without names, to write to food vendors.
           </p>
         </Section>
 
@@ -88,18 +88,20 @@ export function PrivacyPage() {
         <Section title="The services behind it">
           <p className="mt-2 text-muted">
             {BRAND.name} runs on Convex, which stores your plan, and Cloudflare, which serves the site. Clerk handles sign-in.
-            Anthropic reads vendor and guest replies and writes emails. Firecrawl reads vendors&rsquo; own web pages. AgentMail
+            Meta reads vendor and guest replies and writes emails, with Anthropic as a backup. Firecrawl reads vendors&rsquo; own
+            web pages. AgentMail
             sends and receives your event&rsquo;s email. Resend sends the weekly update email. PostHog counts which screens and
             buttons are used, only if you allow it, and never records your screen. Each sees only what it needs for that
-            job, and none of them is given your data to sell or train on.
+            job, and none of them is given your data to sell. None of them trains on it, with one exception: while we use
+            Meta&rsquo;s trial credits, Meta may use what we send it to improve its products.
           </p>
         </Section>
 
         <Section title="Where it is processed">
           <p className="mt-2 text-muted">
             Convex stores your data in Ireland, in the European Union. Cloudflare serves the site from its locations around
-            the world. Anthropic, PostHog, Clerk and our other providers process data in the United States or the European
-            Union.
+            the world. Meta, Anthropic, PostHog, Clerk and our other providers process data in the United States or the
+            European Union.
           </p>
         </Section>
 
