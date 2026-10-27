@@ -61,17 +61,8 @@ export function TermsPage() {
           <p className="mt-2 text-muted">Written permission means a signed letter, or an email from <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a>, from PlusOne Events or its authorised representative, that names what is permitted. Nothing else counts: not silence, a demo, a conversation, a video call, or anything said by anyone at PlusOne, including a representative, unless it is confirmed in writing in that way.</p>
         </section>
         <section>
-          <h2 className="display text-xl">5. Conversations, demos and introductions</h2>
-          <p className="mt-2 text-muted">These rules apply to everyone who accepts these terms, about everything PlusOne Events, its founders, staff, developers or representatives have shown or told them, before or after accepting, in any way: chat or messaging apps such as WhatsApp, calls and video calls, meetings, email, decks, documents, demos, prototypes, test accounts, repositories, recordings and screenshots ("PlusOne Material").</p>
-          <ol className="mt-2 grid gap-1.5 pl-5 text-muted list-decimal">
-            <li><strong className="text-ink">PlusOne Material is confidential</strong> unless we made it public ourselves. Keep it to yourself, and use it only to discuss working with us.</li>
-            <li><strong className="text-ink">Don't build on it.</strong> Don't use PlusOne Material, or anything you worked out from it, to design, build, change or promote any product, service, feature, workflow or business, or to brief any person, AI model, agent or tool to do so.</li>
-            <li><strong className="text-ink">Tools and methods we introduced.</strong> If we named, recommended, demonstrated or explained a tool, service, provider, model, data source, integration or way of combining them that you did not already use for that purpose, don't adopt it for the same or a similar purpose in a product or service that competes with PlusOne for three years from when we introduced it, without our written permission. The tools themselves stay free for anyone who found them on their own; what this protects is what you learned from us.</li>
-            <li><strong className="text-ink">Business models we shared.</strong> The same applies to PlusOne's business and operating model as it reached you through PlusOne Material: how PlusOne charges and earns, how it works with vendors and with people on the ground, how it prices and sets fair prices, which markets it enters and in what order, and how it combines these. If your product or service did not already work that way before PlusOne Material reached you, don't adopt that model, or a version of it, in a product or service that competes with PlusOne for three years from when it reached you, without our written permission.</li>
-            <li><strong className="text-ink">Prior knowledge has to be shown.</strong> If a product or service of yours turns out to resemble PlusOne in its features, flows, design, wording, tools or the way they are combined, or in its business or operating model, in ways you did not have before PlusOne Material reached you, the resemblance is treated as coming from PlusOne Material and as a breach of this section, unless you show from records dated before then that you had it independently, or that it came from a public source unconnected with us.</li>
-            <li><strong className="text-ink">Return and delete.</strong> When we ask, or when talks with us end, return or delete PlusOne Material and confirm it in writing.</li>
-          </ol>
-          <p className="mt-2 text-muted">Saying nothing, a friendly conversation, a joint demo, family or personal ties, or our having shared something openly with you does not make PlusOne Material free to use. Only written permission, as described in section 4, does.</p>
+          <h2 className="display text-xl">5. What we show you privately</h2>
+          <p className="mt-2 text-muted">Anything PlusOne Events, its founders, staff, developers or representatives show or tell you that we have not made public — in chat, calls, meetings, email, decks, demos, prototypes or test accounts — is confidential. Keep it to yourself, don't use it to design or build any product or service, or to brief anyone, including an AI tool, to do so, and delete it when we ask. Only written permission, as described in section 4, makes it free to use. If you see more of PlusOne before it is public, we may ask you to sign a separate agreement, which then applies as well.</p>
         </section>
         <section>
           <h2 className="display text-xl">6. Using the Service fairly</h2>
@@ -117,7 +108,7 @@ export function TermsPage() {
         </section>
         <section>
           <h2 className="display text-xl">13. Ending</h2>
-          <p className="mt-2 text-muted">You can stop using PlusOne and delete your account whenever you like, from your account page. We may suspend or end your access if you break these terms, if the law requires it, or to protect the Service or other people. Sections 3 to 7 and 10 to 15 continue after your account ends, and section 5 also binds anyone who received PlusOne Material without opening an account.</p>
+          <p className="mt-2 text-muted">You can stop using PlusOne and delete your account whenever you like, from your account page. We may suspend or end your access if you break these terms, if the law requires it, or to protect the Service or other people. Sections 3 to 7 and 10 to 15 continue after your account ends.</p>
         </section>
         <section>
           <h2 className="display text-xl">14. Law and disputes</h2>
