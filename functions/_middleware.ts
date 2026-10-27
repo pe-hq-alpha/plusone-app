@@ -58,7 +58,7 @@ export type VisitRecord = {
 // ---------------------------------------------------------------- which requests
 
 const SKIP_PREFIXES = ["/assets/", "/ingest/", "/plates/", "/photos/", "/.well-known/"];
-const SKIP_EXACT = new Set(["/ingest", "/geo", "/favicon.ico", "/robots.txt", "/sitemap.xml"]);
+const SKIP_EXACT = new Set(["/ingest", "/geo", "/favicon.ico", "/favicon.svg", "/robots.txt", "/sitemap.xml"]);
 const STATIC_EXT = new Set([
   "js", "mjs", "cjs", "css", "map", "json", "webmanifest", "txt", "xml",
   "png", "jpg", "jpeg", "gif", "webp", "avif", "svg", "ico", "bmp",
