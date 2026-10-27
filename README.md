@@ -52,6 +52,8 @@ Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), wi
 
 PlusOne placed second at Convex's All Gas hackathon. For the Meta Global AI Developer Hackathon (Startup track), it now reads and writes with Meta's Muse Spark, and gains a voice brief, a view of the decor on your own venue, and PlusOne Partner, where vendors list themselves and get verified.
 
+**Team:** Padmanabhan Rajendrakumar (representative), who builds the core product and its move to Meta's models, and Sharmila Raghu, who builds PlusOne Partner and refines the design of every app. The two of them founded PlusOne.
+
 **For the judges:** open [the demo](https://app.plusoneevents.site/demo), start on **Today**, then follow **Vendors → Compare** to see three catering quotes read into one price per plate.
 
 ## Meta's models in PlusOne

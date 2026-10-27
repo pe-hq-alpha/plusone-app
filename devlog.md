@@ -2,7 +2,7 @@
 
 - **Project:** PlusOne Events
 - **Event:** Meta Global AI Developer Hackathon (Cerebral Valley), 26 Oct – 4 Nov 2026
-- **Team:** two founders
+- **Team:** Padmanabhan Rajendrakumar (representative; core product and the move to Meta's models) and Sharmila Raghu (PlusOne Partner and the design of every app), the founders
 - **What it does:** A co-pilot for planning any event (a birthday, a wedding, an office party): it talks the plan through, sets out the parts of the event, the vendors each needs and a budget, then finds vendors, writes to them from the event's own inbox, chases replies and lines their quotes up in one unit, while the people planning make every decision.
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable.
 - **Status:** deployed
