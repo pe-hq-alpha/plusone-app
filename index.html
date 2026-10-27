@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#11141c" />
     <script>
-      // Dark unless the person chose light or the device's setting, applied before the first paint (src/lib/theme.ts).
+      // Dark unless the person chose light or the device's setting, applied before the first paint. The shared cookie
+      // carries the choice between the home page and the app; local storage is the fallback (src/lib/theme.ts).
       (function () {
-        var c = null;
-        try { c = localStorage.getItem("plusone.theme"); } catch (e) {}
+        var m = document.cookie.match(/(?:^|;\s*)plusone\.theme=(light|dark|system)(?:;|$)/), c = m ? m[1] : null;
+        if (!c) { try { c = localStorage.getItem("plusone.theme"); } catch (e) {} }
         var dark = c === "light" ? false : c === "system" ? !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) : true;
         document.documentElement.dataset.theme = dark ? "dark" : "light";
         if (!dark) document.querySelector('meta[name="theme-color"]').setAttribute("content", "#fefcf7");

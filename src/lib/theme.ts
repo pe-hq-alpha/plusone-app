@@ -1,8 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { BRAND } from "./brand";
 
 /**
  * Dark by default; light, or whatever the device prefers, when the person picks it. The choice
- * is kept in this browser only.
+ * is kept in this browser only: in a cookie shared by the home page and the app (they are two
+ * addresses, plusoneevents.site and app.plusoneevents.site, whose storage is separate), and in
+ * local storage as before.
  * index.html applies it before the first paint, so a dark page never flashes ivory;
  * this module keeps it in step afterwards and when the device switches at dusk.
  */
@@ -14,13 +17,33 @@ const DARK = "(prefers-color-scheme: dark)";
 /** The page colour per theme, for the browser chrome on phones. */
 const CHROME: Record<Theme, string> = { light: "#fefcf7", dark: "#11141c" };
 
+const COOKIE = /(?:^|;\s*)plusone\.theme=(light|dark|system)(?:;|$)/;
+
+/** The choice from the shared cookie first, then this address's own storage, else dark. */
+export function choiceFrom(cookie: string, stored: string | null): ThemeChoice {
+  const v = cookie.match(COOKIE)?.[1] ?? stored;
+  return v === "light" || v === "system" ? v : "dark";
+}
+
 export function readChoice(): ThemeChoice {
+  let stored: string | null = null;
   try {
-    const v = localStorage.getItem(KEY);
-    return v === "light" || v === "system" ? v : "dark";
+    stored = localStorage.getItem(KEY);
   } catch {
-    return "dark";
+    // storage blocked: the cookie alone decides
   }
+  return choiceFrom(typeof document === "undefined" ? "" : document.cookie, stored);
+}
+
+/** The domain the cookie is shared across: the brand's, on its own addresses; this host otherwise. */
+export function cookieDomain(hostname: string, domain: string): string | undefined {
+  return hostname === domain || hostname.endsWith(`.${domain}`) ? domain : undefined;
+}
+
+function writeCookie(choice: ThemeChoice) {
+  const domain = cookieDomain(window.location.hostname, BRAND.domain);
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `plusone.theme=${choice}; Path=/; Max-Age=31536000; SameSite=Lax${domain ? `; Domain=${domain}` : ""}${secure}`;
 }
 
 function systemTheme(): Theme {
@@ -45,8 +68,10 @@ export function setChoice(choice: ThemeChoice) {
     if (choice === "dark") localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, choice);
   } catch {
-    // Private windows can refuse storage; the choice then lasts for this page only.
+    // Private windows can refuse storage; the cookie still carries the choice.
   }
+  // Dark is written too, not cleared, so it overrides a light choice left in the other address's storage.
+  writeCookie(choice);
   current = choice;
   apply(resolve(choice));
 }
