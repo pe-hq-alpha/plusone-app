@@ -191,7 +191,7 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
       },
       {
         ask: "What does PlusOne cost?",
-        answer: "Nothing until we launch: Co-pilot, where PlusOne plans with you and does the legwork, is free to use until then, and moves to an introductory monthly price at launch. Assisted, where a PlusOne planner plans it with you and is on call any time, opens after that. Both come with instant help from our support team. For now, PlusOne doesn't handle payments to vendors: you pay them directly. The Pricing page has the prices.",
+        answer: "Nothing until we launch: Co-pilot, where PlusOne plans with you and does the legwork, is free to use until then, and moves to an introductory monthly price at launch. Assisted, where a person from the PlusOne team plans it with you and is on call any time, opens after that. Both come with instant help from our support team. For now, PlusOne doesn't handle payments to vendors: you pay them directly. The Pricing page has the prices.",
       },
       {
         ask: "How do I get help from the team?",

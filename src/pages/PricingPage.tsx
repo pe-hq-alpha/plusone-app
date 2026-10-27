@@ -26,13 +26,13 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
   {
     id: "assisted",
     name: "Assisted",
-    line: `A ${BRAND.name} planner plans it with you.`,
+    line: `A person from the ${BRAND.name} team plans it with you.`,
     status: "Opens after launch",
     when: "a month once it opens",
     includes: [
       "Everything in Co-pilot",
-      "A planner who shortlists vendors for you and lines them up",
-      "Planning done together, with someone keeping it moving",
+      "Your own contact on our team, who shortlists vendors and lines them up for you",
+      "Planning done together, with them keeping it moving",
       "On call any time, by phone",
       "Instant help from our support team",
     ],
@@ -51,7 +51,7 @@ export function PricingPage() {
         <PlusOneMark />
       </Link>
       <h1 className="mt-6 text-3xl">Pricing</h1>
-      <p className="mt-2 max-w-2xl text-muted">Two ways to plan: do it yourself with the co-pilot, or have a {BRAND.name} planner do it with you.</p>
+      <p className="mt-2 max-w-2xl text-muted">Two ways to plan: do it yourself with the co-pilot, or have someone from the {BRAND.name} team do it with you.</p>
 
       <section className="card mt-6 flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="free-now">
         <div>
