@@ -7,7 +7,7 @@ import { formatMoney, matchByName, truncate } from "./lib/text";
 import { anOccasion, hasCoHost, hostsLabel, isWedding, isWorkEvent, occasionNoun, partWord, peopleWord } from "./lib/occasion";
 import { looksLikeOptOut } from "./lib/optOut";
 import { ceremonyLine, matchCeremonies } from "./lib/rsvp";
-import { MAX_OUTPUT_TOKENS, MODEL_FAST, MODEL_SMART, generateObject, generateText } from "./lib/claude";
+import { MAX_OUTPUT_TOKENS, MODEL_FAST, MODEL_SMART, generateObject, generateText } from "./lib/models";
 import { helpWithLabels } from "./lib/helpWith";
 import {
   cleanQuery,

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { withinLimits } from "./claude";
+import { withinLimits } from "./models";
 
 const schema = z.object({
   ceremonies: z.array(z.object({ id: z.string(), tasks: z.array(z.string()).max(3) })),
@@ -14,7 +14,7 @@ const fix = (data: unknown) => {
   return first.success ? first : schema.safeParse(withinLimits(data, first.error.issues as never));
 };
 
-describe("bringing Claude's answer within a schema's limits", () => {
+describe("bringing a model's answer within a schema's limits", () => {
   it("keeps the first three tasks when there are four, clamps a score and trims a subject", () => {
     const result = fix({
       ceremonies: [{ id: "a", tasks: ["1", "2", "3", "4"] }, { id: "b", tasks: ["x"] }],

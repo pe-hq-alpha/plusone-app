@@ -118,7 +118,7 @@ The rest of the app:
 | The planning conversation | Claude (`claude-haiku-5-5`) plus own rules | `convex/planningChat.ts` reads each message into facts; `convex/lib/planningChat.ts` decides what to fix, ask or read back and when the plan is ready; `convex/lib/wizard.ts` fills in defaults by event type from `convex/lib/templates.ts` and turns the result into an event; the page is `src/pages/NewEventPage.tsx` |
 | Event types | Own code | Sixteen types in three groups (family, work and community, other), with the words each one uses, in `convex/lib/occasion.ts` |
 | Today | Own code, no model | The co-pilot's route in `convex/copilot.ts`, drawn by `src/pages/TodayPage.tsx`; the "Tell PlusOne" box goes to `convex/assistant.ts`, and anything it proposes to change waits on a card until someone presses its button |
-| Reading and writing | Claude through the Anthropic SDK: `claude-sonnet-5-5` for plans, emails, quotes and imports; `claude-haiku-5-5` for quick reads | `convex/lib/claude.ts` and `convex/claude.ts`, with one house style sent ahead of every request; both models can be changed with `ANTHROPIC_MODEL_SMART` / `ANTHROPIC_MODEL_FAST` |
+| Reading and writing | Meta's Muse Spark (`muse-spark-1.3`, Standard) through the Model API's Chat Completions, with structured output as JSON Schema; Claude (`claude-sonnet-5-5`, `claude-haiku-5-5`) as the fallback | `convex/lib/models.ts` picks the provider from `MODEL_PROVIDER`, sends one house style ahead of every request, retries Meta on 429/500/503 and moves a call to Claude when Meta can't answer; adapters in `convex/lib/meta.ts` and `convex/lib/claude.ts` |
 | Vendor search | Firecrawl | Short search terms in `convex/lib/searchTerms.ts`; research, ranking and contact and pricing pages in `convex/research.ts` and `convex/firecrawl.ts`, with what may be read decided in `convex/lib/scrapePolicy.ts` and a cache in `convex/webCache.ts` |
 | The event's inbox | AgentMail | One inbox per event, named after the hosts' first names on the deployment's domain, in `convex/agentmail.ts` and `convex/lib/inboxName.ts`; sending, replies and follow-ups in `convex/outreach.ts`, `convex/inbound.ts` and `convex/followups.ts`; the do-not-contact list in `convex/doNotContact.ts`. Each deployment keeps its inboxes in its own AgentMail pod, with a webhook that hears only that pod |
 | Quotes in one unit | Own code | `convex/lib/comparable.ts` puts each quote per plate, per piece, per day or all in, at the host's numbers, with its flags; `convex/quotes.ts` and `convex/lib/quoteHold.ts` decide when a quote waits and handle the undo; the page is `src/pages/DecisionsPage.tsx` |
@@ -166,6 +166,9 @@ Every push to `main` that passes typecheck and tests also goes to a staging site
 |---|---|
 | `ANTHROPIC_API_KEY` | Reading descriptions, plans, emails, quotes, imports and the assistant |
 | `ANTHROPIC_MODEL_SMART`, `ANTHROPIC_MODEL_FAST` | Optional. Override `claude-sonnet-5-5` and `claude-haiku-5-5` |
+| `MODEL_PROVIDER` | `meta` to run model calls on Meta's models; anything else (or unset) uses Claude |
+| `MODEL_API_KEY` | Meta Model API key. Without it, `MODEL_PROVIDER=meta` falls back to Claude |
+| `META_MODEL_SMART`, `META_MODEL_FAST` | Optional. Override `muse-spark-1.3` per tier (Contributor ids are refused) |
 | `FIRECRAWL_API_KEY` | Vendor search |
 | `AGENTMAIL_API_KEY`, `AGENTMAIL_WEBHOOK_SECRET`, `AGENTMAIL_INBOX_DOMAIN` | The event inboxes and their incoming mail |
 | `AGENTMAIL_FALLBACK_INBOX_ID` | Optional. An inbox to use when an event can't get its own |

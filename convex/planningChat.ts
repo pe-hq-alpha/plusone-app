@@ -5,7 +5,7 @@ import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalMutation, internalQuery, mutation, query, type ActionCtx } from "./_generated/server";
 import { currentUserId, isClerkIdentity, requireUserId } from "./lib/auth";
-import { MODEL_FAST, generateObject } from "./lib/claude";
+import { MODEL_FAST, generateObject } from "./lib/models";
 import { EVENT_TYPES } from "./lib/occasion";
 import { LEAD_TITLE } from "./lib/templates";
 import { VENDOR_CATEGORIES } from "./lib/vendorNeeds";

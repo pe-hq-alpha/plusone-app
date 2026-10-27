@@ -4,7 +4,7 @@ import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { action, internalAction, internalMutation, internalQuery, mutation, query, type ActionCtx, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { logActivity, requireMember } from "./lib/auth";
-import { MODEL_FAST, generateObject, type Part } from "./lib/claude";
+import { MODEL_FAST, generateObject, type Part } from "./lib/models";
 import { isHexColour } from "./lib/colours";
 import {
   cleanUrl,

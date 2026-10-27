@@ -5,7 +5,7 @@ import { v } from "convex/values";
 import { z } from "zod";
 import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
-import { MAX_OUTPUT_TOKENS, MODEL_SMART, generateObject } from "./lib/claude";
+import { MAX_OUTPUT_TOKENS, MODEL_SMART, generateObject } from "./lib/models";
 import { truncate } from "./lib/text";
 import { unzipParts } from "./lib/unzip";
 import { decodeEntities } from "./lib/entities";
