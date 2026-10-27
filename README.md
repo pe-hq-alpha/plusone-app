@@ -160,6 +160,8 @@ node scripts/agentmail-setup.mjs https://<deployment>.convex.site <pod-id>   # o
 
 The app can also be served by Convex itself: `npm run deploy`.
 
+Every push to `main` that passes typecheck and tests also goes to a staging site with its own backend (`.github/workflows/staging.yml`). Production is deployed by hand.
+
 | Variable | For |
 |---|---|
 | `ANTHROPIC_API_KEY` | Reading descriptions, plans, emails, quotes, imports and the assistant |

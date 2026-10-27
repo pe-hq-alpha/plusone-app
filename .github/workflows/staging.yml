@@ -1,0 +1,57 @@
+name: Staging
+# Every push to main that passes typecheck and tests is deployed to the staging site.
+# Production is deployed by hand, never from here.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_STAGING }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY_STAGING }}
+    steps:
+      - name: Check the staging secrets are set
+        id: ready
+        run: |
+          for v in CONVEX_DEPLOY_KEY CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID VITE_CLERK_PUBLISHABLE_KEY; do
+            if [ -z "${!v}" ]; then echo "::notice::Staging not deployed: $v is not set"; echo "ok=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          done
+          case "$CONVEX_DEPLOY_KEY" in prod:beloved-warbler-290\|*) ;; *) echo "::error::CONVEX_DEPLOY_KEY_STAGING is not the staging deployment's key"; exit 1 ;; esac
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.ready.outputs.ok == 'true'
+        run: npm ci
+      - name: Typecheck and test
+        if: steps.ready.outputs.ok == 'true'
+        run: npm run typecheck && npm test
+
+      - name: Deploy the backend, then build the app against it
+        if: steps.ready.outputs.ok == 'true'
+        run: |
+          npx convex deploy -y --cmd-url-env-var-name VITE_CONVEX_URL \
+            --cmd 'VITE_CONVEX_SITE_URL="${VITE_CONVEX_URL%.cloud}.site" npx vite build'
+          if grep -lqE "trustworthy-ram|handsome-caiman" dist/assets/*.js; then
+            echo "::error::build points at production or dev, not staging"; exit 1
+          fi
+          # Keep staging out of search engines.
+          printf '\n/*\n  X-Robots-Tag: noindex, nofollow\n' >> dist/_headers
+
+      - name: Publish to Cloudflare Pages (plusone-staging)
+        if: steps.ready.outputs.ok == 'true'
+        run: npx -y wrangler@4 pages deploy dist --project-name plusone-staging --branch main --commit-dirty=true
