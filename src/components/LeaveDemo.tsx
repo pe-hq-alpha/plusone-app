@@ -19,3 +19,15 @@ export function LeaveDemo({ children }: { children: ReactNode }) {
   if (me === undefined || guest) return <div className="grid min-h-[100dvh] place-items-center bg-paper text-sm text-muted">Loading…</div>;
   return <>{children}</>;
 }
+
+/**
+ * Where a demo guest goes back to: their own sample event (at `page` inside it), never
+ * "/", which would end the guest session and lose what they did. Null while it loads,
+ * and for anyone who isn't a guest.
+ */
+export function useDemoEventPath(page = ""): string | null {
+  const me = useQuery(api.users.me);
+  const events = useQuery(api.events.listMine, me?.isGuest ? {} : "skip");
+  const demo = events?.find((e) => e.event.demo)?.event._id;
+  return demo ? `/e/${demo}${page}` : null;
+}

@@ -270,7 +270,7 @@ function SlotPanel({
         </section>
       )}
 
-      <AskVerified eventId={event._id} slotId={slot._id} canEdit={canEdit} />
+      {slot.status !== "booked" && <AskVerified eventId={event._id} slotId={slot._id} canEdit={canEdit} />}
 
       <section aria-labelledby="found-h">
         <div className="flex flex-wrap items-center justify-between gap-2">

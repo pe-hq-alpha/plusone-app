@@ -71,6 +71,8 @@ export const ask = mutation({
     const { userId } = await requireMember(ctx, args.eventId, "planner");
     const room = await rateLimiter.limit(ctx, "partnerEdits", { key: userId });
     if (!room.ok) throw new ConvexError("That's a lot of requests at once. Try again in a few minutes.");
+    const slot = await ctx.db.get(args.slotId);
+    if (slot?.status === "booked") throw new ConvexError("This is already booked, so there's nothing to ask vendors for.");
     return await openBrief(ctx, args.eventId, args.slotId, args.notes);
   },
 });

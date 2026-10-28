@@ -67,7 +67,7 @@ export function DecisionsPage() {
   if (board === undefined) {
     return (
       <>
-        <PageHeader title="Decisions" meta="Everything you are waiting on, and everything you can decide." />
+        <PageHeader title="Compare" meta="Every quote and offer on the same lines, and everything you can decide." />
         <p className="text-sm text-muted">Loading the board…</p>
       </>
     );
@@ -80,8 +80,8 @@ export function DecisionsPage() {
   return (
     <>
       <PageHeader
-        title="Decisions"
-        meta="Everything you are waiting on, and everything you can decide — without opening an inbox."
+        title="Compare"
+        meta="Every quote and offer on the same lines, what each leaves out, and everything you can decide — without opening an inbox."
         action={
           <label className="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" checked={onlyLive} onChange={(e) => setOnlyLive(e.target.checked)} />
@@ -257,8 +257,12 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId }: { need: Nee
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
 
+      {need.sheet && columns.length > 0 && (
+        <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} vendorSide={demo && need.offers.length > 0} />
+      )}
+
       {live.length > 0 && (
-      <div className="overflow-x-auto">
+      <div className={`overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
         <table className="w-full min-w-[54rem] text-sm">
           <caption className="sr-only">Everyone asked about {need.title}</caption>
           <thead>
@@ -421,9 +425,6 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId }: { need: Nee
       </div>
       )}
 
-      {need.sheet && columns.length > 0 && (
-        <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} vendorSide={demo && need.offers.length > 0} />
-      )}
     </section>
   );
 }
@@ -448,7 +449,7 @@ function LineByLine({
   vendorSide: boolean;
 }) {
   return (
-    <div className="border-t border-line px-6 pb-5 pt-4">
+    <div className="px-6 pb-5 pt-4">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
         {vendorSide && (

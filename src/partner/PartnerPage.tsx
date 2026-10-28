@@ -10,6 +10,7 @@ import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
 import { money } from "../lib/format";
 import { useAuthActions } from "../lib/session";
+import { useDemoEventPath } from "../components/LeaveDemo";
 import { BadgeRow, dayText, errorText, unitWord } from "./shared";
 
 /**
@@ -22,19 +23,24 @@ export function PartnerPage() {
   const mine = useQuery(api.marketplace.partner.mine);
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
+  const demoCompare = useDemoEventPath("/decisions");
+  const back = me?.isGuest ? demoCompare : "/";
   if (mine === undefined || me === undefined) return <main id="main" className="page px-5 py-10 text-muted">Loading…</main>;
-  if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={() => void signOut().then(() => navigate("/partner"))} />;
+  if (me?.isGuest && !mine.profile) return <TryAsGuest back={back} onAccount={() => void signOut().then(() => navigate("/partner"))} />;
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
-      <Link to="/" className="btn-quiet btn-sm gap-1.5 bg-cream">
-        <Icon name="arrow" size={15} className="rotate-180" />
-        {me?.isGuest ? "Back to the demo" : "Home"}
-      </Link>
+      {back && (
+        <Link to={back} className="btn-quiet btn-sm gap-1.5 bg-cream">
+          <Icon name="arrow" size={15} className="rotate-180" />
+          {me?.isGuest ? "Back to the demo" : "Home"}
+        </Link>
+      )}
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
       {me?.isGuest && (
         <p className="card-quiet mt-4 px-5 py-3 text-sm">
           <span className="chip-pending mr-2">Sample</span>
-          You're a sample caterer, seeing your own demo event's request. Answer it, then open Compare in your event to see your offer beside the others.
+          You're a sample caterer, seeing your own demo event's request. Answer it, then{" "}
+          {back ? <Link to={back} className="underline">open Compare</Link> : "open Compare"} in your event to see your offer beside the others.
         </p>
       )}
       {mine.profile ? (
@@ -47,7 +53,7 @@ export function PartnerPage() {
 }
 
 /** The demo, from the vendor's side: try it as a sample caterer, or make an account for a real business. */
-function TryAsGuest({ onAccount }: { onAccount: () => void }) {
+function TryAsGuest({ back, onAccount }: { back: string | null; onAccount: () => void }) {
   const trySample = useMutation(api.marketplace.partner.trySample);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -76,7 +82,7 @@ function TryAsGuest({ onAccount }: { onAccount: () => void }) {
           <button type="button" className="btn-quiet" onClick={onAccount}>Create an account</button>
         </div>
         {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
-        <Link to="/" className="mt-5 inline-block text-sm text-muted underline">Back to the demo</Link>
+        {back && <Link to={back} className="mt-5 inline-block text-sm text-muted underline">Back to the demo</Link>}
       </div>
     </main>
   );
@@ -438,6 +444,11 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
       {sheet && (
         <fieldset>
           <legend className="label">Every other charge, the same for every vendor</legend>
+          <p className="mb-2.5 text-xs text-muted">
+            <strong className="font-medium text-ink">In the price</strong>: the main price covers it.{" "}
+            <strong className="font-medium text-ink">Added, in ₹</strong>: its own amount, added to the total.{" "}
+            <strong className="font-medium text-ink">Extra</strong>: billed on top, outside the total.
+          </p>
           <ul className="grid gap-2">
             {sheet.lines.map((line) => {
               const a = answers[line.key];
@@ -448,8 +459,8 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
                   <div role="radiogroup" aria-label={line.label} className="flex flex-wrap gap-1.5">
                     {(
                       [
-                        ["included", "Included"],
-                        ["priced", "In the total"],
+                        ["included", "In the price"],
+                        ["priced", "Added, in ₹"],
                         ["extra", "Extra"],
                       ] as const
                     ).map(([status, text]) => (
@@ -469,10 +480,10 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
                     <input
                       className="input w-32"
                       inputMode="numeric"
-                      aria-label={`${line.label} amount`}
+                      aria-label={`${line.label} amount in rupees`}
                       value={a.amount}
                       onChange={(e) => setAnswers((prev) => ({ ...prev, [line.key]: { ...a, amount: e.target.value } }))}
-                      placeholder={line.kind === "tax" ? "e.g. 18%" : a.status === "priced" ? "₹ amount" : "₹ if known"}
+                      placeholder={a.status === "priced" ? "₹ amount" : "₹ if known"}
                     />
                   )}
                 </li>

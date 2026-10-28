@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { useAuthActions } from "../lib/session";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
+import { useDemoEventPath } from "./LeaveDemo";
 
 /**
  * Planning an event of your own needs an account. A demo guest who gets here is
@@ -12,6 +13,7 @@ export function RequireAccount({ children }: { children: ReactNode }) {
   const me = useQuery(api.users.me);
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
+  const back = useDemoEventPath();
 
   if (me === undefined) return <main id="main" className="grid min-h-screen place-items-center text-muted">Loading…</main>;
   if (!me?.isGuest) return <>{children}</>;
@@ -26,7 +28,7 @@ export function RequireAccount({ children }: { children: ReactNode }) {
           <button type="button" className="btn-primary" onClick={() => void signOut().then(() => navigate("/signin"))}>
             Create an account
           </button>
-          <Link to="/" className="btn-quiet">Back to the demo</Link>
+          {back && <Link to={back} className="btn-quiet">Back to the demo</Link>}
         </div>
       </div>
     </main>

@@ -34,12 +34,16 @@ const VENDOR_PHOTOS = [
  */
 export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?: string; audience?: "customer" | "vendor" }) {
   const [params] = useSearchParams();
-  const newHere = params.get("new") === "1";
   const { error } = useAuthActions();
   const vendor = audience === "vendor";
+  // Most vendors arrive to list a business, so their door opens on signing up; customers'
+  // opens on signing in.
+  const newHere = vendor ? params.get("signin") !== "1" : params.get("new") === "1";
   // The people who make events happen, Indian and Western, one of them per visit.
   const [vendorPhoto] = useState(() => VENDOR_PHOTOS[Math.floor(Math.random() * VENDOR_PHOTOS.length)]);
   const here = vendor ? "/partner" : "/signin";
+  const signInUrl = vendor ? "/partner?signin=1" : "/signin";
+  const signUpUrl = vendor ? "/partner" : "/signin?new=1";
   const back = redirectTo ?? (window.location.pathname === here ? (vendor ? "/partner" : "/") : window.location.pathname + window.location.search);
   const pitch = vendor
     ? `Answer requests from families and event managers on the same sheet every vendor fills in, keep your prices itemised, and get verified so they can find you.`
@@ -103,9 +107,9 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
           aria-disabled={!agreed}
         >
           {newHere ? (
-            <SignUp routing="hash" signInUrl={here} forceRedirectUrl={back} />
+            <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} />
           ) : (
-            <SignIn routing="hash" signUpUrl={`${here}?new=1`} forceRedirectUrl={back} signUpForceRedirectUrl={back} />
+            <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} />
           )}
         </div>
         <p className="mt-5 text-center text-sm text-muted">

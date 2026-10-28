@@ -406,6 +406,14 @@ describe("briefs and offers", () => {
     await expect(as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers })).rejects.toThrow(/no longer taking offers/);
   });
 
+  test("a need that's already booked isn't sent to vendors", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t);
+    await t.run(async (ctx) => await ctx.db.patch(slotId, { status: "booked" }));
+    await expect(as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId })).rejects.toThrow(/already booked/);
+    expect(await as(t, familyId).query(api.marketplace.briefs.forSlot, { eventId, slotId })).toBeNull();
+  });
+
   test("a sample event's brief never reaches a real vendor, and a viewer can't send one", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t, { demo: true });
