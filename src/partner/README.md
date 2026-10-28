@@ -33,11 +33,12 @@ Signed out, Partner opens the vendors' own sign-in page (`VendorSignInPage` in `
 | `briefs.ts` | A customer's ask: open, close and list the briefs for a need, and the open briefs a vendor can answer |
 | `offers.ts` | A vendor's answer to a brief: send, withdraw, a vendor's own offers, and the offers for an event that Compare shows |
 | `ops.ts` | The team's side: the queue, a vendor's profile with its evidence, the decision on a vendor or a claim, and team roles |
+| `checks.ts` | The vendor check for Ops: start one (staff only, with daily limits), run it in the background on Muse Wonder with pages read through Firecrawl, keep its report and cost, and show the newest |
 | `bands.ts` | Each city's price ranges, recomputed on a schedule |
 | `samples.ts` | The sample vendors and their offers for the demo events |
 | `vendors.ts` | Shared helpers: a vendor's identity and cleaning up their records |
 
-The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names (an older name like "Bombay" counts as Mumbai), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
+The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `vendorChecks`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names (an older name like "Bombay" counts as Mumbai), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
 
 ## Rules it keeps
 
@@ -51,7 +52,7 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 
 | What | Meta model | Status |
 |---|---|---|
-| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Building, by 1 Nov |
+| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live run next |
 | Voice sign-up: a vendor describes their business and packages aloud, in Tamil or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
 | Portfolio photos tagged with the standard sheet's lines, so past work sits beside an offer's line | Muse Glimmer (open weights, on Modal) | Planned |
 
