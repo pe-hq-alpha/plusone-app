@@ -799,14 +799,17 @@ const replySchema = z.object({
 
 type ReplyReading = z.infer<typeof replySchema>;
 
-/** Read a vendor reply, and its PDF when there is one: quotes often live in the attachment, not the email. */
+/**
+ * Read a vendor reply, and its PDF or photo when there is one: quotes often live in the
+ * attachment (a PDF by email, a photo of a price list on WhatsApp), not the message.
+ */
 async function readVendorReply(ctx: ActionCtx, args: {
   event: Doc<"events">;
   slot: Doc<"vendorSlots"> | null;
   vendorName: string;
   subject: string;
   body: string;
-  pdf?: { bytes: ArrayBuffer; filename: string };
+  pdf?: { bytes: ArrayBuffer; filename: string; mediaType?: string };
 }): Promise<ReplyReading> {
   const { event, slot } = args;
   const text =
@@ -817,8 +820,11 @@ async function readVendorReply(ctx: ActionCtx, args: {
     `attachment; "question" = they need information from the hosts before quoting; "declined" = unavailable or not ` +
     `interested; "available" = available but no price yet.\n` +
     (args.pdf
-      ? `They attached a PDF (${args.pdf.filename}). Read it as part of the reply: vendors often put the whole quote, ` +
-        `package list or terms in the attachment and write only "please see attached" in the email.\n`
+      ? args.pdf.mediaType?.startsWith("image/")
+        ? `They sent a photo (${args.pdf.filename}): a picture or screenshot of their quote, price list or chat. Read ` +
+          `every price and line in it as part of the reply, exactly as written; treat it as the attachment.\n`
+        : `They attached a PDF (${args.pdf.filename}). Read it as part of the reply: vendors often put the whole quote, ` +
+          `package list or terms in the attachment and write only "please see attached" in the email.\n`
       : "") +
     `\nFrom: ${args.vendorName}\nSubject: ${args.subject}\n\n${truncate(args.body, PAGE_CHARS)}`;
   const { object } = await generateObject({
@@ -833,7 +839,7 @@ async function readVendorReply(ctx: ActionCtx, args: {
         role: "user",
         content: [
           { type: "text", text },
-          ...(args.pdf ? [{ type: "file" as const, data: args.pdf.bytes, mediaType: "application/pdf", filename: args.pdf.filename }] : []),
+          ...(args.pdf ? [{ type: "file" as const, data: args.pdf.bytes, mediaType: args.pdf.mediaType ?? "application/pdf", filename: args.pdf.filename }] : []),
         ],
       },
     ],
@@ -900,8 +906,10 @@ export const extractReply = internalAction({
     const context = await ctx.runQuery(internal.messages.getContext, { messageId: args.messageId });
     if (!context || !context.thread) return null;
     const { message, event, thread, vendor, slot } = context;
-    // The first PDF is read with the email; a quote often lives only in the attachment.
-    const attached = message.attachments.find((f) => f.contentType.includes("pdf") || f.filename.toLowerCase().endsWith(".pdf"));
+    // The first PDF, or else the first photo, is read with the message; a quote often lives only in the attachment.
+    const attached =
+      message.attachments.find((f) => f.contentType.includes("pdf") || f.filename.toLowerCase().endsWith(".pdf")) ??
+      message.attachments.find((f) => /^image\/(jpeg|png|webp|gif)$/.test(f.contentType));
     const blob = attached ? await ctx.storage.get(attached.storageId) : null;
     const object = await readVendorReply(ctx, {
       event,
@@ -909,9 +917,9 @@ export const extractReply = internalAction({
       vendorName: vendor?.name ?? message.fromAddress,
       subject: message.subject,
       body: message.bodyText,
-      pdf: attached && blob ? { bytes: await blob.arrayBuffer(), filename: attached.filename } : undefined,
+      pdf: attached && blob ? { bytes: await blob.arrayBuffer(), filename: attached.filename, mediaType: attached.contentType.startsWith("image/") ? attached.contentType : undefined } : undefined,
     });
-    if (attached && object.attachmentKind === "contract") {
+    if (attached && object.attachmentKind === "contract" && !attached.contentType.startsWith("image/")) {
       await ctx.runMutation(internal.inbound.createContractCheck, {
         eventId: thread.eventId,
         storageId: attached.storageId,

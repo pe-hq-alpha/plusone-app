@@ -479,6 +479,10 @@ function SlotPanel({
         </section>
       )}
 
+      {canEdit && slot.status !== "booked" && vendors && vendors.length > 0 && (
+        <SharedQuote eventId={event._id} vendors={vendors.map((v) => ({ _id: v._id, name: v.name }))} />
+      )}
+
       {canEdit && (
         <details className="card p-5">
           <summary className="cursor-pointer text-sm font-medium">Add a vendor you already know</summary>
@@ -502,6 +506,76 @@ function SlotPanel({
 
       {error && <p role="alert" className="text-sm text-bad">{error}</p>}
     </div>
+  );
+}
+
+/**
+ * A quote that came outside the inbox: a WhatsApp photo, a screenshot, a PDF or a pasted
+ * message. It is read like an emailed reply, into the same lines, and lands in Compare.
+ */
+function SharedQuote({ eventId, vendors }: { eventId: Id<"events">; vendors: Array<{ _id: Id<"vendors">; name: string }> }) {
+  const uploadUrl = useMutation(api.sharedQuotes.generateUploadUrl);
+  const add = useMutation(api.sharedQuotes.add);
+  const [vendorId, setVendorId] = useState<Id<"vendors">>(vendors[0]._id);
+  const [text, setText] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send() {
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    try {
+      let storageId: Id<"_storage"> | undefined;
+      if (file) {
+        const res = await fetch(await uploadUrl({ eventId }), { method: "POST", headers: { "Content-Type": file.type }, body: file });
+        if (!res.ok) throw new Error("That upload didn't go. Try again.");
+        storageId = ((await res.json()) as { storageId: Id<"_storage"> }).storageId;
+      }
+      await add({ vendorId, text: text.trim() || undefined, storageId, filename: file?.name, contentType: file?.type || undefined });
+      setDone(`Reading ${vendors.find((v) => v._id === vendorId)?.name ?? "their"} quote. It lands in Compare in a few seconds.`);
+      setText("");
+      setFile(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message.replace(/^.*ConvexError: /, "") : "That didn't go. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <details className="card p-5">
+      <summary className="cursor-pointer text-sm font-medium">Add a quote they sent on WhatsApp or by hand</summary>
+      <p className="mt-1 text-xs text-muted">A photo or screenshot of their price list, a PDF, or their message pasted in. It&rsquo;s read into the same lines as every other quote.</p>
+      <form
+        className="mt-3 grid gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send();
+        }}
+      >
+        <select className="input sm:w-72" value={vendorId} onChange={(e) => setVendorId(e.target.value as Id<"vendors">)} aria-label="Which vendor">
+          {vendors.map((v) => (
+            <option key={v._id} value={v._id}>{v.name}</option>
+          ))}
+        </select>
+        <textarea className="input min-h-20" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste their message (optional with a photo)" aria-label="Their message" />
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,application/pdf"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-ink"
+          aria-label="A photo or PDF of their quote"
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <button className="btn-ghost btn-sm" disabled={busy || (!text.trim() && !file)}>{busy ? "Sending…" : "Read this quote"}</button>
+          {done && <p className="text-xs text-muted">{done}</p>}
+          {error && <p role="alert" className="text-xs text-bad">{error}</p>}
+        </div>
+      </form>
+    </details>
   );
 }
 
