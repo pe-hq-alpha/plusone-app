@@ -16,6 +16,10 @@ export type RecordedCall = {
 };
 
 export const RECORDED_RUN: { on: string; calls: RecordedCall[] } = {
-  on: "",
-  calls: [],
+  on: "28 Oct 2026",
+  calls: [
+    { feature: "readVendorReply", note: "Annam Caterers", model: "muse-spark-1.3", inputTokens: 1_467, outputTokens: 2_848, costUsd: 0.01393775, durationMs: 14_371 },
+    { feature: "readVendorReply", note: "Saapadu Kitchen", model: "muse-spark-1.3", inputTokens: 1_415, outputTokens: 1_669, costUsd: 0.008862, durationMs: 7_112 },
+    { feature: "readVendorReply", note: "Kaveri Feast Co.", model: "muse-spark-1.3", inputTokens: 1_447, outputTokens: 2_053, costUsd: 0.010534, durationMs: 9_074 },
+  ],
 };

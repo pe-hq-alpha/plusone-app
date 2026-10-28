@@ -161,6 +161,7 @@ describe("the demo's recorded run", () => {
     const as = t.withIdentity({ subject: `${userId}|s` });
     const recorded = await as.query(api.modelCalls.recorded, { eventId: demoId });
     expect(recorded.length).toBe(RECORDED_RUN.calls.length);
+    expect(recorded.map((r) => r.note)).toEqual(["Annam Caterers", "Saapadu Kitchen", "Kaveri Feast Co."]);
     for (const row of recorded) expect(row).toMatchObject({ provider: "meta", recordedOn: RECORDED_RUN.on });
     expect(await as.query(api.modelCalls.recorded, { eventId: realId })).toEqual([]);
   });

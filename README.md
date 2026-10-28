@@ -15,24 +15,23 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-485_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-487_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
 <tr>
-<td align="center" width="200"><img src="assets/logos/meta.svg" width="52" height="52" alt="Meta"><br><b>Meta Muse Spark</b><br><sub>The reading and writing. Plans, vendor emails, quotes and replies, on Meta's Model API.</sub></td>
-<td align="center" width="200"><img src="assets/logos/claude.svg" width="52" height="52" alt="Claude"><br><b>Claude</b><br><sub>The fallback. Takes any call Meta can't answer, so nothing stalls.</sub></td>
-<td align="center" width="200"><img src="assets/logos/convex.svg" width="52" height="52" alt="Convex"><br><b>Convex</b><br><sub>The platform. Database, server functions, workflows, scheduling and webhooks in one.</sub></td>
+<td align="center" width="168"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"><br><b>Meta Muse Spark</b><br><sub>Reads every quote, reply and PDF into the same lines; writes the plans and emails.</sub></td>
+<td align="center" width="168"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"><br><b>Muse Glimmer</b><br><sub>Open weights on our own Modal endpoint: tags vendors' portfolio photos. Being built.</sub></td>
+<td align="center" width="168"><img src="assets/logos/convex.svg" width="44" height="44" alt="Convex"><br><b>Convex</b><br><sub>Database, functions, workflows, scheduling and webhooks in one.</sub></td>
+<td align="center" width="168"><img src="assets/logos/claude.svg" width="44" height="44" alt="Claude"><br><b>Claude</b><br><sub>The fallback for any call Meta can't answer, so nothing stalls.</sub></td>
+<td align="center" width="168"><img src="assets/logos/firecrawl.png" width="44" height="44" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites, down to their pricing pages.</sub></td>
 </tr>
 <tr>
-<td align="center" width="200"><img src="assets/logos/firecrawl.png" width="52" height="52" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>The search. Reads vendors' own websites, down to their pricing pages.</sub></td>
-<td align="center" width="200"><img src="assets/logos/agentmail.png" width="52" height="52" alt="AgentMail"><br><b>AgentMail</b><br><sub>The event's inbox. Every event gets its own address.</sub></td>
-<td align="center" width="200"><img src="assets/logos/clerk.svg" width="52" height="52" alt="Clerk"><br><b>Clerk</b><br><sub>The sign-in. One account for planners, vendors and staff, with a door for each.</sub></td>
-</tr>
-<tr>
-<td align="center" width="200"><img src="assets/logos/resend.svg" width="52" height="52" alt="Resend"><br><b>Resend</b><br><sub>The app's own email. The weekly update and account mail.</sub></td>
-<td align="center" width="200"><img src="assets/logos/posthog.svg" width="52" height="52" alt="PostHog"><br><b>PostHog</b><br><sub>The usage counts. What people do, never what they write, only with consent.</sub></td>
-<td align="center" width="200"><img src="assets/logos/cloudflare.svg" width="52" height="52" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>The edge. Serves the site fast from India and everywhere else.</sub></td>
+<td align="center" width="168"><img src="assets/logos/agentmail.png" width="44" height="44" alt="AgentMail"><br><b>AgentMail</b><br><sub>Every event gets its own inbox to write to vendors from.</sub></td>
+<td align="center" width="168"><img src="assets/logos/clerk.svg" width="44" height="44" alt="Clerk"><br><b>Clerk</b><br><sub>One account for customers, vendors and staff, with a door for each.</sub></td>
+<td align="center" width="168"><img src="assets/logos/resend.svg" width="44" height="44" alt="Resend"><br><b>Resend</b><br><sub>The app's own email: the weekly update and account mail.</sub></td>
+<td align="center" width="168"><img src="assets/logos/posthog.svg" width="44" height="44" alt="PostHog"><br><b>PostHog</b><br><sub>Usage counts, never what people write, only with consent.</sub></td>
+<td align="center" width="168"><img src="assets/logos/cloudflare.svg" width="44" height="44" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Serves the site fast from India and everywhere else.</sub></td>
 </tr>
 </table>
 
@@ -87,7 +86,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | What | Meta model | Status |
 |---|---|---|
 | Every reading and writing step moved to Meta's models, through one wrapper with retries, a logged fallback and a cost row for every call | Muse Spark 1.3 | Live in production, 27 Oct |
-| **Under the hood:** every step PlusOne ran for an event, with its model, time and cost | | Live, 27 Oct |
+| **Under the hood:** every step PlusOne ran for an event, with its model, time and cost; in the demo, a recorded Muse Spark run on its own three catering quotes (28 Oct: all three read right, 7–14 s each, $0.033 in all), labelled as recorded | Muse Spark 1.3 | Live, 27 Oct; recorded run 28 Oct |
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for Co-pilot and Assisted; a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
 | **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by customers and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Live, 28 Oct (`convex/lib/standardSheet.ts`) |
@@ -107,7 +106,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families, teams and event managers planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Today, Muse Spark reads every reply, PDF and quote, in Tamil and English, into the same lines, and fixed rules then flag what each leaves out. Being added: Muse Voice Transcribe hears a spoken brief and Muse Spark turns it into the plan; SAM 3.1 finds the stage in a venue photo for the decor; Muse Wonder gathers evidence about a vendor; Muse Glimmer, open weights on our own endpoint, tags vendors' portfolio photos. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 485 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 487 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
 
 ## The business
@@ -135,7 +134,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 | **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Tags a Partner vendor's portfolio photos with the standard sheet's lines (stage backdrop, entrance arch, live counters), so past work sits beside an offer's line; flags likely stock photos for Ops | Planned, by 31 Oct |
 | **Muse Code** (Meta's coding agent) | Builds bounded pieces of PlusOne from a written brief, which are then reviewed and tested before they are committed; the first was the SAM 3.1 adapter. Every session is logged in [`devlog.md`](devlog.md#muse-code) | In use since 27 Oct 2026 |
 
-**See it at work:** in any event, the **Under the hood** button in the top bar lists every step PlusOne ran for that event, with the Meta model that did it, how long it took and what it cost. Ask "We're now 140 people" on Today in the demo and watch the step appear.
+**See it at work:** in any event, the **Under the hood** button in the top bar lists every step PlusOne ran for that event, with the Meta model that did it, how long it took and what it cost. In the demo it opens on a recorded run: Muse Spark reading the three caterers' replies into the lines Compare shows. Ask "We're now 140 people" on Today and watch a new step appear.
 
 Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=meta` with a Model API key sends it to Meta; calls retry on 429, 500 and 503, honouring `Retry-After`, and a call Meta can't answer moves to Claude, with the switch logged. A request Meta rejects as malformed is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and list-price cost, so spend is known per feature and per day.
 
@@ -199,9 +198,10 @@ The rest of the app:
 | What | Result | When | How |
 |---|---|---|---|
 | Muse Spark in production | A made-up guest reply ("Both of us will come. My husband is allergic to peanuts.") read by `muse-spark-1.3` through the production backend: coming, 2 people, the peanut allergy caught, valid structured output first time; 1,214 tokens in, 880 out, $0.0053, written to `modelCalls` | 27 Oct 2026 | `npx convex run claude:readRsvpReply` against production |
+| Muse Spark reading the demo's quotes | The three caterers' replies read on `muse-spark-1.3` in production, each right first time: Annam ₹66,150 in three lines (150 plates at ₹380, ₹6,000 service, ₹3,150 GST), priced for 150; Saapadu ₹62,000 all in for 120 with the ₹480 extra plate kept apart; Kaveri ₹54,000 plus ₹2,500 for vessels and staff, GST extra. 7.1–14.4 s each, 4,329 tokens in and 6,570 out, $0.033 in all, no fallback | 28 Oct 2026 | `npx convex run claude:readDemoQuotes`; the rows are Under the hood's recorded run |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 485 passed in 48 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
-| Typecheck, app and backend | Clean | 27 Oct 2026 | `npm run typecheck` |
+| Tests | 487 passed in 48 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
+| Typecheck, app and backend | Clean | 28 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
 | Page load from India | First byte in 0.08–0.09 s from Cloudflare's edge, down from 0.9–1.2 s | 18 Oct 2026 | `curl` timing from Chennai |
