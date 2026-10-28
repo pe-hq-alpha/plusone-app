@@ -57,7 +57,8 @@ export function VendorDemoPage() {
       void start({})
         .then(() => {
           record(EVENTS.vendorDemoOpened);
-          navigate(partnerHref("/"), { replace: true });
+          // The page knows it was opened from the demo, so the sample business stays.
+          navigate(partnerHref("/"), { replace: true, state: { demo: true } });
         })
         .catch(failed);
     }

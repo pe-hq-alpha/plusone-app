@@ -94,7 +94,7 @@ export default function App() {
                   <Route path="/new/manual" element={<RequireAccount><OnboardingPage /></RequireAccount>} />
                   <Route path="/account" element={<AccountPage />} />
                   <Route path="/share" element={<SharePage />} />
-                  <Route path="/partner" element={<PartnerPage />} />
+                  <Route path="/partner" element={<PartnerHome />} />
                   <Route path="/ops" element={<OpsPage />} />
                   <Route path="/e/:eventId" element={<EventLayout />}>
                     <Route index element={<TodayPage />} />
@@ -151,7 +151,7 @@ function PartnerRoutes() {
           <SignedInOrOut signedOut={<VendorSignInPage />}>
             <a href="#main" className="skip-link">Skip to content</a>
             <ErrorBoundary>
-              <PartnerPage />
+              <PartnerHome />
             </ErrorBoundary>
           </SignedInOrOut>
         }
@@ -175,6 +175,21 @@ function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children
 
 /** Pages on the app's address that work without signing in. */
 const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
+
+/**
+ * Partner's own page. A guest gets there only from the vendors' demo, which says so in
+ * the navigation; coming back to Partner's address later ends that sample session, so
+ * the visitor sees the sign-in rather than last time's sample business.
+ */
+function PartnerHome() {
+  const { state } = useLocation();
+  const fromDemo = Boolean((state as { demo?: boolean } | null)?.demo);
+  return (
+    <LeaveDemo keep={fromDemo}>
+      <PartnerPage />
+    </LeaveDemo>
+  );
+}
 
 /**
  * Ops on its own address: the team's queue at /, sign-in when signed out. Everything

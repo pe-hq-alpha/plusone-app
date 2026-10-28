@@ -9,10 +9,11 @@ import { api } from "../../convex/_generated/api";
  * page (or the sign-in form) like anyone else rather than a "my events" page that
  * only holds the demo. People with real accounts pass straight through.
  */
-export function LeaveDemo({ children }: { children: ReactNode }) {
+export function LeaveDemo({ children, keep = false }: { children: ReactNode; keep?: boolean }) {
   const me = useQuery(api.users.me);
   const { signOut } = useAuthActions();
-  const guest = me?.isGuest === true;
+  // `keep`: the visitor is still inside the demo (PlusOne Partner's, arriving from its own start).
+  const guest = me?.isGuest === true && !keep;
   useEffect(() => {
     if (guest) void signOut();
   }, [guest, signOut]);
