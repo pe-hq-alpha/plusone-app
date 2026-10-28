@@ -16,10 +16,11 @@ import { Backdrop } from "../components/ui/Backdrop";
  * The form stays switched off until the "I agree" box is ticked; the agreement is
  * remembered here and recorded against the account once it signs in (lib/session).
  *
- * Two doors to the same accounts: families planning an event come in at /signin, vendors
- * at /partner, with their own words and landing on PlusOne Partner. One person can be both.
+ * Two doors to the same accounts: customers planning an event (families and event managers)
+ * come in at /signin, vendors at /partner, with their own words and landing on PlusOne
+ * Partner. One person can be both.
  */
-export function SignInPage({ redirectTo, audience = "family" }: { redirectTo?: string; audience?: "family" | "vendor" }) {
+export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?: string; audience?: "customer" | "vendor" }) {
   const [params] = useSearchParams();
   const newHere = params.get("new") === "1";
   const { error } = useAuthActions();
@@ -27,7 +28,7 @@ export function SignInPage({ redirectTo, audience = "family" }: { redirectTo?: s
   const here = vendor ? "/partner" : "/signin";
   const back = redirectTo ?? (window.location.pathname === here ? (vendor ? "/partner" : "/") : window.location.pathname + window.location.search);
   const pitch = vendor
-    ? `Answer families' requests on the same sheet every vendor fills in, keep your prices itemised, and get verified so families can find you.`
+    ? `Answer requests from families and event managers on the same sheet every vendor fills in, keep your prices itemised, and get verified so they can find you.`
     : `${BRAND.name} finds vendors, writes to them from your event\u2019s own inbox and reads their quotes into your budget, so the legwork is done and the choices stay yours.`;
   const [agreed, setAgreed] = useState(() => pendingAgreement() === TERMS_VERSION);
   const agree = (value: boolean) => {

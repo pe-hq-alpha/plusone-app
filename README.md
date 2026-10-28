@@ -53,11 +53,11 @@ PlusOne is one platform with three layers that feed each other:
 
 | Layer | For | What it does | Today |
 |---|---|---|---|
-| **PlusOne Co-pilot** | People planning their own event | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
+| **PlusOne Co-pilot** | Families planning their own event, and event managers planning for their clients | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
 | **PlusOne Assisted** | People who want a person beside them | Everything the Co-pilot does, plus a real person from the PlusOne team helping in real time and on call | Opens after launch |
-| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units families compare, answer a family's brief, get verified and get found | Built during the hackathon, on dev since 28 Oct; voice sign-up next |
+| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, on dev since 28 Oct; voice sign-up next |
 
-More vendors on Partner widen what families can find and compare; more families bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
+More vendors on Partner widen what families and event managers can find and compare; more customers bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
 
 It is built for the events families and teams actually hold: birthdays and sixtieths, housewarmings and griha pravesams, naming ceremonies, poojas at home, baby showers, anniversaries and engagements; office parties, team offsites, product launches, conferences, college fests and community festivals. Weddings are one of the sixteen types too.
 
@@ -80,7 +80,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | **Bring Meta's models into your domain** | Events in India, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English; Muse Voice Transcribe hears a spoken brief that switches between the two; SAM 3.1 works on the family's own venue photo; Muse Wonder checks a vendor's evidence; Muse Spark Open pools quotes into market ranges |
 | **A problem you know firsthand** | The founders are in Chennai, where PlusOne starts, and know this from planning events in their own families: quotes that can't be compared, charges that turn up later, vendors spread across calls and chats. PlusOne began as a planner for exactly that |
 | **Free up time and mental space** | The Co-pilot does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
-| **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers in the same lines, missing charges flagged and the market range. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
+| **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers in the same lines, missing charges flagged and the market range. An event manager gets the same for every client's event, without chasing each vendor by phone. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
@@ -90,11 +90,11 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | **Under the hood:** every step PlusOne ran for an event, with its model, time and cost | | Live, 27 Oct |
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for Co-pilot and Assisted; a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
-| **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by families and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Built 28 Oct (`convex/lib/standardSheet.ts`), on dev; live with the next deploy |
+| **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by customers and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Built 28 Oct (`convex/lib/standardSheet.ts`), on dev; live with the next deploy |
 | **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark; Muse Spark Open for the ranges | Built 28 Oct, on dev: missing charges, line by line, and the Chennai range from verified vendors' listed prices; live with the next deploy |
 | **The voice brief:** speak the plan in Tamil, Hindi or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
 | **See it on your venue:** tap the stage in a venue photo and see the decor on the real space | SAM 3.1 | Adapter built and tested (`convex/lib/sam.ts`); the view by 1 Nov |
-| **PlusOne Partner:** vendors register by voice, price packages on the standard sheet and answer a family's brief | Muse Voice Transcribe, Muse Spark | Built 28 Oct, on dev: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the family's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
+| **PlusOne Partner:** vendors register by voice, price packages on the standard sheet and answer a customer's brief | Muse Voice Transcribe, Muse Spark | Built 28 Oct, on dev: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the customer's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
 | **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Review queue with its checklist, evidence and decisions built 28 Oct, on dev; the Muse Wonder agent by 1 Nov |
 | WhatsApp and calling vendors from the app | | Building, by 1 Nov |
 
@@ -104,7 +104,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 | Criterion (weight) | What PlusOne shows | Where to look |
 |---|---|---|
-| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families and teams planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
+| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families, teams and event managers planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Muse Voice Transcribe hears a brief that mixes Tamil and English, and Muse Spark turns it into the plan. Muse Spark reads every reply, PDF and quote into the same lines. Muse Spark finds the stage in a venue photo and SAM 3.1 cuts it out for the decor. Muse Wonder gathers evidence about a vendor. Muse Spark Open, the open-weights model, turns pooled quotes into a market range on Baseten. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
 | **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 484 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
@@ -127,7 +127,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 | Model | Where it works in PlusOne | Status |
 |---|---|---|
 | **Muse Spark 1.3** (Meta Model API) | Every reading and writing step: the planning conversation, search plans and vendor ranking, inquiries and follow-ups, quotes in replies and PDFs, RSVPs, guest-list imports, palettes and the "Tell PlusOne" box. Structured answers come back as JSON Schema, checked against the same Zod schemas | Live in production since 27 Oct 2026 |
-| **Muse Voice Transcribe** | The voice brief: a family speaks the plan in Tamil, Hindi or English; a vendor talks through what they offer | Hackathon build |
+| **Muse Voice Transcribe** | The voice brief: a family or an event manager speaks the plan in Tamil, Hindi or English; a vendor talks through what they offer | Hackathon build |
 | **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Adapter built and tested (`convex/lib/sam.ts`: one concept or up to 16 tapped objects, masks read with `@meta-sam/parser`); the venue view is next |
 | **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Hackathon build |
 | **Muse Spark Open** (open weights, on Baseten) | Batch jobs: seeding the vendor directory from public listings, and turning pooled quotes, without names, into market ranges | Hackathon build |
@@ -296,10 +296,10 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 ## Next steps
 
 - **Finish the hackathon build:** the items marked "Building" in [For the judges](#for-the-judges), by 1 November.
-- **Chennai first:** real families and vendors for birthdays, engagements and housewarmings; real quotations collected and hidden charges mapped; then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
+- **Chennai first:** real families, event managers and vendors for birthdays, engagements and housewarmings; real quotations collected and hidden charges mapped; then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
 - **PlusOne Assisted:** a real person from the PlusOne team beside the Co-pilot, in real time and on call, opening after launch.
 - **Booking and execution:** milestones, advances, vendor confirmations, change requests and a final reconciliation, booked through PlusOne with a disclosed fee.
-- **Vendor reliability, measured:** punctuality, cancellations, quality and budget overruns, so a family knows who delivers.
+- **Vendor reliability, measured:** punctuality, cancellations, quality and budget overruns, so customers know who delivers.
 - **Billing:** Stripe outside India and Razorpay in India.
 - **More cities, then more countries:** the same engine and playbook, adapted to local vendors, customs and prices.
 

@@ -56,7 +56,7 @@ function TryAsGuest({ onAccount }: { onAccount: () => void }) {
       <div className="card max-w-md px-7 py-8 text-center">
         <h1 className="display text-[1.7rem] leading-tight">See the <em>vendor's</em> side</h1>
         <p className="mt-2 text-muted">
-          Families send what they need; vendors answer on the same sheet, so every offer can be compared line by line. Try
+          Families and event managers send what they need; vendors answer on the same sheet, so every offer can be compared line by line. Try
           it as a sample caterer answering your demo event, or make an account for your own business.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -98,7 +98,7 @@ function Join({ claims }: { claims: Claim[] }) {
   return (
     <>
       <p className="mt-1 max-w-[42rem] text-sm leading-relaxed text-muted">
-        Families planning in your city send what they need: the occasion, the date, how many guests. You answer on the same
+        Families and event managers planning in your city send what they need: the occasion, the date, how many guests. You answer on the same
         sheet as every other vendor, so they see what your price includes and what's extra, line by line. No bidding wars,
         no hidden charges.
       </p>
@@ -198,7 +198,7 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
   return (
     <section className="card mt-5 p-6 md:p-7" aria-labelledby="details-h">
       <h2 id="details-h" className="display text-xl">{initial ? "Your details" : "Set up your business"}</h2>
-      {!initial && <p className="mt-1 text-sm text-muted">Families see you once we've checked you're real, usually within a day.</p>}
+      {!initial && <p className="mt-1 text-sm text-muted">Customers see you once we've checked you're real, usually within a day.</p>}
       <form className="mt-4 grid gap-4 md:grid-cols-2" onSubmit={submit}>
         <div>
           <label className="label" htmlFor="p-name">Business name</label>
@@ -241,7 +241,7 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
           <input id="p-wa" className="input" value={f.whatsapp ?? ""} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="Same as phone, or another" />
         </div>
         <div className="md:col-span-2">
-          <label className="label" htmlFor="p-lang">Languages you speak with families</label>
+          <label className="label" htmlFor="p-lang">Languages you speak with customers</label>
           <input id="p-lang" className="input" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="Tamil, English" />
         </div>
         <div className="md:col-span-2">
@@ -252,7 +252,7 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
           <button type="submit" className="btn-primary" disabled={state === "saving" || !f.name.trim() || !f.categories.length}>
             {state === "saving" ? "Saving…" : initial ? "Save changes" : "Join PlusOne Partner"}
           </button>
-          {initial && <span className="text-xs text-quiet">A new name or website is checked again before families see it.</span>}
+          {initial && <span className="text-xs text-quiet">A new name or website is checked again before customers see it.</span>}
         </div>
         {state === "listed" && (
           <p className="text-sm md:col-span-2">We already list a business with that website. Look it up above and claim it, so you're not listed twice.</p>
@@ -313,18 +313,18 @@ function Dashboard({
 }
 
 function StatusLine({ profile }: { profile: Profile }) {
-  if (profile.status === "verified") return <p className="mt-4 text-sm text-muted">Verified: families in {profile.city} see you and your prices.</p>;
+  if (profile.status === "verified") return <p className="mt-4 text-sm text-muted">Verified: customers in {profile.city} see you and your prices.</p>;
   if (profile.status === "pending")
     return (
       <p className="mt-4 text-sm">
         <span className="chip-pending mr-2">Being checked</span>
-        {profile.statusReason ?? "We're checking your business. Meanwhile, add your prices so families see them the moment you're verified."}
+        {profile.statusReason ?? "We're checking your business. Meanwhile, add your prices so customers see them the moment you're verified."}
       </p>
     );
   return (
     <p className="mt-4 text-sm">
       <span className="chip-warn mr-2">{profile.status === "suspended" ? "Paused" : "Not approved"}</span>
-      {profile.statusReason ?? "Families can't see this listing. Write to us if you think that's wrong."}
+      {profile.statusReason ?? "Customers can't see this listing. Write to us if you think that's wrong."}
     </p>
   );
 }
@@ -336,15 +336,15 @@ function Briefs({ verified }: { verified: boolean }) {
   const [answering, setAnswering] = useState<Id<"vendorBriefs"> | null>(null);
   return (
     <section className="mt-8" aria-labelledby="briefs-h">
-      <h2 id="briefs-h" className="display text-2xl">Families <em>asking</em></h2>
+      <h2 id="briefs-h" className="display text-2xl">Customers <em>asking</em></h2>
       <p className="mt-1 text-sm text-muted">Each request is for your kind of service in your city. Answer once; change it any time while it's open.</p>
       <div className="mt-4 grid gap-4">
         {!verified ? (
-          <EmptyState compact icon="check" title="Requests appear once you're verified" body="We check every vendor before families hear from them." />
+          <EmptyState compact icon="check" title="Requests appear once you're verified" body="We check every vendor before customers hear from them." />
         ) : briefs === undefined ? (
           <p className="text-sm text-muted">Loading…</p>
         ) : briefs.length === 0 ? (
-          <EmptyState compact icon="mail" title="No open requests right now" body="When a family near you needs what you offer, it shows up here." />
+          <EmptyState compact icon="mail" title="No open requests right now" body="When someone near you needs what you offer, it shows up here." />
         ) : (
           briefs.map((b) => (
             <article key={b._id} className="card p-5 md:p-6">
@@ -483,7 +483,7 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
       )}
 
       <div>
-        <label className="label" htmlFor="o-notes">Anything else the family should know</label>
+        <label className="label" htmlFor="o-notes">Anything else the customer should know</label>
         <textarea id="o-notes" className="input min-h-20" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
 
@@ -493,7 +493,7 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
         </button>
         <button type="button" className="btn-quiet btn-sm" onClick={onDone}>Cancel</button>
         <p className="text-sm text-muted">
-          The family sees <strong className="text-ink">{money(total, "INR")}</strong>
+          The customer sees <strong className="text-ink">{money(total, "INR")}</strong>
           {perUnit && qty ? ` (${money(Number(price) || 0, "INR")} × ${qty}${priced ? ` + ${money(priced, "INR")}` : ""})` : ""}
           {sheet && !answeredAll ? " · answer every line to send" : ""}
         </p>
@@ -522,7 +522,7 @@ function SentOffers() {
                 <span className="chip-quiet">Withdrawn</span>
               ) : o.briefOpen ? (
                 <>
-                  <span className="chip-pending">With the family</span>
+                  <span className="chip-pending">With the customer</span>
                   <button type="button" className="btn-quiet btn-sm" onClick={() => void withdraw({ offerId: o._id })}>Withdraw</button>
                 </>
               ) : (
