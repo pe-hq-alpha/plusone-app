@@ -15,7 +15,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-484_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-485_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -27,7 +27,7 @@
 <tr>
 <td align="center" width="200"><img src="assets/logos/firecrawl.png" width="52" height="52" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>The search. Reads vendors' own websites, down to their pricing pages.</sub></td>
 <td align="center" width="200"><img src="assets/logos/agentmail.png" width="52" height="52" alt="AgentMail"><br><b>AgentMail</b><br><sub>The event's inbox. Every event gets its own address.</sub></td>
-<td align="center" width="200"><img src="assets/logos/clerk.svg" width="52" height="52" alt="Clerk"><br><b>Clerk</b><br><sub>The sign-in. One account for planners, and later for vendors and staff.</sub></td>
+<td align="center" width="200"><img src="assets/logos/clerk.svg" width="52" height="52" alt="Clerk"><br><b>Clerk</b><br><sub>The sign-in. One account for planners, vendors and staff, with a door for each.</sub></td>
 </tr>
 <tr>
 <td align="center" width="200"><img src="assets/logos/resend.svg" width="52" height="52" alt="Resend"><br><b>Resend</b><br><sub>The app's own email. The weekly update and account mail.</sub></td>
@@ -55,7 +55,7 @@ PlusOne is one platform with three layers that feed each other:
 |---|---|---|---|
 | **PlusOne Co-pilot** | Families planning their own event, and event managers planning for their clients | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
 | **PlusOne Assisted** | People who want a person beside them | Everything the Co-pilot does, plus a real person from the PlusOne team helping in real time and on call | Opens after launch |
-| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, on dev since 28 Oct; voice sign-up next |
+| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, live since 28 Oct; voice sign-up next |
 
 More vendors on Partner widen what families and event managers can find and compare; more customers bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
 
@@ -69,7 +69,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 ## For the judges
 
-**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th in Chennai with no sign-up. Start on **Today**. Press **Under the hood** in the top bar to see each step's Meta model, time and cost. Type "We're now 140 people" in the box and press the card it offers. Then follow **Vendors → Compare** to see three catering quotes read into one price per plate.
+**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th in Chennai with no sign-up. Start on **Today**. Follow **Vendors → Compare**: three caterers' emailed quotes and two verified vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the Chennai range beside them. Press **See the vendor's side** to answer the same brief as a sample caterer, then **Back to the demo** to see your offer land in Compare. Press **Under the hood** in the top bar to see each step's Meta model, time and cost, and type "We're now 140 people" in the box on Today to watch one run.
 
 ### The theme: Build for Your World
 
@@ -77,7 +77,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 | The theme asks | PlusOne's answer |
 |---|---|
-| **Bring Meta's models into your domain** | Events in India, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English; Muse Voice Transcribe hears a spoken brief that switches between the two; SAM 3.1 works on the family's own venue photo; Muse Wonder checks a vendor's evidence; Muse Spark Open pools quotes into market ranges |
+| **Bring Meta's models into your domain** | Events in India, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English into the same lines, live today. Being added during the hackathon: Muse Voice Transcribe for a spoken brief that switches between the two, SAM 3.1 on the customer's own venue photo, Muse Wonder checking a vendor's evidence, and Muse Glimmer on our own endpoint tagging vendors' portfolios |
 | **A problem you know firsthand** | The founders are in Chennai, where PlusOne starts, and know this from planning events in their own families: quotes that can't be compared, charges that turn up later, vendors spread across calls and chats. PlusOne began as a planner for exactly that |
 | **Free up time and mental space** | The Co-pilot does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
 | **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers in the same lines, missing charges flagged and the market range. An event manager gets the same for every client's event, without chasing each vendor by phone. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
@@ -90,12 +90,13 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | **Under the hood:** every step PlusOne ran for an event, with its model, time and cost | | Live, 27 Oct |
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for Co-pilot and Assisted; a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
-| **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by customers and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Built 28 Oct (`convex/lib/standardSheet.ts`), on dev; live with the next deploy |
-| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark; Muse Spark Open for the ranges | Built 28 Oct, on dev: missing charges, line by line, and the Chennai range from verified vendors' listed prices; live with the next deploy |
+| **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by customers and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Live, 28 Oct (`convex/lib/standardSheet.ts`) |
+| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark reads the quotes; the gaps and the range are fixed, tested rules | Live, 28 Oct: missing charges, line by line, and the Chennai range from vendors' listed prices |
 | **The voice brief:** speak the plan in Tamil, Hindi or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
 | **See it on your venue:** tap the stage in a venue photo and see the decor on the real space | SAM 3.1 | Adapter built and tested (`convex/lib/sam.ts`); the view by 1 Nov |
-| **PlusOne Partner:** vendors register by voice, price packages on the standard sheet and answer a customer's brief | Muse Voice Transcribe, Muse Spark | Built 28 Oct, on dev: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the customer's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
-| **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Review queue with its checklist, evidence and decisions built 28 Oct, on dev; the Muse Wonder agent by 1 Nov |
+| **PlusOne Partner:** vendors register, price packages on the standard sheet and answer a customer's brief | Voice sign-up: Muse Voice Transcribe, Muse Spark | Live, 28 Oct: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the customer's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
+| **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Review queue with its checklist, evidence and decisions live 28 Oct; the Muse Wonder agent by 1 Nov |
+| **Muse Glimmer** portfolio tagging on our own Modal endpoint | Muse Glimmer (open weights) | Building, by 31 Oct |
 | WhatsApp and calling vendors from the app | | Building, by 1 Nov |
 
 Before the hackathon, PlusOne already planned an event from a conversation, found vendors, wrote to them from the event's inbox and put their quotes in one unit, on Claude. [Repository](#repository) gives the exact line between the two.
@@ -105,8 +106,8 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 | Criterion (weight) | What PlusOne shows | Where to look |
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families, teams and event managers planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
-| **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Muse Voice Transcribe hears a brief that mixes Tamil and English, and Muse Spark turns it into the plan. Muse Spark reads every reply, PDF and quote into the same lines. Muse Spark finds the stage in a venue photo and SAM 3.1 cuts it out for the decor. Muse Wonder gathers evidence about a vendor. Muse Spark Open, the open-weights model, turns pooled quotes into a market range on Baseten. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 484 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
+| **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Today, Muse Spark reads every reply, PDF and quote, in Tamil and English, into the same lines, and fixed rules then flag what each leaves out. Being added: Muse Voice Transcribe hears a spoken brief and Muse Spark turns it into the plan; SAM 3.1 finds the stage in a venue photo for the decor; Muse Wonder gathers evidence about a vendor; Muse Glimmer, open weights on our own endpoint, tags vendors' portfolio photos. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 485 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
 
 ## The business
@@ -122,15 +123,15 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 
 ## Meta's models in PlusOne
 
-<img src="assets/meta-models.jpg" width="100%" alt="Meta's models in PlusOne: Muse Spark 1.3 live in production for all reading and writing; Muse Voice Transcribe, SAM 3.1, Muse Wonder and Muse Spark Open being built during the hackathon; retries and a Claude fallback built in">
+<img src="assets/meta-models.jpg" width="100%" alt="Meta's models in PlusOne: Muse Spark 1.3 live in production for all reading and writing; Muse Voice Transcribe, SAM 3.1, Muse Wonder and Muse Glimmer being built during the hackathon; retries and a Claude fallback built in">
 
 | Model | Where it works in PlusOne | Status |
 |---|---|---|
 | **Muse Spark 1.3** (Meta Model API) | Every reading and writing step: the planning conversation, search plans and vendor ranking, inquiries and follow-ups, quotes in replies and PDFs, RSVPs, guest-list imports, palettes and the "Tell PlusOne" box. Structured answers come back as JSON Schema, checked against the same Zod schemas | Live in production since 27 Oct 2026 |
-| **Muse Voice Transcribe** | The voice brief: a family or an event manager speaks the plan in Tamil, Hindi or English; a vendor talks through what they offer | Hackathon build |
+| **Muse Voice Transcribe** | The voice brief: a family or an event manager speaks the plan in Tamil, Hindi or English; a vendor talks through what they offer | Building, by 1 Nov |
 | **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Adapter built and tested (`convex/lib/sam.ts`: one concept or up to 16 tapped objects, masks read with `@meta-sam/parser`); the venue view is next |
-| **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Hackathon build |
-| **Muse Spark Open** (open weights, on Baseten) | Batch jobs: seeding the vendor directory from public listings, and turning pooled quotes, without names, into market ranges | Hackathon build |
+| **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Building, by 1 Nov |
+| **Muse Spark Open** (open weights) | Batch jobs such as seeding the vendor directory from public listings | After the hackathon |
 | **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Tags a Partner vendor's portfolio photos with the standard sheet's lines (stage backdrop, entrance arch, live counters), so past work sits beside an offer's line; flags likely stock photos for Ops | Planned, by 31 Oct |
 | **Muse Code** (Meta's coding agent) | Builds bounded pieces of PlusOne from a written brief, which are then reviewed and tested before they are committed; the first was the SAM 3.1 adapter. Every session is logged in [`devlog.md`](devlog.md#muse-code) | In use since 27 Oct 2026 |
 
@@ -163,7 +164,7 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 |---|---|
 | <img src="assets/screens/vendors.jpg" alt="Find: a priest for the morning pooja, researched on the open web, with the best match ranked on reviews, price against the budget and fit"> | <img src="assets/screens/inbox.jpg" alt="The inbox: six vendor conversations with their status, and the first email to a nadaswaram group with a follow-up due"> |
 
-6. **Line up quotes in one unit.** Vendors quote per plate, all in, plus service, plus transport, each for a headcount of their own choosing. A price in a reply, or in a PDF attached to it, is read into a quote with its lines, and Compare puts every quote in the same unit at the host's own numbers: per plate for food, per piece for gifts and hampers, per day for stays and transport, all in for the rest (`convex/lib/comparable.ts`). It says what each quote leaves out ("GST extra", "Priced for 150; you expect 120") and refuses a per-unit figure when the lines don't add up to the total. **New for the hackathon:** each need's quotes also sit line by line on the standard sheet, as a price, included, extra or not stated, and fixed rules flag what each quote leaves unsaid, with what the others charge for it ("No transport line, and one other charges ₹2,500") (`convex/lib/standardSheet.ts`; on dev, live with the next deploy).
+6. **Line up quotes in one unit.** Vendors quote per plate, all in, plus service, plus transport, each for a headcount of their own choosing. A price in a reply, or in a PDF attached to it, is read into a quote with its lines, and Compare puts every quote in the same unit at the host's own numbers: per plate for food, per piece for gifts and hampers, per day for stays and transport, all in for the rest (`convex/lib/comparable.ts`). It says what each quote leaves out ("GST extra", "Priced for 150; you expect 120") and refuses a per-unit figure when the lines don't add up to the total. **New for the hackathon:** each need's quotes also sit line by line on the standard sheet, as a price, included, extra or not stated, and fixed rules flag what each quote leaves unsaid, with what the others charge for it ("No transport line, and one other charges ₹2,500") (`convex/lib/standardSheet.ts`).
 
 <img src="assets/screens/decisions.jpg" width="100%" alt="Compare for the sample birthday: three catering quotes from ₹456 to ₹517 a plate for 120, with what each includes and leaves out">
 
@@ -199,7 +200,7 @@ The rest of the app:
 |---|---|---|---|
 | Muse Spark in production | A made-up guest reply ("Both of us will come. My husband is allergic to peanuts.") read by `muse-spark-1.3` through the production backend: coming, 2 people, the peanut allergy caught, valid structured output first time; 1,214 tokens in, 880 out, $0.0053, written to `modelCalls` | 27 Oct 2026 | `npx convex run claude:readRsvpReply` against production |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 484 passed in 48 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
+| Tests | 485 passed in 48 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 27 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
@@ -239,12 +240,19 @@ You need Node 20 or later, a Convex account and a Clerk application with a JWT t
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm install
 npx convex dev --once     # first run: sign in and create a dev deployment (writes .env.local)
+node scripts/auth-keys.mjs                                   # once: JWT_PRIVATE_KEY and JWKS for the demo's guest tokens
+npx convex env set SITE_URL http://localhost:5173            # where links in emails point
+npx convex env set CLERK_JWT_ISSUER_DOMAIN https://<your-clerk-frontend-api>
+npx convex env set MODEL_PROVIDER meta && npx convex env set MODEL_API_KEY <meta-key>   # or ANTHROPIC_API_KEY
+echo 'VITE_CLERK_PUBLISHABLE_KEY=pk_test_…' >> .env.local     # the app's Clerk key
 npm run dev               # the app on http://localhost:5173, and the backend watching for changes
 ```
 
+Open `http://localhost:5173/demo` for the sample events; they need only the steps above, since their vendors are made up and nothing is sent. Vendor search also needs `FIRECRAWL_API_KEY`, and real emails need the AgentMail and Resend keys in the table below.
+
 Or run `./start.sh`, which checks Node, installs what's missing, warns about any backend key not yet set on the deployment, and then starts both.
 
-Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **To run on Meta's models**, also set `npx convex env set MODEL_PROVIDER meta` and `npx convex env set MODEL_API_KEY …` (a Meta Model API key); without them every call runs on Claude. The minimum to try it: `CLERK_JWT_ISSUER_DOMAIN`, `JWT_PRIVATE_KEY`, `JWKS` and `SITE_URL`, a model key (`MODEL_API_KEY` with `MODEL_PROVIDER=meta`, or `ANTHROPIC_API_KEY`), `FIRECRAWL_API_KEY` for vendor search, and `VITE_CLERK_PUBLISHABLE_KEY` in `.env.local`. To deploy:
+Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **To run on Meta's models**, also set `npx convex env set MODEL_PROVIDER meta` and `npx convex env set MODEL_API_KEY …` (a Meta Model API key); without them every call runs on Claude. The minimum to try it is what the block above sets. To deploy (run `node scripts/auth-keys.mjs --prod` once for the production deployment first):
 
 ```bash
 npx convex deploy -y                                                    # the backend
@@ -276,7 +284,7 @@ Every push to `main` runs typecheck and tests in CI. A staging workflow (`.githu
 | `CLERK_JWT_ISSUER_DOMAIN` | The Clerk instance whose sign-ins the backend accepts, such as `https://clerk.<home>` |
 | `CLERK_SECRET_KEY` | Optional. Deletes the person at Clerk too when an account is deleted |
 | `VISIT_LOG_SECRET` | Optional. Shared with the Cloudflare middleware, which sends each visit for the security log |
-| `JWT_PRIVATE_KEY`, `JWKS` | Keys for the demo's guest tokens (Convex Auth) |
+| `JWT_PRIVATE_KEY`, `JWKS` | Keys for the demo's guest tokens (Convex Auth), made by `node scripts/auth-keys.mjs` |
 | `RESEND_API_KEY`, `EMAIL_FROM` | The app's own emails |
 | `EMAIL_LIVE` | Optional. `1` to send app emails; anything else keeps them in test mode |
 | `EMAIL_UNSUBSCRIBE_SECRET` | Signs the stop links in app emails |
@@ -316,7 +324,7 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 | `convex/` | The backend: `schema.ts` and one file per area, with tests beside them |
 | `convex/marketplace/` | PlusOne Partner's backend: listings and claims, briefs and offers, Ops decisions and city price ranges |
 | `convex/lib/` | Pure rules shared with the app: quote comparison, the standard sheet and its missing charges, the planning conversation's rules, event types and their words, templates, inbox names, search terms |
-| `scripts/` | `agentmail-setup.mjs` registers a deployment's inbox webhook; `fake-webhook.mjs` sends a signed test email to it |
+| `scripts/` | `auth-keys.mjs` makes the demo's guest-token keys; `agentmail-setup.mjs` registers a deployment's inbox webhook; `fake-webhook.mjs` sends a signed test email to it |
 | `functions/` | Cloudflare Pages Functions: `geo.ts` for a visit's country and state, `ingest/` for analytics |
 | `public/` | Icons, the install manifest, the share image and the mail logo |
 | `assets/` | This README's banner and Meta models image (sources in `assets/src/`), screenshots and logos |
