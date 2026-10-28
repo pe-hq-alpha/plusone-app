@@ -20,9 +20,13 @@ export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; b
       <nav className="pub-links" aria-label="Main">
         <Link to="/how-it-works" className="pub-link pub-link--hide-sm" aria-current={here("/how-it-works")}>How it works</Link>
         <Link to="/pricing" className="pub-link" aria-current={here("/pricing")}>Pricing</Link>
-        <Link to="/partner" className="pub-link pub-link--hide-sm" aria-current={here("/partner")}>For vendors</Link>
+        <Link to="/partner" className="pub-link" aria-current={here("/partner")}>
+          <span className="max-sm:hidden">For vendors</span>
+          <span className="sm:hidden">Vendors</span>
+        </Link>
         {signIn && <Link to="/signin" className="pub-link pub-link--accent">Sign in</Link>}
-        <ThemeSwitch compact className="ml-2" />
+        {/* On a phone the bar keeps its links; the theme follows the device. */}
+        <ThemeSwitch compact className="ml-2 max-sm:hidden" />
       </nav>
     </header>
   );

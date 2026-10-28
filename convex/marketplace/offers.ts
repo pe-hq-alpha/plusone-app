@@ -99,7 +99,7 @@ export const submit = mutation({
   returns: v.id("vendorOffers"),
   handler: async (ctx, args) => {
     const { userId, profile } = await requireVendor(ctx);
-    if (profile.status !== "verified") throw new ConvexError("You can answer families once PlusOne has verified your business.");
+    if (profile.status !== "verified") throw new ConvexError("You can answer customers once PlusOne has verified your business.");
     const brief = await ctx.db.get(args.briefId);
     if (!brief || brief.status !== "open") throw new ConvexError("This family is no longer taking offers.");
     if (brief.demo !== (profile.sample === true) || brief.cityKey !== profile.cityKey || !profile.categories.includes(brief.category)) {

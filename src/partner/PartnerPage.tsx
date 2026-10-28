@@ -13,7 +13,7 @@ import { useAuthActions } from "../lib/session";
 import { BadgeRow, dayText, errorText, unitWord } from "./shared";
 
 /**
- * PlusOne Partner, for vendors: join or claim your listing, answer families' briefs on
+ * PlusOne Partner, for vendors: join or claim your listing, answer customers' briefs on
  * the same sheet every vendor fills in, and keep your prices itemised. Families compare
  * offers line by line, so an offer here is complete or it isn't sent.
  */

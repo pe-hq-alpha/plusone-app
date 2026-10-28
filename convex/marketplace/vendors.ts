@@ -16,7 +16,7 @@ export async function requireVendor(ctx: QueryCtx | MutationCtx): Promise<{ user
     .first();
   if (!profile) throw new ConvexError("Set up your business on PlusOne Partner first.");
   const user = await ctx.db.get(userId);
-  if (user?.isAnonymous && !isTrial(profile)) throw new ConvexError("Create an account to answer families as a vendor.");
+  if (user?.isAnonymous && !isTrial(profile)) throw new ConvexError("Create an account to answer customers as a vendor.");
   return { userId, profile };
 }
 
