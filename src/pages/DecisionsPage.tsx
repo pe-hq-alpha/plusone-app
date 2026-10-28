@@ -19,6 +19,10 @@ type Quote = NonNullable<VendorRow["quote"]>;
 type QuotedRow = VendorRow & { quote: Quote };
 type Reading = Quote["readings"][number];
 
+/** What a quote's place in its city's range means. It places a price; it never calls one fair. */
+const TIER_NOTE =
+  "Where this price sits among prices listed by vendors in the city for the same unit: Value is the lowest quarter, Standard the middle half, Premium up to the top tenth, Luxury above that.";
+
 /** The quote's own warnings, less "GST extra" when the line-by-line gaps already say it. */
 function flagsBesideGaps(q: Quote): string[] {
   return q.missing.some((m) => m.key === "gst") ? q.flags.filter((f) => !/^GST extra$/i.test(f)) : q.flags;
@@ -130,7 +134,7 @@ export function DecisionsPage() {
       ) : (
         <div className="mt-7 grid gap-5">
           {shown.map((need) => (
-            <NeedBoard key={need.slotId} need={need} currency={board.currency} canEdit={canEdit} eventId={eventId} />
+            <NeedBoard key={need.slotId} need={need} currency={board.currency} city={event.city} canEdit={canEdit} eventId={eventId} />
           ))}
         </div>
       )}
@@ -157,7 +161,7 @@ function Kpi({ label, value, note, tone }: { label: string; value: string; note:
 }
 
 /** One need, with everyone in the running side by side. */
-function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency: string; canEdit: boolean; eventId: Id<"events"> }) {
+function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; currency: string; city: string; canEdit: boolean; eventId: Id<"events"> }) {
   const markBooked = useMutation(api.slots.markBooked);
   const setStatus = useMutation(api.threads.setStatus);
   const [busy, setBusy] = useState<string | null>(null);
@@ -208,11 +212,12 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
             {need.sessionNames.length > 0 ? need.sessionNames.join(" · ") : "the whole event"} · {money(need.budget, currency)} planned
           </p>
         </div>
+        <div className="text-right">
         <p className="text-sm text-muted">
           {need.spread ? (
             <>
               {need.basisLabel}: <span className="text-ink">{money(need.spread.low, currency)}</span> – {money(need.spread.high, currency)}
-              <span className="text-quiet"> · for {need.units}</span>
+              <span className="text-quiet"> · for {need.units}, across these quotes</span>
             </>
           ) : need.cheapest !== null ? (
             <>
@@ -223,6 +228,14 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
             `${live.length} ${live.length === 1 ? "vendor" : "vendors"} asked, no prices yet`
           )}
         </p>
+        {need.market && (
+          <p className="mt-0.5 text-xs text-muted" title={`The middle half of ${need.market.count} prices listed by ${city} vendors for the same unit`}>
+            {city} range: <span className="text-ink">{money(need.market.p25, need.market.currency)}</span> – {money(need.market.p75, need.market.currency)}
+            {unitWord !== "all in" && <> per {unitWord}</>}
+            <span className="text-quiet"> · {need.market.count} listed prices</span>
+          </p>
+        )}
+        </div>
       </div>
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
@@ -302,6 +315,11 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
                           <span className={`block text-xs ${isBestValue ? "text-accent" : "text-muted"}`}>
                             {money(v.quote.perUnit, v.quote.currency)} per {unitWord}
                             {v.quote.atYourNumbers !== v.quote.total && <> · {money(v.quote.atYourNumbers, v.quote.currency)} for your {need.units}</>}
+                          </span>
+                        )}
+                        {v.quote.tier && (
+                          <span className="block text-xs text-muted" title={TIER_NOTE}>
+                            {v.quote.tier} for {city}
                           </span>
                         )}
                         {flagsBesideGaps(v.quote).length > 0 && (
@@ -384,7 +402,7 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
         </table>
       </div>
 
-      {need.sheet && quoted.length > 0 && <LineByLine sheet={need.sheet} quoted={quoted} unitWord={unitWord} />}
+      {need.sheet && quoted.length > 0 && <LineByLine sheet={need.sheet} quoted={quoted} unitWord={unitWord} city={need.market ? city : null} />}
     </section>
   );
 }
@@ -393,7 +411,7 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
  * Every quote for a need on the same rows: the need's standard sheet, line by line, so a
  * charge one vendor names and another leaves out shows as a gap rather than a lower total.
  */
-function LineByLine({ sheet, quoted, unitWord }: { sheet: NonNullable<Need["sheet"]>; quoted: QuotedRow[]; unitWord: string }) {
+function LineByLine({ sheet, quoted, unitWord, city }: { sheet: NonNullable<Need["sheet"]>; quoted: QuotedRow[]; unitWord: string; city: string | null }) {
   return (
     <div className="border-t border-line px-6 pb-5 pt-4">
       <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
@@ -427,6 +445,18 @@ function LineByLine({ sheet, quoted, unitWord }: { sheet: NonNullable<Need["shee
                 </td>
               ))}
             </tr>
+            {city && (
+              <tr>
+                <th scope="row" className="py-2 pr-4 text-left font-normal text-muted" title={TIER_NOTE}>
+                  In the {city} range
+                </th>
+                {quoted.map((v) => (
+                  <td key={v.vendorId} className="px-3 py-2 text-right text-muted">
+                    {v.quote.tier ?? "—"}
+                  </td>
+                ))}
+              </tr>
+            )}
             {sheet.lines.map((line) => (
               <tr key={line.key}>
                 <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">{line.label}</th>

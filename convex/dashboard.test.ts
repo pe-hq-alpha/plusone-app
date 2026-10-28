@@ -108,3 +108,34 @@ describe("missing charges on the decision board", () => {
     expect(board.needs[0].vendors[0].quote?.readings).toEqual([]);
   });
 });
+
+describe("the market range in Compare", () => {
+  const decor: QuoteSeed[] = [
+    { name: "Thoranam Decor", total: 28_000 },
+    { name: "Malli Poo Decor", total: 45_000 },
+    { name: "Grand Mandap Co.", total: 80_000 },
+  ];
+  const band = { category: "Decor & Florals", unit: "total" as const, city: "chennai", currency: "INR", count: 12, p25: 30_000, p50: 40_000, p75: 50_000, p90: 70_000, sample: false, computedAt: 0 };
+
+  test("a need whose city has a range carries it, and each quote shows where it sits in it", async () => {
+    const t = setup();
+    const s = await seed(t, "Decor & Florals", decor);
+    await t.run((ctx) => ctx.db.insert("priceBands", band));
+    const need = (await as(t, s.ownerId).query(api.dashboard.board, { eventId: s.eventId })).needs[0];
+    expect(need.market).toEqual({ count: 12, p25: 30_000, p50: 40_000, p75: 50_000, p90: 70_000, currency: "INR" });
+    expect(Object.fromEntries(need.vendors.map((v) => [v.name, v.quote?.tier]))).toEqual({
+      "Thoranam Decor": "Value",
+      "Malli Poo Decor": "Standard",
+      "Grand Mandap Co.": "Luxury",
+    });
+  });
+
+  test("with no range for the city yet, there is none to show and no quote is placed", async () => {
+    const t = setup();
+    const s = await seed(t, "Decor & Florals", decor);
+    await t.run((ctx) => ctx.db.insert("priceBands", { ...band, city: "delhi" }));
+    const need = (await as(t, s.ownerId).query(api.dashboard.board, { eventId: s.eventId })).needs[0];
+    expect(need.market).toBeNull();
+    expect(need.vendors.map((v) => v.quote?.tier)).toEqual([null, null, null]);
+  });
+});

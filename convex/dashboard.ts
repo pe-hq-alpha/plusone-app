@@ -7,6 +7,8 @@ import type { Infer } from "convex/values";
 import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
 import { missingCharges, readQuote, sheetFor, type Sheet } from "./lib/standardSheet";
+import { tierFor } from "./lib/marketplace";
+import { bandRow, tier } from "./marketplace/listings";
 
 /**
  * Everything the couple needs to decide, in one read.
@@ -71,6 +73,8 @@ const vendorRow = v.object({
       ),
       /** Charges it leaves unsaid, against the sheet and the other quotes for the same need. */
       missing: v.array(v.object({ key: v.string(), label: v.string(), message: v.string() })),
+      /** Where the quote sits in its city's range (Value, Standard, Premium, Luxury); null with no range. It places a price, never judges it. */
+      tier: v.union(tier, v.null()),
     }),
     v.null(),
   ),
@@ -86,6 +90,13 @@ type VendorRow = Infer<typeof vendorRow>;
 function comparison(...args: Parameters<typeof compare>) {
   const { perUnit, atYourNumbers, flags } = compare(...args);
   return { perUnit, atYourNumbers, flags };
+}
+
+/** Where a quote sits in its city's range, in the need's unit: the total for "all in" needs, per plate or piece for the rest. */
+function placeInBand(quote: Doc<"quotes">, ...[basis, units, band]: [Parameters<typeof compare>[1], number, Doc<"priceBands"> | null]) {
+  if (!band || band.currency !== quote.currency) return null;
+  const price = basis === "total" ? quote.total : compare(quote, basis, units).perUnit;
+  return price === null ? null : (tierFor(price, band) ?? null);
 }
 
 /** A quote against its need's standard sheet: each line, and what it leaves unsaid. */
@@ -138,6 +149,11 @@ export const board = query({
         spread: v.union(v.object({ low: v.number(), high: v.number() }), v.null()),
         /** The need's standard sheet, whose lines are the rows of a line-by-line compare; null when it has none. */
         sheet: v.union(v.object({ covers: v.string(), lines: v.array(v.object({ key: v.string(), label: v.string() })) }), v.null()),
+        /** The city's range for this need, in its comparison unit, from listed vendors' prices; null until there are enough. */
+        market: v.union(
+          v.object({ count: v.number(), p25: v.number(), p50: v.number(), p75: v.number(), p90: v.number(), currency: v.string() }),
+          v.null(),
+        ),
         vendors: v.array(vendorRow),
       }),
     ),
@@ -228,6 +244,8 @@ export const board = query({
       const people = Math.max(0, ...served.map((e) => e.guestCount), served.length ? 0 : event.guestEstimate ?? 0);
       const units = basis === "per_day" ? Math.max(1, new Set(served.map((e) => e.date)).size) : people;
       const sheet = sheetFor(slot.category);
+      // A sample event sees ranges that count the sample vendors; a real family only real prices.
+      const band = await bandRow(ctx, slot.category, basis, event.city, event.demo === true);
       const slotQuotes = vendors.map((vendor) => quoteByVendor.get(vendor._id)).filter((q): q is Doc<"quotes"> => !!q);
 
       const rows: VendorRow[] = [];
@@ -295,6 +313,7 @@ export const board = query({
                 summary: quote.summary,
                 deltaVsBudget: quote.total - slot.budget,
                 ...comparison(quote, basis, units),
+                tier: placeInBand(quote, basis, units, band),
                 lines: (quote.lines ?? []).slice(0, 12).map((l) => ({ item: l.item, amount: l.amount, optional: Boolean(l.optional) })),
                 ...againstSheet(quote, sheet, slotQuotes.filter((o) => o._id !== quote._id)),
               }
@@ -331,6 +350,7 @@ export const board = query({
         units,
         spread: spread(rows.filter((r) => r.state !== "declined").map((r) => r.quote?.perUnit ?? null)),
         sheet: sheet && { covers: sheet.covers, lines: sheet.lines.map(({ key, label }) => ({ key, label })) },
+        market: band && band.currency === event.currency ? { count: band.count, p25: band.p25, p50: band.p50, p75: band.p75, p90: band.p90, currency: band.currency } : null,
         vendors: rows,
       });
     }
