@@ -1,12 +1,13 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalQuery, mutation, query, type QueryCtx } from "../_generated/server";
-import { currentUserId, requireAccount } from "../lib/auth";
-import { checkOfferLines, offerTotal } from "../lib/marketplace";
+import { currentUserId } from "../lib/auth";
+import { checkOfferLines, isTrial, offerTotal } from "../lib/marketplace";
 import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offerLine, offeringUnit } from "../schema";
 import { cardFor, listingCard } from "./listings";
+import { eventIdsOf, requireVendor } from "./vendors";
 
 /**
  * Offers: a verified Partner vendor's answer to a family's brief, priced on the standard
@@ -97,17 +98,15 @@ export const submit = mutation({
   },
   returns: v.id("vendorOffers"),
   handler: async (ctx, args) => {
-    const userId = await requireAccount(ctx);
-    const profile = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
-    if (!profile) throw new ConvexError("Set up your business on PlusOne Partner first.");
+    const { userId, profile } = await requireVendor(ctx);
     if (profile.status !== "verified") throw new ConvexError("You can answer families once PlusOne has verified your business.");
     const brief = await ctx.db.get(args.briefId);
     if (!brief || brief.status !== "open") throw new ConvexError("This family is no longer taking offers.");
     if (brief.demo !== (profile.sample === true) || brief.cityKey !== profile.cityKey || !profile.categories.includes(brief.category)) {
       throw new ConvexError("This request isn't for your kind of service or your city.");
+    }
+    if (isTrial(profile) && !(await eventIdsOf(ctx, userId)).has(brief.eventId)) {
+      throw new ConvexError("A sample business answers your own sample event only.");
     }
     const room = await rateLimiter.limit(ctx, "partnerEdits", { key: userId });
     if (!room.ok) throw new ConvexError("That's a lot of changes at once. Try again in a few minutes.");
@@ -153,10 +152,9 @@ export const withdraw = mutation({
   args: { offerId: v.id("vendorOffers") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await requireAccount(ctx);
+    const { profile } = await requireVendor(ctx);
     const offer = await ctx.db.get(args.offerId);
-    const profile = offer ? await ctx.db.get(offer.profileId) : null;
-    if (!offer || profile?.ownerUserId !== userId) throw new ConvexError("That offer isn't yours to withdraw.");
+    if (!offer || offer.profileId !== profile._id) throw new ConvexError("That offer isn't yours to withdraw.");
     await ctx.db.patch(offer._id, { status: "withdrawn" });
     return null;
   },

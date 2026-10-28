@@ -129,7 +129,7 @@ const SAMPLE_OFFERS: { vendor: string; category: string; price: number; covers: 
 export async function ensureSampleVendors(ctx: MutationCtx): Promise<Map<string, Id<"vendorProfiles">>> {
   const ids = new Map<string, Id<"vendorProfiles">>();
   for await (const p of ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified"))) {
-    if (p.sample) ids.set(p.name, p._id);
+    if (p.sample && !p.ownerUserId) ids.set(p.name, p._id);
   }
   let added = 0;
   const now = Date.now();

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
-import { bandOf, isListed } from "../lib/marketplace";
+import { bandOf, isListed, isTrial } from "../lib/marketplace";
 
 /**
  * Each city's price ranges, worked out from the prices listed vendors publish on
@@ -33,7 +33,7 @@ export async function recomputeBands(ctx: MutationCtx): Promise<{ bands: number;
   for (const status of ["verified", "pending"] as const) {
     for await (const profile of ctx.db.query("vendorProfiles").withIndex("by_status", (q) => q.eq("status", status))) {
       if (++read > MAX_PROFILES) break;
-      if (!isListed(profile)) continue;
+      if (!isListed(profile) || isTrial(profile)) continue;
       const offerings = await ctx.db
         .query("vendorOfferings")
         .withIndex("by_profileId", (q) => q.eq("profileId", profile._id))

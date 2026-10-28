@@ -107,6 +107,14 @@ export function isListed(profile: { status: ProfileStatus; source: ProfileSource
   return profile.status === "pending" && profile.source === "plusone_added";
 }
 
+/**
+ * A demo guest's own sample business, made so they can try Partner from the vendor's
+ * side. It answers only their own sample event, and never shows in a search or a range.
+ */
+export function isTrial(profile: { sample?: boolean; ownerUserId?: unknown }): boolean {
+  return profile.sample === true && Boolean(profile.ownerUserId);
+}
+
 /** The cheapest offering in a category: the "from" price a family sees on the card. */
 export function startingOffering<T extends OfferingLike & { category: string }>(offerings: T[], category: string): T | undefined {
   return offerings

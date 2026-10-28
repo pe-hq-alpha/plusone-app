@@ -1,13 +1,14 @@
 import { ConvexError, v, type ObjectType } from "convex/values";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
 import { mutation, query, type MutationCtx } from "../_generated/server";
-import { currentUserId, requireAccount } from "../lib/auth";
-import { cityKey, e164, emailMatchesWebsite, isListed } from "../lib/marketplace";
+import { currentUserId, requireAccount, requireUserId } from "../lib/auth";
+import { cityKey, e164, emailMatchesWebsite, isListed, isTrial } from "../lib/marketplace";
 import { canonicalWebsite } from "../lib/text";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
+import { requireVendor } from "./vendors";
 
 /**
  * PlusOne Partner, for vendors: sign up or claim the listing PlusOne added from your
@@ -44,15 +45,6 @@ function cleanPhone(raw: string | undefined, what: string): string | undefined {
 function cleanList(items: string[] | undefined, max: number, each: number): string[] | undefined {
   if (!items) return undefined;
   return items.map((s) => s.trim().slice(0, each)).filter(Boolean).slice(0, max);
-}
-
-async function ownedProfile(ctx: MutationCtx, userId: Id<"users">): Promise<Doc<"vendorProfiles">> {
-  const profile = await ctx.db
-    .query("vendorProfiles")
-    .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-    .first();
-  if (!profile) throw new ConvexError("Set up your business on PlusOne Partner first.");
-  return profile;
 }
 
 async function editAllowance(ctx: MutationCtx, userId: Id<"users">) {
@@ -259,6 +251,55 @@ export const claim = mutation({
   },
 });
 
+/**
+ * The guest demo, from the vendor's side: a sample catering business of the guest's
+ * own, verified at once, that sees only the guest's own sample event. Gone when the
+ * demo is cleared away.
+ */
+export const trySample = mutation({
+  args: {},
+  returns: v.id("vendorProfiles"),
+  handler: async (ctx) => {
+    const userId = await requireUserId(ctx);
+    const user = await ctx.db.get(userId);
+    if (!user?.isAnonymous) throw new ConvexError("A sample business is for the demo. Set up your own business instead.");
+    const owned = await ctx.db
+      .query("vendorProfiles")
+      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
+      .first();
+    if (owned) return owned._id;
+    const room = await rateLimiter.limit(ctx, "partnerSignUps");
+    if (!room.ok) throw new ConvexError("A lot of people are trying this right now. Try again in a few minutes.");
+    const now = Date.now();
+    const profileId = await ctx.db.insert("vendorProfiles", {
+      name: "Your catering business",
+      categories: ["Catering"],
+      city: "Chennai",
+      cityKey: "chennai",
+      serviceArea: ["Mylapore"],
+      languages: ["Tamil", "English"],
+      about: "A sample business for trying PlusOne Partner.",
+      source: "vendor_signup",
+      ownerUserId: userId,
+      status: "verified",
+      statusAt: now,
+      joinedAt: now,
+      completedEvents: 0,
+      sample: true,
+    });
+    await ctx.db.insert("vendorOfferings", {
+      profileId,
+      category: "Catering",
+      title: "Veg lunch on banana leaf",
+      unit: "per_person",
+      price: 360,
+      currency: "INR",
+      includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", "Banana leaf", "Serving staff"],
+    });
+    return profileId;
+  },
+});
+
 // ---------------------------------------------------------------- keeping it right
 
 /**
@@ -269,8 +310,7 @@ export const update = mutation({
   args: profileArgs,
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await requireAccount(ctx);
-    const profile = await ownedProfile(ctx, userId);
+    const { userId, profile } = await requireVendor(ctx);
     await editAllowance(ctx, userId);
     const fields = cleanProfile(args);
     if (fields.website && fields.website !== profile.website) {
@@ -280,7 +320,7 @@ export const update = mutation({
         .first();
       if (taken && taken._id !== profile._id) throw new ConvexError("Another listing already has that website. Write to us if it's yours.");
     }
-    const recheck = profile.status === "verified" && (fields.name !== profile.name || fields.website !== profile.website);
+    const recheck = !isTrial(profile) && profile.status === "verified" && (fields.name !== profile.name || fields.website !== profile.website);
     await ctx.db.patch(profile._id, {
       ...fields,
       ...(recheck ? { status: "pending" as const, statusReason: "New name or website, waiting for a fresh check", statusAt: Date.now() } : {}),
@@ -306,8 +346,7 @@ export const saveOffering = mutation({
   },
   returns: v.id("vendorOfferings"),
   handler: async (ctx, args) => {
-    const userId = await requireAccount(ctx);
-    const profile = await ownedProfile(ctx, userId);
+    const { userId, profile } = await requireVendor(ctx);
     await editAllowance(ctx, userId);
     if (!profile.categories.includes(args.category)) throw new ConvexError("Add that kind of service to your profile first.");
     const title = text(args.title, 120);
@@ -341,8 +380,7 @@ export const removeOffering = mutation({
   args: { offeringId: v.id("vendorOfferings") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const userId = await requireAccount(ctx);
-    const profile = await ownedProfile(ctx, userId);
+    const { profile } = await requireVendor(ctx);
     const offering = await ctx.db.get(args.offeringId);
     if (!offering || offering.profileId !== profile._id) throw new ConvexError("That offering isn't yours to remove.");
     await ctx.db.delete(offering._id);

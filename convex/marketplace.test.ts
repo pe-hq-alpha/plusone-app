@@ -406,7 +406,7 @@ describe("briefs and offers", () => {
     await expect(as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers })).rejects.toThrow(/no longer taking offers/);
   });
 
-  test("a sample event's brief reaches only sample vendors, and a viewer can't send one", async () => {
+  test("a sample event's brief never reaches a real vendor, and a viewer can't send one", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t, { demo: true });
     const real = await user(t, "owner@anjalicaterers.in");
@@ -417,7 +417,8 @@ describe("briefs and offers", () => {
     const briefId = await t.mutation(internal.marketplace.briefs.openForSlot, { eventId, slotId });
     expect(await as(t, real).query(api.marketplace.briefs.open, {})).toEqual([]);
     await expect(as(t, real).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers })).rejects.toThrow(/isn't for your kind/);
-    expect((await as(t, sampleOwner).query(api.marketplace.briefs.open, {})).map((b) => b._id)).toEqual([briefId]);
+    // An owned sample business is a demo guest's own trial: it sees only that guest's event.
+    expect(await as(t, sampleOwner).query(api.marketplace.briefs.open, {})).toEqual([]);
 
     const viewer = await user(t, "aunt@example.com");
     await t.run(async (ctx) => await ctx.db.insert("members", { eventId, userId: viewer, role: "viewer" }));
@@ -471,5 +472,65 @@ describe("the guest demo's Partner side", () => {
     while (!done) done = (await t.mutation(internal.maintenance.deleteEvent, { eventId: demo.eventId })).done;
     const left = await t.run(async (ctx) => [(await ctx.db.query("vendorBriefs").collect()).length, (await ctx.db.query("vendorOffers").collect()).length]);
     expect(left).toEqual([0, 0]);
+  });
+});
+
+describe("a demo guest trying Partner", () => {
+  test("answers their own sample event as a sample caterer, and sees the offer land in their Compare", async () => {
+    const t = setup();
+    const mine = await familyEvent(t, { demo: true });
+    const someoneElse = await familyEvent(t, { demo: true });
+    await t.run(async (ctx) => {
+      await ctx.db.patch(mine.familyId, { isAnonymous: true });
+      await ctx.db.patch(someoneElse.familyId, { isAnonymous: true });
+    });
+    const guest = as(t, mine.familyId);
+    const myBrief = await t.mutation(internal.marketplace.briefs.openForSlot, { eventId: mine.eventId, slotId: mine.slotId });
+    await t.mutation(internal.marketplace.briefs.openForSlot, { eventId: someoneElse.eventId, slotId: someoneElse.slotId });
+
+    await expect(guest.mutation(api.marketplace.partner.register, { name: "X", categories: ["Catering"], city: "Chennai" })).rejects.toThrow(/account/);
+    const profileId = await guest.mutation(api.marketplace.partner.trySample, {});
+    expect(await guest.mutation(api.marketplace.partner.trySample, {})).toBe(profileId);
+
+    const open = await guest.query(api.marketplace.briefs.open, {});
+    expect(open.map((b) => b._id)).toEqual([myBrief]);
+    await guest.mutation(api.marketplace.offers.submit, { briefId: myBrief, price: 360, lines: cateringAnswers });
+    const offers = await t.query(internal.marketplace.offers.offersFor, { eventId: mine.eventId });
+    expect(offers.map((o) => [o.vendor.name, o.vendor.sample, o.total])).toEqual([["Your catering business", true, 360 * 120 + 2500]]);
+
+    // Nobody else's sample event, search or range ever sees it.
+    const otherBrief = (await t.run(async (ctx) => await ctx.db.query("vendorBriefs").collect())).find((b) => b.eventId === someoneElse.eventId)!;
+    await expect(guest.mutation(api.marketplace.offers.submit, { briefId: otherBrief._id, price: 360, lines: cateringAnswers })).rejects.toThrow(/your own sample event/);
+    expect(await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai", samples: true })).toEqual([]);
+
+    // A real account can't take a sample business.
+    const real = await user(t, "owner@anjalicaterers.in");
+    await expect(as(t, real).mutation(api.marketplace.partner.trySample, {})).rejects.toThrow(/for the demo/);
+  });
+
+  test("clearing a guest away, or deleting a vendor's account, takes their business with it", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t, { demo: true });
+    await t.run(async (ctx) => await ctx.db.patch(familyId, { isAnonymous: true }));
+    const briefId = await t.mutation(internal.marketplace.briefs.openForSlot, { eventId, slotId });
+    await as(t, familyId).mutation(api.marketplace.partner.trySample, {});
+    await as(t, familyId).mutation(api.marketplace.offers.submit, { briefId, price: 360, lines: cateringAnswers });
+
+    const vendor = await user(t, "owner@anjalicaterers.in");
+    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.in", prices: [500] });
+    await as(t, vendor).mutation(api.marketplace.partner.claim, { profileId: added });
+
+    await t.run(async (ctx) => {
+      const { deleteUserRecords } = await import("./lib/accounts");
+      await deleteUserRecords(ctx, familyId);
+      await deleteUserRecords(ctx, vendor);
+    });
+    const left = await t.run(async (ctx) => ({
+      profiles: (await ctx.db.query("vendorProfiles").collect()).map((p) => [p.name, p.ownerUserId ?? null, p.status]),
+      offerings: (await ctx.db.query("vendorOfferings").collect()).length,
+      offers: (await ctx.db.query("vendorOffers").collect()).length,
+      claims: (await ctx.db.query("vendorClaims").collect()).length,
+    }));
+    expect(left).toEqual({ profiles: [["Anjali Caterers", null, "pending"]], offerings: 0, offers: 0, claims: 0 });
   });
 });

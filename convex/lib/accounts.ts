@@ -1,5 +1,6 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { deleteVendorRecords } from "../marketplace/vendors";
 
 /**
  * Remove a person's own records: their unfinished onboarding and its pictures, their
@@ -9,6 +10,8 @@ import type { MutationCtx } from "../_generated/server";
  * logs) is cleared in batches by users.purgeTrail.
  */
 export async function deleteUserRecords(ctx: MutationCtx, userId: Id<"users">): Promise<void> {
+  await deleteVendorRecords(ctx, userId);
+
   for (const chat of await ctx.db.query("planningChats").withIndex("by_userId", (q) => q.eq("userId", userId)).take(20)) {
     await ctx.db.delete(chat._id);
   }

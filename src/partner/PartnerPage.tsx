@@ -23,27 +23,20 @@ export function PartnerPage() {
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
   if (mine === undefined || me === undefined) return <main id="main" className="page px-5 py-10 text-muted">Loading…</main>;
-  if (me?.isGuest) {
-    return (
-      <main id="main" className="grid min-h-screen place-items-center px-5">
-        <div className="card max-w-md px-7 py-8 text-center">
-          <h1 className="display text-[1.7rem] leading-tight">Join PlusOne <em>Partner</em></h1>
-          <p className="mt-2 text-muted">You're in the demo. To answer families as a vendor, make a free account for your business first.</p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <button type="button" className="btn-primary" onClick={() => void signOut().then(() => navigate("/signin"))}>Create an account</button>
-            <Link to="/" className="btn-quiet">Back to the demo</Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
+  if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={() => void signOut().then(() => navigate("/signin"))} />;
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
       <Link to="/" className="btn-quiet btn-sm gap-1.5 bg-cream">
         <Icon name="arrow" size={15} className="rotate-180" />
-        Home
+        {me?.isGuest ? "Back to the demo" : "Home"}
       </Link>
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
+      {me?.isGuest && (
+        <p className="card-quiet mt-4 px-5 py-3 text-sm">
+          <span className="chip-pending mr-2">Sample</span>
+          You're a sample caterer, seeing your own demo event's request. Answer it, then open Compare in your event to see your offer beside the others.
+        </p>
+      )}
       {mine.profile ? (
         <Dashboard profile={mine.profile} offerings={mine.offerings} badges={mine.badges} tier={mine.tier} level={mine.level} />
       ) : (
@@ -53,9 +46,45 @@ export function PartnerPage() {
   );
 }
 
+/** The demo, from the vendor's side: try it as a sample caterer, or make an account for a real business. */
+function TryAsGuest({ onAccount }: { onAccount: () => void }) {
+  const trySample = useMutation(api.marketplace.partner.trySample);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  return (
+    <main id="main" className="grid min-h-screen place-items-center px-5">
+      <div className="card max-w-md px-7 py-8 text-center">
+        <h1 className="display text-[1.7rem] leading-tight">See the <em>vendor's</em> side</h1>
+        <p className="mt-2 text-muted">
+          Families send what they need; vendors answer on the same sheet, so every offer can be compared line by line. Try
+          it as a sample caterer answering your demo event, or make an account for your own business.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={busy}
+            onClick={() => {
+              setBusy(true);
+              void trySample({})
+                .catch((err) => setError(errorText(err, "That didn't start. Try again.")))
+                .finally(() => setBusy(false));
+            }}
+          >
+            {busy ? "Starting…" : "Try it as a sample caterer"}
+          </button>
+          <button type="button" className="btn-quiet" onClick={onAccount}>Create an account</button>
+        </div>
+        {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
+        <Link to="/" className="mt-5 inline-block text-sm text-muted underline">Back to the demo</Link>
+      </div>
+    </main>
+  );
+}
+
 // ---------------------------------------------------------------- joining
 
-type Claim = { _id: Id<"vendorClaims">; profileName: string; status: "pending" | "approved" | "rejected" };
+type Claim ={ _id: Id<"vendorClaims">; profileName: string; status: "pending" | "approved" | "rejected" };
 
 function Join({ claims }: { claims: Claim[] }) {
   const [website, setWebsite] = useState("");
@@ -321,7 +350,7 @@ function Briefs({ verified }: { verified: boolean }) {
             <article key={b._id} className="card p-5 md:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="label mb-1">{b.category}</p>
+                  {b.category !== b.title && <p className="label mb-1">{b.category}</p>}
                   <h3 className="display text-xl">{b.title}</h3>
                   <p className="mt-1 text-sm text-muted">
                     {b.occasion} · {dayText(b.date)} · {b.guests ? `${b.guests} guests · ` : ""}{b.area ? `${b.area}, ` : ""}{b.city}

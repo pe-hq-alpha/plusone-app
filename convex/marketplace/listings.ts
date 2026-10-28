@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { internalQuery, type QueryCtx } from "../_generated/server";
-import { badgesFor, cityKey, isListed, levelFor, MIN_BAND_COUNT, startingOffering, tierFor, type Band } from "../lib/marketplace";
+import { badgesFor, cityKey, isListed, isTrial, levelFor, MIN_BAND_COUNT, startingOffering, tierFor, type Band } from "../lib/marketplace";
 import type { Basis } from "../lib/comparable";
 import { canonicalWebsite } from "../lib/text";
 import { offeringUnit } from "../schema";
@@ -112,7 +112,7 @@ export const searchProfiles = internalQuery({
       for await (const profile of rows) {
         if (cards.length >= MAX_CARDS || ++scanned > MAX_SCANNED) break;
         if (!isListed(profile) || !profile.categories.includes(args.category)) continue;
-        if (profile.sample && !args.samples) continue;
+        if ((profile.sample && !args.samples) || isTrial(profile)) continue;
         cards.push(await cardFor(ctx, profile, args.category));
       }
     }

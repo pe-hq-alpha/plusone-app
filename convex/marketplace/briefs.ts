@@ -3,11 +3,12 @@ import type { Doc, Id } from "../_generated/dataModel";
 import { internalMutation, mutation, query, type MutationCtx } from "../_generated/server";
 import { currentUserId, requireMember } from "../lib/auth";
 import { basisFor } from "../lib/comparable";
-import { cityKey } from "../lib/marketplace";
+import { cityKey, isTrial } from "../lib/marketplace";
 import { EVENT_TYPES, eventTypeOf } from "../lib/occasion";
 import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit } from "../schema";
+import { eventIdsOf } from "./vendors";
 
 /**
  * Briefs: a family's need, sent to PlusOne Partner so verified vendors answer it on the
@@ -145,7 +146,16 @@ export const open = query({
       .first();
     if (!profile || profile.status !== "verified") return [];
     const briefs: Doc<"vendorBriefs">[] = [];
-    for (const category of profile.categories) {
+    if (isTrial(profile)) {
+      // A guest's sample business sees only the guest's own sample event.
+      for (const eventId of await eventIdsOf(ctx, userId)) {
+        const rows = await ctx.db
+          .query("vendorBriefs")
+          .withIndex("by_eventId", (q) => q.eq("eventId", eventId))
+          .take(20);
+        briefs.push(...rows.filter((b) => b.status === "open" && b.demo && profile.categories.includes(b.category)));
+      }
+    } else for (const category of profile.categories) {
       const rows = await ctx.db
         .query("vendorBriefs")
         .withIndex("by_category_and_cityKey_and_status", (q) => q.eq("category", category).eq("cityKey", profile.cityKey).eq("status", "open"))
