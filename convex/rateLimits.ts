@@ -98,6 +98,11 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   vendorChecks: { kind: "token bucket", rate: 20, period: DAY, capacity: 5 },
   vendorChecksAll: { kind: "fixed window", rate: 60, period: DAY },
 
+  // Tidying what a vendor writes: cheap, but still capped per account, per guest and overall.
+  vendorTidy: { kind: "token bucket", rate: 60, period: HOUR, capacity: 20 },
+  vendorTidyDemo: { kind: "fixed window", rate: 20, period: DAY },
+  vendorTidyAll: { kind: "fixed window", rate: 3000, period: DAY },
+
   // The visit log (POST /visit): plenty for a scraper to show up clearly, while a
   // flood from one address, or a leaked secret, can't fill the table.
   visitsPerIp: { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },

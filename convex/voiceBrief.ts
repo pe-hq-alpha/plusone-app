@@ -1,9 +1,8 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import { action, internalQuery, mutation, type ActionCtx, type MutationCtx } from "./_generated/server";
-import { isClerkIdentity, requireUserId } from "./lib/auth";
+import { requireActionUserId, requireUserId } from "./lib/auth";
 import { MetaError } from "./lib/meta";
 import { voiceCostUsd } from "./lib/modelCost";
 import { transcribe as voiceTranscribe, type VoiceOptions, type VoiceResult } from "./lib/voice";
@@ -77,18 +76,6 @@ export const prepare = internalQuery({
   },
 });
 
-/** The signed-in caller of an action: an account by its Clerk user, a guest by its own token. */
-async function actionUserId(ctx: ActionCtx): Promise<Id<"users">> {
-  const identity = await ctx.auth.getUserIdentity();
-  const userId = !identity
-    ? null
-    : isClerkIdentity(identity)
-      ? await ctx.runQuery(internal.users.byClerkId, { clerkId: identity.subject })
-      : await getAuthUserId(ctx);
-  if (!userId) throw new ConvexError("Please sign in to continue.");
-  return userId;
-}
-
 function isWav(bytes: Uint8Array): boolean {
   try {
     wavInfo(bytes);
@@ -115,7 +102,7 @@ export const transcribe = action({
   args: { storageId: v.id("_storage"), eventId: v.optional(v.id("events")) },
   returns: v.object({ text: v.string(), seconds: v.number() }),
   handler: async (ctx, args): Promise<{ text: string; seconds: number }> => {
-    const userId = await actionUserId(ctx);
+    const userId = await requireActionUserId(ctx);
     const file = await ctx.runQuery(internal.voiceBrief.prepare, { userId, storageId: args.storageId, eventId: args.eventId });
     // Only a voice note is read or deleted here; any other file someone names is left alone.
     if (!file.isVoiceNote) throw new ConvexError(NOT_HEARD);

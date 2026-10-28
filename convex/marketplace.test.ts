@@ -839,3 +839,96 @@ describe("running a vendor check", () => {
     expect(rows[0].costUsd).toBeCloseTo(wonderCostUsd({ inputTokens: 1200, outputTokens: 300 }, 0));
   });
 });
+
+function tidyReply(fields: { key: string; text: string }[]) {
+  return {
+    model: "muse-spark-1.3",
+    choices: [{ finish_reason: "stop", message: { content: JSON.stringify({ fields }) } }],
+    usage: { prompt_tokens: 100, completion_tokens: 20 },
+  };
+}
+
+async function tidyVendor(t: T, email: string, guest = false) {
+  const userId = await user(t, email);
+  if (guest) await t.run(async (ctx) => await ctx.db.patch(userId, { isAnonymous: true }));
+  await t.run(async (ctx) => {
+    await ctx.db.insert("vendorProfiles", {
+      name: "Lakshmi Caterers",
+      categories: ["Catering"],
+      city: "Chennai",
+      cityKey: "chennai",
+      source: "vendor_signup",
+      status: "pending",
+      statusAt: 0,
+      joinedAt: 0,
+      completedEvents: 0,
+      ownerUserId: userId,
+    });
+  });
+  return userId;
+}
+
+describe("tidying what a vendor writes", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  test("a vendor gets the tidied text back with changed true", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => checkResponseJson(tidyReply([{ key: "About", text: "Veg lunch, 5 hours" }]))));
+    const t = setup();
+    const vendorId = await tidyVendor(t, "vendor-tidy@example.com");
+    const out = await as(t, vendorId).action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "veg lunch 5hrs" }] });
+    expect(out).toMatchObject([{ key: "About", before: "veg lunch 5hrs", after: "Veg lunch, 5 hours", changed: true }]);
+    const rows = await t.run(async (ctx) => await ctx.db.query("modelCalls").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ feature: "vendorTidy", provider: "meta" });
+  });
+
+  test("a tidy that changes a price comes back as the vendor's own text", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => checkResponseJson(tidyReply([{ key: "About", text: "₹550 per plate" }]))));
+    const t = setup();
+    const vendorId = await tidyVendor(t, "vendor-price@example.com");
+    const out = await as(t, vendorId).action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "₹500 per plate" }] });
+    expect(out).toMatchObject([{ key: "About", before: "₹500 per plate", after: "₹500 per plate", changed: false }]);
+  });
+
+  test("a model failure returns every field unchanged without throwing", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("down", { status: 500 })));
+    const t = setup();
+    const vendorId = await tidyVendor(t, "vendor-down@example.com");
+    const out = await as(t, vendorId).action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "veg lunch" }] });
+    expect(out).toMatchObject([{ key: "About", before: "veg lunch", after: "veg lunch", changed: false }]);
+  });
+
+  test("a vendor signing up, before their listing exists, gets the tidy too; someone signed out is refused", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => checkResponseJson(tidyReply([{ key: "About", text: "Veg lunch" }]))));
+    const t = setup();
+    const newcomer = await user(t, "newcomer-tidy@example.com");
+    const out = await as(t, newcomer).action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "veg lunch" }] });
+    expect(out[0]).toMatchObject({ after: "Veg lunch", changed: true });
+    await expect(t.action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "hello" }] })).rejects.toThrow(/sign in/);
+  });
+
+  test("a demo guest's 21st call in a day returns the fields unchanged", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => checkResponseJson(tidyReply([{ key: "About", text: "Veg lunch" }]))));
+    const t = setup();
+    const guestId = await tidyVendor(t, "guest-tidy@example.com", true);
+    const guest = as(t, guestId);
+    for (let i = 0; i < 20; i++) {
+      await guest.action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "veg lunch" }] });
+    }
+    const out = await guest.action(api.marketplace.tidy.tidy, { fields: [{ key: "About", text: "veg lunch" }] });
+    expect(out).toMatchObject([{ key: "About", after: "veg lunch", changed: false }]);
+  });
+});

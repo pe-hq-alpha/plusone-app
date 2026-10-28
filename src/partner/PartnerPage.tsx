@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
@@ -174,22 +174,67 @@ type ProfileFields = {
   about?: string;
 };
 
+type TidyResult = { key: string; before: string; after: string; changed: boolean; contact: ("phone" | "email" | "link")[] };
+
+function contactLine(kind: "phone" | "email" | "link"): string {
+  if (kind === "phone") return "This has a phone number in it. Customers see your number from your contact details, so it's best left out here.";
+  if (kind === "email") return "This has an email address in it. Customers reach you from your contact details, so it's best left out here.";
+  return "This has a link in it. Customers find your pages from your contact details, so it's best left out here.";
+}
+
+/** What was written and the tidied wording, one under the other, so the vendor chooses. */
+function TidyPanel({ results, onUse, onKeep }: { results: TidyResult[]; onUse: () => void; onKeep: () => void }) {
+  const shown = results.filter((r) => r.changed || r.contact.length > 0);
+  return (
+    <div className="card-quiet min-w-0 p-4 md:col-span-2" aria-live="polite">
+      <h3 className="label">How customers will see it</h3>
+      <ul className="mt-2 grid min-w-0 gap-3">
+        {shown.map((r) => (
+          <li key={r.key} className="min-w-0 text-sm">
+            <p className="font-medium break-words">{r.key}</p>
+            {r.changed && (
+              <>
+                <p className="mt-1 text-xs text-quiet">You wrote</p>
+                <p className="break-words text-muted">{r.before}</p>
+                <p className="mt-1 text-xs text-quiet">Customers will see</p>
+                <p className="break-words">{r.after}</p>
+              </>
+            )}
+            {r.contact.map((c) => (
+              <p key={c} className="mt-1 break-words text-muted">{contactLine(c)}</p>
+            ))}
+          </li>
+        ))}
+      </ul>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <button type="button" className="btn-primary btn-sm" onClick={onUse}>Use the tidied text</button>
+        <button type="button" className="btn-quiet btn-sm" onClick={onKeep}>Keep mine as written</button>
+      </div>
+    </div>
+  );
+}
+
 /** Your details: a new business, or changes to yours. */
 function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: () => void }) {
   const register = useMutation(api.marketplace.partner.register);
   const update = useMutation(api.marketplace.partner.update);
+  const tidyAction = useAction(api.marketplace.tidy.tidy);
   const [f, setF] = useState<ProfileFields>(initial ?? { name: "", categories: [], city: "Chennai" });
   const [languages, setLanguages] = useState((initial?.languages ?? []).join(", "));
   const [state, setState] = useState<"idle" | "saving" | "listed">("idle");
+  const [checking, setChecking] = useState(false);
+  const [preview, setPreview] = useState<TidyResult[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const set = (patch: Partial<ProfileFields>) => setF((prev) => ({ ...prev, ...patch }));
+  const set = (patch: Partial<ProfileFields>) => {
+    setF((prev) => ({ ...prev, ...patch }));
+    setPreview(null);
+  };
   const toggle = (c: string) => set({ categories: f.categories.includes(c) ? f.categories.filter((x) => x !== c) : [...f.categories, c] });
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
+  const saveWith = (about: string | undefined) => {
     setState("saving");
     setError(null);
-    const args = { ...f, languages: languages.split(",").map((s) => s.trim()).filter(Boolean) };
+    const args = { ...f, about, languages: languages.split(",").map((s) => s.trim()).filter(Boolean) };
     const done = initial
       ? update(args).then(() => {
           setState("idle");
@@ -200,6 +245,29 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
       setError(errorText(err, "That didn't save. Try again."));
       setState("idle");
     });
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (checking || state === "saving") return;
+    const about = (f.about ?? "").trim();
+    if (!about) {
+      saveWith(f.about);
+      return;
+    }
+    setChecking(true);
+    setError(null);
+    void tidyAction({ fields: [{ key: "About", text: f.about ?? "" }] })
+      .then((results) => {
+        const clean = results.every((r) => !r.changed && r.contact.length === 0);
+        if (clean) {
+          saveWith(f.about);
+        } else {
+          setPreview(results);
+        }
+      })
+      .catch(() => saveWith(f.about))
+      .finally(() => setChecking(false));
   };
 
   return (
@@ -255,9 +323,23 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
           <label className="label" htmlFor="p-about">About you</label>
           <textarea id="p-about" className="input min-h-24" value={f.about ?? ""} onChange={(e) => set({ about: e.target.value })} placeholder="What you're known for, since when, the areas you cover" />
         </div>
+        {preview && (
+          <TidyPanel
+            results={preview}
+            onUse={() => {
+              const next = preview.find((r) => r.key === "About")?.after ?? f.about;
+              setPreview(null);
+              saveWith(next);
+            }}
+            onKeep={() => {
+              setPreview(null);
+              saveWith(f.about);
+            }}
+          />
+        )}
         <div className="flex flex-wrap items-center gap-3 md:col-span-2">
-          <button type="submit" className="btn-primary" disabled={state === "saving" || !f.name.trim() || !f.categories.length}>
-            {state === "saving" ? "Saving…" : initial ? "Save changes" : "Join PlusOne Partner"}
+          <button type="submit" className="btn-primary" disabled={checking || state === "saving" || !f.name.trim() || !f.categories.length}>
+            {checking ? "Checking your wording…" : state === "saving" ? "Saving…" : initial ? "Save changes" : "Join PlusOne Partner"}
           </button>
           {initial && <span className="text-xs text-quiet">A new name or website is checked again before customers see it.</span>}
         </div>
@@ -702,6 +784,7 @@ function SentOffers() {
 function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[] }) {
   const save = useMutation(api.marketplace.partner.saveOffering);
   const remove = useMutation(api.marketplace.partner.removeOffering);
+  const tidyAction = useAction(api.marketplace.tidy.tidy);
   const [category, setCategory] = useState(profile.categories[0] ?? "");
   const sheet = sheetFor(category);
   const [title, setTitle] = useState("");
@@ -712,19 +795,20 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
   const [includes, setIncludes] = useState("");
   const [gst, setGst] = useState<"" | "in" | "extra">("");
   const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [preview, setPreview] = useState<TidyResult[] | null>(null);
   const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
 
-  const add = (e: FormEvent) => {
-    e.preventDefault();
+  const saveWith = (nextTitle: string, nextIncludes: string[]) => {
     setError(null);
     void save({
       category,
-      title,
+      title: nextTitle,
       // A category with a sheet is compared in the sheet's unit; the way of charging says the rest.
       unit: sheet?.unit ?? unit,
       ...(sheet ? { priceUnit: unitKey, quantities } : {}),
       price: Number(price),
-      includes: includes.split("\n").map((s) => s.trim()).filter(Boolean),
+      includes: nextIncludes,
       ...(gst ? { taxIncluded: gst === "in" } : {}),
     })
       .then(() => {
@@ -733,8 +817,33 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
         setTyped({});
         setIncludes("");
         setGst("");
+        setPreview(null);
       })
       .catch((err) => setError(errorText(err, "That price didn't save. Try again.")));
+  };
+
+  const add = (e: FormEvent) => {
+    e.preventDefault();
+    if (checking) return;
+    const lines = includes.split("\n").map((s) => s.trim()).filter(Boolean);
+    const fields = [{ key: "Name", text: title }, ...lines.map((line, i) => ({ key: `Includes ${i + 1}`, text: line }))];
+    if (!fields.some((f) => f.text.trim())) {
+      saveWith(title, lines);
+      return;
+    }
+    setChecking(true);
+    setError(null);
+    void tidyAction({ fields })
+      .then((results) => {
+        const clean = results.every((r) => !r.changed && r.contact.length === 0);
+        if (clean) {
+          saveWith(title, lines);
+        } else {
+          setPreview(results);
+        }
+      })
+      .catch(() => saveWith(title, lines))
+      .finally(() => setChecking(false));
   };
 
   return (
@@ -781,7 +890,17 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
         </div>
         <div>
           <label className="label" htmlFor="pr-title">Name</label>
-          <input id="pr-title" className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="South Indian lunch, banana leaf" required />
+          <input
+            id="pr-title"
+            className="input"
+            value={title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              setPreview(null);
+            }}
+            placeholder="South Indian lunch, banana leaf"
+            required
+          />
         </div>
         <div>
           <label className="label" htmlFor="pr-price">{sheet ? priceUnitOf(sheet, unitKey).priceLabel : "Price"}</label>
@@ -823,17 +942,48 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
         )}
         <div className="md:col-span-2">
           <label className="label" htmlFor="pr-inc">What it includes, one per line</label>
-          <textarea id="pr-inc" className="input min-h-20" value={includes} onChange={(e) => setIncludes(e.target.value)} placeholder={sheet?.covers ?? ""} />
+          <textarea
+            id="pr-inc"
+            className="input min-h-20"
+            value={includes}
+            onChange={(e) => {
+              setIncludes(e.target.value);
+              setPreview(null);
+            }}
+            placeholder={sheet?.covers ?? ""}
+          />
         </div>
         {sheet && (
           <div className="md:col-span-2">
             <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={quantities} />
           </div>
         )}
+        {preview && (
+          <TidyPanel
+            results={preview}
+            onUse={() => {
+              const nextTitle = preview.find((r) => r.key === "Name")?.after ?? title;
+              const nextLines = preview.filter((r) => r.key.startsWith("Includes")).map((r) => r.after);
+              const lines = nextLines.length ? nextLines : includes.split("\n").map((s) => s.trim()).filter(Boolean);
+              setPreview(null);
+              saveWith(nextTitle, lines);
+            }}
+            onKeep={() => {
+              setPreview(null);
+              saveWith(title, includes.split("\n").map((s) => s.trim()).filter(Boolean));
+            }}
+          />
+        )}
         <div className="md:col-span-2">
-          <button type="submit" className="btn-primary btn-sm" disabled={!title.trim() || !price}>
-            <Icon name="plus" size={14} />
-            Add price
+          <button type="submit" className="btn-primary btn-sm" disabled={checking || !title.trim() || !price}>
+            {checking ? (
+              "Checking your wording…"
+            ) : (
+              <>
+                <Icon name="plus" size={14} />
+                Add price
+              </>
+            )}
           </button>
           {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
         </div>

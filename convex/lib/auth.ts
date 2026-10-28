@@ -1,7 +1,8 @@
 import { ConvexError } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc, Id } from "../_generated/dataModel";
-import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { internal } from "../_generated/api";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
 import { APP_ACTOR } from "./brand";
 import type { ActivityActorKind, ActivityType, Role } from "./validators";
 
@@ -33,6 +34,18 @@ export async function currentUserId(ctx: QueryCtx | MutationCtx): Promise<Id<"us
     return user?._id ?? null;
   }
   return await getAuthUserId(ctx);
+}
+
+/** The signed-in caller of an action, which has no db: an account by its Clerk user, a guest by its own token. */
+export async function requireActionUserId(ctx: ActionCtx): Promise<Id<"users">> {
+  const identity = await ctx.auth.getUserIdentity();
+  const userId = !identity
+    ? null
+    : isClerkIdentity(identity)
+      ? await ctx.runQuery(internal.users.byClerkId, { clerkId: identity.subject })
+      : await getAuthUserId(ctx);
+  if (!userId) throw new ConvexError("Please sign in to continue.");
+  return userId;
 }
 
 /** Throws a readable ConvexError when the caller is not signed in. */
