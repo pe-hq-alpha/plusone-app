@@ -264,6 +264,8 @@ export const vendorProfileFields = {
   joinedAt: v.number(),
   /** Events done through PlusOne; sets the level (New, Trusted, Top). */
   completedEvents: v.number(),
+  /** A sample vendor for the guest demo, modelled on published prices: shown only on sample events, never to a real family. */
+  sample: v.optional(v.boolean()),
 };
 
 export const vendorOfferingFields = {
@@ -305,6 +307,62 @@ export const vettingReviewFields = {
   at: v.number(),
 };
 
+/**
+ * A family's need, sent to Partner vendors so they answer it on the standard sheet. It
+ * carries what a vendor needs to price it (occasion, date, guests, area) and never the
+ * family's contact details or budget.
+ */
+export const vendorBriefFields = {
+  eventId: v.id("events"),
+  slotId: v.id("vendorSlots"),
+  category: v.string(),
+  /** The need as the family's plan names it: "Lunch for the 60th". */
+  title: v.string(),
+  occasion: v.string(),
+  city: v.string(),
+  cityKey: v.string(),
+  area: v.optional(v.string()),
+  date: v.string(),
+  guests: v.optional(v.number()),
+  /** The unit offers are priced in, from the category's standard sheet. */
+  unit: offeringUnit,
+  notes: v.optional(v.string()),
+  /** From a sample event: shown only to the sample vendors, never to real ones. */
+  demo: v.boolean(),
+  status: v.union(v.literal("open"), v.literal("closed")),
+  openedAt: v.number(),
+};
+
+/** One sheet line in an offer, in the shape lib/standardSheet readQuote gives a quote. */
+export const offerLine = v.object({
+  key: v.string(),
+  status: v.union(v.literal("priced"), v.literal("included"), v.literal("extra"), v.literal("unstated")),
+  amount: v.optional(v.number()),
+});
+
+/** A Partner vendor's answer to a brief, priced on the standard sheet's lines. */
+export const vendorOfferFields = {
+  briefId: v.id("vendorBriefs"),
+  profileId: v.id("vendorProfiles"),
+  eventId: v.id("events"),
+  slotId: v.id("vendorSlots"),
+  category: v.string(),
+  unit: offeringUnit,
+  /** The main price, per unit. */
+  price: v.number(),
+  /** How many units it is priced for (plates, pieces, days); 1 for an all-in price. */
+  quantity: v.number(),
+  currency: v.string(),
+  /** What the main price covers, in the vendor's words. */
+  covers: v.optional(v.string()),
+  lines: v.array(offerLine),
+  /** price × quantity plus every line priced inside it. */
+  total: v.number(),
+  notes: v.optional(v.string()),
+  status: v.union(v.literal("sent"), v.literal("withdrawn")),
+  submittedAt: v.number(),
+};
+
 /** A city's price range for one category in one unit, from pooled prices with no names. */
 export const priceBandFields = {
   category: v.string(),
@@ -317,6 +375,8 @@ export const priceBandFields = {
   p50: v.number(),
   p75: v.number(),
   p90: v.number(),
+  /** Counts sample vendors' prices too: for sample events only. Real families see bands from real prices. */
+  sample: v.boolean(),
   computedAt: v.number(),
 };
 
@@ -734,7 +794,16 @@ export default defineSchema({
 
   vettingReviews: defineTable(vettingReviewFields).index("by_profileId", ["profileId"]),
 
-  priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city", ["category", "unit", "city"]),
+  priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),
+
+  vendorBriefs: defineTable(vendorBriefFields)
+    .index("by_slotId", ["slotId"])
+    .index("by_category_and_cityKey_and_status", ["category", "cityKey", "status"]),
+
+  vendorOffers: defineTable(vendorOfferFields)
+    .index("by_eventId", ["eventId"])
+    .index("by_briefId_and_profileId", ["briefId", "profileId"])
+    .index("by_profileId", ["profileId"]),
 
   researchRuns: defineTable(researchRunFields)
     .index("by_slotId", ["slotId"])

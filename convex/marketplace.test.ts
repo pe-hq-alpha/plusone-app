@@ -34,6 +34,7 @@ async function listing(
     source?: "plusone_added" | "vendor_signup";
     ownerUserId?: Id<"users">;
     prices?: number[];
+    sample?: boolean;
   },
 ) {
   return await t.run(async (ctx) => {
@@ -50,6 +51,7 @@ async function listing(
       statusAt: 0,
       joinedAt: 0,
       completedEvents: 0,
+      ...(fields.sample ? { sample: true } : {}),
     });
     for (const price of fields.prices ?? []) {
       await ctx.db.insert("vendorOfferings", {
@@ -97,7 +99,8 @@ describe("what Events reads", () => {
 
     await listing(t, { name: "Caterer 7", prices: [750] });
     await listing(t, { name: "Caterer 8", prices: [800] });
-    expect(await t.mutation(internal.marketplace.bands.recompute, {})).toEqual({ bands: 1, removed: 0 });
+    // One band from real prices, one with the sample vendors' too.
+    expect(await t.mutation(internal.marketplace.bands.recompute, {})).toEqual({ bands: 2, removed: 0 });
     const band = await t.query(internal.marketplace.listings.bandFor, { category: "Catering", unit: "per_person", city: "chennai" });
     expect(band).toMatchObject({ count: 9, p25: 500, p50: 600, p75: 700, p90: 760, currency: "INR" });
 
@@ -112,7 +115,7 @@ describe("what Events reads", () => {
     for (let i = 0; i < 8; i++) ids.push(await listing(t, { name: `Caterer ${i}`, prices: [400 + i * 50] }));
     await t.mutation(internal.marketplace.bands.recompute, {});
     await t.run(async (ctx) => await ctx.db.patch(ids[0], { status: "suspended" }));
-    expect(await t.mutation(internal.marketplace.bands.recompute, {})).toEqual({ bands: 0, removed: 1 });
+    expect(await t.mutation(internal.marketplace.bands.recompute, {})).toEqual({ bands: 0, removed: 2 });
   });
 
   test("a website a search found links to its listing, however it was written", async () => {
@@ -273,5 +276,152 @@ describe("Ops verifying", () => {
     ).rejects.toThrow(/hasn't been claimed/);
     await t.mutation(internal.marketplace.ops.setStaffRole, { email: "ops@plusoneevents.site", role: null });
     await expect(as(t, someone).query(api.marketplace.ops.queue, {})).rejects.toThrow(/PlusOne team/);
+  });
+});
+
+describe("sample vendors", () => {
+  test("only sample events see sample vendors and the ranges their prices make", async () => {
+    const t = setup();
+    for (let i = 0; i < 8; i++) await listing(t, { name: `Sample caterer ${i}`, status: "verified", prices: [400 + i * 50], sample: true, website: `https://sample${i}.example` });
+    await listing(t, { name: "Real caterer", status: "verified", prices: [900] });
+    await t.mutation(internal.marketplace.bands.recompute, {});
+
+    const real = await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai" });
+    expect(real.map((c) => c.name)).toEqual(["Real caterer"]);
+    expect(real[0].tier).toBeUndefined();
+    const demo = await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai", samples: true });
+    expect(demo).toHaveLength(9);
+    expect(demo.find((c) => c.name === "Real caterer")?.sample).toBe(false);
+    expect(demo.find((c) => c.name === "Sample caterer 0")).toMatchObject({ sample: true, tier: "Value" });
+
+    expect(await t.query(internal.marketplace.listings.bandFor, { category: "Catering", unit: "per_person", city: "Chennai" })).toBeNull();
+    expect(await t.query(internal.marketplace.listings.bandFor, { category: "Catering", unit: "per_person", city: "Chennai", samples: true })).toMatchObject({ count: 9 });
+    expect(await t.query(internal.marketplace.listings.profileByWebsite, { website: "https://sample0.example" })).toBeNull();
+  });
+});
+
+/** A family's event in Chennai with one catering need for a 120-guest lunch. */
+async function familyEvent(t: T, opts: { demo?: boolean } = {}) {
+  return await t.run(async (ctx) => {
+    const familyId = await ctx.db.insert("users", { email: "family@example.com" });
+    const eventId = await ctx.db.insert("events", {
+      name: "Amma's 60th",
+      host: "Meena",
+      coHost: "",
+      startDate: "2026-12-12",
+      endDate: "2026-12-12",
+      city: "Chennai",
+      area: "Mylapore",
+      currency: "INR",
+      totalBudget: 300000,
+      occasionLabel: "Amma's 60th",
+      eventType: "birthday",
+      createdBy: familyId,
+      ...(opts.demo ? { demo: true } : {}),
+    });
+    await ctx.db.insert("members", { eventId, userId: familyId, role: "owner" });
+    const sessionId = await ctx.db.insert("sessions", {
+      eventId, name: "Lunch", dayIndex: 0, date: "2026-12-12", guestCount: 120, budget: 90000, color: "#000", order: 0,
+    });
+    const slotId = await ctx.db.insert("vendorSlots", { eventId, sessionIds: [sessionId], category: "Catering", title: "Lunch for the 60th", budget: 90000, status: "research" });
+    return { familyId, eventId, slotId };
+  });
+}
+
+const cateringAnswers = [
+  { key: "gst", status: "extra" as const },
+  { key: "service_staff", status: "included" as const },
+  { key: "transport", status: "priced" as const, amount: 2500 },
+  { key: "crockery", status: "included" as const },
+  { key: "water", status: "included" as const },
+];
+
+describe("briefs and offers", () => {
+  test("a family's need reaches verified caterers in the city, and their offer comes back on the sheet's lines", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t);
+    const vendor = await user(t, "owner@anjalicaterers.in");
+    const profileId = await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor, prices: [520] });
+    const unverified = await user(t, "new@caterer.in");
+    await listing(t, { name: "New caterer", source: "vendor_signup", status: "pending", ownerUserId: unverified });
+
+    const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
+    expect(await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId })).toBe(briefId);
+
+    const open = await as(t, vendor).query(api.marketplace.briefs.open, {});
+    expect(open).toMatchObject([{ _id: briefId, title: "Lunch for the 60th", occasion: "Amma's 60th", area: "Mylapore", guests: 120, unit: "per_person", answered: false }]);
+    expect(JSON.stringify(open)).not.toMatch(/Meena|300000|family@example/);
+    expect(await as(t, unverified).query(api.marketplace.briefs.open, {})).toEqual([]);
+    await expect(
+      as(t, unverified).mutation(api.marketplace.offers.submit, { briefId, price: 500, lines: cateringAnswers }),
+    ).rejects.toThrow(/once PlusOne has verified/);
+
+    await expect(
+      as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers.slice(1) }),
+    ).rejects.toThrow(/Say whether GST/);
+    await expect(
+      as(t, vendor).mutation(api.marketplace.offers.submit, {
+        briefId, price: 550, lines: cateringAnswers.map((l) => (l.key === "transport" ? { key: "transport", status: "priced" as const } : l)),
+      }),
+    ).rejects.toThrow(/amount for transport/);
+
+    const offerId = await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, covers: "Veg lunch on banana leaf", lines: cateringAnswers });
+    expect((await as(t, vendor).query(api.marketplace.briefs.open, {}))[0].answered).toBe(true);
+    expect(await as(t, familyId).query(api.marketplace.briefs.forSlot, { eventId, slotId })).toMatchObject({ status: "open", offers: 1 });
+
+    const offers = await t.query(internal.marketplace.offers.offersFor, { eventId });
+    expect(offers).toHaveLength(1);
+    expect(offers[0]).toMatchObject({
+      _id: offerId,
+      slotId,
+      price: 550,
+      quantity: 120,
+      total: 550 * 120 + 2500,
+      vendor: { _id: profileId, name: "Anjali Caterers", badges: ["verified", "transparent_pricing"] },
+    });
+    expect(offers[0].lines.find((l) => l.key === "transport")).toEqual({ key: "transport", label: "Transport", status: "priced", amount: 2500 });
+    expect(offers[0].lines.find((l) => l.key === "gst")).toEqual({ key: "gst", label: "GST", status: "extra" });
+
+    // Answering again changes the offer rather than adding a second.
+    await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 530, quantity: 150, lines: cateringAnswers });
+    expect((await t.query(internal.marketplace.offers.offersFor, { eventId })).map((o) => [o.price, o.quantity])).toEqual([[530, 150]]);
+  });
+
+  test("a withdrawn offer, or one from a vendor since suspended, leaves Compare", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t);
+    const vendor = await user(t, "owner@anjalicaterers.in");
+    const profileId = await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor });
+    const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
+    const offerId = await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers });
+
+    await t.run(async (ctx) => await ctx.db.patch(profileId, { status: "suspended" }));
+    expect(await t.query(internal.marketplace.offers.offersFor, { eventId })).toEqual([]);
+    await t.run(async (ctx) => await ctx.db.patch(profileId, { status: "verified" }));
+    await as(t, vendor).mutation(api.marketplace.offers.withdraw, { offerId });
+    expect(await t.query(internal.marketplace.offers.offersFor, { eventId })).toEqual([]);
+    expect((await as(t, vendor).query(api.marketplace.offers.mine, {}))[0]).toMatchObject({ status: "withdrawn", briefOpen: true });
+
+    await as(t, familyId).mutation(api.marketplace.briefs.close, { briefId });
+    await expect(as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers })).rejects.toThrow(/no longer taking offers/);
+  });
+
+  test("a sample event's brief reaches only sample vendors, and a viewer can't send one", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t, { demo: true });
+    const real = await user(t, "owner@anjalicaterers.in");
+    await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: real });
+    const sampleOwner = await user(t, "sample@plusoneevents.site");
+    await listing(t, { name: "Sample caterer", source: "vendor_signup", status: "verified", ownerUserId: sampleOwner, sample: true });
+
+    const briefId = await t.mutation(internal.marketplace.briefs.openForSlot, { eventId, slotId });
+    expect(await as(t, real).query(api.marketplace.briefs.open, {})).toEqual([]);
+    await expect(as(t, real).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers })).rejects.toThrow(/isn't for your kind/);
+    expect((await as(t, sampleOwner).query(api.marketplace.briefs.open, {})).map((b) => b._id)).toEqual([briefId]);
+
+    const viewer = await user(t, "aunt@example.com");
+    await t.run(async (ctx) => await ctx.db.insert("members", { eventId, userId: viewer, role: "viewer" }));
+    await expect(as(t, viewer).mutation(api.marketplace.briefs.ask, { eventId, slotId })).rejects.toThrow(/planner/);
+    expect(familyId).toBeDefined();
   });
 });

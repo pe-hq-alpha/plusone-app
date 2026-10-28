@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { badgesFor, bandOf, cityKey, e164, emailMatchesWebsite, isListed, levelFor, startingOffering, tierFor } from "./marketplace";
+import { badgesFor, bandOf, checkOfferLines, cityKey, e164, emailMatchesWebsite, isListed, levelFor, offerTotal, startingOffering, tierFor } from "./marketplace";
+import { sheetFor } from "./standardSheet";
 
 describe("cityKey", () => {
   test("reads spacing, case and old names as one city", () => {
@@ -110,5 +111,45 @@ describe("e164", () => {
   test("turns down what can't be a number", () => {
     expect(e164("12345")).toBeUndefined();
     expect(e164("call me")).toBeUndefined();
+  });
+});
+
+describe("offers on the standard sheet", () => {
+  const sheet = sheetFor("Catering");
+  const answers = [
+    { key: "gst", status: "extra" as const },
+    { key: "service_staff", status: "included" as const, amount: 999 },
+    { key: "transport", status: "priced" as const, amount: 2499.6 },
+    { key: "crockery", status: "included" as const },
+    { key: "water", status: "extra" as const, amount: 600 },
+    { key: "not_on_the_sheet", status: "priced" as const, amount: 5 },
+  ];
+
+  test("keeps the sheet's lines in its order, rounds amounts and drops what isn't on the sheet", () => {
+    expect(checkOfferLines(sheet, answers)).toEqual({
+      lines: [
+        { key: "gst", status: "extra" },
+        { key: "service_staff", status: "included" },
+        { key: "transport", status: "priced", amount: 2500 },
+        { key: "crockery", status: "included" },
+        { key: "water", status: "extra", amount: 600 },
+      ],
+    });
+  });
+
+  test("every line must be answered, and a priced line needs its amount", () => {
+    expect(checkOfferLines(sheet, answers.filter((a) => a.key !== "crockery"))).toEqual({ problem: expect.stringMatching(/crockery/i) });
+    expect(checkOfferLines(sheet, answers.map((a) => (a.key === "gst" ? { key: "gst", status: "unstated" as const } : a)))).toEqual({
+      problem: expect.stringMatching(/GST/),
+    });
+    expect(checkOfferLines(sheet, answers.map((a) => (a.key === "transport" ? { key: "transport", status: "priced" as const } : a)))).toEqual({
+      problem: expect.stringMatching(/amount for transport/),
+    });
+    expect(checkOfferLines(null, answers)).toEqual({ lines: [] });
+  });
+
+  test("the total is the main price for its quantity plus the lines priced inside it, never the extras", () => {
+    const checked = checkOfferLines(sheet, answers);
+    expect("lines" in checked && offerTotal(550, 120, checked.lines)).toBe(550 * 120 + 2500);
   });
 });

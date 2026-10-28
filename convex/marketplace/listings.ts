@@ -35,6 +35,8 @@ export const listingCard = v.object({
   startingPrice: v.optional(v.object({ price: v.number(), unit: offeringUnit, currency: v.string() })),
   phone: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
+  /** A sample vendor, shown only on sample events and labelled as one. */
+  sample: v.boolean(),
 });
 
 export const bandResult = v.union(
@@ -57,20 +59,25 @@ export async function offeringsOf(ctx: QueryCtx, profile: Doc<"vendorProfiles">)
     .take(MAX_OFFERINGS);
 }
 
-/** A city's range for a category and unit, or null until enough prices sit behind it. */
-export async function bandRow(ctx: QueryCtx, category: string, unit: Basis, city: string): Promise<Doc<"priceBands"> | null> {
+/**
+ * A city's range for a category and unit, or null until enough prices sit behind it.
+ * `samples`: count the sample vendors' prices too, for a sample event only.
+ */
+export async function bandRow(ctx: QueryCtx, category: string, unit: Basis, city: string, samples = false): Promise<Doc<"priceBands"> | null> {
   const band = await ctx.db
     .query("priceBands")
-    .withIndex("by_category_and_unit_and_city", (q) => q.eq("category", category).eq("unit", unit).eq("city", cityKey(city)))
+    .withIndex("by_category_and_unit_and_city_and_sample", (q) =>
+      q.eq("category", category).eq("unit", unit).eq("city", cityKey(city)).eq("sample", samples),
+    )
     .first();
   return band && band.count >= MIN_BAND_COUNT ? band : null;
 }
 
-/** A listing as a family's vendor card shows it, for one category. */
+/** A listing as a family's vendor card shows it, for one category; a sample listing is placed in the sample range. */
 export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, category: string) {
   const offerings = await offeringsOf(ctx, profile);
   const start = startingOffering(offerings, category);
-  const band: Band | null = start ? await bandRow(ctx, category, start.unit, profile.cityKey) : null;
+  const band: Band | null = start ? await bandRow(ctx, category, start.unit, profile.cityKey, profile.sample === true) : null;
   return {
     _id: profile._id,
     name: profile.name,
@@ -83,16 +90,18 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     startingPrice: start ? { price: start.price, unit: start.unit, currency: start.currency } : undefined,
     phone: profile.phone,
     whatsapp: profile.whatsapp,
+    sample: profile.sample === true,
   };
 }
 
 /**
  * Listed vendors for one need in one city: verified vendors first, then listings
- * PlusOne added from public pages. Never a suspended or rejected vendor, and never a
- * vendor's own sign-up before a person has verified it.
+ * PlusOne added from public pages. Never a suspended or rejected vendor, never a
+ * vendor's own sign-up before a person has verified it, and sample vendors only when
+ * `samples` is set, for a sample event.
  */
 export const searchProfiles = internalQuery({
-  args: { category: v.string(), city: v.string() },
+  args: { category: v.string(), city: v.string(), samples: v.optional(v.boolean()) },
   returns: v.array(listingCard),
   handler: async (ctx, args) => {
     const key = cityKey(args.city);
@@ -103,6 +112,7 @@ export const searchProfiles = internalQuery({
       for await (const profile of rows) {
         if (cards.length >= MAX_CARDS || ++scanned > MAX_SCANNED) break;
         if (!isListed(profile) || !profile.categories.includes(args.category)) continue;
+        if (profile.sample && !args.samples) continue;
         cards.push(await cardFor(ctx, profile, args.category));
       }
     }
@@ -111,10 +121,10 @@ export const searchProfiles = internalQuery({
 });
 
 export const bandFor = internalQuery({
-  args: { category: v.string(), unit: offeringUnit, city: v.string() },
+  args: { category: v.string(), unit: offeringUnit, city: v.string(), samples: v.optional(v.boolean()) },
   returns: bandResult,
   handler: async (ctx, args) => {
-    const band = await bandRow(ctx, args.category, args.unit, args.city);
+    const band = await bandRow(ctx, args.category, args.unit, args.city, args.samples === true);
     if (!band) return null;
     const { count, p25, p50, p75, p90, currency, computedAt } = band;
     return { count, p25, p50, p75, p90, currency, computedAt };
@@ -132,6 +142,6 @@ export const profileByWebsite = internalQuery({
       .query("vendorProfiles")
       .withIndex("by_website", (q) => q.eq("website", website))
       .first();
-    return profile && isListed(profile) ? profile._id : null;
+    return profile && isListed(profile) && !profile.sample ? profile._id : null;
   },
 });

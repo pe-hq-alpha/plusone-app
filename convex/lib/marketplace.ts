@@ -1,5 +1,6 @@
 import type { Basis } from "./comparable";
-import { hostOf } from "./text";
+import type { LineStatus, Sheet } from "./standardSheet";
+import { hostOf, inSentence } from "./text";
 
 /**
  * The rules behind PlusOne Partner's listings, kept pure so Events, Partner and Ops all
@@ -126,6 +127,33 @@ export function emailMatchesWebsite(email: string | undefined, website: string |
   const host = hostOf(website);
   if (!domain || !host || FREE_MAIL.has(domain)) return false;
   return domain === host || domain.endsWith(`.${host}`) || host.endsWith(`.${domain}`);
+}
+
+export type OfferLine = { key: string; status: LineStatus; amount?: number };
+
+/**
+ * An offer's answers checked against its sheet, in the sheet's order. Every line must be
+ * answered (included, priced inside the total, or extra), since an offer made on PlusOne
+ * Partner should leave nothing unsaid; a priced line needs its amount. Returns the lines
+ * to store, or the first problem in words the vendor reads.
+ */
+export function checkOfferLines(sheet: Sheet | null, lines: OfferLine[]): { lines: OfferLine[] } | { problem: string } {
+  if (!sheet) return { lines: [] };
+  const out: OfferLine[] = [];
+  for (const line of sheet.lines) {
+    const answer = lines.find((l) => l.key === line.key);
+    if (!answer || answer.status === "unstated") return { problem: `Say whether ${inSentence(line.label)} is included, priced in, or extra.` };
+    const amount = answer.amount === undefined ? undefined : Math.round(answer.amount);
+    if (amount !== undefined && (!Number.isFinite(amount) || amount < 0 || amount > 1e9)) return { problem: `The amount for ${inSentence(line.label)} doesn't look right.` };
+    if (answer.status === "priced" && !amount) return { problem: `Give the amount for ${inSentence(line.label)}, or mark it included.` };
+    out.push({ key: line.key, status: answer.status, ...(answer.status === "included" || amount === undefined ? {} : { amount }) });
+  }
+  return { lines: out };
+}
+
+/** What the family pays for an offer as made: the main price for its quantity, plus every line priced inside it. */
+export function offerTotal(price: number, quantity: number, lines: OfferLine[]): number {
+  return Math.round(price * quantity + lines.filter((l) => l.status === "priced").reduce((sum, l) => sum + (l.amount ?? 0), 0));
 }
 
 /** A phone or WhatsApp number in E.164 (+919840012345), or undefined if it can't be read as one. */
