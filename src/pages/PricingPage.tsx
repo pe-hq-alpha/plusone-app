@@ -49,6 +49,7 @@ const ALL: { group: string; rows: Row[] }[] = [
     group: "Planning",
     rows: [
       { feature: "Tell us about the event in your own words; the plan is set out for you", basic: true, premium: true },
+      { feature: "Speak instead of typing, in Tamil, English or both", basic: true, premium: true },
       { feature: "Today: what's done, what's under way and what's next", basic: true, premium: true },
       { feature: "Changes made by just saying them", basic: true, premium: true },
       { feature: "The budget, deposits and deadlines in one list", basic: true, premium: true },
@@ -83,7 +84,6 @@ const ALL: { group: string; rows: Row[] }[] = [
   {
     group: "Coming soon",
     rows: [
-      { feature: "Speak your plan instead of typing it", basic: true, premium: true },
       { feature: "See the decor on a photo of your own venue", basic: true, premium: true },
     ],
   },

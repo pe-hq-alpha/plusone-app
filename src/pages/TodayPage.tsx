@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
@@ -8,6 +8,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { longDate, money, timeAgo } from "../lib/format";
 import { BudgetBar } from "../components/ui/BudgetBar";
 import { Icon } from "../components/ui/Icon";
+import { VoiceButton } from "../components/VoiceButton";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { BRAND } from "../lib/brand";
@@ -179,6 +180,7 @@ function Tell({ eventId }: { eventId: Id<"events"> }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   async function send(words: string) {
     const content = words.trim();
@@ -207,6 +209,7 @@ function Tell({ eventId }: { eventId: Id<"events"> }) {
         <label htmlFor="tell-input" className="sr-only">Ask or tell {BRAND.name} anything about this event</label>
         <textarea
           id="tell-input"
+          ref={inputRef}
           className="input min-h-[5.5rem] resize-y"
           placeholder="A change, a question, or a vendor to find"
           value={text}
@@ -219,6 +222,16 @@ function Tell({ eventId }: { eventId: Id<"events"> }) {
             }
           }}
         />
+        <div className="mt-2">
+          <VoiceButton
+            eventId={eventId}
+            disabled={busy}
+            onText={(t) => {
+              setText((prev) => (prev ? `${prev} ${t}` : t));
+              inputRef.current?.focus();
+            }}
+          />
+        </div>
         {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
         <div className="mt-3 flex items-center justify-between gap-3">
           <span className="text-xs text-quiet">Enter to send</span>

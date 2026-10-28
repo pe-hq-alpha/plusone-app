@@ -25,6 +25,15 @@ export function costUsd(model: string, usage: Completion["usage"]): number | und
   return (usage.inputTokens * rate.input + usage.outputTokens * rate.output) / 1_000_000;
 }
 
+/**
+ * What a voice transcription cost, billed in whole seconds at $0.18 an hour:
+ * a clip of 0.1 seconds bills as one second, 1.1 as two.
+ */
+export function voiceCostUsd(seconds: number): number {
+  const billed = Math.ceil(Math.max(0, seconds));
+  return (billed * 0.18) / 3600;
+}
+
 /** The `modelCalls` row for a finished call. */
 export function callRecord(
   feature: string,

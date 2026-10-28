@@ -118,6 +118,7 @@ import type * as threads from "../threads.js";
 import type * as users from "../users.js";
 import type * as vendors from "../vendors.js";
 import type * as visits from "../visits.js";
+import type * as voiceBrief from "../voiceBrief.js";
 import type * as webCache from "../webCache.js";
 import type * as workflows from "../workflows.js";
 
@@ -238,6 +239,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   vendors: typeof vendors;
   visits: typeof visits;
+  voiceBrief: typeof voiceBrief;
   webCache: typeof webCache;
   workflows: typeof workflows;
 }>;

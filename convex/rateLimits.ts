@@ -89,6 +89,11 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   // New demos opened, across everyone.
   demoStarts: { kind: "fixed window", rate: 2000, period: DAY },
 
+  // Voice brief: speak the plan or a change.
+  voice: { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  voiceDemo: { kind: "fixed window", rate: 6, period: DAY },
+  voiceAll: { kind: "fixed window", rate: 400, period: DAY },
+
   // The visit log (POST /visit): plenty for a scraper to show up clearly, while a
   // flood from one address, or a leaked secret, can't fill the table.
   visitsPerIp: { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },

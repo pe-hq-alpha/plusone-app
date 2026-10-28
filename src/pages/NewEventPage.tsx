@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { toCreateArgs, withDefaults, type Facts } from "../../convex/lib/wizard";
+import { VoiceButton } from "../components/VoiceButton";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
@@ -177,6 +178,13 @@ export function NewEventPage() {
                 }
               }}
               autoFocus
+            />
+            <VoiceButton
+              disabled={busy !== null}
+              onText={(t) => {
+                setText((prev) => (prev ? `${prev} ${t}` : t));
+                inputRef.current?.focus();
+              }}
             />
             <button type="submit" className="btn-primary btn-sm" disabled={!text.trim() || busy !== null}>
               Send
