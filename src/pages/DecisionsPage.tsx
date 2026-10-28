@@ -4,6 +4,7 @@ import { Link, useLocation, useOutletContext } from "react-router-dom";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { quantityText, quantityValue } from "../../convex/lib/standardSheet";
 import { money, pct, timeAgo } from "../lib/format";
 import { BookButton } from "../components/BookButton";
 import { PageHeader } from "../components/ui/PageHeader";
@@ -19,12 +20,19 @@ type VendorRow = Need["vendors"][number];
 type Quote = NonNullable<VendorRow["quote"]>;
 type QuotedRow = VendorRow & { quote: Quote };
 type Reading = Quote["readings"][number];
-/** A column of the line-by-line compare: a quote that came by email, or a verified vendor's offer. */
-type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> & {
-  id: string;
-  name: string;
-  from: "web" | "verified" | "sample";
-};
+type Offer = Need["offers"][number];
+type SheetQuantity = NonNullable<Need["sheet"]>["quantities"][number];
+/**
+ * A column of the line-by-line compare: a quote that came by email, or a verified vendor's
+ * offer. Only an offer says how it's priced and what's in it, for now; reading those from
+ * an emailed quote is a later step.
+ */
+type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> &
+  Partial<Pick<Offer, "priceUnit" | "quantities">> & {
+    id: string;
+    name: string;
+    from: "web" | "verified" | "sample";
+  };
 
 /** What a quote's place in its city's range means. It places a price; it never calls one fair. */
 const TIER_NOTE =
@@ -516,6 +524,7 @@ function LineByLine({
                 ))}
               </tr>
             )}
+            <WhatsInIt sheet={sheet} columns={columns} />
             {sheet.lines.map((line) => (
               <tr key={line.key}>
                 <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
@@ -542,6 +551,78 @@ function LineByLine({
         </table>
       </div>
     </div>
+  );
+}
+
+/** A heading row inside the line-by-line table, which stays put as the columns scroll. */
+function GroupRow({ label, span }: { label: string; span: number }) {
+  return (
+    <tr>
+      <th colSpan={span} className="pb-1.5 pt-4 text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">
+        <span className="sticky left-0 inline-block">{label}</span>
+      </th>
+    </tr>
+  );
+}
+
+/**
+ * What each price buys, one row per quantity at least one column states: hours, photographers,
+ * edited photos, weeks to deliver. Where columns differ, the ones that give less (or deliver
+ * later) are marked, so "covers 6 hours; another covers 8" shows at a glance. How each is
+ * priced shows only when the offers don't all charge the main way.
+ */
+function WhatsInIt({ sheet, columns }: { sheet: NonNullable<Need["sheet"]>; columns: Column[] }) {
+  const rows = sheet.quantities.filter((q) => columns.some((c) => c.quantities?.[q.key] !== undefined));
+  const main = sheet.units[0]?.key;
+  const mixed = columns.some((c) => c.priceUnit !== undefined && c.priceUnit !== main);
+  if (!rows.length && !mixed) return null;
+  const span = columns.length + 1;
+  return (
+    <>
+      <GroupRow label="What's in it" span={span} />
+      {mixed && (
+        <tr>
+          <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Priced</th>
+          {columns.map((c) => (
+            <td key={c.id} className="px-3 py-2 text-right">
+              {c.priceUnit ? sheet.units.find((u) => u.key === c.priceUnit)?.label ?? "—" : <span className="text-quiet">—</span>}
+            </td>
+          ))}
+        </tr>
+      )}
+      {rows.map((q) => (
+        <QuantityRow key={q.key} q={q} columns={columns} />
+      ))}
+      <GroupRow label="Charges" span={span} />
+    </>
+  );
+}
+
+function QuantityRow({ q, columns }: { q: SheetQuantity; columns: Column[] }) {
+  const stated = columns.map((c) => c.quantities?.[q.key]).filter((n): n is number => n !== undefined);
+  const best = q.better === "less" ? Math.min(...stated) : Math.max(...stated);
+  const differ = new Set(stated).size > 1;
+  return (
+    <tr>
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">{q.label}</th>
+      {columns.map((c) => {
+        const n = c.quantities?.[q.key];
+        if (n === undefined) {
+          return (
+            <td key={c.id} className="px-3 py-2 text-right text-quiet">
+              Not stated
+            </td>
+          );
+        }
+        const short = differ && n !== best;
+        return (
+          <td key={c.id} className={`px-3 py-2 text-right${short ? " text-warn" : ""}`} title={short ? `Another offer: ${quantityText(q, best)}` : undefined}>
+            {quantityValue(q, n)}
+            {short && <span className="sr-only">; another offer: {quantityText(q, best)}</span>}
+          </td>
+        );
+      })}
+    </tr>
   );
 }
 

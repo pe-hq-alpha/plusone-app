@@ -2,7 +2,8 @@ import { ConvexError, v, type ObjectType } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { mutation, query, type MutationCtx } from "../_generated/server";
 import { currentUserId, requireAccount, requireUserId } from "../lib/auth";
-import { cityKey, e164, emailMatchesWebsite, isListed, isTrial } from "../lib/marketplace";
+import { checkPriceTerms, cityKey, e164, emailMatchesWebsite, isListed, isTrial } from "../lib/marketplace";
+import { sheetFor } from "../lib/standardSheet";
 import { canonicalWebsite } from "../lib/text";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
@@ -298,6 +299,8 @@ export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">
     category: "Catering",
     title: "Veg lunch on banana leaf",
     unit: "per_person",
+    priceUnit: "per_plate",
+    quantities: { dishes: 8, sweets: 2 },
     price: 360,
     currency: "INR",
     includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", "Banana leaf", "Serving staff"],
@@ -334,13 +337,19 @@ export const update = mutation({
   },
 });
 
-/** Add or change one priced offering, in the units families compare. */
+/**
+ * Add or change one priced offering, in the way the trade charges ("per hour", "for the
+ * event") with what the price includes. For a category with a standard sheet the unit
+ * Compare scales by is the sheet's, whatever was sent.
+ */
 export const saveOffering = mutation({
   args: {
     offeringId: v.optional(v.id("vendorOfferings")),
     category: v.string(),
     title: v.string(),
     unit: offeringUnit,
+    priceUnit: v.optional(v.string()),
+    quantities: v.optional(v.record(v.string(), v.number())),
     price: v.number(),
     currency: v.optional(v.string()),
     includes: v.array(v.string()),
@@ -358,11 +367,17 @@ export const saveOffering = mutation({
     if (!title) throw new ConvexError("Give the offering a name, like \"South Indian lunch, banana leaf\".");
     if (!Number.isFinite(args.price) || args.price <= 0 || args.price > 1e9) throw new ConvexError("That price doesn't look right.");
     const qty = (n: number | undefined) => (n === undefined || !Number.isFinite(n) || n <= 0 ? undefined : Math.round(n));
+    const sheet = sheetFor(args.category);
+    if (!sheet && (args.priceUnit !== undefined || args.quantities !== undefined)) throw new ConvexError("This kind of service is priced in one way only.");
+    // A published price is a rate: "per hour" needn't say for how many hours.
+    const terms = sheet ? checkPriceTerms(sheet, args.priceUnit, args.quantities, false) : null;
+    if (terms && "problem" in terms) throw new ConvexError(terms.problem);
     const fields = {
       profileId: profile._id,
       category: args.category,
       title,
-      unit: args.unit,
+      unit: sheet?.unit ?? args.unit,
+      ...(terms ? { priceUnit: terms.priceUnit, ...(Object.keys(terms.quantities).length ? { quantities: terms.quantities } : {}) } : {}),
       price: Math.round(args.price),
       currency: (text(args.currency, 3) ?? "INR").toUpperCase(),
       includes: cleanList(args.includes, MAX_INCLUDES, 120) ?? [],

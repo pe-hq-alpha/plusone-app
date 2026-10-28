@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
-import { bandOf, isListed, isTrial } from "../lib/marketplace";
+import { bandOf, inRangeUnit, isListed, isTrial } from "../lib/marketplace";
 
 /**
  * Each city's price ranges, worked out from the prices listed vendors publish on
@@ -9,6 +9,8 @@ import { bandOf, isListed, isTrial } from "../lib/marketplace";
  * with no names attached. Run on a schedule (crons.ts); a band whose prices fall below
  * eight is removed rather than shown on too little. Each band is worked out twice: from
  * real vendors only, for real families, and with the sample vendors too, for sample events.
+ * Only prices in the way Compare reads the category count (lib/marketplace inRangeUnit),
+ * so a photographer's rate per hour never sits among prices for the whole event.
  */
 
 /** Listings read per run; well above one city's vendors for now. */
@@ -39,6 +41,7 @@ export async function recomputeBands(ctx: MutationCtx): Promise<{ bands: number;
         .withIndex("by_profileId", (q) => q.eq("profileId", profile._id))
         .take(50);
       for (const o of offerings) {
+        if (!inRangeUnit(o)) continue;
         add(o, profile.cityKey, true);
         if (!profile.sample) add(o, profile.cityKey, false);
       }

@@ -1,5 +1,5 @@
 import type { Basis } from "./comparable";
-import type { LineStatus, Sheet } from "./standardSheet";
+import { basisUnitOf, priceUnitOf, quantitiesFor, sheetFor, timesFor, type LineStatus, type Sheet } from "./standardSheet";
 import { hostOf, inSentence } from "./text";
 
 /**
@@ -115,11 +115,24 @@ export function isTrial(profile: { sample?: boolean; ownerUserId?: unknown }): b
   return profile.sample === true && Boolean(profile.ownerUserId);
 }
 
-/** The cheapest offering in a category: the "from" price a family sees on the card. */
-export function startingOffering<T extends OfferingLike & { category: string }>(offerings: T[], category: string): T | undefined {
-  return offerings
-    .filter((o) => o.category === category && o.price > 0)
-    .sort((a, b) => a.price - b.price)[0];
+/**
+ * Whether a published price belongs in its city's range: priced the way Compare reads its
+ * category (lib/standardSheet basisUnitOf), so a rate per hour never sits among prices for
+ * the whole event. A kind of service without a sheet has one way of pricing, so it does.
+ */
+export function inRangeUnit(o: { category: string; unit: Basis; priceUnit?: string }): boolean {
+  const sheet = sheetFor(o.category);
+  if (!sheet) return true;
+  return o.unit === sheet.unit && priceUnitOf(sheet, o.priceUnit).key === basisUnitOf(sheet).key;
+}
+
+/**
+ * The cheapest offering in a category: the "from" price a family sees on the card. One
+ * priced the way the range is wins over a cheaper rate per hour, which isn't the same price.
+ */
+export function startingOffering<T extends OfferingLike & { category: string; priceUnit?: string }>(offerings: T[], category: string): T | undefined {
+  const priced = offerings.filter((o) => o.category === category && o.price > 0).sort((a, b) => a.price - b.price);
+  return priced.find(inRangeUnit) ?? priced[0];
 }
 
 /**
@@ -157,6 +170,40 @@ export function checkOfferLines(sheet: Sheet | null, lines: OfferLine[]): { line
     out.push({ key: line.key, status: answer.status, ...(answer.status === "included" || amount === undefined ? {} : { amount }) });
   }
   return { lines: out };
+}
+
+/** Above any real event's plates, hours or photos; a bigger number is a slip of the keyboard. */
+export const MAX_QUANTITY = 100_000;
+
+export type PriceTerms = { priceUnit: string; quantities: Record<string, number>; times: number | null };
+
+/**
+ * A price's way of charging and what it includes, checked against its sheet: a way the
+ * trade charges, and quantities the sheet names, each a number not below zero. Those that
+ * go with another way of charging are dropped, since a form switched between ways may still
+ * hold them. `need`: an offer's total is its price times the quantities its way of charging
+ * counts, so they must be given; a published price is a rate, so it needn't say them.
+ */
+export function checkPriceTerms(sheet: Sheet, priceUnit: string | undefined, quantities: Record<string, number> | undefined, need: boolean): PriceTerms | { problem: string } {
+  if (priceUnit !== undefined && !sheet.units.some((u) => u.key === priceUnit)) return { problem: "Choose one of the ways this service is priced." };
+  const unit = priceUnitOf(sheet, priceUnit);
+  const shown = quantitiesFor(sheet, unit.key);
+  const out: Record<string, number> = {};
+  for (const [key, n] of Object.entries(quantities ?? {})) {
+    const q = sheet.quantities.find((x) => x.key === key);
+    if (!q) return { problem: "That isn't something this kind of price can include." };
+    if (!Number.isFinite(n) || n < 0 || n > MAX_QUANTITY) return { problem: `The number for ${inSentence(q.label)} doesn't look right.` };
+    // Plates and pieces are whole; hours and kg may be halves.
+    if (shown.includes(q)) out[key] = q.fromBrief ? Math.round(n) : Math.round(n * 100) / 100;
+  }
+  if (need) {
+    for (const key of unit.times) {
+      if ((out[key] ?? 0) > 0) continue;
+      const q = sheet.quantities.find((x) => x.key === key)!;
+      return { problem: q.fromBrief ? `Say how many ${q.label.toLowerCase()} the price is for.` : `A price ${unit.label} needs the ${inSentence(q.label)}.` };
+    }
+  }
+  return { priceUnit: unit.key, quantities: out, times: timesFor(unit, out) };
 }
 
 /** What the family pays for an offer as made: the main price for its quantity, plus every line priced inside it. */

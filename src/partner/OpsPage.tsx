@@ -5,10 +5,9 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
-import { money } from "../lib/format";
 import { onOpsHost } from "../lib/hosts";
 import { useAuthActions } from "../lib/session";
-import { errorText, unitWord } from "./shared";
+import { errorText, priceText } from "./shared";
 
 /**
  * PlusOne Ops: the team checks every vendor before families hear from them. Each
@@ -212,7 +211,7 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
           <ul className="grid gap-1 text-sm">
             {offerings.map((o) => (
               <li key={o._id}>
-                {o.title}: {money(o.price, o.currency)} {unitWord(o.unit, o.category)}
+                {o.title}: {priceText(o)}
                 {o.includes.length ? <span className="text-muted"> · includes {o.includes.join(", ")}</span> : null}
               </li>
             ))}

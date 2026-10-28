@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { basisFor } from "./comparable";
-import { gapsIn, missingCharges, readQuote, sheetFor, STANDARD_SHEETS } from "./standardSheet";
+import { amountFor, basisUnitOf, describeOffer, gapsIn, missingCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, readQuote, sheetFor, STANDARD_SHEETS, timesFor } from "./standardSheet";
 import { VENDOR_NEEDS } from "./vocab";
 
 const line = (item: string, kind: "core" | "extra" | "tax" | "fee", amount: number, more: object = {}) => ({
@@ -198,5 +198,131 @@ describe("missing charges", () => {
   test("each flag names the sheet line it is about, so Compare can mark that row", () => {
     const flags = missingCharges({ total: 40_000 }, decor, []);
     expect(flags.find((f) => f.message === "Doesn't say whether GST is included")).toMatchObject({ key: "gst", label: "GST" });
+  });
+});
+
+describe("how each trade charges, and what its price includes", () => {
+  const sheets = Object.values(STANDARD_SHEETS);
+
+  test("every sheet has a main way of charging and says what its price includes", () => {
+    for (const sheet of sheets) {
+      expect(sheet.units.length, sheet.need).toBeGreaterThan(0);
+      expect(sheet.units.length, sheet.need).toBeLessThanOrEqual(3);
+      expect(sheet.quantities.length, sheet.need).toBeGreaterThan(0);
+    }
+  });
+
+  test("keys are unique, and every quantity a price is multiplied by is on the sheet and shown with that way of charging", () => {
+    for (const sheet of sheets) {
+      const units = sheet.units.map((u) => u.key);
+      const quantities = sheet.quantities.map((q) => q.key);
+      expect(new Set(units).size, sheet.need).toBe(units.length);
+      expect(new Set(quantities).size, sheet.need).toBe(quantities.length);
+      for (const unit of sheet.units) {
+        expect(unit.priceLabel, unit.key).toBe(`Price ${unit.label}`);
+        const shown = quantitiesFor(sheet, unit.key).map((q) => q.key);
+        for (const key of unit.times) expect(shown, `${sheet.need} ${unit.key}`).toContain(key);
+      }
+      for (const q of sheet.quantities) for (const u of q.forUnits ?? []) expect(units, `${sheet.need} ${q.key}`).toContain(u);
+    }
+  });
+
+  test("the main ways match the trades: per plate, for the event, per kg, for the day", () => {
+    const main = Object.fromEntries(sheets.map((s) => [s.need, s.units[0].label]));
+    expect(main).toEqual({
+      venue: "for the day",
+      catering: "per plate",
+      decor: "for the setup",
+      cake: "per kg",
+      photography: "for the event",
+      videography: "for the event",
+      entertainment: "for the performance",
+      gifting: "per piece",
+      officiant: "for the ceremony",
+    });
+    expect(sheetFor("Photographer")!.units.map((u) => u.label)).toEqual(["for the event", "per hour", "per day"]);
+  });
+
+  test("plates and pieces come from the brief's guests, as 'For how many' does", () => {
+    expect(sheetFor("Catering")!.quantities.find((q) => q.key === "count")).toMatchObject({ label: "Plates", fromBrief: true });
+    expect(sheetFor("Gifting")!.quantities.find((q) => q.key === "count")).toMatchObject({ label: "Pieces", fromBrief: true });
+    for (const sheet of sheets) {
+      // Compare scales per-plate and per-piece needs by the count, so those trades always price by it.
+      if (sheet.unit === "per_person" || sheet.unit === "per_piece") {
+        for (const unit of sheet.units) expect(unit.times, `${sheet.need} ${unit.key}`).toEqual(["count"]);
+      }
+    }
+  });
+});
+
+describe("reading a way of charging", () => {
+  const photo = sheetFor("Photographer")!;
+  const cake = sheetFor("Cake")!;
+
+  test("a key finds its way of charging; none reads as the one Compare's unit is", () => {
+    expect(priceUnitOf(photo, "per_hour").label).toBe("per hour");
+    expect(priceUnitOf(photo).key).toBe("for_event");
+    expect(priceUnitOf(photo, "per_fortnight").key).toBe("for_event");
+  });
+
+  test("a cake is priced per kg, but a price from before had no weight and was for the whole cake", () => {
+    expect(cake.units[0].key).toBe("per_kg");
+    expect(basisUnitOf(cake).key).toBe("for_cake");
+    expect(priceUnitOf(cake).key).toBe("for_cake");
+    for (const sheet of Object.values(STANDARD_SHEETS)) if (sheet.need !== "cake") expect(basisUnitOf(sheet), sheet.need).toBe(sheet.units[0]);
+  });
+
+  test("the days are asked for only with a price per day", () => {
+    expect(quantitiesFor(photo, "for_event").map((q) => q.key)).toEqual(["hours", "photographers", "photos", "delivery"]);
+    expect(quantitiesFor(photo, "per_day").map((q) => q.key)).toEqual(["hours", "photographers", "photos", "delivery", "days"]);
+    expect(quantitiesFor(sheetFor("Venue")!, "per_session").map((q) => q.key)).toContain("sessions");
+    expect(quantitiesFor(sheetFor("Venue")!, "for_day").map((q) => q.key)).not.toContain("sessions");
+  });
+
+  test("the amount is the price times what its unit counts, and waits for a missing quantity", () => {
+    expect(amountFor(45_000, priceUnitOf(photo, "for_event"), {})).toBe(45_000);
+    expect(amountFor(2_000, priceUnitOf(photo, "per_hour"), { hours: 6, photographers: 2 })).toBe(12_000);
+    expect(amountFor(1_200, priceUnitOf(cake, "per_kg"), { weight: 2.5 })).toBe(3_000);
+    expect(amountFor(340, priceUnitOf(sheetFor("Catering")!, "per_plate"), { count: 120 })).toBe(40_800);
+    expect(amountFor(2_000, priceUnitOf(photo, "per_hour"), {})).toBeNull();
+    expect(amountFor(2_000, priceUnitOf(photo, "per_hour"), { hours: 0 })).toBeNull();
+    expect(timesFor(priceUnitOf(photo, "per_day"), { days: 2 })).toBe(2);
+  });
+});
+
+describe("the line a customer reads", () => {
+  test("a photographer's price, with what's in it", () => {
+    expect(describeOffer(sheetFor("Photographer")!, "for_event", 45_000, { hours: 8, photographers: 2, photos: 400, delivery: 3 }, "INR")).toBe(
+      "₹45,000 for the event · 8 hours · 2 photographers · 400 edited photos · delivered in 3 weeks",
+    );
+  });
+
+  test("what the vendor didn't say is left out, and what doesn't go with the unit too", () => {
+    expect(describeOffer(sheetFor("Photographer")!, "for_event", 45_000, { hours: 8, days: 2 }, "INR")).toBe("₹45,000 for the event · 8 hours");
+    expect(describeOffer(sheetFor("Photographer")!, "per_day", 30_000, { days: 2 }, "INR")).toBe("₹30,000 per day · 2 days");
+    expect(describeOffer(sheetFor("Decor & Florals")!, undefined, 24_500, {}, "INR")).toBe("₹24,500 for the setup");
+  });
+
+  test("each trade in its own words, one and many", () => {
+    expect(describeOffer(sheetFor("Catering")!, "per_plate", 340, { count: 120, dishes: 10, sweets: 1, staff: 6 }, "INR")).toBe(
+      "₹340 per plate · 120 plates · 10 dishes · 1 sweet · 6 serving staff",
+    );
+    expect(describeOffer(sheetFor("Cake")!, "per_kg", 1_100, { weight: 1.5, tiers: 1 }, "INR")).toBe("₹1,100 per kg · 1.5 kg · 1 tier");
+    expect(describeOffer(sheetFor("Videographer")!, "for_event", 60_000, { operators: 1, film: 20, highlights: 3, delivery: 1 }, "INR")).toBe(
+      "₹60,000 for the event · 1 camera operator · 20-minute film · 3-minute highlights film · delivered in 1 week",
+    );
+    expect(describeOffer(sheetFor("Officiant")!, "for_ceremony", 15_000, { hours: 2, assistants: 0 }, "INR")).toBe(
+      "₹15,000 for the ceremony · 2 hours · no assistant priests",
+    );
+    expect(describeOffer(sheetFor("Decor & Florals")!, "for_setup", 18_000, { areas: 1 }, "INR")).toBe("₹18,000 for the setup · 1 area decorated");
+  });
+
+  test("a value in a Compare cell carries its measure, and a count just the number", () => {
+    const photo = sheetFor("Photographer")!;
+    const q = (key: string) => photo.quantities.find((x) => x.key === key)!;
+    expect(quantityValue(q("hours"), 6)).toBe("6 hours");
+    expect(quantityValue(q("delivery"), 1)).toBe("1 week");
+    expect(quantityValue(q("photos"), 1200)).toBe("1,200");
+    expect(quantityText(q("photographers"), 1)).toBe("1 photographer");
   });
 });

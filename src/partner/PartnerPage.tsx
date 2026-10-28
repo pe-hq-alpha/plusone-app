@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
-import { sheetFor } from "../../convex/lib/standardSheet";
+import { describeOffer, priceUnitOf, quantitiesFor, quantityValue, sheetFor, timesFor, type Sheet } from "../../convex/lib/standardSheet";
 import { VENDOR_CATEGORIES } from "../../convex/lib/vendorNeeds";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -13,7 +13,7 @@ import { useAuthActions } from "../lib/session";
 import { useDemoEventId } from "../components/LeaveDemo";
 import { CustomerCompare } from "../pages/DecisionsPage";
 import { partnerHref } from "../lib/hosts";
-import { BadgeRow, dayText, errorText, unitWord } from "./shared";
+import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
 
 /**
  * PlusOne Partner, for vendors: join or claim your listing, answer customers' briefs on
@@ -393,23 +393,144 @@ function Briefs({ verified }: { verified: boolean }) {
 
 type Brief = { _id: Id<"vendorBriefs">; category: string; guests?: number; unit: Basis };
 type LineAnswer = { status: "priced" | "included" | "extra"; amount: string };
+/** What a vendor has typed for each of the sheet's quantities, as typed. */
+type Typed = Record<string, string>;
 
-/** The standard sheet for the brief's category: the main price, then every charge, each answered. */
+/** The quantities typed for a way of charging, as numbers: blank, unreadable and other ways' ones left out. */
+function quantitiesTyped(sheet: Sheet, unitKey: string, typed: Typed): Record<string, number> {
+  const shown = quantitiesFor(sheet, unitKey);
+  return Object.fromEntries(
+    Object.entries(typed)
+      .filter(([key, value]) => value.trim() !== "" && Number.isFinite(Number(value)) && shown.some((q) => q.key === key))
+      .map(([key, value]) => [key, Number(value)]),
+  );
+}
+
+const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * "Charge differently?": the other ways the trade charges, a short list so offers stay
+ * comparable. Until it's opened the price's label says the main way, which is enough.
+ */
+function ChargeDifferently({ sheet, unitKey, onChange }: { sheet: Sheet; unitKey: string; onChange: (key: string) => void }) {
+  const [open, setOpen] = useState(unitKey !== sheet.units[0].key);
+  if (sheet.units.length < 2) return null;
+  if (!open) {
+    return (
+      <button type="button" className="mt-1.5 text-xs text-accent underline-offset-4 hover:underline" onClick={() => setOpen(true)}>
+        Charge differently?
+      </button>
+    );
+  }
+  return (
+    <div role="radiogroup" aria-label="How you charge" className="mt-2 flex flex-wrap gap-1.5">
+      {sheet.units.map((u) => (
+        <button
+          key={u.key}
+          type="button"
+          role="radio"
+          aria-checked={u.key === unitKey}
+          onClick={() => onChange(u.key)}
+          className={u.key === unitKey ? "chip-pending" : "chip-quiet hover:text-accent"}
+        >
+          {capital(u.label)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * "What's in this price": each quantity the trade states for the way chosen, with the
+ * usual numbers to tap and room for any other. The plates or pieces aren't here; they're
+ * "For how many". `counted`: an offer's total is the price times the quantities its way of
+ * charging counts, so those must be given; a published rate needn't say them.
+ */
+function WhatsInThePrice({ sheet, unitKey, typed, onChange, counted, idPrefix }: { sheet: Sheet; unitKey: string; typed: Typed; onChange: (key: string, value: string) => void; counted: boolean; idPrefix: string }) {
+  const unit = priceUnitOf(sheet, unitKey);
+  const shown = quantitiesFor(sheet, unitKey).filter((q) => !q.fromBrief);
+  if (!shown.length) return null;
+  return (
+    <fieldset>
+      <legend className="label">What's in this price</legend>
+      <ul className="grid gap-2">
+        {shown.map((q) => {
+          const value = typed[q.key] ?? "";
+          const sets = counted && unit.times.includes(q.key);
+          return (
+            <li key={q.key} className="card-quiet flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+              <label htmlFor={`${idPrefix}-${q.key}`} className="min-w-[9rem] flex-1 text-sm font-medium">
+                {q.label}
+                {sets && <span className="block text-xs font-normal text-muted">The price is {unit.label}, so this sets the total</span>}
+              </label>
+              <div role="group" aria-label={`${q.label}: usual choices`} className="flex flex-wrap gap-1.5">
+                {q.presets.map((n) => {
+                  const picked = value.trim() !== "" && Number(value) === n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      aria-pressed={picked}
+                      onClick={() => onChange(q.key, picked ? "" : String(n))}
+                      className={picked ? "chip-pending" : "chip-quiet hover:text-accent"}
+                    >
+                      {quantityValue({}, n)}
+                    </button>
+                  );
+                })}
+              </div>
+              <span className="flex items-center gap-1.5">
+                <input
+                  id={`${idPrefix}-${q.key}`}
+                  className="input w-24"
+                  inputMode="decimal"
+                  value={value}
+                  onChange={(e) => onChange(q.key, e.target.value)}
+                  required={sets}
+                />
+                {q.unit && <span className="text-sm text-muted">{q.unit}</span>}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </fieldset>
+  );
+}
+
+/** The line customers will read, as the vendor types. */
+function CustomersRead({ sheet, unitKey, price, quantities }: { sheet: Sheet; unitKey: string; price: string; quantities: Record<string, number> }) {
+  if (!(Number(price) > 0)) return null;
+  return (
+    <p className="text-sm text-muted" aria-live="polite">
+      Customers read: <span className="text-ink">{describeOffer(sheet, unitKey, Number(price), quantities, "INR")}</span>
+    </p>
+  );
+}
+
+/** The standard sheet for the brief's category: the main price in the trade's own terms, what it includes, then every charge, each answered. */
 function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
   const submit = useMutation(api.marketplace.offers.submit);
   const sheet = sheetFor(brief.category);
   const [price, setPrice] = useState("");
+  const [unitKey, setUnitKey] = useState(sheet?.units[0].key ?? "");
+  const [typed, setTyped] = useState<Typed>({});
   const [quantity, setQuantity] = useState(String(brief.guests ?? ""));
   const [covers, setCovers] = useState("");
   const [notes, setNotes] = useState("");
   const [answers, setAnswers] = useState<Record<string, LineAnswer>>({});
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const perUnit = brief.unit !== "total";
-  const qty = perUnit ? Number(quantity) || 0 : 1;
+  const unit = sheet ? priceUnitOf(sheet, unitKey) : null;
+  // A price per plate or piece is for "how many", from the brief's guests, as before.
+  const perUnit = unit ? unit.times.includes("count") : brief.unit !== "total";
+  const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
+  const counted = { ...quantities, ...(perUnit && Number(quantity) > 0 ? { count: Number(quantity) } : {}) };
+  const qty = unit ? (timesFor(unit, counted) ?? 0) : perUnit ? Number(quantity) || 0 : 1;
   const priced = Object.values(answers).filter((a) => a.status === "priced").reduce((s, a) => s + (Number(a.amount) || 0), 0);
   const total = (Number(price) || 0) * qty + priced;
   const answeredAll = !sheet || sheet.lines.every((l) => answers[l.key]);
+  const multiplied = unit ? unit.times.length > 0 : perUnit;
 
   const send = (e: FormEvent) => {
     e.preventDefault();
@@ -423,7 +544,8 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
     void submit({
       briefId: brief._id,
       price: Number(price),
-      ...(perUnit ? { quantity: qty } : {}),
+      ...(perUnit ? { quantity: Number(quantity) || 0 } : {}),
+      ...(sheet ? { priceUnit: unitKey, quantities } : {}),
       covers: covers || undefined,
       notes: notes || undefined,
       lines,
@@ -437,8 +559,11 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
     <form className="mt-5 grid gap-5 border-t border-line pt-5" onSubmit={send}>
       <div className="grid gap-4 md:grid-cols-3">
         <div>
-          <label className="label" htmlFor="o-price">{perUnit ? `Price ${unitWord(brief.unit, brief.category)}` : "Price, all in"}</label>
+          <label className="label" htmlFor="o-price">
+            {unit ? unit.priceLabel : perUnit ? `Price ${unitWord(brief.unit, brief.category)}` : "Price, all in"}
+          </label>
           <input id="o-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
+          {sheet && <ChargeDifferently sheet={sheet} unitKey={unitKey} onChange={setUnitKey} />}
         </div>
         {perUnit && (
           <div>
@@ -451,6 +576,20 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
           <input id="o-covers" className="input" value={covers} onChange={(e) => setCovers(e.target.value)} placeholder={sheet?.covers ?? "What's in the main price"} />
         </div>
       </div>
+
+      {sheet && (
+        <div className="grid gap-2.5">
+          <WhatsInThePrice
+            sheet={sheet}
+            unitKey={unitKey}
+            typed={typed}
+            onChange={(key, value) => setTyped((prev) => ({ ...prev, [key]: value }))}
+            counted
+            idPrefix="o-q"
+          />
+          <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={counted} />
+        </div>
+      )}
 
       {sheet && (
         <fieldset>
@@ -516,7 +655,7 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
         <button type="button" className="btn-quiet btn-sm" onClick={onDone}>Cancel</button>
         <p className="text-sm text-muted">
           The customer sees <strong className="text-ink">{money(total, "INR")}</strong>
-          {perUnit && qty ? ` (${money(Number(price) || 0, "INR")} × ${qty}${priced ? ` + ${money(priced, "INR")}` : ""})` : ""}
+          {multiplied && qty ? ` (${money(Number(price) || 0, "INR")} × ${qty}${priced ? ` + ${money(priced, "INR")}` : ""})` : ""}
           {sheet && !answeredAll ? " · answer every line to send" : ""}
         </p>
       </div>
@@ -567,10 +706,13 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
   const sheet = sheetFor(category);
   const [title, setTitle] = useState("");
   const [unit, setUnit] = useState<Basis>(sheet?.unit ?? "total");
+  const [unitKey, setUnitKey] = useState(sheet?.units[0].key ?? "");
+  const [typed, setTyped] = useState<Typed>({});
   const [price, setPrice] = useState("");
   const [includes, setIncludes] = useState("");
   const [gst, setGst] = useState<"" | "in" | "extra">("");
   const [error, setError] = useState<string | null>(null);
+  const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
 
   const add = (e: FormEvent) => {
     e.preventDefault();
@@ -578,7 +720,9 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
     void save({
       category,
       title,
-      unit,
+      // A category with a sheet is compared in the sheet's unit; the way of charging says the rest.
+      unit: sheet?.unit ?? unit,
+      ...(sheet ? { priceUnit: unitKey, quantities } : {}),
       price: Number(price),
       includes: includes.split("\n").map((s) => s.trim()).filter(Boolean),
       ...(gst ? { taxIncluded: gst === "in" } : {}),
@@ -586,6 +730,7 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
       .then(() => {
         setTitle("");
         setPrice("");
+        setTyped({});
         setIncludes("");
         setGst("");
       })
@@ -606,7 +751,7 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
               <div className="min-w-0">
                 <p className="font-medium">{o.title}</p>
                 <p className="text-sm text-muted">
-                  {money(o.price, o.currency)} {unitWord(o.unit, o.category)} · {o.category}
+                  {priceText(o)} · {o.category}
                   {o.taxIncluded === true ? " · GST included" : o.taxIncluded === false ? " · GST extra" : ""}
                 </p>
                 {o.includes.length > 0 && <p className="mt-1 text-sm">Includes {o.includes.join(", ")}</p>}
@@ -624,8 +769,11 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
             className="input"
             value={category}
             onChange={(e) => {
+              const next = sheetFor(e.target.value);
               setCategory(e.target.value);
-              setUnit(sheetFor(e.target.value)?.unit ?? "total");
+              setUnit(next?.unit ?? "total");
+              setUnitKey(next?.units[0].key ?? "");
+              setTyped({});
             }}
           >
             {profile.categories.map((c) => <option key={c}>{c}</option>)}
@@ -636,15 +784,22 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
           <input id="pr-title" className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="South Indian lunch, banana leaf" required />
         </div>
         <div>
-          <label className="label" htmlFor="pr-price">Price</label>
-          <div className="flex gap-2">
-            <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
-            <select className="input w-40" value={unit} onChange={(e) => setUnit(e.target.value as Basis)} aria-label="Priced">
-              {(["per_person", "per_piece", "per_day", "total"] as const).map((u) => (
-                <option key={u} value={u}>{basisLabel(u, category)}</option>
-              ))}
-            </select>
-          </div>
+          <label className="label" htmlFor="pr-price">{sheet ? priceUnitOf(sheet, unitKey).priceLabel : "Price"}</label>
+          {sheet ? (
+            <>
+              <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
+              <ChargeDifferently key={category} sheet={sheet} unitKey={unitKey} onChange={setUnitKey} />
+            </>
+          ) : (
+            <div className="flex gap-2">
+              <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
+              <select className="input w-40" value={unit} onChange={(e) => setUnit(e.target.value as Basis)} aria-label="Priced">
+                {(["per_person", "per_piece", "per_day", "total"] as const).map((u) => (
+                  <option key={u} value={u}>{basisLabel(u, category)}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         <div>
           <label className="label" htmlFor="pr-gst">GST</label>
@@ -654,10 +809,27 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
             <option value="extra">Extra, on top</option>
           </select>
         </div>
+        {sheet && (
+          <div className="md:col-span-2">
+            <WhatsInThePrice
+              sheet={sheet}
+              unitKey={unitKey}
+              typed={typed}
+              onChange={(key, value) => setTyped((prev) => ({ ...prev, [key]: value }))}
+              counted={false}
+              idPrefix="pr-q"
+            />
+          </div>
+        )}
         <div className="md:col-span-2">
           <label className="label" htmlFor="pr-inc">What it includes, one per line</label>
           <textarea id="pr-inc" className="input min-h-20" value={includes} onChange={(e) => setIncludes(e.target.value)} placeholder={sheet?.covers ?? ""} />
         </div>
+        {sheet && (
+          <div className="md:col-span-2">
+            <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={quantities} />
+          </div>
+        )}
         <div className="md:col-span-2">
           <button type="submit" className="btn-primary btn-sm" disabled={!title.trim() || !price}>
             <Icon name="plus" size={14} />

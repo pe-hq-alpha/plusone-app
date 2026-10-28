@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { internalQuery, type QueryCtx } from "../_generated/server";
-import { badgesFor, cityKey, isListed, isTrial, levelFor, MIN_BAND_COUNT, startingOffering, tierFor, type Band } from "../lib/marketplace";
+import { badgesFor, cityKey, inRangeUnit, isListed, isTrial, levelFor, MIN_BAND_COUNT, startingOffering, tierFor, type Band } from "../lib/marketplace";
 import type { Basis } from "../lib/comparable";
 import { canonicalWebsite } from "../lib/text";
 import { offeringUnit } from "../schema";
@@ -32,7 +32,8 @@ export const listingCard = v.object({
   badges: v.array(badge),
   tier: v.optional(tier),
   level,
-  startingPrice: v.optional(v.object({ price: v.number(), unit: offeringUnit, currency: v.string() })),
+  /** `priceUnit`: the way of charging on the sheet, so a rate per hour is never read as a price for the event. */
+  startingPrice: v.optional(v.object({ price: v.number(), unit: offeringUnit, priceUnit: v.optional(v.string()), currency: v.string() })),
   phone: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
   /** A sample vendor, shown only on sample events and labelled as one. */
@@ -73,11 +74,15 @@ export async function bandRow(ctx: QueryCtx, category: string, unit: Basis, city
   return band && band.count >= MIN_BAND_COUNT ? band : null;
 }
 
-/** A listing as a family's vendor card shows it, for one category; a sample listing is placed in the sample range. */
+/**
+ * A listing as a family's vendor card shows it, for one category; a sample listing is
+ * placed in the sample range. A starting price in another way of charging than the
+ * range's (a rate per hour) is shown without a place in it.
+ */
 export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, category: string) {
   const offerings = await offeringsOf(ctx, profile);
   const start = startingOffering(offerings, category);
-  const band: Band | null = start ? await bandRow(ctx, category, start.unit, profile.cityKey, profile.sample === true) : null;
+  const band: Band | null = start && inRangeUnit(start) ? await bandRow(ctx, category, start.unit, profile.cityKey, profile.sample === true) : null;
   return {
     _id: profile._id,
     name: profile.name,
@@ -87,7 +92,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     badges: badgesFor(profile, offerings),
     tier: start ? tierFor(start.price, band) : undefined,
     level: levelFor(profile.completedEvents),
-    startingPrice: start ? { price: start.price, unit: start.unit, currency: start.currency } : undefined,
+    startingPrice: start ? { price: start.price, unit: start.unit, ...(start.priceUnit ? { priceUnit: start.priceUnit } : {}), currency: start.currency } : undefined,
     phone: profile.phone,
     whatsapp: profile.whatsapp,
     sample: profile.sample === true,

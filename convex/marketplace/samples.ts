@@ -3,6 +3,7 @@ import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
 import type { Basis } from "../lib/comparable";
 import { offerTotal, type OfferLine } from "../lib/marketplace";
+import { priceUnitOf, sheetFor, timesFor } from "../lib/standardSheet";
 import { recomputeBands } from "./bands";
 import { openBrief } from "./briefs";
 
@@ -16,20 +17,34 @@ import { openBrief } from "./briefs";
  * they have no phone numbers, so nobody real is ever called.
  */
 
-type SampleOffering = { title: string; unit: Basis; price: number; includes: string[]; taxIncluded?: boolean };
+type Quantities = Record<string, number>;
+type SampleOffering = { title: string; unit: Basis; priceUnit: string; quantities: Quantities; price: number; includes: string[]; taxIncluded?: boolean };
 type SampleVendor = { name: string; area: string; category: string; about: string; completedEvents: number; offering: SampleOffering };
 
 const leaf = ["Banana leaf", "Water bottle", "Serving staff"];
+// Sweet, two curries, kootu, sambar, rasam, payasam and appalam: eight dishes, two of them sweet.
 const lunch = (price: number, extra: string[] = []): SampleOffering => ({
   title: "Veg lunch on banana leaf",
   unit: "per_person",
+  priceUnit: "per_plate",
+  quantities: { dishes: 8, sweets: 2 },
   price,
   includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", ...extra],
 });
-const stage = (price: number, includes: string[]): SampleOffering => ({ title: "Stage and entrance flowers", unit: "total", price, includes });
-const shoot = (price: number, hours: number, includes: string[]): SampleOffering => ({
+const stage = (price: number, areas: number, includes: string[]): SampleOffering => ({
+  title: "Stage and entrance flowers",
+  unit: "total",
+  priceUnit: "for_setup",
+  quantities: { areas },
+  price,
+  includes,
+});
+/** A shoot priced for the event: its hours, photographers, edited photos and weeks to deliver them. */
+const shoot = (price: number, hours: number, crew: { photographers?: number; photos: number; weeks: number }, includes: string[]): SampleOffering => ({
   title: `Candid and family photos, ${hours} hours`,
   unit: "total",
+  priceUnit: "for_event",
+  quantities: { hours, photographers: crew.photographers ?? 1, photos: crew.photos, delivery: crew.weeks },
   price,
   includes: [`${hours} hours of coverage`, ...includes],
 });
@@ -46,34 +61,37 @@ export const SAMPLE_VENDORS: SampleVendor[] = [
   { name: "Kumudham Feast", area: "Anna Nagar", category: "Catering", about: "Premium leaf meals and sweet stalls.", completedEvents: 6, offering: lunch(520, [...leaf, "Transport in Chennai"]) },
   { name: "Vettrilai Caterers", area: "Besant Nagar", category: "Catering", about: "Heritage recipes, served in silver-rimmed leaves.", completedEvents: 7, offering: { ...lunch(600, [...leaf, "Transport in Chennai"]), taxIncluded: true } },
 
-  { name: "Sevvanthi Stage Decor", area: "Saidapet", category: "Decor & Florals", about: "Marigold and chrysanthemum stages for home functions.", completedEvents: 3, offering: stage(11_000, ["Marigold backdrop", "Entrance string"]) },
-  { name: "Kolam Corner Decor", area: "West Mambalam", category: "Decor & Florals", about: "Rangoli, kolam and simple flower decor.", completedEvents: 2, offering: stage(14_500, ["Flower backdrop", "Rangoli at the entrance"]) },
-  { name: "Poo Kadai Events", area: "Mylapore", category: "Decor & Florals", about: "Fresh flowers from the Mylapore market, every time.", completedEvents: 8, offering: stage(18_000, ["Jasmine and marigold backdrop", "Entrance arch"]) },
-  { name: "Kuthuvilakku Decor", area: "Alwarpet", category: "Decor & Florals", about: "Brass lamps, banana trees and traditional stages.", completedEvents: 6, offering: stage(21_000, ["Backdrop with brass lamps", "Banana trees at the door", "Setup and removal"]) },
-  { name: "Jasmine Arch Decorators", area: "R.A. Puram", category: "Decor & Florals", about: "Jasmine-led stages for sixtieths and engagements.", completedEvents: 11, offering: stage(24_500, ["Jasmine and marigold backdrop", "Entrance arch", "Two flower stands", "Setup and removal"]) },
-  { name: "Rangoli Room Events", area: "Kilpauk", category: "Decor & Florals", about: "Themed stages with fresh and silk flowers.", completedEvents: 4, offering: stage(28_000, ["Themed backdrop", "Entrance arch", "Photo corner"]) },
-  { name: "Marigold Mandapam Designs", area: "Nungambakkam", category: "Decor & Florals", about: "Full-hall decor with lighting.", completedEvents: 9, offering: stage(34_000, ["Stage", "Entrance", "Hall pillars", "Warm lighting", "Setup and removal"]) },
-  { name: "Thamarai Petal Studio", area: "Boat Club", category: "Decor & Florals", about: "Lotus and orchid stages, designed to a palette.", completedEvents: 5, offering: stage(40_000, ["Designed stage", "Entrance", "Table flowers", "Lighting", "Setup and removal"]) },
+  { name: "Sevvanthi Stage Decor", area: "Saidapet", category: "Decor & Florals", about: "Marigold and chrysanthemum stages for home functions.", completedEvents: 3, offering: stage(11_000, 2, ["Marigold backdrop", "Entrance string"]) },
+  { name: "Kolam Corner Decor", area: "West Mambalam", category: "Decor & Florals", about: "Rangoli, kolam and simple flower decor.", completedEvents: 2, offering: stage(14_500, 2, ["Flower backdrop", "Rangoli at the entrance"]) },
+  { name: "Poo Kadai Events", area: "Mylapore", category: "Decor & Florals", about: "Fresh flowers from the Mylapore market, every time.", completedEvents: 8, offering: stage(18_000, 2, ["Jasmine and marigold backdrop", "Entrance arch"]) },
+  { name: "Kuthuvilakku Decor", area: "Alwarpet", category: "Decor & Florals", about: "Brass lamps, banana trees and traditional stages.", completedEvents: 6, offering: stage(21_000, 2, ["Backdrop with brass lamps", "Banana trees at the door", "Setup and removal"]) },
+  { name: "Jasmine Arch Decorators", area: "R.A. Puram", category: "Decor & Florals", about: "Jasmine-led stages for sixtieths and engagements.", completedEvents: 11, offering: stage(24_500, 2, ["Jasmine and marigold backdrop", "Entrance arch", "Two flower stands", "Setup and removal"]) },
+  { name: "Rangoli Room Events", area: "Kilpauk", category: "Decor & Florals", about: "Themed stages with fresh and silk flowers.", completedEvents: 4, offering: stage(28_000, 3, ["Themed backdrop", "Entrance arch", "Photo corner"]) },
+  { name: "Marigold Mandapam Designs", area: "Nungambakkam", category: "Decor & Florals", about: "Full-hall decor with lighting.", completedEvents: 9, offering: stage(34_000, 3, ["Stage", "Entrance", "Hall pillars", "Warm lighting", "Setup and removal"]) },
+  { name: "Thamarai Petal Studio", area: "Boat Club", category: "Decor & Florals", about: "Lotus and orchid stages, designed to a palette.", completedEvents: 5, offering: stage(40_000, 3, ["Designed stage", "Entrance", "Table flowers", "Lighting", "Setup and removal"]) },
 
-  { name: "Veranda Frames", area: "Mylapore", category: "Photographer", about: "Candid photos of family functions.", completedEvents: 3, offering: shoot(8_000, 3, ["Edited photos online"]) },
-  { name: "Gopuram Lens Co.", area: "Triplicane", category: "Photographer", about: "Traditional and candid, one photographer.", completedEvents: 2, offering: shoot(10_500, 3, ["Edited photos online"]) },
-  { name: "Thinnai Photography", area: "Mandaveli", category: "Photographer", about: "Quiet candid photos for small family days.", completedEvents: 10, offering: shoot(12_500, 3, ["Edited photos online", "Travel in Chennai"]) },
-  { name: "Vilakku Light Studio", area: "Adyar", category: "Photographer", about: "Natural-light portraits and family groups.", completedEvents: 6, offering: shoot(15_000, 4, ["Edited photos online", "Travel in Chennai"]) },
-  { name: "Muthu Moments", area: "T. Nagar", category: "Photographer", about: "Photos and a short highlight reel.", completedEvents: 8, offering: shoot(18_000, 4, ["Edited photos online", "1-minute reel"]) },
-  { name: "Marina Light Photography", area: "Santhome", category: "Photographer", about: "Two photographers for larger groups.", completedEvents: 7, offering: shoot(21_000, 4, ["Two photographers", "Edited photos online"]) },
-  { name: "Pattu Pavadai Pictures", area: "Anna Nagar", category: "Photographer", about: "Candid photos and printed albums.", completedEvents: 5, offering: shoot(25_000, 5, ["Edited photos online", "20-page album"]) },
-  { name: "Rangam Studios", area: "Alwarpet", category: "Photographer", about: "Photo and video teams for milestone birthdays.", completedEvents: 12, offering: shoot(30_000, 5, ["Two photographers", "Edited photos online", "20-page album"]) },
+  { name: "Veranda Frames", area: "Mylapore", category: "Photographer", about: "Candid photos of family functions.", completedEvents: 3, offering: shoot(8_000, 3, { photos: 100, weeks: 2 }, ["Edited photos online"]) },
+  { name: "Gopuram Lens Co.", area: "Triplicane", category: "Photographer", about: "Traditional and candid, one photographer.", completedEvents: 2, offering: shoot(10_500, 3, { photos: 120, weeks: 2 }, ["Edited photos online"]) },
+  { name: "Thinnai Photography", area: "Mandaveli", category: "Photographer", about: "Quiet candid photos for small family days.", completedEvents: 10, offering: shoot(12_500, 3, { photos: 150, weeks: 1 }, ["Edited photos online", "Travel in Chennai"]) },
+  { name: "Vilakku Light Studio", area: "Adyar", category: "Photographer", about: "Natural-light portraits and family groups.", completedEvents: 6, offering: shoot(15_000, 4, { photos: 200, weeks: 2 }, ["Edited photos online", "Travel in Chennai"]) },
+  { name: "Muthu Moments", area: "T. Nagar", category: "Photographer", about: "Photos and a short highlight reel.", completedEvents: 8, offering: shoot(18_000, 4, { photos: 200, weeks: 2 }, ["Edited photos online", "1-minute reel"]) },
+  { name: "Marina Light Photography", area: "Santhome", category: "Photographer", about: "Two photographers for larger groups.", completedEvents: 7, offering: shoot(21_000, 4, { photographers: 2, photos: 300, weeks: 2 }, ["Two photographers", "Edited photos online"]) },
+  { name: "Pattu Pavadai Pictures", area: "Anna Nagar", category: "Photographer", about: "Candid photos and printed albums.", completedEvents: 5, offering: shoot(25_000, 5, { photos: 300, weeks: 3 }, ["Edited photos online", "20-page album"]) },
+  { name: "Rangam Studios", area: "Alwarpet", category: "Photographer", about: "Photo and video teams for milestone birthdays.", completedEvents: 12, offering: shoot(30_000, 5, { photographers: 2, photos: 400, weeks: 3 }, ["Two photographers", "Edited photos online", "20-page album"]) },
 ];
 
 /**
  * The sample vendors' answers to a sample event's briefs: complete on every line of the
  * sheet, so they sit beside web-found quotes that leave charges unsaid.
  */
-const SAMPLE_OFFERS: { vendor: string; category: string; price: number; covers: string; lines: OfferLine[]; notes?: string }[] = [
+const SAMPLE_OFFERS: { vendor: string; category: string; price: number; priceUnit: string; quantities: Quantities; covers: string; lines: OfferLine[]; notes?: string }[] = [
   {
     vendor: "Kalyana Saapadu Co.",
     category: "Catering",
     price: 340,
+    priceUnit: "per_plate",
+    // The plates are the brief's guests, added when the offer is made.
+    quantities: { dishes: 9, sweets: 2, staff: 6 },
     covers: "Veg lunch on banana leaf: sweet, two curries, kootu, sambar, rasam, payasam, vadai, appalam",
     lines: [
       { key: "gst", status: "priced", amount: 2040 },
@@ -88,6 +106,8 @@ const SAMPLE_OFFERS: { vendor: string; category: string; price: number; covers: 
     vendor: "Komalam Caterers",
     category: "Catering",
     price: 450,
+    priceUnit: "per_plate",
+    quantities: { dishes: 12, sweets: 4, staff: 8 },
     covers: "Festive lunch on banana leaf with two sweets, two payasams and a live appalam counter",
     lines: [
       { key: "gst", status: "included" },
@@ -101,6 +121,8 @@ const SAMPLE_OFFERS: { vendor: string; category: string; price: number; covers: 
     vendor: "Jasmine Arch Decorators",
     category: "Decor & Florals",
     price: 24_500,
+    priceUnit: "for_setup",
+    quantities: { areas: 2 },
     covers: "Jasmine and marigold stage backdrop, entrance arch and two flower stands",
     lines: [
       { key: "gst", status: "extra", amount: 4410 },
@@ -114,6 +136,8 @@ const SAMPLE_OFFERS: { vendor: string; category: string; price: number; covers: 
     vendor: "Thinnai Photography",
     category: "Photographer",
     price: 12_500,
+    priceUnit: "for_event",
+    quantities: { hours: 3, photographers: 1, photos: 150, delivery: 1 },
     covers: "One photographer for 3 hours, candid and family groups, edited photos online in a week",
     lines: [
       { key: "gst", status: "included" },
@@ -177,7 +201,9 @@ export async function seedSampleOffers(ctx: MutationCtx, eventId: Id<"events">):
     if (!slot || !profileId) continue;
     const briefId = await openBrief(ctx, eventId, slot._id);
     const brief = (await ctx.db.get(briefId))!;
-    const quantity = brief.unit === "total" ? 1 : (brief.guests ?? 1);
+    const sheet = sheetFor(offer.category)!;
+    const quantities = sheet.quantities.some((q) => q.key === "count") ? { ...offer.quantities, count: brief.guests ?? 1 } : offer.quantities;
+    const quantity = timesFor(priceUnitOf(sheet, offer.priceUnit), quantities) ?? 1;
     await ctx.db.insert("vendorOffers", {
       briefId,
       profileId,
@@ -185,6 +211,8 @@ export async function seedSampleOffers(ctx: MutationCtx, eventId: Id<"events">):
       slotId: slot._id,
       category: offer.category,
       unit: brief.unit,
+      priceUnit: offer.priceUnit,
+      quantities,
       price: offer.price,
       quantity,
       currency: "INR",

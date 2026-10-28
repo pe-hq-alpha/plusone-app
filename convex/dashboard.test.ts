@@ -123,6 +123,49 @@ describe("missing charges on the decision board", () => {
     expect(board.needs.find((n) => n.category === "Decor & Florals")!.offers.map((o) => o.name)).toEqual(["Jasmine Arch Decorators"]);
   });
 
+  test("Amma's 60th: each offer says how it's priced and what's in it, and the sheet gives the rows, plates aside", async () => {
+    const t = setup();
+    const { userId, eventId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
+      return { userId, eventId: await seedBirthday(ctx, userId) };
+    });
+    const board = await as(t, userId).query(api.dashboard.board, { eventId });
+    const catering = board.needs.find((n) => n.category === "Catering")!;
+    expect(catering.sheet?.units).toEqual([
+      { key: "per_plate", label: "per plate" },
+      { key: "per_person_buffet", label: "per person, buffet" },
+    ]);
+    expect(catering.sheet?.quantities.map((q) => q.key)).toEqual(["dishes", "sweets", "staff"]);
+    expect(catering.offers.map((o) => [o.name, o.priceUnit, o.quantities])).toEqual([
+      ["Kalyana Saapadu Co.", "per_plate", { count: 120, dishes: 9, sweets: 2, staff: 6 }],
+      ["Komalam Caterers", "per_plate", { count: 120, dishes: 12, sweets: 4, staff: 8 }],
+    ]);
+    const photos = board.needs.find((n) => n.category === "Photographer")!;
+    expect(photos.sheet?.quantities.find((q) => q.key === "delivery")).toEqual({ key: "delivery", label: "Delivered in", unit: "weeks", better: "less" });
+    expect(photos.offers[0]).toMatchObject({ name: "Thinnai Photography", priceUnit: "for_event", quantities: { hours: 3, photographers: 1, photos: 150, delivery: 1 } });
+  });
+
+  test("an offer from before there were ways of charging reads as the main one, with nothing stated", async () => {
+    const t = setup();
+    const s = await seed(t, "Decor & Florals", []);
+    await t.run(async (ctx) => {
+      const slot = (await ctx.db.query("vendorSlots").collect())[0];
+      const profileId = await ctx.db.insert("vendorProfiles", {
+        name: "Malli Poo Decor", categories: ["Decor & Florals"], city: "Chennai", cityKey: "chennai", source: "vendor_signup", status: "verified", statusAt: 0, joinedAt: 0, completedEvents: 0,
+      });
+      const briefId = await ctx.db.insert("vendorBriefs", {
+        eventId: s.eventId, slotId: slot._id, category: "Decor & Florals", title: "Decor", occasion: "60th", city: "Chennai", cityKey: "chennai", date: "2027-02-14", unit: "total", demo: false, status: "open", openedAt: 0,
+      });
+      await ctx.db.insert("vendorOffers", {
+        briefId, profileId, eventId: s.eventId, slotId: slot._id, category: "Decor & Florals", unit: "total", price: 30_000, quantity: 1, currency: "INR",
+        lines: [{ key: "gst", status: "included" }, { key: "transport", status: "included" }, { key: "setup", status: "included" }, { key: "lighting", status: "included" }],
+        total: 30_000, status: "sent", submittedAt: 0,
+      });
+    });
+    const [offer] = (await as(t, s.ownerId).query(api.dashboard.board, { eventId: s.eventId })).needs[0].offers;
+    expect(offer).toMatchObject({ priceUnit: "for_setup", quantities: {}, total: 30_000 });
+  });
+
   test("a need with no sheet has no rows and flags nothing", async () => {
     const t = setup();
     const s = await seed(t, "Fireworks", [{ name: "Diwali Sparks", total: 15_000 }]);

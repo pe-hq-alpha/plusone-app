@@ -2,7 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { internalQuery, mutation, query, type QueryCtx } from "../_generated/server";
 import { currentUserId } from "../lib/auth";
-import { checkOfferLines, isTrial, offerTotal } from "../lib/marketplace";
+import { checkOfferLines, checkPriceTerms, isTrial, MAX_QUANTITY, offerTotal } from "../lib/marketplace";
 import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offerLine, offeringUnit } from "../schema";
@@ -14,8 +14,6 @@ import { eventIdsOf, requireVendor } from "./vendors";
  * sheet's lines. Every line is answered, so an offer leaves nothing unsaid, and its lines
  * are in the same shape Events reads a quote into, so Compare puts the two side by side.
  */
-
-const MAX_QUANTITY = 100_000;
 
 /** An offer's line with the sheet's label, as Compare shows it. */
 const labelledLine = v.object({
@@ -31,6 +29,8 @@ export const offerForCompare = v.object({
   category: v.string(),
   vendor: listingCard,
   unit: offeringUnit,
+  priceUnit: v.optional(v.string()),
+  quantities: v.optional(v.record(v.string(), v.number())),
   price: v.number(),
   quantity: v.number(),
   currency: v.string(),
@@ -60,6 +60,8 @@ export async function offersForEvent(ctx: QueryCtx, eventId: Id<"events">) {
       category: offer.category,
       vendor: await cardFor(ctx, profile, offer.category),
       unit: offer.unit,
+      priceUnit: offer.priceUnit,
+      quantities: offer.quantities,
       price: offer.price,
       quantity: offer.quantity,
       currency: offer.currency,
@@ -85,12 +87,17 @@ export const offersFor = internalQuery({
 /**
  * Answer a brief, or change the answer already sent. Only a verified vendor in the
  * brief's category and city can, and every line on the category's sheet must be answered.
+ * The price is in one of the ways the trade charges, with what it includes; the total is
+ * worked out here from the price and the quantities, never taken from the form.
  */
 export const submit = mutation({
   args: {
     briefId: v.id("vendorBriefs"),
     price: v.number(),
+    /** The plates or pieces, as "For how many" sends it; `quantities.count` says the same. */
     quantity: v.optional(v.number()),
+    priceUnit: v.optional(v.string()),
+    quantities: v.optional(v.record(v.string(), v.number())),
     currency: v.optional(v.string()),
     covers: v.optional(v.string()),
     lines: v.array(offerLine),
@@ -112,11 +119,25 @@ export const submit = mutation({
     if (!room.ok) throw new ConvexError("That's a lot of changes at once. Try again in a few minutes.");
 
     if (!Number.isFinite(args.price) || args.price <= 0 || args.price > 1e9) throw new ConvexError("That price doesn't look right.");
-    const quantity = brief.unit === "total" ? 1 : Math.round(args.quantity ?? brief.guests ?? 0);
-    if (!Number.isFinite(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
+    const sheet = sheetFor(brief.category);
+    let quantity: number;
+    let terms: { priceUnit: string; quantities: Record<string, number> } | undefined;
+    if (sheet) {
+      // The plates or pieces come from "For how many", else the brief's guests, as before.
+      const count = args.quantities?.count ?? args.quantity ?? brief.guests;
+      const usesCount = sheet.quantities.some((q) => q.key === "count");
+      const checked = checkPriceTerms(sheet, args.priceUnit, { ...args.quantities, ...(usesCount && count !== undefined ? { count } : {}) }, true);
+      if ("problem" in checked) throw new ConvexError(checked.problem);
+      quantity = checked.times ?? 0;
+      terms = { priceUnit: checked.priceUnit, quantities: checked.quantities };
+    } else {
+      if (args.priceUnit !== undefined || args.quantities !== undefined) throw new ConvexError("This kind of service is priced in one way only.");
+      quantity = brief.unit === "total" ? 1 : Math.round(args.quantity ?? brief.guests ?? 0);
+    }
+    if (!Number.isFinite(quantity) || quantity <= 0 || quantity > MAX_QUANTITY) {
       throw new ConvexError(brief.unit === "per_person" ? "Say how many plates or guests the price is for." : "Say how many the price is for.");
     }
-    const checked = checkOfferLines(sheetFor(brief.category), args.lines);
+    const checked = checkOfferLines(sheet, args.lines);
     if ("problem" in checked) throw new ConvexError(checked.problem);
     const price = Math.round(args.price);
     const fields = {
@@ -126,6 +147,7 @@ export const submit = mutation({
       slotId: brief.slotId,
       category: brief.category,
       unit: brief.unit,
+      ...(terms ? { priceUnit: terms.priceUnit, ...(Object.keys(terms.quantities).length ? { quantities: terms.quantities } : {}) } : {}),
       price,
       quantity,
       currency: (args.currency?.trim().slice(0, 3) || "INR").toUpperCase(),

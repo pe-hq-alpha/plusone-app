@@ -26,13 +26,63 @@ export type SheetLine = {
   ask?: string;
 };
 
+/**
+ * One way a trade charges. The price is multiplied by the quantities named in `times`
+ * ("per hour" by the hours), so a price for the whole thing names none. Named SheetUnit,
+ * not PriceUnit, which is already the unit a quote's line is read in (lib/validators).
+ */
+export type SheetUnit = {
+  key: string;
+  /** As it reads after a price: "per plate", "for the event". */
+  label: string;
+  /** The price field on Partner: "Price per plate". */
+  priceLabel: string;
+  times: string[];
+};
+
+/** Something a price includes, as a number a vendor taps in: hours of coverage, edited photos, kg. */
+export type SheetQuantity = {
+  key: string;
+  /** The field on Partner and the row in Compare: "Hours of coverage". */
+  label: string;
+  /** A measure written after the number, plural: "hours", "kg", "weeks", "minutes". */
+  unit?: string;
+  presets: number[];
+  /** Shown only with these ways of charging, like the days for a price per day. */
+  forUnits?: string[];
+  /** Filled from the brief's guests, as "For how many" is: the plates or pieces. */
+  fromBrief?: boolean;
+  /** When fewer is the better side, as with weeks to delivery; Compare marks the others. */
+  better?: "less";
+  /** How the customer's line says it, one and many, with # for the number, when the label or unit reads wrong after a number. */
+  say?: [one: string, many: string];
+};
+
 export type Sheet = {
   need: VendorNeedKey;
   unit: Basis;
   /** What the main price covers, in the words a vendor fills in on Partner. */
   covers: string;
   lines: SheetLine[];
+  /** How the trade charges: the main way first, then the other ways it really does, kept short so offers stay comparable. */
+  units: SheetUnit[];
+  /** What a price includes, as numbers. */
+  quantities: SheetQuantity[];
 };
+
+const priced = (key: string, label: string, times: string[] = []): SheetUnit => ({ key, label, priceLabel: `Price ${label}`, times });
+const hours = (presets: number[], label = "Hours of coverage"): SheetQuantity => ({ key: "hours", label, unit: "hours", presets });
+const DAYS: SheetQuantity = { key: "days", label: "Days", unit: "days", presets: [1, 2, 3], forUnits: ["per_day"] };
+const weeksToDeliver = (presets: number[]): SheetQuantity => ({
+  key: "delivery",
+  label: "Delivered in",
+  unit: "weeks",
+  presets,
+  better: "less",
+  say: ["delivered in # week", "delivered in # weeks"],
+});
+/** Event photo and video teams charge for the event, by the hour, or by the day. */
+const COVERAGE_UNITS = [priced("for_event", "for the event"), priced("per_hour", "per hour", ["hours"]), priced("per_day", "per day", ["days"])];
 
 const GST: SheetLine = { key: "gst", label: "GST", kind: "tax", usually: "extra", match: /\b(gst|[cs]gst|igst|tax(es)?)\b/i };
 const TRANSPORT: SheetLine = {
@@ -78,6 +128,12 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "cleaning", label: "Cleaning", kind: "fee", usually: "extra", match: /\b(clean\w*|housekeeping|maintenance)\b/i },
       OVERTIME,
     ],
+    units: [priced("for_day", "for the day"), priced("per_session", "per session", ["sessions"])],
+    quantities: [
+      hours([4, 6, 8, 12], "Hours"),
+      { key: "capacity", label: "Seated guests", presets: [100, 200, 300, 500] },
+      { key: "sessions", label: "Sessions", presets: [1, 2, 3], forUnits: ["per_session"] },
+    ],
   },
   catering: {
     need: "catering",
@@ -102,12 +158,21 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       },
       { key: "water", label: "Water", kind: "extra", usually: "included", match: /\bwater\b/i },
     ],
+    units: [priced("per_plate", "per plate", ["count"]), priced("per_person_buffet", "per person, buffet", ["count"])],
+    quantities: [
+      { key: "count", label: "Plates", presets: [], fromBrief: true },
+      { key: "dishes", label: "Dishes on the menu", presets: [8, 12, 16, 20], say: ["# dish", "# dishes"] },
+      { key: "sweets", label: "Sweets", presets: [1, 2, 3] },
+      { key: "staff", label: "Serving staff", presets: [4, 8, 12] },
+    ],
   },
   decor: {
     need: "decor",
     unit: "total",
     covers: "The stage and decor agreed, with the flowers named (fresh or artificial)",
     lines: [GST, TRANSPORT, SETUP, { key: "lighting", label: "Lighting", kind: "extra", usually: "extra", match: /\b(light(s|ing)?|led)\b/i }],
+    units: [priced("for_setup", "for the setup")],
+    quantities: [{ key: "areas", label: "Areas decorated", presets: [1, 2, 3, 4], say: ["# area decorated", "# areas decorated"] }],
   },
   cake: {
     need: "cake",
@@ -117,6 +182,11 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       GST,
       { ...TRANSPORT, key: "delivery", label: "Delivery" },
       { key: "topper", label: "Topper and customisation", kind: "extra", usually: "included", match: /\b(topper|custom\w*|figurines?|photo print)\b/i },
+    ],
+    units: [priced("per_kg", "per kg", ["weight"]), priced("for_cake", "for the cake")],
+    quantities: [
+      { key: "weight", label: "Weight", unit: "kg", presets: [1, 2, 3, 5] },
+      { key: "tiers", label: "Tiers", presets: [1, 2, 3] },
     ],
   },
   photography: {
@@ -130,6 +200,14 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "album", label: "Printed album", kind: "extra", usually: "extra", match: /\balbums?\b/i },
       { key: "drone", label: "Drone", kind: "extra", usually: "included", match: /\bdrone\b/i },
     ],
+    units: COVERAGE_UNITS,
+    quantities: [
+      hours([4, 6, 8, 10, 12]),
+      { key: "photographers", label: "Photographers", presets: [1, 2, 3] },
+      { key: "photos", label: "Edited photos", presets: [100, 200, 400, 600] },
+      weeksToDeliver([1, 2, 3, 4]),
+      DAYS,
+    ],
   },
   videography: {
     need: "videography",
@@ -142,6 +220,15 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "highlights", label: "Highlights film", kind: "extra", usually: "included", match: /\b(highlights?|teaser|reels?|short film)\b/i },
       { key: "drone", label: "Drone", kind: "extra", usually: "included", match: /\bdrone\b/i },
     ],
+    units: COVERAGE_UNITS,
+    quantities: [
+      hours([4, 6, 8, 10, 12]),
+      { key: "operators", label: "Camera operators", presets: [1, 2, 3] },
+      { key: "film", label: "Film length", unit: "minutes", presets: [5, 10, 20, 30], say: ["#-minute film", "#-minute film"] },
+      { key: "highlights", label: "Highlights film", unit: "minutes", presets: [1, 2, 3], say: ["#-minute highlights film", "#-minute highlights film"] },
+      weeksToDeliver([2, 4, 6, 8]),
+      DAYS,
+    ],
   },
   entertainment: {
     need: "entertainment",
@@ -153,6 +240,8 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "sound", label: "Sound equipment", kind: "fee", usually: "extra", match: /\b(sound|speakers?|mics?|microphones?|audio|pa system)\b/i },
       OVERTIME,
     ],
+    units: [priced("for_performance", "for the performance"), priced("per_hour", "per hour", ["hours"])],
+    quantities: [hours([1, 2, 3, 4], "Hours"), { key: "performers", label: "Performers", presets: [1, 2, 4, 6] }],
   },
   gifting: {
     need: "gifting",
@@ -164,6 +253,8 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "printing", label: "Name printing", kind: "extra", usually: "extra", match: /\b(name|print(ing)?|personali[sz]\w*|tags?)\b/i },
       { ...TRANSPORT, key: "delivery", label: "Delivery" },
     ],
+    units: [priced("per_piece", "per piece", ["count"])],
+    quantities: [{ key: "count", label: "Pieces", presets: [], fromBrief: true }],
   },
   officiant: {
     need: "officiant",
@@ -174,6 +265,8 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       TRAVEL,
       { key: "assistants", label: "Assistant priests", kind: "fee", usually: "included", match: /\b(assistants?|helpers?|additional priests?|second priest)\b/i },
     ],
+    units: [priced("for_ceremony", "for the ceremony")],
+    quantities: [hours([1, 2, 3], "Duration"), { key: "assistants", label: "Assistant priests", presets: [0, 1, 2] }],
   },
 };
 
@@ -184,6 +277,84 @@ export function sheetFor(needOrCategory: string): Sheet | null {
     (k) => k === wanted || VENDOR_NEEDS[k].category.toLowerCase() === wanted,
   );
   return (need && STANDARD_SHEETS[need]) || null;
+}
+
+// ---------------------------------------------------------------- how a price is charged
+
+/**
+ * The way of charging that prices the way Compare reads the category (`Sheet.unit`): the
+ * main one, except where the trade's main way is a rate Compare can't read. A cake is
+ * priced per kg but compared by its total, so this is "for the cake". A city's range is
+ * pooled in it, so a rate per kg never sits among whole cakes' prices, and a price saved
+ * before there were ways of charging reads as it, since it was priced in Compare's unit.
+ */
+export function basisUnitOf(sheet: Sheet): SheetUnit {
+  const scales = sheet.unit === "total" ? "" : sheet.unit === "per_day" ? "days" : "count";
+  return sheet.units.find((u) => u.times.join() === scales) ?? sheet.units[0];
+}
+
+/** A way of charging on a sheet by its key. None, as on an older price, reads as the one Compare's unit is (basisUnitOf). */
+export function priceUnitOf(sheet: Sheet, key?: string): SheetUnit {
+  return sheet.units.find((u) => u.key === key) ?? basisUnitOf(sheet);
+}
+
+/** The quantities a vendor states for a way of charging, in the sheet's order: the days only for a price per day. */
+export function quantitiesFor(sheet: Sheet, unitKey?: string): SheetQuantity[] {
+  const unit = priceUnitOf(sheet, unitKey);
+  return sheet.quantities.filter((q) => !q.forUnits || q.forUnits.includes(unit.key));
+}
+
+/** How many times the price is counted: the unit's quantities multiplied (1 for a price for the whole thing), or null while one is missing. */
+export function timesFor(unit: SheetUnit, quantities: Record<string, number>): number | null {
+  let times = 1;
+  for (const key of unit.times) {
+    const n = quantities[key];
+    if (n === undefined || !Number.isFinite(n) || n <= 0) return null;
+    times *= n;
+  }
+  return times;
+}
+
+/** What a price comes to: ₹2,000 per hour for 6 hours is ₹12,000. Null while a quantity it is multiplied by is missing. */
+export function amountFor(price: number, unit: SheetUnit, quantities: Record<string, number>): number | null {
+  const times = timesFor(unit, quantities);
+  return times === null ? null : price * times;
+}
+
+function singular(word: string): string {
+  if (/(sh|ch|x|ss)es$/.test(word)) return word.slice(0, -2);
+  return /[^s]s$/.test(word) ? word.slice(0, -1) : word;
+}
+
+const numberText = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 2 });
+
+/** A quantity as the customer's line says it: "8 hours", "2 photographers", "delivered in 3 weeks". */
+export function quantityText(q: Pick<SheetQuantity, "label" | "unit" | "say">, n: number): string {
+  const noun = q.unit ?? q.label.toLowerCase();
+  const [one, many] = q.say ?? [`# ${singular(noun)}`, `# ${noun}`];
+  const form = n === 1 ? one : many;
+  return n === 0 && form.startsWith("# ") ? form.replace("#", "no") : form.replace("#", numberText(n));
+}
+
+/** A quantity's value in a Compare cell, under its label: "8 hours", "3 weeks", "400". */
+export function quantityValue(q: Pick<SheetQuantity, "unit">, n: number): string {
+  if (!q.unit) return n === 0 ? "None" : numberText(n);
+  return `${numberText(n)} ${n === 1 ? singular(q.unit) : q.unit}`;
+}
+
+/**
+ * The one line a customer reads for a price, in the trade's own terms, leaving out what
+ * the vendor didn't say: "₹45,000 for the event · 8 hours · 2 photographers · 400 edited
+ * photos · delivered in 3 weeks".
+ */
+export function describeOffer(sheet: Sheet, unitKey: string | undefined, price: number, quantities: Record<string, number>, currency: string): string {
+  const unit = priceUnitOf(sheet, unitKey);
+  const parts = [`${formatMoney(price, currency)} ${unit.label}`];
+  for (const q of quantitiesFor(sheet, unit.key)) {
+    const n = quantities[q.key];
+    if (n !== undefined && Number.isFinite(n) && n >= 0) parts.push(quantityText(q, n));
+  }
+  return parts.join(" · ");
 }
 
 type QuoteLike = {

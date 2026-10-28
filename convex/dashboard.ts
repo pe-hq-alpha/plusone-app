@@ -6,7 +6,7 @@ import { slotStatus, threadStatus } from "./lib/validators";
 import type { Infer } from "convex/values";
 import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
-import { gapsIn, missingCharges, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
+import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
 import { tierFor } from "./lib/marketplace";
 import { badge, bandRow, tier } from "./marketplace/listings";
 import { offersForEvent } from "./marketplace/offers";
@@ -45,6 +45,10 @@ const offerRow = v.object({
   readings: v.array(answer),
   missing: v.array(missingCharge),
   tier: v.union(tier, v.null()),
+  /** The way of charging on the need's sheet ("per_hour"), an older offer read as Compare's unit; missing for a need with no sheet. */
+  priceUnit: v.optional(v.string()),
+  /** What the price includes, by the sheet's quantity keys: { hours: 8, photographers: 2 }. */
+  quantities: v.record(v.string(), v.number()),
 });
 
 const vendorRow = v.object({
@@ -168,8 +172,20 @@ export const board = query({
         units: v.number(),
         /** Lowest and highest per-unit figures among the quotes, when two or more compare. */
         spread: v.union(v.object({ low: v.number(), high: v.number() }), v.null()),
-        /** The need's standard sheet, whose lines are the rows of a line-by-line compare; null when it has none. */
-        sheet: v.union(v.object({ covers: v.string(), lines: v.array(v.object({ key: v.string(), label: v.string() })) }), v.null()),
+        /**
+         * The need's standard sheet, whose lines and quantities are the rows of a line-by-line
+         * compare, with the ways its trade charges; null when it has none. The plates or pieces
+         * aren't a row: the total already counts them.
+         */
+        sheet: v.union(
+          v.object({
+            covers: v.string(),
+            lines: v.array(v.object({ key: v.string(), label: v.string() })),
+            units: v.array(v.object({ key: v.string(), label: v.string() })),
+            quantities: v.array(v.object({ key: v.string(), label: v.string(), unit: v.optional(v.string()), better: v.optional(v.literal("less")) })),
+          }),
+          v.null(),
+        ),
         /** The city's range for this need, in its comparison unit, from listed vendors' prices; null until there are enough. */
         market: v.union(
           v.object({ count: v.number(), p25: v.number(), p50: v.number(), p75: v.number(), p90: v.number(), currency: v.string() }),
@@ -378,7 +394,12 @@ export const board = query({
         basisLabel: basisLabel(basis, slot.category),
         units,
         spread: spread(rows.filter((r) => r.state !== "declined").map((r) => r.quote?.perUnit ?? null)),
-        sheet: sheet && { covers: sheet.covers, lines: sheet.lines.map(({ key, label }) => ({ key, label })) },
+        sheet: sheet && {
+          covers: sheet.covers,
+          lines: sheet.lines.map(({ key, label }) => ({ key, label })),
+          units: sheet.units.map(({ key, label }) => ({ key, label })),
+          quantities: sheet.quantities.filter((q) => !q.fromBrief).map(({ key, label, unit, better }) => ({ key, label, ...(unit ? { unit } : {}), ...(better ? { better } : {}) })),
+        },
         market: band && band.currency === event.currency ? { count: band.count, p25: band.p25, p50: band.p50, p75: band.p75, p90: band.p90, currency: band.currency } : null,
         vendors: rows,
         offers: slotOffers.map((o, i) => {
@@ -399,6 +420,8 @@ export const board = query({
             readings: o.lines.map(plain),
             missing: sheet ? gapsIn(o.lines, sheet, theirs, o.currency) : [],
             tier: placeInBand(basis === "total" ? o.total : perUnit, o.currency, band),
+            ...(sheet ? { priceUnit: priceUnitOf(sheet, o.priceUnit).key } : o.priceUnit ? { priceUnit: o.priceUnit } : {}),
+            quantities: o.quantities ?? {},
           };
         }),
       });

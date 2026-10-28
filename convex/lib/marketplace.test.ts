@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { badgesFor, bandOf, checkOfferLines, cityKey, e164, emailMatchesWebsite, isListed, levelFor, offerTotal, startingOffering, tierFor } from "./marketplace";
+import { badgesFor, bandOf, checkOfferLines, checkPriceTerms, cityKey, e164, emailMatchesWebsite, inRangeUnit, isListed, levelFor, offerTotal, startingOffering, tierFor } from "./marketplace";
 import { sheetFor } from "./standardSheet";
 
 describe("cityKey", () => {
@@ -151,5 +151,60 @@ describe("offers on the standard sheet", () => {
   test("the total is the main price for its quantity plus the lines priced inside it, never the extras", () => {
     const checked = checkOfferLines(sheet, answers);
     expect("lines" in checked && offerTotal(550, 120, checked.lines)).toBe(550 * 120 + 2500);
+  });
+});
+
+describe("prices in each trade's own units", () => {
+  const photo = sheetFor("Photographer")!;
+  const catering = sheetFor("Catering")!;
+
+  test("a way of charging the trade uses is kept with what it includes; one it doesn't is turned down", () => {
+    expect(checkPriceTerms(photo, "per_hour", { hours: 6, photographers: 2 }, true)).toEqual({ priceUnit: "per_hour", quantities: { hours: 6, photographers: 2 }, times: 6 });
+    expect(checkPriceTerms(photo, "per_plate", {}, true)).toEqual({ problem: expect.stringMatching(/ways this service is priced/) });
+    expect(checkPriceTerms(photo, undefined, {}, true)).toMatchObject({ priceUnit: "for_event", times: 1 });
+  });
+
+  test("quantities must be on the sheet and be numbers not below zero", () => {
+    expect(checkPriceTerms(photo, "for_event", { plates: 100 }, true)).toEqual({ problem: expect.stringMatching(/isn't something/) });
+    expect(checkPriceTerms(photo, "for_event", { hours: -2 }, true)).toEqual({ problem: "The number for hours of coverage doesn't look right." });
+    expect(checkPriceTerms(photo, "for_event", { photos: Number.NaN }, true)).toEqual({ problem: expect.stringMatching(/edited photos/) });
+    expect(checkPriceTerms(photo, "for_event", { photos: Infinity }, true)).toEqual({ problem: expect.stringMatching(/edited photos/) });
+    expect(checkPriceTerms(sheetFor("Officiant")!, "for_ceremony", { assistants: 0 }, true)).toMatchObject({ quantities: { assistants: 0 } });
+  });
+
+  test("an offer must give what its price is multiplied by; a published rate needn't", () => {
+    expect(checkPriceTerms(photo, "per_hour", { photographers: 2 }, true)).toEqual({ problem: "A price per hour needs the hours of coverage." });
+    expect(checkPriceTerms(photo, "per_hour", { hours: 0 }, true)).toEqual({ problem: "A price per hour needs the hours of coverage." });
+    expect(checkPriceTerms(sheetFor("Cake")!, "per_kg", {}, true)).toEqual({ problem: "A price per kg needs the weight." });
+    expect(checkPriceTerms(catering, "per_plate", {}, true)).toEqual({ problem: "Say how many plates the price is for." });
+    expect(checkPriceTerms(photo, "per_hour", {}, false)).toEqual({ priceUnit: "per_hour", quantities: {}, times: null });
+  });
+
+  test("quantities that go with another way of charging are dropped, and plates are whole", () => {
+    expect(checkPriceTerms(photo, "for_event", { hours: 8, days: 2 }, true)).toEqual({ priceUnit: "for_event", quantities: { hours: 8 }, times: 1 });
+    expect(checkPriceTerms(catering, "per_plate", { count: 119.6, dishes: 12 }, true)).toEqual({ priceUnit: "per_plate", quantities: { count: 120, dishes: 12 }, times: 120 });
+    expect(checkPriceTerms(sheetFor("Cake")!, "per_kg", { weight: 1.5 }, true)).toMatchObject({ times: 1.5 });
+  });
+
+  test("only prices in the way Compare reads a category go into its city's range", () => {
+    expect(inRangeUnit({ category: "Photographer", unit: "total", priceUnit: "for_event" })).toBe(true);
+    expect(inRangeUnit({ category: "Photographer", unit: "total" })).toBe(true);
+    expect(inRangeUnit({ category: "Photographer", unit: "total", priceUnit: "per_hour" })).toBe(false);
+    expect(inRangeUnit({ category: "Catering", unit: "per_person", priceUnit: "per_plate" })).toBe(true);
+    // A caterer's lump sum, saved as "all in" before units followed the sheet, isn't a price per plate.
+    expect(inRangeUnit({ category: "Catering", unit: "total" })).toBe(false);
+    expect(inRangeUnit({ category: "Cake", unit: "total", priceUnit: "per_kg" })).toBe(false);
+    expect(inRangeUnit({ category: "Cake", unit: "total", priceUnit: "for_cake" })).toBe(true);
+    expect(inRangeUnit({ category: "Makeup & Hair", unit: "per_person" })).toBe(true);
+  });
+
+  test("the starting price is the cheapest priced the way the range is, ahead of a cheaper rate per hour", () => {
+    const offerings = [
+      { price: 2_000, unit: "total" as const, includes: ["Edited photos"], category: "Photographer", priceUnit: "per_hour" },
+      { price: 15_000, unit: "total" as const, includes: ["Edited photos"], category: "Photographer", priceUnit: "for_event" },
+      { price: 12_500, unit: "total" as const, includes: ["Edited photos"], category: "Photographer" },
+    ];
+    expect(startingOffering(offerings, "Photographer")?.price).toBe(12_500);
+    expect(startingOffering(offerings.slice(0, 1), "Photographer")?.priceUnit).toBe("per_hour");
   });
 });

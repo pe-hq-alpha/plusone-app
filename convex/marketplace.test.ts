@@ -109,6 +109,26 @@ describe("what Events reads", () => {
     expect(cards.find((c) => c.name === "Caterer 8")?.tier).toBe("Luxury");
   });
 
+  test("a rate per hour never sits in a range of prices for the whole event", async () => {
+    const t = setup();
+    for (let i = 0; i < 8; i++) {
+      const profileId = await listing(t, { name: `Photographer ${i}`, categories: ["Photographer"], status: "verified" });
+      await t.run(async (ctx) => {
+        const base = { profileId, category: "Photographer", title: "Candid photos", unit: "total" as const, currency: "INR", includes: ["Edited photos"] };
+        await ctx.db.insert("vendorOfferings", { ...base, priceUnit: i % 2 ? "for_event" : undefined, price: 20_000 + i * 2_000 });
+        await ctx.db.insert("vendorOfferings", { ...base, priceUnit: "per_hour", price: 1_500 });
+      });
+    }
+    await t.mutation(internal.marketplace.bands.recompute, {});
+    const band = await t.query(internal.marketplace.listings.bandFor, { category: "Photographer", unit: "total", city: "Chennai" });
+    expect(band).toMatchObject({ count: 8, p25: 23_500, p50: 27_000 });
+
+    // The card's "from" price is for the event, not the cheaper hourly rate, and is placed in the range.
+    const cards = await t.query(internal.marketplace.listings.searchProfiles, { category: "Photographer", city: "Chennai" });
+    expect(cards.find((c) => c.name === "Photographer 0")).toMatchObject({ startingPrice: { price: 20_000, unit: "total" }, tier: "Value" });
+    expect(cards.find((c) => c.name === "Photographer 1")?.startingPrice).toEqual({ price: 22_000, unit: "total", priceUnit: "for_event", currency: "INR" });
+  });
+
   test("a band with too few prices left is removed, not shown on too little", async () => {
     const t = setup();
     const ids: Id<"vendorProfiles">[] = [];
@@ -219,6 +239,30 @@ describe("a vendor's prices", () => {
       /price/,
     );
     await expect(as(t, stranger).mutation(api.marketplace.partner.removeOffering, { offeringId })).rejects.toThrow(/Set up your business/);
+  });
+
+  test("a photographer prices the way photographers do, with what the price includes", async () => {
+    const t = setup();
+    const vendor = await user(t, "hello@thinnai.in");
+    await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Thinnai Photography", categories: ["Photographer", "Makeup & Hair"], city: "Chennai" });
+    const save = (more: object) =>
+      as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Photographer", title: "Candid photos", unit: "per_person", price: 2_000, includes: ["Edited photos online"], ...more });
+
+    await save({ priceUnit: "per_hour", quantities: { photographers: 2, photos: 150.4, days: 3 } });
+    await save({ priceUnit: "for_event", quantities: { hours: 8, photographers: 2, photos: 400, delivery: 3 }, price: 45_000 });
+    // A rate per hour is a published price: it needn't say for how many hours.
+    const offerings = (await as(t, vendor).query(api.marketplace.partner.mine, {})).offerings;
+    expect(offerings.map((o) => [o.unit, o.priceUnit, o.quantities])).toEqual([
+      ["total", "per_hour", { photographers: 2, photos: 150.4 }],
+      ["total", "for_event", { hours: 8, photographers: 2, photos: 400, delivery: 3 }],
+    ]);
+
+    await expect(save({ priceUnit: "per_plate" })).rejects.toThrow(/ways this service is priced/);
+    await expect(save({ priceUnit: "for_event", quantities: { plates: 100 } })).rejects.toThrow(/isn't something/);
+    await expect(save({ priceUnit: "for_event", quantities: { hours: -1 } })).rejects.toThrow(/hours of coverage doesn't look right/);
+    await expect(
+      as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Makeup & Hair", title: "Bridal look", unit: "per_person", priceUnit: "per_look", price: 8_000, includes: [] }),
+    ).rejects.toThrow(/one way only/);
   });
 });
 
@@ -387,6 +431,57 @@ describe("briefs and offers", () => {
     expect((await t.query(internal.marketplace.offers.offersFor, { eventId })).map((o) => [o.price, o.quantity])).toEqual([[530, 150]]);
   });
 
+  test("a photographer answers in their own terms, and the total is worked out from the price and the hours", async () => {
+    const t = setup();
+    const { familyId, eventId } = await familyEvent(t);
+    const slotId = await t.run(async (ctx) => {
+      const lunch = (await ctx.db.query("sessions").collect())[0];
+      return await ctx.db.insert("vendorSlots", { eventId, sessionIds: [lunch._id], category: "Photographer", title: "Photos of the lunch", budget: 30000, status: "research" });
+    });
+    const vendor = await user(t, "hello@thinnai.in");
+    await listing(t, { name: "Thinnai Photography", categories: ["Photographer"], source: "vendor_signup", status: "verified", ownerUserId: vendor });
+    const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
+    const lines = [
+      { key: "gst", status: "included" as const },
+      { key: "travel", status: "priced" as const, amount: 500 },
+      { key: "overtime", status: "extra" as const, amount: 2000 },
+      { key: "album", status: "extra" as const },
+      { key: "drone", status: "included" as const },
+    ];
+    const send = (more: object) => as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 2_000, lines, ...more });
+
+    await expect(send({ priceUnit: "per_hour", quantities: { photographers: 2 } })).rejects.toThrow("A price per hour needs the hours of coverage.");
+    await expect(send({ priceUnit: "per_kg", quantities: { hours: 6 } })).rejects.toThrow(/ways this service is priced/);
+    await expect(send({ priceUnit: "per_hour", quantities: { hours: 6, plates: 120 } })).rejects.toThrow(/isn't something/);
+    await expect(send({ priceUnit: "per_hour", quantities: { hours: Number.POSITIVE_INFINITY } })).rejects.toThrow(/doesn't look right/);
+
+    // A total sent from the form is never trusted: there is no such field, and it's worked out here.
+    await send({ priceUnit: "per_hour", quantities: { hours: 6, photographers: 2, photos: 300, delivery: 2, days: 2 } });
+    let [offer] = await t.query(internal.marketplace.offers.offersFor, { eventId });
+    expect(offer).toMatchObject({ unit: "total", priceUnit: "per_hour", quantities: { hours: 6, photographers: 2, photos: 300, delivery: 2 }, quantity: 6, total: 2_000 * 6 + 500 });
+
+    await send({ price: 14_000, priceUnit: "for_event", quantities: { hours: 4 } });
+    [offer] = await t.query(internal.marketplace.offers.offersFor, { eventId });
+    expect(offer).toMatchObject({ priceUnit: "for_event", quantities: { hours: 4 }, quantity: 1, total: 14_500 });
+  });
+
+  test("a caterer's plates come from 'For how many', or from the quantities, or from the brief's guests", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t);
+    const vendor = await user(t, "owner@anjalicaterers.in");
+    await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor });
+    const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
+    const send = (more: object) => as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 400, lines: cateringAnswers, ...more });
+    const sent = async () => (await t.query(internal.marketplace.offers.offersFor, { eventId }))[0];
+
+    await send({ priceUnit: "per_person_buffet", quantities: { dishes: 12, staff: 6 } });
+    expect(await sent()).toMatchObject({ unit: "per_person", priceUnit: "per_person_buffet", quantities: { count: 120, dishes: 12, staff: 6 }, quantity: 120, total: 400 * 120 + 2500 });
+    await send({ quantity: 150 });
+    expect(await sent()).toMatchObject({ priceUnit: "per_plate", quantities: { count: 150 }, quantity: 150 });
+    await send({ quantities: { count: 90 } });
+    expect(await sent()).toMatchObject({ quantity: 90, total: 400 * 90 + 2500 });
+  });
+
   test("a withdrawn offer, or one from a vendor since suspended, leaves Compare", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t);
@@ -453,6 +548,8 @@ describe("the guest demo's Partner side", () => {
     expect(byVendor["Komalam Caterers"].total).toBe(450 * 120);
     expect(byVendor["Jasmine Arch Decorators"].total).toBe(24_500 + 1200);
     expect(byVendor["Thinnai Photography"].total).toBe(12_500);
+    expect(byVendor["Thinnai Photography"]).toMatchObject({ priceUnit: "for_event", quantity: 1, quantities: { hours: 3, photographers: 1, photos: 150, delivery: 1 } });
+    expect(byVendor["Kalyana Saapadu Co."]).toMatchObject({ priceUnit: "per_plate", quantities: { count: 120, dishes: 9, sweets: 2, staff: 6 } });
     for (const o of offers) {
       expect(o.vendor.sample).toBe(true);
       expect(o.lines.every((l) => l.status !== "unstated")).toBe(true);

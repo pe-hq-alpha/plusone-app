@@ -85,6 +85,8 @@ import type * as lib_validators from "../lib/validators.js";
 import type * as lib_vendorNeeds from "../lib/vendorNeeds.js";
 import type * as lib_visits from "../lib/visits.js";
 import type * as lib_vocab from "../lib/vocab.js";
+import type * as lib_voice from "../lib/voice.js";
+import type * as lib_wav from "../lib/wav.js";
 import type * as lib_wizard from "../lib/wizard.js";
 import type * as maintenance from "../maintenance.js";
 import type * as marketplace_bands from "../marketplace/bands.js";
@@ -203,6 +205,8 @@ declare const fullApi: ApiFromModules<{
   "lib/vendorNeeds": typeof lib_vendorNeeds;
   "lib/visits": typeof lib_visits;
   "lib/vocab": typeof lib_vocab;
+  "lib/voice": typeof lib_voice;
+  "lib/wav": typeof lib_wav;
   "lib/wizard": typeof lib_wizard;
   maintenance: typeof maintenance;
   "marketplace/bands": typeof marketplace_bands;

@@ -268,11 +268,19 @@ export const vendorProfileFields = {
   sample: v.optional(v.boolean()),
 };
 
+/** A way of charging on the category's standard sheet ("per_hour"); missing on prices saved before there were ways, which read as Compare's unit. */
+const sheetPriceUnit = v.optional(v.string());
+/** What the price includes, by the sheet's quantity keys: { hours: 8, photographers: 2 }. */
+const sheetQuantities = v.optional(v.record(v.string(), v.number()));
+
 export const vendorOfferingFields = {
   profileId: v.id("vendorProfiles"),
   category: v.string(),
   title: v.string(),
+  /** Compare's unit, which scales the price: always the sheet's for a category with one. */
   unit: offeringUnit,
+  priceUnit: sheetPriceUnit,
+  quantities: sheetQuantities,
   price: v.number(),
   currency: v.string(),
   includes: v.array(v.string()),
@@ -348,9 +356,11 @@ export const vendorOfferFields = {
   slotId: v.id("vendorSlots"),
   category: v.string(),
   unit: offeringUnit,
+  priceUnit: sheetPriceUnit,
+  quantities: sheetQuantities,
   /** The main price, per unit. */
   price: v.number(),
-  /** How many units it is priced for (plates, pieces, days); 1 for an all-in price. */
+  /** What the price is multiplied by: the quantities its way of charging counts (plates, hours, kg); 1 for a price for the whole thing. */
   quantity: v.number(),
   currency: v.string(),
   /** What the main price covers, in the vendor's words. */

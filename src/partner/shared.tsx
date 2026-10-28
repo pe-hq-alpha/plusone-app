@@ -1,4 +1,6 @@
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
+import { describeOffer, sheetFor } from "../../convex/lib/standardSheet";
+import { money } from "../lib/format";
 
 /** A server refusal in the words it was written in, without Convex's wrapping. */
 export const errorText = (e: unknown, fallback: string) =>
@@ -14,6 +16,19 @@ export function dayText(iso: string): string {
 /** "per plate", "per piece", "all in": the unit as it reads after a price. */
 export function unitWord(unit: Basis, category: string): string {
   return unit === "total" ? "all in" : basisLabel(unit, category).toLowerCase();
+}
+
+type PricedOffering = { price: number; currency: string; unit: Basis; category: string; priceUnit?: string; quantities?: Record<string, number> };
+
+/**
+ * A published price as customers read it: in the trade's own terms with what it includes
+ * ("₹45,000 for the event · 8 hours"), or the price and its unit for a kind of service
+ * with no sheet. One saved in another unit than its sheet's reads as it was saved.
+ */
+export function priceText(o: PricedOffering): string {
+  const sheet = sheetFor(o.category);
+  if (sheet && o.unit === sheet.unit) return describeOffer(sheet, o.priceUnit, o.price, o.quantities ?? {}, o.currency);
+  return `${money(o.price, o.currency)} ${unitWord(o.unit, o.category)}`;
 }
 
 const BADGE_TEXT: Record<string, string> = {
