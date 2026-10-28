@@ -74,6 +74,11 @@
 .rs__event { margin: calc(4 / 20.48 * 1cqw) 0 0; font-size: calc(23 / 20.48 * 1cqw); color: var(--color-quiet); }
 .rs__event span { color: var(--color-muted); }
 .rs__lede-strong { color: var(--color-ink); }
+/* A phrase that breaks as one: "in one place." never leaves "place." alone on a line. */
+.rs__keep { white-space: nowrap; }
+/* The one line for vendors under the hero's buttons. */
+.rs__vendors { margin: calc(22 / 20.48 * 1cqw) 0 0; font-size: 0.95rem; color: var(--color-muted); }
+.rs__vendors a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 
 .rs__route { list-style: none; margin: calc(18 / 20.48 * 1cqw) 0 0; padding: 0; display: grid; gap: calc(13 / 20.48 * 1cqw); position: relative; }
 .rs__step {
@@ -150,6 +155,7 @@
   .rs__title { font-size: clamp(2.6rem, 9vw, 4rem); }
   .rs__lede { margin-top: 16px; font-size: 1.08rem; }
   .rs__actions { flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+  .rs__vendors { margin-top: 16px; }
   .rs__pill { height: 50px; min-width: 0; flex: 1 1 10rem; padding: 0 24px; font-size: 1.02rem; }
   .rs__pill--outline { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
   .rs__status-title { font-size: 1.5rem; }

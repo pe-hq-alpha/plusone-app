@@ -58,7 +58,7 @@ export default function App() {
     <>
       <Splash />
       <UpdatePrompt />
-      <Suspense fallback={<FullPage>Loading…</FullPage>}>
+      <Suspense fallback={<Waiting />}>
       <HostGate>
       {onPartnerHost() ? <PartnerRoutes /> : onOpsHost() ? <OpsRoutes /> : (
       <Routes>
@@ -169,7 +169,7 @@ function PartnerRoutes() {
 function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children: ReactNode }) {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const [hint] = useState(likelySignedOut);
-  if (isLoading) return hint ? <>{signedOut}</> : <FullPage>Loading…</FullPage>;
+  if (isLoading) return hint ? <>{signedOut}</> : <Waiting />;
   return isAuthenticated ? <>{children}</> : <>{signedOut}</>;
 }
 
@@ -225,8 +225,18 @@ function HostGate({ children }: { children: ReactNode }) {
     else if (toApp) goToApp(pathname + search + hash);
     else if (toHome) goHome();
   }, [toOps, toPartner, toApp, toHome, pathname, search, hash]);
-  if (toOps || toPartner || toApp || toHome) return <FullPage>Loading…</FullPage>;
+  if (toOps || toPartner || toApp || toHome) return <Waiting />;
   return <>{children}</>;
+}
+
+/** "Loading…" only once a wait is long enough to notice; a quick load shows a calm, empty page. */
+function Waiting() {
+  const [late, setLate] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setLate(true), 500);
+    return () => window.clearTimeout(t);
+  }, []);
+  return <FullPage>{late ? "Loading…" : null}</FullPage>;
 }
 
 export function FullPage({ children }: { children: React.ReactNode }) {

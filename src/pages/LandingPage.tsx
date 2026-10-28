@@ -124,18 +124,21 @@ export function LandingPage() {
         <main id="main" className="rs__body">
           <div className="rs__pitch">
             <h1 id="hero-title" className="rs__title">
-              Your plus one <br />
-              for <em>every event.</em>
+              Plan it all <span className="rs__keep">in one place.</span> <br />
+              <em>Pay what&rsquo;s fair.</em>
             </h1>
             <p className="rs__lede">
-              One app for the whole event, and people on your side.
-              <br />
-              <span className="rs__lede-strong">Every quote on the same lines, so you pay what&rsquo;s fair.</span>
+              One app from the first idea to the day itself,{" "}
+              <span className="rs__lede-strong">and a team on your side, so you never pay more than you should.</span>
             </p>
             <div className="rs__actions">
               <Link to="/signin?new=1" className="rs__pill rs__pill--solid">Plan an event</Link>
               <Link to="/demo" className="rs__pill rs__pill--outline">See the demo</Link>
             </div>
+            <p className="rs__vendors">
+              Vendors: get found by people planning near you, with or without a website.{" "}
+              <Link to={partnerHref("/")}>List your business &rarr;</Link>
+            </p>
             <div className="rs__fan">
               {FAN.map((p) => <img key={p.src} src={p.src} alt={p.alt} width={560} height={700} decoding="async" />)}
             </div>
