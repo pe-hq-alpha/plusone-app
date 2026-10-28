@@ -1,5 +1,5 @@
-import { Authenticated, AuthLoading, Unauthenticated, useConvexAuth } from "convex/react";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { useConvexAuth } from "convex/react";
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { goHome, goToApp, goToOps, goToPartner, hasOpsHost, hasPartnerHost, HOME_PATHS, ON_OPS_PATH, ON_PARTNER_PATH, onAppHost, onHomeHost, onOpsHost, onPartnerHost, OPS_PATHS, PARTNER_PATHS } from "./lib/hosts";
 import { LandingPage } from "./pages/LandingPage";
@@ -9,6 +9,7 @@ import { UpdatePrompt } from "./components/UpdatePrompt";
 import { RequireAccount } from "./components/RequireAccount";
 import { LeaveDemo } from "./components/LeaveDemo";
 import { Splash } from "./components/Splash";
+import { likelySignedOut } from "./lib/session";
 
 // Each page loads as its own file, so the first visit downloads only what it shows.
 // The landing page stays in the main bundle because it is what a new visitor sees first.
@@ -75,18 +76,15 @@ export default function App() {
         <Route
           path="/*"
           element={
-            <>
-              <AuthLoading>
-                <FullPage>Loading…</FullPage>
-              </AuthLoading>
-              <Unauthenticated>
+            <SignedInOrOut
+              signedOut={
                 <Routes>
                   <Route path="/signin" element={<SignInPage />} />
                   <Route path="/partner" element={<VendorSignInPage />} />
                   <Route path="*" element={<LandingPage />} />
                 </Routes>
-              </Unauthenticated>
-              <Authenticated>
+              }
+            >
                 <a href="#main" className="skip-link">Skip to content</a>
                 <ErrorBoundary>
                 <Routes>
@@ -126,8 +124,7 @@ export default function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
                 </ErrorBoundary>
-              </Authenticated>
-            </>
+            </SignedInOrOut>
           }
         />
       </Routes>
@@ -151,24 +148,29 @@ function PartnerRoutes() {
       <Route
         path="/*"
         element={
-          <>
-            <AuthLoading>
-              <FullPage>Loading…</FullPage>
-            </AuthLoading>
-            <Unauthenticated>
-              <VendorSignInPage />
-            </Unauthenticated>
-            <Authenticated>
-              <a href="#main" className="skip-link">Skip to content</a>
-              <ErrorBoundary>
-                <PartnerPage />
-              </ErrorBoundary>
-            </Authenticated>
-          </>
+          <SignedInOrOut signedOut={<VendorSignInPage />}>
+            <a href="#main" className="skip-link">Skip to content</a>
+            <ErrorBoundary>
+              <PartnerPage />
+            </ErrorBoundary>
+          </SignedInOrOut>
         }
       />
     </Routes>
   );
+}
+
+/**
+ * The signed-in pages or the signed-out ones. While sign-in is still being checked, a
+ * browser with no sign-in at all (lib/session's likelySignedOut) is shown the signed-out
+ * page at once instead of "Loading…"; it stays the same element when the answer comes,
+ * so nothing re-mounts or replays. Anyone signed in waits for the real answer.
+ */
+function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children: ReactNode }) {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const [hint] = useState(likelySignedOut);
+  if (isLoading) return hint ? <>{signedOut}</> : <FullPage>Loading…</FullPage>;
+  return isAuthenticated ? <>{children}</> : <>{signedOut}</>;
 }
 
 /** Pages on the app's address that work without signing in. */
@@ -186,20 +188,12 @@ function OpsRoutes() {
       <Route
         path="/*"
         element={
-          <>
-            <AuthLoading>
-              <FullPage>Loading…</FullPage>
-            </AuthLoading>
-            <Unauthenticated>
-              <SignInPage />
-            </Unauthenticated>
-            <Authenticated>
-              <a href="#main" className="skip-link">Skip to content</a>
-              <ErrorBoundary>
-                <OpsPage />
-              </ErrorBoundary>
-            </Authenticated>
-          </>
+          <SignedInOrOut signedOut={<SignInPage />}>
+            <a href="#main" className="skip-link">Skip to content</a>
+            <ErrorBoundary>
+              <OpsPage />
+            </ErrorBoundary>
+          </SignedInOrOut>
         }
       />
     </Routes>

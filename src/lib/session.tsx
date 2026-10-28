@@ -50,6 +50,23 @@ function writeDemo(tokens: DemoTokens | null) {
     /* kept in memory instead */
   }
 }
+/**
+ * Whether this browser has no sign-in at all, known at once rather than after Clerk has
+ * loaded and asked its server (about a second): no demo session kept here, and Clerk's
+ * own marker cookie, `__client_uat` (shared across plusoneevents.site, "0" or absent when
+ * signed out), says signed out. A signed-out visitor then sees their page straight away;
+ * anyone signed in still waits for the real answer.
+ */
+export function likelySignedOut(): boolean {
+  if (readDemo()) return false;
+  try {
+    const marks = document.cookie.split(/;\s*/).filter((c) => /^__client_uat(_[^=]*)?=/.test(c));
+    return marks.every((c) => c.slice(c.indexOf("=") + 1) === "0");
+  } catch {
+    return false;
+  }
+}
+
 /** A token with under a minute left is refreshed rather than sent. */
 function expiresSoon(jwt: string): boolean {
   try {
