@@ -77,6 +77,21 @@ export async function requireMember(
   return { userId, member, event };
 }
 
+/**
+ * Verifies the caller is on PlusOne's own team (Ops). Admins can do everything a
+ * reviewer can. Demo guests never are, whatever their row says.
+ */
+export async function requireStaff(
+  ctx: QueryCtx | MutationCtx,
+  minRole: "reviewer" | "admin" = "reviewer",
+): Promise<{ userId: Id<"users">; role: "reviewer" | "admin" }> {
+  const userId = await requireUserId(ctx);
+  const user = await ctx.db.get(userId);
+  const role = user && !user.isAnonymous ? user.staffRole : undefined;
+  if (!role || (minRole === "admin" && role !== "admin")) throw new ConvexError("This page is for the PlusOne team.");
+  return { userId, role };
+}
+
 /** Human label for the acting user, used in the activity feed. */
 export async function actorLabelFor(ctx: QueryCtx | MutationCtx, userId: Id<"users">): Promise<string> {
   const user = await ctx.db.get(userId);

@@ -221,6 +221,103 @@ export const vendorFields = {
   rankReason: v.optional(v.string()),
   isTopPick: v.optional(v.boolean()),
   pagesRead: v.array(v.string()), // the urls actually scraped for this vendor
+  /** The PlusOne Partner listing this vendor is, matched on website. */
+  profileId: v.optional(v.id("vendorProfiles")),
+};
+
+// ---------------------------------------------------------------- PlusOne Partner
+
+/** What an offering's price is for: the same units Compare reads quotes in (lib/comparable Basis). */
+export const offeringUnit = v.union(v.literal("per_person"), v.literal("per_piece"), v.literal("per_day"), v.literal("total"));
+export const profileStatus = v.union(v.literal("pending"), v.literal("verified"), v.literal("rejected"), v.literal("suspended"));
+export const profileSource = v.union(v.literal("plusone_added"), v.literal("vendor_signup"));
+
+/**
+ * A vendor on PlusOne Partner. "plusone_added" listings hold public facts only (name,
+ * category, city, website) until the vendor claims them; a vendor's own sign-up is
+ * hidden from families until a person in Ops verifies it.
+ */
+export const vendorProfileFields = {
+  name: v.string(),
+  /** The same strings as VENDOR_CATEGORIES (lib/vendorNeeds). */
+  categories: v.array(v.string()),
+  /** The city as the vendor wrote it, for display. */
+  city: v.string(),
+  /** The city it is searched under (lib/marketplace cityKey). */
+  cityKey: v.string(),
+  serviceArea: v.optional(v.array(v.string())),
+  /** Canonical, https://host (lib/text canonicalWebsite): the key seeded and claimed listings match on. */
+  website: v.optional(v.string()),
+  email: v.optional(v.string()),
+  /** E.164, for calling and WhatsApp. */
+  phone: v.optional(v.string()),
+  whatsapp: v.optional(v.string()),
+  languages: v.optional(v.array(v.string())),
+  about: v.optional(v.string()),
+  photoIds: v.optional(v.array(v.id("_storage"))),
+  source: profileSource,
+  /** The account that runs this listing, once claimed or signed up. */
+  ownerUserId: v.optional(v.id("users")),
+  status: profileStatus,
+  statusReason: v.optional(v.string()),
+  statusAt: v.number(),
+  joinedAt: v.number(),
+  /** Events done through PlusOne; sets the level (New, Trusted, Top). */
+  completedEvents: v.number(),
+};
+
+export const vendorOfferingFields = {
+  profileId: v.id("vendorProfiles"),
+  category: v.string(),
+  title: v.string(),
+  unit: offeringUnit,
+  price: v.number(),
+  currency: v.string(),
+  includes: v.array(v.string()),
+  excludes: v.optional(v.array(v.string())),
+  /** Whether the price already includes GST; missing when the vendor hasn't said. */
+  taxIncluded: v.optional(v.boolean()),
+  minQty: v.optional(v.number()),
+  maxQty: v.optional(v.number()),
+};
+
+export const vendorClaimFields = {
+  profileId: v.id("vendorProfiles"),
+  userId: v.id("users"),
+  method: v.union(v.literal("domain_email"), v.literal("manual")),
+  status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+  /** What the vendor told us to prove it's theirs, for a manual check. */
+  note: v.optional(v.string()),
+  createdAt: v.number(),
+  decidedAt: v.optional(v.number()),
+  decidedBy: v.optional(v.id("users")),
+};
+
+/** One Ops decision on a listing, never edited: the record of who verified what, on what evidence. */
+export const vettingReviewFields = {
+  profileId: v.id("vendorProfiles"),
+  reviewerId: v.id("users"),
+  /** Each check and whether it passed: "Website is theirs", "GST number matches". */
+  checks: v.array(v.object({ label: v.string(), passed: v.boolean() })),
+  evidence: v.array(v.object({ label: v.string(), url: v.string() })),
+  outcome: profileStatus,
+  notes: v.optional(v.string()),
+  at: v.number(),
+};
+
+/** A city's price range for one category in one unit, from pooled prices with no names. */
+export const priceBandFields = {
+  category: v.string(),
+  unit: offeringUnit,
+  /** A cityKey. */
+  city: v.string(),
+  currency: v.string(),
+  count: v.number(),
+  p25: v.number(),
+  p50: v.number(),
+  p75: v.number(),
+  p90: v.number(),
+  computedAt: v.number(),
 };
 
 export const researchRunFields = {
@@ -559,6 +656,8 @@ export default defineSchema({
     /** When they ticked "I agree" at sign-in, and which version of the Terms and Privacy Policy (lib/terms). */
     termsAcceptedAt: v.optional(v.number()),
     termsVersion: v.optional(v.string()),
+    /** PlusOne's own team: reviewers verify vendors in Ops; admins also see spend. Set by hand (marketplace/ops setStaffRole). */
+    staffRole: v.optional(v.union(v.literal("admin"), v.literal("reviewer"))),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
@@ -619,6 +718,23 @@ export default defineSchema({
     .index("by_slotId", ["slotId"])
     .index("by_slotId_and_score", ["slotId", "score"])
     .index("by_eventId_and_website", ["eventId", "website"]),
+
+  vendorProfiles: defineTable(vendorProfileFields)
+    .index("by_cityKey_and_status", ["cityKey", "status"])
+    .index("by_status", ["status"])
+    .index("by_website", ["website"])
+    .index("by_ownerUserId", ["ownerUserId"]),
+
+  vendorOfferings: defineTable(vendorOfferingFields).index("by_profileId", ["profileId"]),
+
+  vendorClaims: defineTable(vendorClaimFields)
+    .index("by_profileId", ["profileId"])
+    .index("by_userId", ["userId"])
+    .index("by_status", ["status"]),
+
+  vettingReviews: defineTable(vettingReviewFields).index("by_profileId", ["profileId"]),
+
+  priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city", ["category", "unit", "city"]),
 
   researchRuns: defineTable(researchRunFields)
     .index("by_slotId", ["slotId"])

@@ -82,6 +82,10 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   giftReservations: { kind: "token bucket", rate: 20, period: HOUR, capacity: 8 },
   publicReads: { kind: "token bucket", rate: 20000, period: HOUR, capacity: 2000 },
 
+  // PlusOne Partner: new listings and claims across everyone, and a vendor's edits.
+  partnerSignUps: { kind: "token bucket", rate: 100, period: HOUR, capacity: 40 },
+  partnerEdits: { kind: "token bucket", rate: 120, period: HOUR, capacity: 40 },
+
   // New demos opened, across everyone.
   demoStarts: { kind: "fixed window", rate: 2000, period: DAY },
 
