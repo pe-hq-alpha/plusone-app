@@ -47,6 +47,8 @@ const AccountPage = page(() => import("./pages/AccountPage"), "AccountPage");
 const PrivacyPage = page(() => import("./pages/PrivacyPage"), "PrivacyPage");
 const TermsPage = page(() => import("./pages/TermsPage"), "TermsPage");
 const SignInPage = page(() => import("./pages/SignInPage"), "SignInPage");
+const PartnerPage = page(() => import("./partner/PartnerPage"), "PartnerPage");
+const OpsPage = page(() => import("./partner/OpsPage"), "OpsPage");
 
 export default function App() {
   return (
@@ -89,6 +91,8 @@ export default function App() {
                   <Route path="/new/manual" element={<RequireAccount><OnboardingPage /></RequireAccount>} />
                   <Route path="/account" element={<AccountPage />} />
                   <Route path="/share" element={<SharePage />} />
+                  <Route path="/partner" element={<PartnerPage />} />
+                  <Route path="/ops" element={<OpsPage />} />
                   <Route path="/e/:eventId" element={<EventLayout />}>
                     <Route index element={<TodayPage />} />
                     <Route path="plan" element={<PlanPage />} />
