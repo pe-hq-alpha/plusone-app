@@ -15,7 +15,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-441_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-484_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -55,7 +55,7 @@ PlusOne is one platform with three layers that feed each other:
 |---|---|---|---|
 | **PlusOne Co-pilot** | People planning their own event | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
 | **PlusOne Assisted** | People who want a person beside them | Everything the Co-pilot does, plus a real person from the PlusOne team helping in real time and on call | Opens after launch |
-| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units families compare, answer a family's brief, get verified and get found | Being built during the hackathon |
+| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units families compare, answer a family's brief, get verified and get found | Built during the hackathon, on dev since 28 Oct; voice sign-up next |
 
 More vendors on Partner widen what families can find and compare; more families bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
 
@@ -91,11 +91,11 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for Co-pilot and Assisted; a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
 | **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by families and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Built 28 Oct (`convex/lib/standardSheet.ts`), on dev; live with the next deploy |
-| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark; Muse Spark Open for the ranges | Missing charges and line by line built 28 Oct, on dev; the market range by 1 Nov |
+| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark; Muse Spark Open for the ranges | Built 28 Oct, on dev: missing charges, line by line, and the Chennai range from verified vendors' listed prices; live with the next deploy |
 | **The voice brief:** speak the plan in Tamil, Hindi or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
 | **See it on your venue:** tap the stage in a venue photo and see the decor on the real space | SAM 3.1 | Adapter built and tested (`convex/lib/sam.ts`); the view by 1 Nov |
-| **PlusOne Partner:** vendors register by voice, price packages on the standard sheet and answer a family's brief | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
-| **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Building, by 1 Nov |
+| **PlusOne Partner:** vendors register by voice, price packages on the standard sheet and answer a family's brief | Muse Voice Transcribe, Muse Spark | Built 28 Oct, on dev: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the family's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
+| **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Review queue with its checklist, evidence and decisions built 28 Oct, on dev; the Muse Wonder agent by 1 Nov |
 | WhatsApp and calling vendors from the app | | Building, by 1 Nov |
 
 Before the hackathon, PlusOne already planned an event from a conversation, found vendors, wrote to them from the event's inbox and put their quotes in one unit, on Claude. [Repository](#repository) gives the exact line between the two.
@@ -106,7 +106,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families and teams planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Muse Voice Transcribe hears a brief that mixes Tamil and English, and Muse Spark turns it into the plan. Muse Spark reads every reply, PDF and quote into the same lines. Muse Spark finds the stage in a venue photo and SAM 3.1 cuts it out for the decor. Muse Wonder gathers evidence about a vendor. Muse Spark Open, the open-weights model, turns pooled quotes into a market range on Baseten. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 441 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 484 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
 
 ## The business
@@ -131,6 +131,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 | **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Adapter built and tested (`convex/lib/sam.ts`: one concept or up to 16 tapped objects, masks read with `@meta-sam/parser`); the venue view is next |
 | **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Hackathon build |
 | **Muse Spark Open** (open weights, on Baseten) | Batch jobs: seeding the vendor directory from public listings, and turning pooled quotes, without names, into market ranges | Hackathon build |
+| **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Tags a Partner vendor's portfolio photos with the standard sheet's lines (stage backdrop, entrance arch, live counters), so past work sits beside an offer's line; flags likely stock photos for Ops | Planned, by 31 Oct |
 | **Muse Code** (Meta's coding agent) | Builds bounded pieces of PlusOne from a written brief, which are then reviewed and tested before they are committed; the first was the SAM 3.1 adapter. Every session is logged in [`devlog.md`](devlog.md#muse-code) | In use since 27 Oct 2026 |
 
 **See it at work:** in any event, the **Under the hood** button in the top bar lists every step PlusOne ran for that event, with the Meta model that did it, how long it took and what it cost. Ask "We're now 140 people" on Today in the demo and watch the step appear.
@@ -198,7 +199,7 @@ The rest of the app:
 |---|---|---|---|
 | Muse Spark in production | A made-up guest reply ("Both of us will come. My husband is allergic to peanuts.") read by `muse-spark-1.3` through the production backend: coming, 2 people, the peanut allergy caught, valid structured output first time; 1,214 tokens in, 880 out, $0.0053, written to `modelCalls` | 27 Oct 2026 | `npx convex run claude:readRsvpReply` against production |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 441 passed in 46 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
+| Tests | 484 passed in 48 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 27 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
@@ -310,9 +311,11 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 | Path | What it is |
 |---|---|
 | `src/pages/` | One file per screen: Today, the plan and each function, to-dos, budget, Spaces, Find, Compare, Inbox, guests, gifts, the event page, the planning team, settings and the new-event pages, plus the guest pages for the event page, RSVP links and shared plans |
+| `src/partner/` | PlusOne Partner (`/partner`) for vendors and Ops (`/ops`) for the PlusOne team |
 | `src/components/` | Shared pieces: the four-lane layout (`EventLayout.tsx`), the guided tour, the wordmark in `src/components/brand/` |
 | `convex/` | The backend: `schema.ts` and one file per area, with tests beside them |
-| `convex/lib/` | Pure rules shared with the app: quote comparison, the planning conversation's rules, event types and their words, templates, inbox names, search terms |
+| `convex/marketplace/` | PlusOne Partner's backend: listings and claims, briefs and offers, Ops decisions and city price ranges |
+| `convex/lib/` | Pure rules shared with the app: quote comparison, the standard sheet and its missing charges, the planning conversation's rules, event types and their words, templates, inbox names, search terms |
 | `scripts/` | `agentmail-setup.mjs` registers a deployment's inbox webhook; `fake-webhook.mjs` sends a signed test email to it |
 | `functions/` | Cloudflare Pages Functions: `geo.ts` for a visit's country and state, `ingest/` for analytics |
 | `public/` | Icons, the install manifest, the share image and the mail logo |
