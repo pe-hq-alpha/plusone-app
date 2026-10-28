@@ -11,6 +11,7 @@ export const EVENTS = {
   setupStarted: "setup.started",
   accountCreated: "account.created",
   demoOpened: "demo.opened",
+  vendorDemoOpened: "vendor_demo.opened",
   appActive: "app.active",
   ceremonyOpened: "ceremony.opened",
   thisWeekOpened: "this_week.opened",

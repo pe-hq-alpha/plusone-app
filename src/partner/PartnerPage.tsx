@@ -10,7 +10,9 @@ import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
 import { money } from "../lib/format";
 import { useAuthActions } from "../lib/session";
-import { useDemoEventPath } from "../components/LeaveDemo";
+import { useDemoEventId } from "../components/LeaveDemo";
+import { CustomerCompare } from "../pages/DecisionsPage";
+import { partnerHref } from "../lib/hosts";
 import { BadgeRow, dayText, errorText, unitWord } from "./shared";
 
 /**
@@ -23,24 +25,24 @@ export function PartnerPage() {
   const mine = useQuery(api.marketplace.partner.mine);
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
-  const demoCompare = useDemoEventPath("/decisions");
-  const back = me?.isGuest ? demoCompare : "/";
+  const leave = () => void signOut().then(() => navigate(partnerHref("/")));
   if (mine === undefined || me === undefined) return <main id="main" className="page px-5 py-10 text-muted">Loading…</main>;
-  if (me?.isGuest && !mine.profile) return <TryAsGuest back={back} onAccount={() => void signOut().then(() => navigate("/partner"))} />;
+  if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={leave} />;
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
-      {back && (
-        <Link to={back} className="btn-quiet btn-sm gap-1.5 bg-cream">
-          <Icon name="arrow" size={15} className="rotate-180" />
-          {me?.isGuest ? "Back to the demo" : "Home"}
-        </Link>
-      )}
-      <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
+        {me?.isGuest ? (
+          <Link to={partnerHref("/demo")} className="btn-quiet btn-sm bg-cream">Start the demo again</Link>
+        ) : (
+          <button type="button" className="btn-quiet btn-sm bg-cream" onClick={leave}>Sign out</button>
+        )}
+      </div>
       {me?.isGuest && (
         <p className="card-quiet mt-4 px-5 py-3 text-sm">
           <span className="chip-pending mr-2">Sample</span>
-          You're a sample caterer, seeing your own demo event's request. Answer it, then{" "}
-          {back ? <Link to={back} className="underline">open Compare</Link> : "open Compare"} in your event to see your offer beside the others.
+          You're a sample caterer. A customer planning a 60th birthday has asked for catering: answer it on the sheet below, then see your
+          offer the way they see it, beside the quotes they already have.
         </p>
       )}
       {mine.profile ? (
@@ -53,8 +55,8 @@ export function PartnerPage() {
 }
 
 /** The demo, from the vendor's side: try it as a sample caterer, or make an account for a real business. */
-function TryAsGuest({ back, onAccount }: { back: string | null; onAccount: () => void }) {
-  const trySample = useMutation(api.marketplace.partner.trySample);
+function TryAsGuest({ onAccount }: { onAccount: () => void }) {
+  const start = useMutation(api.demo.startVendor);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   return (
@@ -62,8 +64,8 @@ function TryAsGuest({ back, onAccount }: { back: string | null; onAccount: () =>
       <div className="card max-w-md px-7 py-8 text-center">
         <h1 className="display text-[1.7rem] leading-tight">See the <em>vendor's</em> side</h1>
         <p className="mt-2 text-muted">
-          Families and event managers send what they need; vendors answer on the same sheet, so every offer can be compared line by line. Try
-          it as a sample caterer answering your demo event, or make an account for your own business.
+          Families, teams and event managers send what they need; vendors answer on the same sheet, so every offer can be compared line by
+          line. Try it as a sample caterer answering a customer's request, or make an account for your own business.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
@@ -72,7 +74,7 @@ function TryAsGuest({ back, onAccount }: { back: string | null; onAccount: () =>
             disabled={busy}
             onClick={() => {
               setBusy(true);
-              void trySample({})
+              void start({})
                 .catch((err) => setError(errorText(err, "That didn't start. Try again.")))
                 .finally(() => setBusy(false));
             }}
@@ -82,7 +84,6 @@ function TryAsGuest({ back, onAccount }: { back: string | null; onAccount: () =>
           <button type="button" className="btn-quiet" onClick={onAccount}>Create an account</button>
         </div>
         {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
-        {back && <Link to={back} className="mt-5 inline-block text-sm text-muted underline">Back to the demo</Link>}
       </div>
     </main>
   );
@@ -340,6 +341,9 @@ function StatusLine({ profile }: { profile: Profile }) {
 function Briefs({ verified }: { verified: boolean }) {
   const briefs = useQuery(api.marketplace.briefs.open);
   const [answering, setAnswering] = useState<Id<"vendorBriefs"> | null>(null);
+  // In the vendors' demo the customer is a sample event of the guest's own, so the guest
+  // can see their offer as the customer does. A real vendor never sees a customer's Compare.
+  const demoEventId = useDemoEventId();
   return (
     <section className="mt-8" aria-labelledby="briefs-h">
       <h2 id="briefs-h" className="display text-2xl">Customers <em>asking</em></h2>
@@ -371,6 +375,13 @@ function Briefs({ verified }: { verified: boolean }) {
                 <button type="button" className="btn-primary btn-sm mt-4" onClick={() => setAnswering(b._id)}>
                   {b.answered ? "Change your offer" : "Answer on the sheet"}
                 </button>
+              )}
+              {demoEventId && b.answered && answering !== b._id && (
+                <div className="mt-6">
+                  <h4 className="label">How the customer sees your offer</h4>
+                  <p className="mb-3 mt-1 text-sm text-muted">Their Compare: every quote and offer on the same lines, with what each leaves unsaid.</p>
+                  <CustomerCompare eventId={demoEventId} category={b.category} city={b.city} />
+                </div>
               )}
             </article>
           ))

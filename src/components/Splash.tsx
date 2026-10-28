@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { onAppHost } from "../lib/hosts";
+import { onAppHost, onPartnerHost } from "../lib/hosts";
 import { BRAND } from "../lib/brand";
 import { PlusGlyph, PlusOneMark } from "./brand/Wordmarks";
 import { record } from "../lib/analytics/client";
@@ -14,8 +14,8 @@ const REDUCED_LIFT_AT = 450;
 const REDUCED_DONE_AT = 700;
 
 function alreadySeen(): boolean {
-  // The splash greets people at the front door, the home page; never again inside the app.
-  if (onAppHost()) return true;
+  // The splash greets people at the front door, the home page; never inside the app or on Partner.
+  if (onAppHost() || onPartnerHost()) return true;
   try {
     if (new URLSearchParams(window.location.search).has("splash")) return false;
     return window.localStorage.getItem(SEEN_KEY) === "1";

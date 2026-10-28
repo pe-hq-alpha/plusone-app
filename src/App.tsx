@@ -1,7 +1,7 @@
 import { Authenticated, AuthLoading, Unauthenticated, useConvexAuth } from "convex/react";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
-import { goHome, goToApp, HOME_PATHS, onAppHost, onHomeHost } from "./lib/hosts";
+import { goHome, goToApp, goToPartner, hasPartnerHost, HOME_PATHS, ON_PARTNER_PATH, onAppHost, onHomeHost, onPartnerHost, PARTNER_PATHS } from "./lib/hosts";
 import { LandingPage } from "./pages/LandingPage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EventLayout } from "./components/EventLayout";
@@ -50,6 +50,7 @@ const SignInPage = page(() => import("./pages/SignInPage"), "SignInPage");
 const VendorSignInPage = page(() => import("./pages/SignInPage"), "VendorSignInPage");
 const PartnerPage = page(() => import("./partner/PartnerPage"), "PartnerPage");
 const OpsPage = page(() => import("./partner/OpsPage"), "OpsPage");
+const VendorDemoPage = page(() => import("./partner/VendorDemoPage"), "VendorDemoPage");
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
       <UpdatePrompt />
       <Suspense fallback={<FullPage>Loading…</FullPage>}>
       <HostGate>
+      {onPartnerHost() ? <PartnerRoutes /> : (
       <Routes>
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/pricing" element={<PricingPage />} />
@@ -66,6 +68,7 @@ export default function App() {
         <Route path="/r/:token" element={<RsvpPage />} />
         <Route path="/p/:token" element={<SharedPlanPage />} />
         <Route path="/demo" element={<GuestPage />} />
+        <Route path="/partner/demo" element={<VendorDemoPage />} />
         <Route path="/guest" element={<Navigate to="/demo" replace />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
@@ -128,30 +131,68 @@ export default function App() {
           }
         />
       </Routes>
+      )}
       </HostGate>
       </Suspense>
     </>
   );
 }
 
+/**
+ * PlusOne Partner on its own address: the vendor's page at /, its sign-in when signed
+ * out, and the vendors' demo at /demo. Customers' pages live on the app's address.
+ */
+function PartnerRoutes() {
+  return (
+    <Routes>
+      <Route path="/demo" element={<VendorDemoPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route
+        path="/*"
+        element={
+          <>
+            <AuthLoading>
+              <FullPage>Loading…</FullPage>
+            </AuthLoading>
+            <Unauthenticated>
+              <VendorSignInPage />
+            </Unauthenticated>
+            <Authenticated>
+              <a href="#main" className="skip-link">Skip to content</a>
+              <ErrorBoundary>
+                <PartnerPage />
+              </ErrorBoundary>
+            </Authenticated>
+          </>
+        }
+      />
+    </Routes>
+  );
+}
+
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|partner|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
+const APP_PUBLIC = /^\/(signin|partner|partner\/demo|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
 
 /**
- * Keeps each page on its own address. On the home address, anything that goes into
- * the app (sign in, the demo, an event) moves to the app's address. On the app's
- * address, someone signed out who isn't on a public page goes to the home page.
+ * Keeps each page on its own address. Partner's pages (/partner, /partner/demo) move to
+ * Partner's address from anywhere else. On the home address, anything that goes into
+ * the app (sign in, the demo, an event) moves to the app's address, and so does anything
+ * on Partner's address that isn't Partner's. On the app's address, someone signed out
+ * who isn't on a public page goes to the home page.
  */
 function HostGate({ children }: { children: ReactNode }) {
   const { pathname, search, hash } = useLocation();
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const toApp = onHomeHost() && !HOME_PATHS.has(pathname);
-  const toHome = onAppHost() && !isLoading && !isAuthenticated && !APP_PUBLIC.test(pathname);
+  const toPartner = hasPartnerHost() && !onPartnerHost() && ON_PARTNER_PATH.test(pathname);
+  const toApp = !toPartner && ((onHomeHost() && !HOME_PATHS.has(pathname)) || (onPartnerHost() && !PARTNER_PATHS.has(pathname)));
+  const toHome = !toPartner && onAppHost() && !isLoading && !isAuthenticated && !APP_PUBLIC.test(pathname);
   useEffect(() => {
-    if (toApp) goToApp(pathname + search + hash);
+    if (toPartner) goToPartner(pathname, search + hash);
+    else if (toApp) goToApp(pathname + search + hash);
     else if (toHome) goHome();
-  }, [toApp, toHome, pathname, search, hash]);
-  if (toApp || toHome) return <FullPage>Loading…</FullPage>;
+  }, [toPartner, toApp, toHome, pathname, search, hash]);
+  if (toPartner || toApp || toHome) return <FullPage>Loading…</FullPage>;
   return <>{children}</>;
 }
 

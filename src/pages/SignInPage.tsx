@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { useAuthActions } from "../lib/session";
 import { BRAND } from "../lib/brand";
+import { partnerHref } from "../lib/hosts";
 import { PublicNav } from "../components/public/PublicNav";
 import { pendingAgreement, rememberAgreement, TERMS_VERSION } from "../lib/terms";
 import { Backdrop } from "../components/ui/Backdrop";
@@ -41,10 +42,11 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
   const newHere = vendor ? params.get("signin") !== "1" : params.get("new") === "1";
   // The people who make events happen, Indian and Western, one of them per visit.
   const [vendorPhoto] = useState(() => VENDOR_PHOTOS[Math.floor(Math.random() * VENDOR_PHOTOS.length)]);
-  const here = vendor ? "/partner" : "/signin";
-  const signInUrl = vendor ? "/partner?signin=1" : "/signin";
-  const signUpUrl = vendor ? "/partner" : "/signin?new=1";
-  const back = redirectTo ?? (window.location.pathname === here ? (vendor ? "/partner" : "/") : window.location.pathname + window.location.search);
+  // Partner has its own address in production (partner.plusoneevents.site), so its door is "/" there.
+  const here = vendor ? partnerHref("/") : "/signin";
+  const signInUrl = vendor ? partnerHref("/?signin=1") : "/signin";
+  const signUpUrl = vendor ? partnerHref("/") : "/signin?new=1";
+  const back = redirectTo ?? (window.location.pathname === here ? (vendor ? partnerHref("/") : "/") : window.location.pathname + window.location.search);
   const pitch = vendor
     ? `Answer requests from families and event managers on the same sheet every vendor fills in, keep your prices itemised, and get verified so they can find you.`
     : `${BRAND.name} finds vendors, writes to them from your event\u2019s own inbox and reads their quotes into your budget, so the legwork is done and the choices stay yours.`;
@@ -114,14 +116,14 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
         </div>
         <p className="mt-5 text-center text-sm text-muted">
           Just looking?{" "}
-          <Link to="/demo" className="text-accent underline underline-offset-2">
-            See the demo
+          <Link to={vendor ? partnerHref("/demo") : "/demo"} className="text-accent underline underline-offset-2">
+            {vendor ? "Try it as a sample caterer" : "See the demo"}
           </Link>{" "}
           first. No sign-up.
         </p>
         <p className="mt-2 text-center text-sm text-muted">
           {vendor ? "Planning an event? " : "A vendor? "}
-          <Link to={vendor ? "/signin" : "/partner"} className="text-accent underline underline-offset-2">
+          <Link to={vendor ? "/signin" : partnerHref("/")} className="text-accent underline underline-offset-2">
             {vendor ? "Sign in here" : `Sign in to ${BRAND.name} Partner`}
           </Link>
           .

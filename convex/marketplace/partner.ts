@@ -263,42 +263,47 @@ export const trySample = mutation({
     const userId = await requireUserId(ctx);
     const user = await ctx.db.get(userId);
     if (!user?.isAnonymous) throw new ConvexError("A sample business is for the demo. Set up your own business instead.");
-    const owned = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
-    if (owned) return owned._id;
-    const room = await rateLimiter.limit(ctx, "partnerSignUps");
-    if (!room.ok) throw new ConvexError("A lot of people are trying this right now. Try again in a few minutes.");
-    const now = Date.now();
-    const profileId = await ctx.db.insert("vendorProfiles", {
-      name: "Your catering business",
-      categories: ["Catering"],
-      city: "Chennai",
-      cityKey: "chennai",
-      serviceArea: ["Mylapore"],
-      languages: ["Tamil", "English"],
-      about: "A sample business for trying PlusOne Partner.",
-      source: "vendor_signup",
-      ownerUserId: userId,
-      status: "verified",
-      statusAt: now,
-      joinedAt: now,
-      completedEvents: 0,
-      sample: true,
-    });
-    await ctx.db.insert("vendorOfferings", {
-      profileId,
-      category: "Catering",
-      title: "Veg lunch on banana leaf",
-      unit: "per_person",
-      price: 360,
-      currency: "INR",
-      includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", "Banana leaf", "Serving staff"],
-    });
-    return profileId;
+    return await ensureSampleBusiness(ctx, userId);
   },
 });
+
+/** The guest's sample catering business, made once; the vendors' demo (demo.startVendor) starts here too. */
+export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">): Promise<Id<"vendorProfiles">> {
+  const owned = await ctx.db
+    .query("vendorProfiles")
+    .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
+    .first();
+  if (owned) return owned._id;
+  const room = await rateLimiter.limit(ctx, "partnerSignUps");
+  if (!room.ok) throw new ConvexError("A lot of people are trying this right now. Try again in a few minutes.");
+  const now = Date.now();
+  const profileId = await ctx.db.insert("vendorProfiles", {
+    name: "Your catering business",
+    categories: ["Catering"],
+    city: "Chennai",
+    cityKey: "chennai",
+    serviceArea: ["Mylapore"],
+    languages: ["Tamil", "English"],
+    about: "A sample business for trying PlusOne Partner.",
+    source: "vendor_signup",
+    ownerUserId: userId,
+    status: "verified",
+    statusAt: now,
+    joinedAt: now,
+    completedEvents: 0,
+    sample: true,
+  });
+  await ctx.db.insert("vendorOfferings", {
+    profileId,
+    category: "Catering",
+    title: "Veg lunch on banana leaf",
+    unit: "per_person",
+    price: 360,
+    currency: "INR",
+    includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", "Banana leaf", "Serving staff"],
+  });
+  return profileId;
+}
 
 // ---------------------------------------------------------------- keeping it right
 

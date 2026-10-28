@@ -109,3 +109,28 @@ describe("the demo", () => {
     await expect((await guest(t)).mutation(api.demo.start, {})).rejects.toThrow("The demo is very busy right now.");
   });
 });
+
+describe("the vendors' demo", () => {
+  async function visitor(t: ReturnType<typeof setup>, fields: { isAnonymous?: boolean; email?: string } = { isAnonymous: true }) {
+    const userId = await t.run((ctx) => ctx.db.insert("users", fields));
+    return { userId, as: t.withIdentity({ subject: `${userId}|test-session` }) };
+  }
+
+  test("makes a sample caterer with a customer's catering request to answer, once", async () => {
+    const t = setup();
+    const { userId, as } = await visitor(t);
+    const profileId = await as.mutation(api.demo.startVendor, {});
+    expect(await as.mutation(api.demo.startVendor, {})).toBe(profileId);
+
+    const open = await as.query(api.marketplace.briefs.open, {});
+    expect(open.map((b) => [b.category, b.occasion, b.answered])).toEqual([["Catering", "Amma's 60th", false]]);
+    const memberships = await t.run(async (ctx) => await ctx.db.query("members").withIndex("by_userId", (q) => q.eq("userId", userId)).collect());
+    expect(memberships).toHaveLength(1);
+  });
+
+  test("is only for visitors without an account", async () => {
+    const t = setup();
+    const { as } = await visitor(t, { email: "owner@anjalicaterers.in" });
+    await expect(as.mutation(api.demo.startVendor, {})).rejects.toThrow("without an account");
+  });
+});

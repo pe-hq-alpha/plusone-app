@@ -26,8 +26,13 @@ export function LeaveDemo({ children }: { children: ReactNode }) {
  * and for anyone who isn't a guest.
  */
 export function useDemoEventPath(page = ""): string | null {
+  const demo = useDemoEventId();
+  return demo ? `/e/${demo}${page}` : null;
+}
+
+/** The guest's own sample event, if they are a guest and have one. */
+export function useDemoEventId() {
   const me = useQuery(api.users.me);
   const events = useQuery(api.events.listMine, me?.isGuest ? {} : "skip");
-  const demo = events?.find((e) => e.event.demo)?.event._id;
-  return demo ? `/e/${demo}${page}` : null;
+  return events?.find((e) => e.event.demo)?.event._id ?? null;
 }

@@ -10,6 +10,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Icon } from "../components/ui/Icon";
 import { BRAND } from "../lib/brand";
+import { partnerHref } from "../lib/hosts";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Board = NonNullable<FunctionReturnType<typeof api.dashboard.board>>;
@@ -172,7 +173,19 @@ function Kpi({ label, value, note, tone }: { label: string; value: string; note:
 }
 
 /** One need, with everyone in the running side by side. */
-function NeedBoard({ need, currency, city, demo, canEdit, eventId }: { need: Need; currency: string; city: string; demo: boolean; canEdit: boolean; eventId: Id<"events"> }) {
+/**
+ * One need's quotes and offers line by line, as its customer sees them. For the vendors'
+ * demo, where the sample caterer sees their offer beside the sample customer's quotes;
+ * a real vendor never sees a customer's Compare.
+ */
+export function CustomerCompare({ eventId, category, city }: { eventId: Id<"events">; category: string; city: string }) {
+  const board = useQuery(api.dashboard.board, { eventId });
+  const need = board?.needs.find((n) => n.category === category);
+  if (!board || !need) return null;
+  return <NeedBoard need={need} currency={board.currency} city={city} demo={false} canEdit={false} eventId={eventId} compareOnly />;
+}
+
+function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly = false }: { need: Need; currency: string; city: string; demo: boolean; canEdit: boolean; eventId: Id<"events">; compareOnly?: boolean }) {
   const markBooked = useMutation(api.slots.markBooked);
   const setStatus = useMutation(api.threads.setStatus);
   const [busy, setBusy] = useState<string | null>(null);
@@ -261,7 +274,7 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId }: { need: Nee
         <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} vendorSide={demo && need.offers.length > 0} />
       )}
 
-      {live.length > 0 && (
+      {live.length > 0 && !compareOnly && (
       <div className={`overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
         <table className="w-full min-w-[54rem] text-sm">
           <caption className="sr-only">Everyone asked about {need.title}</caption>
@@ -453,8 +466,8 @@ function LineByLine({
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
         {vendorSide && (
-          <Link to="/partner" className="text-xs text-accent underline-offset-4 hover:underline">
-            See the vendor&rsquo;s side &rarr;
+          <Link to={partnerHref("/demo")} className="text-xs text-accent underline-offset-4 hover:underline">
+            Try the vendors&rsquo; side &rarr;
           </Link>
         )}
       </div>

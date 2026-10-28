@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { BRAND } from "../../lib/brand";
+import { onPartnerHost, partnerHref } from "../../lib/hosts";
 import { PlusOneLockup } from "../brand/Wordmarks";
 import { ThemeSwitch } from "../ui/ThemeSwitch";
 import "../../styles/public.css";
@@ -20,7 +21,7 @@ export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; b
       <nav className="pub-links" aria-label="Main">
         <Link to="/how-it-works" className="pub-link pub-link--hide-sm" aria-current={here("/how-it-works")}>How it works</Link>
         <Link to="/pricing" className="pub-link" aria-current={here("/pricing")}>Pricing</Link>
-        <Link to="/partner" className="pub-link" aria-current={here("/partner")}>
+        <Link to={partnerHref("/")} className="pub-link" aria-current={onPartnerHost() ? "page" : here("/partner")}>
           <span className="max-sm:hidden">For vendors</span>
           <span className="sm:hidden">Vendors</span>
         </Link>

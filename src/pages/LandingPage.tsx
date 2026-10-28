@@ -6,6 +6,7 @@ import "../landing.css";
 import "../styles/running-status.css";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { BRAND } from "../lib/brand";
+import { partnerHref } from "../lib/hosts";
 import { useRegion } from "../lib/region";
 import { examplesFor } from "../lib/regionExamples";
 import { ThemeSwitch } from "../components/ui/ThemeSwitch";
@@ -107,7 +108,7 @@ export function LandingPage() {
           <nav className="rs__links" aria-label="Main">
             <Link to="/how-it-works" className="rs__link rs__link--wide">How it works</Link>
             <Link to="/pricing" className="rs__link">Pricing</Link>
-            <Link to="/partner" className="rs__link"><span className="rs__wide">For vendors</span><span className="rs__narrow">Vendors</span></Link>
+            <Link to={partnerHref("/")} className="rs__link"><span className="rs__wide">For vendors</span><span className="rs__narrow">Vendors</span></Link>
             <Link to="/signin" className="rs__link rs__link--accent">Sign in</Link>
           </nav>
         </header>
