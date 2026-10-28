@@ -25,12 +25,20 @@ const route = (plan: string): { state: StepState; text: string }[] => [
   { state: "next", text: "Choose a caterer by Friday" },
 ];
 
-const HOW = [
-  { title: "Talk it through", text: "Say what you're planning in your own words. It asks what it needs and checks it all with you." },
-  { title: "The plan, set out", text: "Sessions, the vendors each one needs, a budget and first to-dos." },
-  { title: "Vendors found and written to", text: "From the event's own inbox, with follow-ups for anyone who goes quiet." },
-  { title: "Replies read for you", text: "Prices pulled out and made comparable, every number linked to its reply." },
-  { title: "You choose", text: "Book the ones you like; the co-pilot keeps the rest of the plan moving." },
+/** How it works for the people planning, then for the vendors who answer them. */
+const HOW_CUSTOMERS = [
+  { title: "Talk it through", text: "Say what you're planning in your own words. It asks what it needs, checks it with you, then sets out the plan and the budget." },
+  { title: "Vendors found", text: "Searched on the open web, down to their own price pages, and verified vendors on PlusOne answering your request." },
+  { title: "Written to and chased", text: "From the event's own inbox, with follow-ups for anyone who goes quiet." },
+  { title: "Every quote on the same lines", text: "Emails, PDFs and WhatsApp photos of price lists, read at your numbers: what's included, what's extra, what's missing." },
+  { title: "You choose", text: "Compare line by line against the local range and book; the budget, guests and to-dos keep up." },
+];
+
+const HOW_VENDORS = [
+  { title: "Get listed", text: "Set up your business, or claim the listing we made from your public pages. No website needed." },
+  { title: "Price it clearly", text: "Each package with its price, what it's priced by and what it includes." },
+  { title: "Answer real requests", text: "Customers near you send the occasion, the date and the guests. Answer once, on the same sheet as every vendor." },
+  { title: "Be compared fairly", text: "Your offer sits line by line beside the others, so what you include counts, not just the total." },
 ];
 
 /** Three celebrations fanned under the hero's actions, Western and Indian. Generated images, not customers' events. */
@@ -156,17 +164,35 @@ export function LandingPage() {
 
       <section id="how" className="rs-sec" aria-labelledby="how-title">
         <div className="rs-wrap">
-          <h2 id="how-title" className="rs-h2">From the first conversation <em>to the day itself</em></h2>
-          <p className="rs-lede">You make the decisions. {BRAND.name} does the searching, writing, reading and chasing in between, and tells you where things stand.</p>
-          <ol className="rs-line">
-            {HOW.map((h, i) => (
-              <li key={h.title} className="rs-line__stop">
-                <span className="rs-line__node" aria-hidden="true">{i + 1}</span>
-                <h3 className="rs-line__title">{h.title}</h3>
-                <p className="rs-line__text">{h.text}</p>
-              </li>
-            ))}
-          </ol>
+          <h2 id="how-title" className="rs-h2">One app for the whole event. <em>Every quote on the same lines.</em></h2>
+          <p className="rs-lede">Planning usually means calls, chats, email and a spreadsheet, and no two quotes written alike. {BRAND.name} puts the plan in one place for the people planning, and gives vendors one sheet to answer on, so every price can be compared.</p>
+          <div className="rs-track">
+            <h3 className="rs-track__head">For families, teams and event planners</h3>
+            <ol className="rs-line">
+              {HOW_CUSTOMERS.map((h, i) => (
+                <li key={h.title} className="rs-line__stop">
+                  <span className="rs-line__node" aria-hidden="true">{i + 1}</span>
+                  <h4 className="rs-line__title">{h.title}</h4>
+                  <p className="rs-line__text">{h.text}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <div className="rs-track">
+            <h3 className="rs-track__head">For vendors, on {BRAND.name} Partner</h3>
+            <ol className="rs-line rs-line--4">
+              {HOW_VENDORS.map((h, i) => (
+                <li key={h.title} className="rs-line__stop">
+                  <span className="rs-line__node" aria-hidden="true">{i + 1}</span>
+                  <h4 className="rs-line__title">{h.title}</h4>
+                  <p className="rs-line__text">{h.text}</p>
+                </li>
+              ))}
+            </ol>
+            <p className="rs-note">
+              <Link to={partnerHref("/")}>List your business</Link> or <Link to={partnerHref("/demo")}>try it as a sample caterer</Link>, no sign-up.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -218,7 +244,7 @@ export function LandingPage() {
         <div className="rs-wrap rs-split rs-split--reverse">
           <div>
             <h2 id="compare-title" className="rs-h2">Every reply in its own shape. <em>One answer.</em></h2>
-            <p className="rs-lede">Vendors quote per plate, all in, plus service, plus transport. {BRAND.name} reads every reply into the same unit, at your numbers, and lines them up so the best value per plate shows, not just the lowest total.</p>
+            <p className="rs-lede">Vendors quote per plate, all in, plus service, plus transport. {BRAND.name} reads every reply, PDF or photo of a price list onto the same lines, at your numbers, says what each one leaves out, and lines them up so the best value shows, not just the lowest total.</p>
           </div>
           <figure className="rs-compare" aria-label="Example comparison">
             <figcaption className="rs-compare__cap"><span>{ex.compare.title}</span><span className="rs-compare__ex">Example</span></figcaption>

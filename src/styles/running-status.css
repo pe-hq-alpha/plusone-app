@@ -194,6 +194,12 @@
 .rs-line__node { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--color-paper); box-shadow: inset 0 0 0 1.5px var(--color-accent); color: var(--color-accent); font-family: var(--font-display); font-size: 1.15rem; }
 .rs-line__title { margin: 10px 0 0; font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; line-height: 1.15; color: var(--color-ink-deep); }
 .rs-line__text { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--color-muted); }
+.rs-line--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+/* How it works in two tracks: the people planning, then the vendors who answer them. */
+.rs-track { margin-top: clamp(40px, 5vw, 64px); }
+.rs-track__head { margin: 0; padding-bottom: 10px; border-bottom: 1px solid var(--color-line); font-family: var(--font-display); font-weight: 400; font-size: clamp(1.35rem, 2vw, 1.6rem); color: var(--color-ink-deep); }
+.rs-track .rs-line { margin-top: 28px; }
+.rs-track .rs-note { margin-top: 26px; }
 
 /* The world carries on: faint corners of the same drawing at the edges of the middle sections. */
 .rs-sec { position: relative; isolation: isolate; overflow: hidden; }
