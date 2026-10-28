@@ -1,10 +1,12 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { api, internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { wonderCostUsd } from "./lib/modelCost";
 import schema from "./schema";
+import { vendorFacts } from "./marketplace/checks";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -637,5 +639,203 @@ describe("a demo guest trying Partner", () => {
       claims: (await ctx.db.query("vendorClaims").collect()).length,
     }));
     expect(left).toEqual({ profiles: [["Anjali Caterers", null, "pending"]], offerings: 0, offers: 0, claims: 0 });
+  });
+});
+
+function checkResponseJson(body: unknown, init: ResponseInit = {}) {
+  return new Response(JSON.stringify(body), { status: 200, headers: { "Content-Type": "application/json" }, ...init });
+}
+
+function checkReportJson(url: string) {
+  return JSON.stringify({
+    checks: [
+      { key: "identity", label: "The business exists", finding: "supports", note: "Found", sources: [{ title: "Lakshmi", url }] },
+      { key: "website", label: "The website is theirs", finding: "supports", note: "Matches", sources: [{ title: "Lakshmi", url }] },
+      { key: "contact", label: "Their contact details", finding: "supports", note: "Seen", sources: [{ title: "Lakshmi", url }] },
+      { key: "location", label: "Where they work", finding: "supports", note: "Chennai", sources: [{ title: "Lakshmi", url }] },
+      { key: "prices", label: "Their prices", finding: "supports", note: "Match", sources: [{ title: "Lakshmi", url }] },
+      { key: "complaints", label: "Complaints", finding: "not_found", note: "None", sources: [] },
+    ],
+    summary: "All six checks look reasonable.",
+  });
+}
+
+async function checkListing(t: T, fields: { name?: string; website?: string } = {}) {
+  return await t.run(async (ctx) => {
+    const city = "Chennai";
+    return await ctx.db.insert("vendorProfiles", {
+      name: fields.name ?? "Lakshmi Caterers",
+      categories: ["Catering"],
+      city,
+      cityKey: city.toLowerCase(),
+      website: fields.website,
+      source: "vendor_signup",
+      status: "pending",
+      statusAt: 0,
+      joinedAt: 0,
+      completedEvents: 0,
+    });
+  });
+}
+
+describe("starting a vendor check", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  test("a non-staff user, and a demo guest, can't start; staff can, and a second while running is refused", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    const t = setup();
+    const profileId = await checkListing(t);
+    const stranger = await user(t, "stranger@example.com");
+    await expect(as(t, stranger).mutation(api.marketplace.checks.start, { profileId })).rejects.toThrow(/PlusOne team/);
+    const guest = await t.run(async (ctx) => await ctx.db.insert("users", { isAnonymous: true }));
+    await expect(as(t, guest).mutation(api.marketplace.checks.start, { profileId })).rejects.toThrow(/PlusOne team/);
+    const reviewer = await user(t, "ops-check@example.com", "reviewer");
+    const checkId = await as(t, reviewer).mutation(api.marketplace.checks.start, { profileId });
+    expect(checkId).toBeDefined();
+    await expect(as(t, reviewer).mutation(api.marketplace.checks.start, { profileId })).rejects.toThrow(/already running/);
+  });
+
+  test("starting refuses without MODEL_PROVIDER=meta", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "claude");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    const t = setup();
+    const profileId = await checkListing(t);
+    const reviewer = await user(t, "ops-check2@example.com", "reviewer");
+    await expect(as(t, reviewer).mutation(api.marketplace.checks.start, { profileId })).rejects.toThrow(/Checks aren't available/);
+  });
+
+  test("the staff limit refuses after 5 starts in a row", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    const t = setup();
+    const reviewer = await user(t, "ops-limit@example.com", "reviewer");
+    for (let i = 0; i < 5; i++) {
+      const id = await checkListing(t, { name: `Vendor ${i}` });
+      await as(t, reviewer).mutation(api.marketplace.checks.start, { profileId: id });
+    }
+    const sixth = await checkListing(t, { name: "Vendor 5" });
+    await expect(as(t, reviewer).mutation(api.marketplace.checks.start, { profileId: sixth })).rejects.toThrow(/as many checks as we run today/);
+  });
+});
+
+describe("vendorFacts", () => {
+  test("maps a profile and its offerings, in the vendor's own price unit", async () => {
+    const facts = vendorFacts(
+      { name: "Lakshmi", categories: ["Catering"], city: "Chennai", website: "https://lakshmi.example", phone: "98", about: "Family caterers" },
+      [
+        { title: "Lunch", price: 400, unit: "per_person", priceUnit: "per_plate", currency: "INR" },
+        { title: "Dinner", price: 500, unit: "total", priceUnit: undefined, currency: "INR" },
+      ] as never,
+    );
+    expect(facts).toMatchObject({
+      name: "Lakshmi",
+      city: "Chennai",
+      website: "https://lakshmi.example",
+      offerings: [
+        { title: "Lunch", price: 400, unit: "per_plate", currency: "INR" },
+        { title: "Dinner", price: 500, unit: "total", currency: "INR" },
+      ],
+    });
+  });
+});
+
+describe("running a vendor check", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  test("a single reply with a search result and the final report becomes done with a cost row", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    const url = "https://lakshmi.example/menu";
+    const reply = {
+      id: "resp_1",
+      output: [
+        { type: "web_search_call", id: "ws_1", status: "completed", results: [{ type: "text_result", title: "Lakshmi", url, snippet: "caterers" }] },
+        { type: "message", role: "assistant", content: [{ type: "output_text", text: checkReportJson(url), annotations: [] }] },
+      ],
+      usage: { input_tokens: 1000, output_tokens: 500 },
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => checkResponseJson(reply)));
+
+    const t = setup();
+    const profileId = await checkListing(t, { website: "https://lakshmi.example" });
+    await t.run(async (ctx) => {
+      await ctx.db.insert("vendorOfferings", {
+        profileId,
+        category: "Catering",
+        title: "Lunch",
+        unit: "per_person",
+        price: 400,
+        currency: "INR",
+        includes: [],
+      });
+    });
+    const reviewer = await user(t, "ops-run@example.com", "reviewer");
+    const checkId = await as(t, reviewer).mutation(api.marketplace.checks.start, { profileId });
+    await t.action(internal.marketplace.checks.run, { checkId });
+
+    const latest = await as(t, reviewer).query(api.marketplace.checks.latest, { profileId });
+    expect(latest?.status).toBe("done");
+    expect(latest?.report?.checks).toHaveLength(6);
+    expect(latest?.report?.summary).toMatch(/reasonable/);
+    expect(latest?.searches).toBe(1);
+    expect(latest?.pagesRead).toBe(0);
+
+    const rows = await t.run(async (ctx) => await ctx.db.query("modelCalls").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ feature: "vendorCheck", provider: "meta", inputTokens: 1000, outputTokens: 500, fellBack: false });
+    expect(rows[0].costUsd).toBeCloseTo(wonderCostUsd({ inputTokens: 1000, outputTokens: 500 }, 1));
+  });
+
+  test("a Meta 400 makes the check failed with the plain error", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("bad", { status: 400 })));
+
+    const t = setup();
+    const profileId = await checkListing(t);
+    const reviewer = await user(t, "ops-fail@example.com", "reviewer");
+    const checkId = await as(t, reviewer).mutation(api.marketplace.checks.start, { profileId });
+    await t.action(internal.marketplace.checks.run, { checkId });
+
+    const latest = await as(t, reviewer).query(api.marketplace.checks.latest, { profileId });
+    expect(latest?.status).toBe("failed");
+    expect(latest?.error).toBe("The check couldn't finish. Try again in a while.");
+    const rows = await t.run(async (ctx) => await ctx.db.query("modelCalls").collect());
+    expect(rows).toHaveLength(0);
+  });
+
+  test("a check that fails after a turn came back still writes what it spent", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    // Turn one answers in prose, not the report; the repair turn is then refused.
+    const prose = {
+      id: "resp_1",
+      output: [{ type: "message", role: "assistant", content: [{ type: "output_text", text: "Looks fine to me.", annotations: [] }] }],
+      usage: { input_tokens: 1200, output_tokens: 300 },
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(checkResponseJson(prose)).mockResolvedValueOnce(new Response("bad", { status: 400 })),
+    );
+
+    const t = setup();
+    const profileId = await checkListing(t);
+    const reviewer = await user(t, "ops-spent@example.com", "reviewer");
+    const checkId = await as(t, reviewer).mutation(api.marketplace.checks.start, { profileId });
+    await t.action(internal.marketplace.checks.run, { checkId });
+
+    const latest = await as(t, reviewer).query(api.marketplace.checks.latest, { profileId });
+    expect(latest).toMatchObject({ status: "failed", inputTokens: 1200, outputTokens: 300, turns: 1 });
+    const rows = await t.run(async (ctx) => await ctx.db.query("modelCalls").collect());
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ feature: "vendorCheck", inputTokens: 1200, outputTokens: 300 });
+    expect(rows[0].costUsd).toBeCloseTo(wonderCostUsd({ inputTokens: 1200, outputTokens: 300 }, 0));
   });
 });

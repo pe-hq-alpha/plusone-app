@@ -732,6 +732,31 @@ export const readInspiration = internalAction({
 });
 
 /**
+ * One page of a vendor's own site as text, for the vendor check. Refuses
+ * anything we may not read, scrapes markdown only, and cuts to 12,000
+ * characters so a long page stays cheap. No JSON: the check only needs text.
+ */
+export const readPage = internalAction({
+  args: { url: v.string() },
+  returns: v.object({ text: v.string() }),
+  handler: async (_ctx, args): Promise<{ text: string }> => {
+    if (!/^https?:\/\//i.test(args.url.trim())) return { text: "" };
+    const host = hostOf(args.url);
+    if (!host || isBlockedHost(host) || isNoScrapeHost(host)) return { text: "" };
+    if (!(await robotsChecker()(args.url))) return { text: "" };
+    let markdown = "";
+    try {
+      const doc = await fc.scrape(args.url, { formats: ["markdown"], onlyMainContent: true, timeout: SCRAPE_TIMEOUT_MS });
+      markdown = doc.markdown ?? "";
+    } catch (err) {
+      console.warn("firecrawl.readPage failed", args.url, err instanceof Error ? err.message : err);
+      return { text: "" };
+    }
+    return { text: markdown.slice(0, 12_000) };
+  },
+});
+
+/**
  * The preview for a link kept in a Space, from a page that hides it from a plain fetch: one that
  * turns away anything but a browser, or builds itself with scripts. One scrape reads
  * the page's own preview picture and takes a screenshot, which is used only when the

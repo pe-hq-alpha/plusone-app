@@ -34,6 +34,16 @@ export function voiceCostUsd(seconds: number): number {
   return (billed * 0.18) / 3600;
 }
 
+/**
+ * What a vendor check cost: Muse Wonder's tokens plus $2.50 per 1,000 web searches, which
+ * are billed apart. Every input token counts at the full rate, though later turns are mostly
+ * cached at $0.20, so this errs high.
+ */
+export function wonderCostUsd(usage: { inputTokens: number; outputTokens: number }, searches: number): number {
+  const tokens = costUsd("muse-wonder-1.0", usage) ?? 0;
+  return tokens + (Math.max(0, searches) * 2.5) / 1000;
+}
+
 /** The `modelCalls` row for a finished call. */
 export function callRecord(
   feature: string,

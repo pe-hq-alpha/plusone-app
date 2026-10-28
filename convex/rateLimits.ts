@@ -94,6 +94,10 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   voiceDemo: { kind: "fixed window", rate: 6, period: DAY },
   voiceAll: { kind: "fixed window", rate: 400, period: DAY },
 
+  // A vendor check costs the most, so each person gets a few and the team shares a small daily total.
+  vendorChecks: { kind: "token bucket", rate: 20, period: DAY, capacity: 5 },
+  vendorChecksAll: { kind: "fixed window", rate: 60, period: DAY },
+
   // The visit log (POST /visit): plenty for a scraper to show up clearly, while a
   // flood from one address, or a leaked secret, can't fill the table.
   visitsPerIp: { kind: "token bucket", rate: 1200, period: HOUR, capacity: 300 },

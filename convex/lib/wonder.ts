@@ -33,15 +33,10 @@ export type EvidenceCheck = {
 
 export type VerificationReport = { checks: EvidenceCheck[]; summary: string };
 
-export type VerificationRun = {
-  report: VerificationReport;
-  model: string;
-  inputTokens: number;
-  outputTokens: number;
-  searches: number;
-  pagesRead: number;
-  turns: number;
-};
+/** What a check has spent so far, reported after every turn so a run that fails part way is still costed. */
+export type Spent = { model: string; inputTokens: number; outputTokens: number; searches: number; pagesRead: number; turns: number };
+
+export type VerificationRun = Spent & { report: VerificationReport };
 
 const sourceSchema = z.object({
   title: z.string(),
@@ -289,6 +284,7 @@ export async function verifyVendor(
     env?: Record<string, string | undefined>;
     maxTurns?: number;
     sleep?: (ms: number) => Promise<void>;
+    onTurn?: (spent: Spent) => void;
   },
 ): Promise<VerificationRun> {
   const env = deps.env ?? process.env;
@@ -356,6 +352,7 @@ export async function verifyVendor(
     if (typeof id === "string") previousId = id;
     searches += webSearchCallsOf(json).length;
     seenUrlsFromResponse(json, seen);
+    deps.onTurn?.({ model, inputTokens, outputTokens, searches, pagesRead, turns });
     return json;
   }
 

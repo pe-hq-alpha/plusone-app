@@ -315,6 +315,49 @@ export const vettingReviewFields = {
   at: v.number(),
 };
 
+/** Whether a vendor check is still running or has finished. */
+export const vendorCheckStatus = v.union(v.literal("running"), v.literal("done"), v.literal("failed"));
+
+/** The vendor check's report (`VerificationReport` in convex/lib/wonder.ts): six findings, each with its sources. */
+export const verificationReport = v.object({
+  checks: v.array(
+    v.object({
+      key: v.union(
+        v.literal("identity"),
+        v.literal("website"),
+        v.literal("contact"),
+        v.literal("location"),
+        v.literal("prices"),
+        v.literal("complaints"),
+      ),
+      label: v.string(),
+      finding: v.union(v.literal("supports"), v.literal("concern"), v.literal("not_found")),
+      note: v.string(),
+      sources: v.array(v.object({ title: v.string(), url: v.string() })),
+    }),
+  ),
+  summary: v.string(),
+});
+
+/** One run of the vendor check for Ops: the listing, who asked, and the six findings with their sources. */
+export const vendorCheckFields = {
+  profileId: v.id("vendorProfiles"),
+  requestedBy: v.id("users"),
+  status: vendorCheckStatus,
+  startedAt: v.number(),
+  finishedAt: v.optional(v.number()),
+  report: v.optional(verificationReport),
+  model: v.optional(v.string()),
+  searches: v.optional(v.number()),
+  pagesRead: v.optional(v.number()),
+  turns: v.optional(v.number()),
+  inputTokens: v.optional(v.number()),
+  outputTokens: v.optional(v.number()),
+  costUsd: v.optional(v.number()),
+  /** A short plain message when the run failed, for the reviewer to read. */
+  error: v.optional(v.string()),
+};
+
 /**
  * A family's need, sent to Partner vendors so they answer it on the standard sheet. It
  * carries what a vendor needs to price it (occasion, date, guests, area) and never the
@@ -803,6 +846,8 @@ export default defineSchema({
     .index("by_status", ["status"]),
 
   vettingReviews: defineTable(vettingReviewFields).index("by_profileId", ["profileId"]),
+
+  vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
 
   priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),
 

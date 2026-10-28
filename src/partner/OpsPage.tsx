@@ -151,6 +151,22 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const addEvidenceSources = (sources: { label: string; url: string }[]) => {
+    setEvidence((all) => {
+      const seen = new Set(all.map((e) => e.url.trim()).filter(Boolean));
+      // Two findings often cite the same page; it goes in once.
+      const fresh = sources.filter((s) => {
+        const url = s.url.trim();
+        if (!url || seen.has(url)) return false;
+        seen.add(url);
+        return true;
+      });
+      if (fresh.length === 0) return all;
+      // Keep the empty starter row out of the way once real links arrive.
+      const kept = all.filter((e) => e.url.trim() || e.label.trim());
+      return [...kept, ...fresh.map((s) => ({ label: s.label.slice(0, 200), url: s.url.trim().slice(0, 1000) }))];
+    });
+  };
 
   if (detail === undefined) return <p className="text-sm text-muted">Loading…</p>;
   if (detail === null) return <EmptyState compact title="That listing is gone" />;
@@ -219,6 +235,8 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </>
       )}
 
+      <VendorCheck profileId={profileId} onUseSources={addEvidenceSources} />
+
       <fieldset className="mt-6">
         <legend className="label">Checks</legend>
         <ul className="grid gap-2">
@@ -279,5 +297,112 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </>
       )}
     </section>
+  );
+}
+
+/** The background check on a listing: what was found, with sources. A person still ticks the checklist. */
+function VendorCheck({ profileId, onUseSources }: { profileId: Id<"vendorProfiles">; onUseSources: (sources: { label: string; url: string }[]) => void }) {
+  const latest = useQuery(api.marketplace.checks.latest, { profileId });
+  const start = useMutation(api.marketplace.checks.start);
+  const [error, setError] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
+
+  const begin = () => {
+    setStarting(true);
+    setError(null);
+    void start({ profileId })
+      .catch((e) => setError(errorText(e, "That check didn't start. Try again.")))
+      .finally(() => setStarting(false));
+  };
+
+  if (latest === undefined) return <p className="mt-6 text-sm text-muted">Loading…</p>;
+
+  // A run is cut off after ten minutes; one still marked running by then won't finish.
+  const stuck = latest?.status === "running" && Date.now() - latest.startedAt > 10 * 60_000;
+
+  if (latest === null || latest.status === "failed" || stuck) {
+    return (
+      <div className="card-quiet mt-6 p-4">
+        <h3 className="label">Check this listing</h3>
+        <p className="mt-1 text-sm text-muted">Searches the web and reads their own pages, then lists what it found. It flags; you decide.</p>
+        {(latest?.error || stuck) && (
+          <p role="alert" className="mt-2 text-sm text-bad">{latest?.error ?? "That check didn't finish. Try again."}</p>
+        )}
+        {error && (
+          <p role="alert" className="mt-2 text-sm text-bad">{error}</p>
+        )}
+        <button type="button" className="btn-quiet btn-sm mt-3" disabled={starting} onClick={begin}>
+          {latest === null ? "Check this vendor" : "Try again"}
+        </button>
+      </div>
+    );
+  }
+
+  if (latest.status === "running") {
+    return (
+      <div className="card-quiet mt-6 p-4" role="status">
+        <h3 className="label">Check this listing</h3>
+        <p className="mt-1 text-sm text-muted">Checking… this takes a minute or two.</p>
+      </div>
+    );
+  }
+
+  const report = latest.report;
+  if (!report) {
+    return (
+      <div className="card-quiet mt-6 p-4">
+        <h3 className="label">Check this listing</h3>
+        <p className="mt-1 text-sm text-muted">Searches the web and reads their own pages, then lists what it found. It flags; you decide.</p>
+        <button type="button" className="btn-quiet btn-sm mt-3" disabled={starting} onClick={begin}>
+          Check again
+        </button>
+      </div>
+    );
+  }
+
+  const allSources = report.checks.flatMap((c) => c.sources.map((s) => ({ label: c.label, url: s.url })));
+  const when = latest.finishedAt ?? latest.startedAt;
+
+  return (
+    <div className="card-quiet mt-6 p-4">
+      <h3 className="label">What was found</h3>
+      <p className="mt-2 text-sm">{report.summary}</p>
+      <ul className="mt-3 grid gap-3">
+        {report.checks.map((c) => (
+          <li key={c.key} className="text-sm">
+            <p className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{c.label}</span>
+              <span className={c.finding === "supports" ? "chip-ok" : c.finding === "concern" ? "chip-warn" : "chip-quiet"}>
+                {c.finding === "supports" ? "Supports" : c.finding === "concern" ? "Concern" : "Not found"}
+              </span>
+            </p>
+            <p className="mt-1 text-muted">{c.note}</p>
+            {c.sources.length > 0 && (
+              <ul className="mt-1 grid gap-1">
+                {c.sources.map((s) => (
+                  <li key={s.url}>
+                    <a className="underline" href={s.url} target="_blank" rel="noreferrer">{s.title.trim() || s.url}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+      {allSources.length > 0 && (
+        <button type="button" className="btn-quiet btn-sm mt-3" onClick={() => onUseSources(allSources)}>
+          Use these sources as evidence
+        </button>
+      )}
+      <p className="mt-2 text-xs text-muted">
+        Checked {new Date(when).toLocaleDateString("en-IN")} · read {latest.pagesRead ?? 0} {(latest.pagesRead ?? 0) === 1 ? "page" : "pages"}
+      </p>
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-bad">{error}</p>
+      )}
+      <button type="button" className="btn-quiet btn-sm mt-2" disabled={starting} onClick={begin}>
+        Check again
+      </button>
+    </div>
   );
 }
