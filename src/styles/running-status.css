@@ -123,6 +123,18 @@
 .rs__step--now .rs__node { animation: rs-breathe 3.2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .rs__step--now .rs__node { animation: none; } }
 
+.rs__link { white-space: nowrap; }
+.rs__narrow { display: none; }
+/* On phones the bar keeps one line clear of the wordmark: How it works waits in the page
+   and its footer, and vendors get the short word. */
+@media (max-width: 520px) {
+  .rs__links { gap: 10px !important; }
+  .rs__links .rs__link + .rs__link { padding-left: 10px !important; }
+  .rs__link--wide, .rs__wide { display: none; }
+  .rs__narrow { display: inline; }
+  .rs__links .rs__link--wide + .rs__link { padding-left: 0 !important; border-left: 0; }
+}
+
 /* Below desktop the measured frame gives way to a plain stack. */
 @media (max-width: 1100px) {
   .rs { aspect-ratio: auto; container-type: normal; padding: 0 20px 48px; }
