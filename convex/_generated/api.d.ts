@@ -89,6 +89,7 @@ import type * as lib_voice from "../lib/voice.js";
 import type * as lib_voiceWords from "../lib/voiceWords.js";
 import type * as lib_wav from "../lib/wav.js";
 import type * as lib_wizard from "../lib/wizard.js";
+import type * as lib_wonder from "../lib/wonder.js";
 import type * as maintenance from "../maintenance.js";
 import type * as marketplace_bands from "../marketplace/bands.js";
 import type * as marketplace_briefs from "../marketplace/briefs.js";
@@ -212,6 +213,7 @@ declare const fullApi: ApiFromModules<{
   "lib/voiceWords": typeof lib_voiceWords;
   "lib/wav": typeof lib_wav;
   "lib/wizard": typeof lib_wizard;
+  "lib/wonder": typeof lib_wonder;
   maintenance: typeof maintenance;
   "marketplace/bands": typeof marketplace_bands;
   "marketplace/briefs": typeof marketplace_briefs;
