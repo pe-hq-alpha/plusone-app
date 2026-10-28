@@ -2,7 +2,7 @@
 
 The vendors' side of PlusOne. Vendors list their business, price their packages in the units customers compare, and answer a customer's brief on the same lines. **PlusOne Ops** is the PlusOne team's side of it: a person verifies each vendor before families and event managers see them.
 
-Built during the hackathon and live since 28 October 2026 at [app.plusoneevents.site/partner](https://app.plusoneevents.site/partner). Chennai comes first. The vendors in the demo are samples and are labelled as samples; there is no vendor network yet.
+Built during the hackathon and live since 28 October 2026 at [app.plusoneevents.site/partner](https://app.plusoneevents.site/partner). The vendors in the demo are samples, and are labelled as samples.
 
 ## How it connects to PlusOne Events
 
@@ -33,10 +33,10 @@ Signed out, `/partner` opens the vendors' own sign-in page (`VendorSignInPage` i
 | `offers.ts` | A vendor's answer to a brief: send, withdraw, a vendor's own offers, and the offers for an event that Compare shows |
 | `ops.ts` | The team's side: the queue, a vendor's profile with its evidence, the decision on a vendor or a claim, and team roles |
 | `bands.ts` | Each city's price ranges, recomputed on a schedule |
-| `samples.ts` | The sample Chennai vendors and their offers for the demo events |
+| `samples.ts` | The sample vendors and their offers for the demo events |
 | `vendors.ts` | Shared helpers: a vendor's identity and cleaning up their records |
 
-The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names ("Madras" is Chennai), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
+The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names (an older name like "Bombay" counts as Mumbai), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
 
 ## Rules it keeps
 

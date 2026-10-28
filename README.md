@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Your plus one for every event', a chip saying it reads and writes with Meta's Muse Spark, beside the Today screen of a sample 60th birthday in Chennai with the co-pilot's route of done, under way and over-to-you steps">
+<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Your plus one for every event', a chip saying it reads and writes with Meta's Muse Spark, beside the Today screen of a sample 60th birthday with the co-pilot's route of done, under way and over-to-you steps">
 
 # PlusOne Events
 
@@ -46,21 +46,26 @@
 
 > **We're building a standardised way to plan and buy events in India, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
 
-Every event should have a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding. PlusOne is one engine with templates for sixteen kinds of event, starting in **Chennai** with the events that repeat most and standardise best: birthdays and milestone birthdays, engagements and smaller wedding functions, housewarmings, baby showers and naming ceremonies. India is the beachhead, not the boundary: the playbook is proven here first, then adapted to other countries, with local vendors, customs and prices in each.
+Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
+
+1. **One app instead of many tools.** An all-in-one, AI-powered event planner: the plan and its budget, vendors found and written to, every reply read and chased, guests, RSVPs and the event page, for an event of any size.
+2. **Quotes you can compare, and vendors you can find.** Every quote and every vendor's offer lands on the same lines, so what's included, what's extra and what's missing is plain, along with where each price sits in the market. Vendors with no website or listing get a place to be found, and answer customers on those same lines.
+
+The aim is to standardise a segment of the market, how events are planned and bought, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
 
 PlusOne is one platform with three layers that feed each other:
 
 | Layer | For | What it does | Today |
 |---|---|---|---|
-| **PlusOne Co-pilot** | Families planning their own event, and event managers planning for their clients | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
+| **PlusOne Co-pilot** | Families and teams planning their own event, and event managers planning for their clients | Plans with you, finds vendors on the open web, writes to them from the event's own inbox, chases them, reads their quotes and lines them up in one unit, and keeps the budget. The host makes every decision | Live, free until launch |
 | **PlusOne Assisted** | People who want a person beside them | Everything the Co-pilot does, plus a real person from the PlusOne team helping in real time and on call | Opens after launch |
 | **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, live since 28 Oct; voice sign-up next |
 
-More vendors on Partner widen what families and event managers can find and compare; more customers bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
+More vendors on Partner widen what customers can find and compare; more customers bring vendors work; and every quote read into the same lines sharpens the comparison and the market range for the next event.
 
 It is built for the events families and teams actually hold: birthdays and sixtieths, housewarmings and griha pravesams, naming ceremonies, poojas at home, baby showers, anniversaries and engagements; office parties, team offsites, product launches, conferences, college fests and community festivals. Weddings are one of the sixteen types too.
 
-Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), with no sign-up. Three sample events open there, all in rupees: Amma's 60th birthday in Chennai (the default), a griha pravesam in Bengaluru (`/demo?sample=housewarming`) and an office Diwali party in Gurugram with no alcohol (`/demo?sample=office`). Their vendors are made up, so nothing is really sent.
+Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), with no sign-up. Three sample events open there, all in rupees: Amma's 60th birthday (the default), a griha pravesam (`/demo?sample=housewarming`) and an office Diwali party with no alcohol (`/demo?sample=office`). Their vendors are made up, so nothing is really sent.
 
 PlusOne began as a wedding planner and placed second at Convex's All Gas hackathon in September 2026. For the Meta Global AI Developer Hackathon (Startup track), it moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
 
@@ -68,7 +73,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 ## For the judges
 
-**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th in Chennai with no sign-up. Start on **Today**. Follow **Vendors → Compare**: three caterers' emailed quotes and two verified vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the Chennai range beside them. Press **See the vendor's side** to answer the same brief as a sample caterer, then **Back to the demo** to see your offer land in Compare. Press **Under the hood** in the top bar to see each step's Meta model, time and cost, and type "We're now 140 people" in the box on Today to watch one run.
+**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th with no sign-up. Start on **Today**. Follow **Vendors → Compare**: three caterers' emailed quotes and two verified vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them. Press **See the vendor's side** to answer the same brief as a sample caterer, then **Back to the demo** to see your offer land in Compare. Press **Under the hood** in the top bar to see each step's Meta model, time and cost, and type "We're now 140 people" in the box on Today to watch one run.
 
 ### The theme: Build for Your World
 
@@ -76,8 +81,8 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 | The theme asks | PlusOne's answer |
 |---|---|
-| **Bring Meta's models into your domain** | Events in India, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English into the same lines, live today. Being added during the hackathon: Muse Voice Transcribe for a spoken brief that switches between the two, SAM 3.1 on the customer's own venue photo, Muse Wonder checking a vendor's evidence, and Muse Glimmer on our own endpoint tagging vendors' portfolios |
-| **A problem you know firsthand** | The founders are in Chennai, where PlusOne starts, and know this from planning events in their own families: quotes that can't be compared, charges that turn up later, vendors spread across calls and chats. PlusOne began as a planner for exactly that |
+| **Bring Meta's models into your domain** | Event planning, on Meta's models end to end. Muse Spark reads replies, quotes and PDFs that mix Tamil and English into the same lines, live today. Being added during the hackathon: Muse Voice Transcribe for a spoken brief that switches between the two, SAM 3.1 on the customer's own venue photo, Muse Wonder checking a vendor's evidence, and Muse Glimmer on our own endpoint tagging vendors' portfolios |
+| **A problem you know firsthand** | The founders know it from planning events in their own families: vendors spread across calls, chats and spreadsheets, quotes that can't be compared, charges that turn up later. PlusOne began as a planner for exactly that |
 | **Free up time and mental space** | The Co-pilot does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
 | **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers in the same lines, missing charges flagged and the market range. An event manager gets the same for every client's event, without chasing each vendor by phone. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
 
@@ -90,8 +95,8 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for Co-pilot and Assisted; a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
 | **The standard sheet:** what a quote must state for each kind of vendor (the unit, what's included, GST, transport, service, setup, overtime), shared by customers and vendors | Muse Spark reads each quote into it; fixed, tested rules do the rest | Live, 28 Oct (`convex/lib/standardSheet.ts`) |
-| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the Chennai market range | Muse Spark reads the quotes; the gaps and the range are fixed, tested rules | Live, 28 Oct: missing charges, line by line, and the Chennai range from vendors' listed prices |
-| **A quote sent on WhatsApp:** add a photo or screenshot of a vendor's price list, a PDF or their pasted message, and it is read into the same lines as an emailed quote, landing in Compare | Muse Spark 1.3 (the photo goes in as an image) | Built 28 Oct (`convex/sharedQuotes.ts`), tested offline; live with the next deploy |
+| **Missing charges flagged** against the sheet and the other quotes, and **Compare line by line** with the city's market range | Muse Spark reads the quotes; the gaps and the range are fixed, tested rules | Live, 28 Oct: missing charges, line by line, and each city's range from vendors' listed prices |
+| **A quote sent on WhatsApp:** add a photo or screenshot of a vendor's price list, a PDF or their pasted message, and it is read into the same lines as an emailed quote, landing in Compare | Muse Spark 1.3 (the photo goes in as an image) | Live, 28 Oct (`convex/sharedQuotes.ts`) |
 | **The voice brief:** speak the plan in Tamil, Hindi or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
 | **See it on your venue:** tap the stage in a venue photo and see the decor on the real space | SAM 3.1 | Adapter built and tested (`convex/lib/sam.ts`); the view by 1 Nov |
 | **PlusOne Partner:** vendors register, price packages on the standard sheet and answer a customer's brief | Voice sign-up: Muse Voice Transcribe, Muse Spark | Live, 28 Oct: its own sign-in at `/partner`, joining or claiming a listing, prices and offers on the standard sheet, and offers landing in the customer's Compare (in the demo, a guest can answer as a sample caterer); voice sign-up by 1 Nov |
@@ -105,7 +110,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 | Criterion (weight) | What PlusOne shows | Where to look |
 |---|---|---|
-| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **Who benefits:** families, teams and event managers planning events of any size, who can't compare quotes or see what's included, and vendors with no website or listing, who can't be found. **Real-world potential:** an everyday problem at every budget, starting in Chennai with the events that repeat most, with India as the beachhead and four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
+| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **The pain:** planning is spread across calls, chats, email and spreadsheets, and no two quotes are written alike, so charges turn up late. **Who benefits:** families, teams and event managers planning events of any size, and vendors with no website or listing, who can't be found. **What PlusOne does:** one all-in-one app for the whole plan, and every quote and offer on the same lines, with missing charges flagged and the market range. **Real-world potential:** every event needs vendors and quotes, at every budget; the aim is to standardise how they are planned and bought, with four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Today, Muse Spark reads every reply, PDF, quote and WhatsApp photo of a price list, in Tamil and English, into the same lines, and fixed rules then flag what each leaves out. Being added: Muse Voice Transcribe hears a spoken brief and Muse Spark turns it into the plan; SAM 3.1 finds the stage in a venue photo for the decor; Muse Wonder gathers evidence about a vendor; Muse Glimmer, open weights on our own endpoint, tags vendors' portfolio photos. Muse Code builds pieces of the app. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
 | **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 489 tests | [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
@@ -141,14 +146,20 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 
 ## How it works
 
+One app, two sides working on the same lines: customers plan and compare, vendors answer, and the PlusOne team checks every vendor before customers see them.
+
 <img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Your plus one for every event' over a gold line drawing of a garden dinner, with three celebration photos under the buttons, beside an example of the co-pilot at work for Mia's 1st birthday in Austin">
 
-1. **Talk it through.** "Amma's 60th in Chennai, a homam at home and lunch for about 120." PlusOne asks for whatever it still needs, one thing at a time, reads everything back for you to confirm, and points out anything that can't be right, like a weekday that doesn't match the date or a budget missing a zero. It builds the plan only once every line is confirmed. The model only reads each message; what to ask next and when the plan is ready are fixed rules (`/new`, `convex/planningChat.ts`, with the rules in `convex/lib/planningChat.ts`). A manual form at `/new/manual` does the same step by step.
-2. **Open on Today.** The app opens on the co-pilot's route through the event: what is **done**, what is **under way**, what is **over to you** and what is **up next**, each with the button that finishes it. It is read straight from the plan, so it is instant and never disagrees with the pages it links to (`src/pages/TodayPage.tsx`, `convex/copilot.ts`). A box beside it takes a change or a question in plain words: "we're now 140 people", "find us a photographer".
+### Planning an event
+
+For families, teams and event managers.
+
+1. **Talk it through.** "Amma's 60th, a homam at home and lunch for about 120." PlusOne asks for what it still needs, one thing at a time, reads it all back and flags anything that can't be right, like a weekday that doesn't match the date. The model reads each message; fixed rules decide what to ask next and when the plan is ready (`/new`, `convex/planningChat.ts`). A form at `/new/manual` does the same step by step.
+2. **Open on Today.** The co-pilot's route through the event: what is done, under way, over to you and up next, each with the button that finishes it (`src/pages/TodayPage.tsx`). A box beside it takes a change in plain words: "we're now 140 people".
 
 <img src="assets/screens/today.jpg" width="100%" alt="Today for the sample 60th birthday: four done steps, two under way, one over to you, with the budget and a box to tell PlusOne a change">
 
-3. **Move through four lanes.** A top bar holds Today, Plan, Vendors and People. Each lane shows its pages as stops on a line: Plan has the functions, to-dos, budget and Spaces; Vendors has Find, Compare and Inbox; People has guests, gifts, the event page and the planning team (`src/components/EventLayout.tsx`). Each function has its own time, place, headcount, budget, vendors and to-dos, and the words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
+3. **Everything in one place.** Four lanes, Today, Plan, Vendors and People, hold the functions, to-dos, budget, vendors, inbox, guests, gifts and the event page, so nothing lives in a separate spreadsheet or chat (`src/components/EventLayout.tsx`). The words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
 
 <table>
 <tr>
@@ -157,22 +168,40 @@ Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=met
 </tr>
 </table>
 
-4. **Find vendors on the open web.** For each need, PlusOne runs several short searches at once (the kind of vendor and the area, the style, a rounded budget such as "under ₹40,000"), reads vendors' own websites down to the contact and pricing pages most searches never open, and ranks what it finds on reviews, price against the budget and fit, with a reason for each. Every price links back to the page it came from.
-5. **Write from the event's own inbox.** Once the host confirms a shortlist, PlusOne sends the inquiries from the event's own address, follows up with vendors who go quiet (up to three times) and answers the simple questions they ask. Anything that is the host's to decide comes back as one clear question, on Today and in the inbox.
+4. **Find vendors two ways.** PlusOne searches the open web, reads vendors' own sites down to their pricing pages and ranks what it finds with a reason for each, every price linked to its page. Or press **Ask verified vendors** on a need, and vendors on PlusOne Partner answer it.
+5. **Write from the event's own inbox.** PlusOne sends the inquiries from the event's address, follows up with vendors who go quiet (up to three times) and answers simple questions. Anything that is the host's to decide comes back as one clear question.
 
 | Vendors found on the open web | The event's inbox |
 |---|---|
 | <img src="assets/screens/vendors.jpg" alt="Find: a priest for the morning pooja, researched on the open web, with the best match ranked on reviews, price against the budget and fit"> | <img src="assets/screens/inbox.jpg" alt="The inbox: six vendor conversations with their status, and the first email to a nadaswaram group with a follow-up due"> |
 
-6. **Line up quotes in one unit.** Vendors quote per plate, all in, plus service, plus transport, each for a headcount of their own choosing. A price in a reply, or in a PDF attached to it, is read into a quote with its lines, and Compare puts every quote in the same unit at the host's own numbers: per plate for food, per piece for gifts and hampers, per day for stays and transport, all in for the rest (`convex/lib/comparable.ts`). It says what each quote leaves out ("GST extra", "Priced for 150; you expect 120") and refuses a per-unit figure when the lines don't add up to the total. **New for the hackathon:** each need's quotes also sit line by line on the standard sheet, as a price, included, extra or not stated, and fixed rules flag what each quote leaves unsaid, with what the others charge for it ("No transport line, and one other charges ₹2,500") (`convex/lib/standardSheet.ts`).
+6. **Every quote on the same lines.** An emailed reply, a PDF, a photo of a price list sent on WhatsApp or a pasted message is read into the standard sheet for that kind of vendor: the unit, what's included, GST, transport, service and the usual extras (`convex/lib/standardSheet.ts`, `convex/sharedQuotes.ts`).
+7. **Compare line by line.** Quotes and verified vendors' offers sit side by side in the same unit at the host's own headcount, with what each leaves unsaid flagged ("No water line, and one other charges ₹600") and where each sits in the city's price range (`src/pages/DecisionsPage.tsx`, `convex/lib/comparable.ts`).
 
-<img src="assets/screens/decisions.jpg" width="100%" alt="Compare for the sample birthday: three catering quotes from ₹456 to ₹517 a plate for 120, with what each includes and leaves out">
+<img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering, line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
 
-7. **Keep the budget honest.** A quote moves the budget by itself, with an undo; one that looks off (another currency, an offer for something already booked, a price far from the plan) waits for the host. The budget is split by function and by kind of vendor, and every deposit, balance and vendor deadline sits in one list that can go to a calendar.
-8. **Run guests and RSVPs.** Each guest gets one invitation from the event's inbox and their own RSVP link. Replies in their own words or on the link are saved for each function, with head counts and food needs, and caterers who ask get the allergies and numbers, never the names. A guest list can come in from a spreadsheet, a PDF or a paste.
-9. **Give the event a page, and share the plan.** The event page is written from the plan, with dress, travel and how to reply, and stays private until it is published. A gift list lets each guest pick a gift so nobody brings the same thing twice. The plan prints on one page, or goes to family or colleagues as a read-only link with no emails, guest names or vendor contacts in it. Everything in an event can be downloaded as one file.
+8. **Keep the budget honest.** A quote moves the budget by itself, with an undo; one that looks off (another currency, a price far from the plan) waits for the host. Every deposit, balance and vendor deadline sits in one list that can go to a calendar.
+9. **Guests and the event page.** Each guest gets an invitation and their own RSVP link, and replies are saved for each function with head counts and food needs. The event page is written from the plan, and the plan can go to family or colleagues as a read-only link, or print on one page.
 
-The rest of the app:
+### Answering as a vendor
+
+On PlusOne Partner, at [`/partner`](https://app.plusoneevents.site/partner), for vendors, including the many with no website or listing.
+
+1. **Get listed.** Set up the business, or claim the listing PlusOne already made from its public pages. A person at PlusOne checks it is real, usually within a day, and customers see it after that.
+2. **Publish itemised prices.** Each package has a price, its unit (per plate, per hour, all in) and what it includes. Itemised prices earn the Transparent pricing badge and count towards the city's range, never with the vendor's name on them.
+3. **Answer customers' requests.** Each request is for the vendor's kind of service in their city: the occasion, date, guests and area, never the customer's name, contact or budget. The vendor answers every line of the same sheet, in the price, added in ₹ or extra, and sees the total the customer will see before sending.
+4. **Land in the customer's Compare.** The offer sits beside the customer's other quotes, line by line. It can be changed or withdrawn while the request is open, and a vendor's level grows with events done through PlusOne: New, Trusted after 3, Top after 10.
+
+| The vendor's page | Answering a customer's request |
+|---|---|
+| <img src="assets/screens/partner.jpg" alt="PlusOne Partner for a sample caterer: the business with its Verified, Transparent pricing, Standard and New badges, and Customers asking, with a catering request for a 60th birthday for 120 guests"> | <img src="assets/screens/partner-offer.jpg" alt="Answering the request on the standard sheet: ₹460 a plate for 120, GST extra, service staff, crockery and water in the price, transport added at ₹1,500, and the customer sees ₹56,700"> |
+
+### Checking vendors
+
+PlusOne Ops, at `/ops`, is the PlusOne team's side. A queue holds vendors and listing claims waiting for a check; each vendor's page shows the evidence, and a person verifies, turns down or pauses, kept as an append-only record of who decided what on what evidence. A Muse Wonder agent that gathers the evidence first, with links, is being built. Partner's pages, backend and rules: [`src/partner/README.md`](src/partner/README.md).
+
+### The rest of the app
+
 - **Spaces**, one open board per event to pan and zoom, with a zone for each function or session: pictures, links from Instagram, Pinterest, TikTok or any page, notes, colour swatches and pinned vendors, with palettes suggested from the pictures.
 - **People planning together:** owner, planner and viewer roles, with single-use invite links that can be revoked.
 - **Emails from PlusOne:** a weekly update on Fridays that skips quiet weeks, with a way to stop it.
@@ -180,10 +209,6 @@ The rest of the app:
 - **Dark ink and marigold by default**, with a light theme of ink blue on ivory; pick Light, Dark or Device, and the choice carries between the home page and the app. The same line drawing, marigold at night and a soft blue by day, frames the home page, sign-in and the public pages, and sits faintly behind the app; the home page moves gently, with the hero rising in and sections rising into view. A new event's currency, and the home page's example, follow where the visitor is, so money shows in rupees in India and dollars in the US.
 - **Pricing**, at [/pricing](https://plusoneevents.site/pricing): Co-pilot is free to use until launch, then ₹1,000 or $10 a month; Assisted, where a person from the PlusOne team plans with you and is on call any time, opens after launch at ₹2,500 or $25 a month (`src/pages/PricingPage.tsx`, prices in `src/lib/pricing.ts`).
 - **It installs on a phone like an app**, and a link shared to it from another app lands in a Space.
-
-### PlusOne Partner and Ops (new for the hackathon)
-
-The vendors' side runs in the same app, on the same backend and the same lines. A family or an event manager presses "Ask verified vendors" on a need; a verified vendor in that city and category answers on `/partner`, on the standard sheet; and the offer lands in the customer's Compare beside their other quotes, with missing charges flagged and the city's range. Vendors' published prices make each city's ranges, shown once eight prices sit behind one. At `/ops` a person on the PlusOne team verifies each vendor before customers see them. Pages, backend, rules and tests: [`src/partner/README.md`](src/partner/README.md).
 
 ## Care taken
 
@@ -209,7 +234,7 @@ The vendors' side runs in the same app, on the same backend and the same lines. 
 | Typecheck, app and backend | Clean | 28 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
-| Page load from India | First byte in 0.08–0.09 s from Cloudflare's edge, down from 0.9–1.2 s | 18 Oct 2026 | `curl` timing from Chennai |
+| Page load from India | First byte in 0.08–0.09 s from Cloudflare's edge, down from 0.9–1.2 s | 18 Oct 2026 | `curl` timing from India |
 
 ## The tech, part by part
 
@@ -226,7 +251,7 @@ The vendors' side runs in the same app, on the same backend and the same lines. 
 | The event's inbox | AgentMail | One inbox per event, named after the hosts' first names on the deployment's domain, in `convex/agentmail.ts` and `convex/lib/inboxName.ts`; sending, replies and follow-ups in `convex/outreach.ts`, `convex/inbound.ts` and `convex/followups.ts`; the do-not-contact list in `convex/doNotContact.ts`. Each deployment keeps its inboxes in its own AgentMail pod, with a webhook that hears only that pod |
 | Quotes in one unit | Own code | `convex/lib/comparable.ts` puts each quote per plate, per piece, per day or all in, at the host's numbers, with its flags; `convex/quotes.ts` and `convex/lib/quoteHold.ts` decide when a quote waits and handle the undo; the page is `src/pages/DecisionsPage.tsx` |
 | Budget, dues and currencies | Own code | `convex/budget.ts` and `convex/dues.ts`; the calendar file is made in the browser by `src/lib/calendar.ts`; currency by region in `src/lib/currency.ts` and `src/lib/region.ts` |
-| Sample events | Own code | `convex/demoBirthday.ts` (Chennai), `convex/demoHousewarming.ts` (Bengaluru) and `convex/demoOfficeParty.ts` (Gurugram), started fresh for each visitor by `convex/demo.ts` and `src/pages/GuestPage.tsx` |
+| Sample events | Own code | `convex/demoBirthday.ts`, `convex/demoHousewarming.ts` and `convex/demoOfficeParty.ts`, started fresh for each visitor by `convex/demo.ts` and `src/pages/GuestPage.tsx` |
 | Sign-in | Clerk, with Convex Auth for the demo | Accounts sign in with Clerk in `src/lib/session.tsx` and `src/pages/SignInPage.tsx`; the first sign-in finds an earlier account by its verified email, in `convex/users.ts`. Demo visitors get short-lived guest tokens from Convex Auth (`convex/auth.ts`), so the demo needs no account |
 | Guests, event page and gifts | Own code | Guests and RSVPs in `convex/guests.ts` and `convex/lib/rsvp.ts`; the event page in `convex/site.ts` with `src/pages/SitePage.tsx` and `src/pages/RsvpPage.tsx`; gifts in `convex/gifts.ts` |
 | Spaces | Own code, plus TikTok, Pinterest and YouTube previews and any page's own tags | The board in `src/components/board/Board.tsx`, with its geometry in `src/lib/board.ts`; `convex/spaces.ts` for pictures, links, notes, swatches, pinned vendors, previews and palettes (suggested by Muse Spark), with `convex/lib/links.ts`, which refuses private addresses; the phone share target in `public/manifest.webmanifest`, landing in `src/pages/SharePage.tsx` |
@@ -301,15 +326,15 @@ Every push to `main` runs typecheck and tests in CI. A staging workflow (`.githu
 
 ## Status and limits
 
-Planning works end to end: the planning conversation, the plan, Today, vendor search, emails, replies, quotes in one unit, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together.
+Planning works end to end: the planning conversation, the plan, Today, vendor search, emails, replies, quotes on the same lines, verified vendors' offers, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together.
 
 - Vendor search is only as good as vendors' own websites: a vendor with no prices online comes back without one, until it replies.
-- Compare shows the range across the quotes an event has received; a price that cannot be put in the unit honestly is shown as quoted, not converted.
+- A city's price range shows only once eight listed prices sit behind it; until then Compare shows the range across the event's own quotes. A price that cannot be put in the unit honestly is shown as quoted, not converted.
 
 ## Next steps
 
 - **Finish the hackathon build:** the items marked "Building" in [For the judges](#for-the-judges), by 1 November.
-- **Chennai first:** real families, event managers and vendors for birthdays, engagements and housewarmings; real quotations collected and hidden charges mapped; then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
+- **Real customers and vendors:** families, teams, event managers and vendors on the events that repeat most (birthdays, engagements, housewarmings); real quotations collected and hidden charges mapped; then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
 - **PlusOne Assisted:** a real person from the PlusOne team beside the Co-pilot, in real time and on call, opening after launch.
 - **Booking and execution:** milestones, advances, vendor confirmations, change requests and a final reconciliation, booked through PlusOne with a disclosed fee.
 - **Vendor reliability, measured:** punctuality, cancellations, quality and budget overruns, so customers know who delivers.
