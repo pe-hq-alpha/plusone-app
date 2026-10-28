@@ -32,19 +32,19 @@ const HOW = [
   { title: "You choose", text: "Book the ones you like; the co-pilot keeps the rest of the plan moving." },
 ];
 
-/** Three celebrations fanned under the hero's actions. Generated images, not customers' events. */
+/** Three celebrations fanned under the hero's actions, Western and Indian. Generated images, not customers' events. */
 const FAN = [
-  { src: "/photos/firstbday.jpg", alt: "A toddler reaching for a small cake at a first birthday in the garden, family laughing around" },
+  { src: "/photos/first-birthday.jpg", alt: "A baby in a high chair reaching for a small white cake at a first birthday, parents and grandparents laughing, pastel balloons behind" },
   { src: "/photos/sangeet.jpg", alt: "Family dancing at a sangeet night under marigold garlands and fairy lights" },
   { src: "/photos/anniversary.jpg", alt: "An older couple laughing at the head of a candlelit anniversary dinner with their family" },
 ];
 
 /** Celebrations, Western and Indian, under the events list. Generated images, not customers' events. */
 const PHOTOS = [
-  { src: "/photos/birthday.jpg", label: "A garden birthday", alt: "A family birthday dinner at dusk under string lights, a cake with candles carried to the table" },
+  { src: "/photos/backyard-birthday.jpg", label: "A garden birthday", alt: "Three generations clapping at a long table in a back garden at dusk as a cake with lit candles is carried out under string lights" },
   { src: "/photos/haldi.jpg", label: "A haldi morning", alt: "A bride in yellow laughing as her family apply turmeric at a haldi, marigolds all around" },
-  { src: "/photos/wedding.jpg", label: "A wedding reception", alt: "A couple's first dance on a lawn under festoon lights, guests clapping" },
-  { src: "/photos/office.jpg", label: "An office year-end", alt: "Colleagues at a rooftop celebration at dusk, a buffet and festoon lights" },
+  { src: "/photos/first-dance.jpg", label: "A wedding reception", alt: "A bride and groom's first dance on a wooden floor under strings of lights, guests watching from candlelit tables" },
+  { src: "/photos/rooftop-launch.jpg", label: "A product launch", alt: "Colleagues talking over drinks on a city rooftop at blue hour, a stage and screen glowing behind them" },
 ];
 
 const KINDS = [

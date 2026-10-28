@@ -43,7 +43,7 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
         {vendor ? (
           <img src="/photos/sangeet.jpg" alt="Guests dancing at a sangeet under marigold garlands and strings of lights" className="absolute inset-0 size-full object-cover" />
         ) : (
-          <img src="/photos/diwali.jpg" alt="A family lighting diyas together on a terrace at Diwali" className="absolute inset-0 size-full object-cover" />
+          <img src="/photos/housewarming.jpg" alt="Friends raising their glasses over dinner in a new apartment, a moving box and the city lights behind them" className="absolute inset-0 size-full object-cover" />
         )}
         <div className="photo-scrim absolute inset-0" aria-hidden="true" />
         <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">

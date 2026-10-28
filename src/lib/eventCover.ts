@@ -2,25 +2,26 @@ import type { EventType } from "../../convex/lib/validators";
 
 /**
  * The picture at the top of an event's card on Your events, by kind of event. They are the
- * celebration photos from the home page, so a new event never opens on a blank card.
+ * celebration photos from the home page, Western and Indian, so a new event never opens on a
+ * blank card and the cards don't all look like one country.
  */
 const COVER: Record<EventType, string> = {
-  wedding: "wedding",
+  wedding: "first-dance",
   engagement: "wedding",
   birthday: "birthday",
-  graduation: "birthday",
-  party: "birthday",
+  graduation: "backyard-birthday",
+  party: "backyard-birthday",
   anniversary: "anniversary",
   naming_ceremony: "firstbday",
-  baby_shower: "firstbday",
-  housewarming: "diwali",
+  baby_shower: "first-birthday",
+  housewarming: "housewarming",
   pooja: "diwali",
   community_festival: "diwali",
   college_fest: "sangeet",
   office_party: "office",
   team_offsite: "office",
-  product_launch: "office",
-  conference: "office",
+  product_launch: "rooftop-launch",
+  conference: "rooftop-launch",
 };
 
 export function eventCover(type: EventType | undefined): string {
