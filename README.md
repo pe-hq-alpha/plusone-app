@@ -181,6 +181,10 @@ The rest of the app:
 - **Pricing**, at [/pricing](https://plusoneevents.site/pricing): Co-pilot is free to use until launch, then ₹1,000 or $10 a month; Assisted, where a person from the PlusOne team plans with you and is on call any time, opens after launch at ₹2,500 or $25 a month (`src/pages/PricingPage.tsx`, prices in `src/lib/pricing.ts`).
 - **It installs on a phone like an app**, and a link shared to it from another app lands in a Space.
 
+### PlusOne Partner and Ops (new for the hackathon)
+
+The vendors' side runs in the same app, on the same backend and the same lines. A family or an event manager presses "Ask verified vendors" on a need; a verified vendor in that city and category answers on `/partner`, on the standard sheet; and the offer lands in the customer's Compare beside their other quotes, with missing charges flagged and the city's range. Vendors' published prices make each city's ranges, shown once eight prices sit behind one. At `/ops` a person on the PlusOne team verifies each vendor before customers see them. Pages, backend, rules and tests: [`src/partner/README.md`](src/partner/README.md).
+
 ## Care taken
 
 - **The host stays in charge.** PlusOne never books, pays or signs. It drafts, sends and chases; every decision is the host's.
@@ -320,7 +324,7 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 | Path | What it is |
 |---|---|
 | `src/pages/` | One file per screen: Today, the plan and each function, to-dos, budget, Spaces, Find, Compare, Inbox, guests, gifts, the event page, the planning team, settings and the new-event pages, plus the guest pages for the event page, RSVP links and shared plans |
-| `src/partner/` | PlusOne Partner (`/partner`) for vendors and Ops (`/ops`) for the PlusOne team |
+| `src/partner/` | PlusOne Partner (`/partner`) for vendors and Ops (`/ops`) for the PlusOne team, with [its own README](src/partner/README.md) |
 | `src/components/` | Shared pieces: the four-lane layout (`EventLayout.tsx`), the guided tour, the wordmark in `src/components/brand/` |
 | `convex/` | The backend: `schema.ts` and one file per area, with tests beside them |
 | `convex/marketplace/` | PlusOne Partner's backend: listings and claims, briefs and offers, Ops decisions and city price ranges |
