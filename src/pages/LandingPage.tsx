@@ -107,6 +107,7 @@ export function LandingPage() {
           <nav className="rs__links" aria-label="Main">
             <Link to="/how-it-works" className="rs__link">How it works</Link>
             <Link to="/pricing" className="rs__link">Pricing</Link>
+            <Link to="/partner" className="rs__link">For vendors</Link>
             <Link to="/signin" className="rs__link rs__link--accent">Sign in</Link>
           </nav>
         </header>

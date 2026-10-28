@@ -47,6 +47,7 @@ const AccountPage = page(() => import("./pages/AccountPage"), "AccountPage");
 const PrivacyPage = page(() => import("./pages/PrivacyPage"), "PrivacyPage");
 const TermsPage = page(() => import("./pages/TermsPage"), "TermsPage");
 const SignInPage = page(() => import("./pages/SignInPage"), "SignInPage");
+const VendorSignInPage = page(() => import("./pages/SignInPage"), "VendorSignInPage");
 const PartnerPage = page(() => import("./partner/PartnerPage"), "PartnerPage");
 const OpsPage = page(() => import("./partner/OpsPage"), "OpsPage");
 
@@ -78,6 +79,7 @@ export default function App() {
               <Unauthenticated>
                 <Routes>
                   <Route path="/signin" element={<SignInPage />} />
+                  <Route path="/partner" element={<VendorSignInPage />} />
                   <Route path="*" element={<LandingPage />} />
                 </Routes>
               </Unauthenticated>

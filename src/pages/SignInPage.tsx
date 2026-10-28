@@ -15,12 +15,20 @@ import { Backdrop } from "../components/ui/Backdrop";
  *
  * The form stays switched off until the "I agree" box is ticked; the agreement is
  * remembered here and recorded against the account once it signs in (lib/session).
+ *
+ * Two doors to the same accounts: families planning an event come in at /signin, vendors
+ * at /partner, with their own words and landing on PlusOne Partner. One person can be both.
  */
-export function SignInPage({ redirectTo }: { redirectTo?: string }) {
+export function SignInPage({ redirectTo, audience = "family" }: { redirectTo?: string; audience?: "family" | "vendor" }) {
   const [params] = useSearchParams();
   const newHere = params.get("new") === "1";
   const { error } = useAuthActions();
-  const back = redirectTo ?? (window.location.pathname === "/signin" ? "/" : window.location.pathname + window.location.search);
+  const vendor = audience === "vendor";
+  const here = vendor ? "/partner" : "/signin";
+  const back = redirectTo ?? (window.location.pathname === here ? (vendor ? "/partner" : "/") : window.location.pathname + window.location.search);
+  const pitch = vendor
+    ? `Answer families' requests on the same sheet every vendor fills in, keep your prices itemised, and get verified so families can find you.`
+    : `${BRAND.name} finds vendors, writes to them from your event\u2019s own inbox and reads their quotes into your budget, so the legwork is done and the choices stay yours.`;
   const [agreed, setAgreed] = useState(() => pendingAgreement() === TERMS_VERSION);
   const agree = (value: boolean) => {
     setAgreed(value);
@@ -31,18 +39,19 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
     <main id="main" className="grid min-h-screen lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
       {/* A celebration on the left on wide screens; the form on the right, so it all fits without scrolling. */}
       <aside className="photo-panel relative hidden overflow-hidden lg:block">
-        <img src="/photos/diwali.jpg" alt="A family lighting diyas together on a terrace at Diwali" className="absolute inset-0 size-full object-cover" />
+        {vendor ? (
+          <img src="/photos/sangeet.jpg" alt="Guests dancing at a sangeet under marigold garlands and strings of lights" className="absolute inset-0 size-full object-cover" />
+        ) : (
+          <img src="/photos/diwali.jpg" alt="A family lighting diyas together on a terrace at Diwali" className="absolute inset-0 size-full object-cover" />
+        )}
         <div className="photo-scrim absolute inset-0" aria-hidden="true" />
         <div className="relative flex h-full flex-col justify-between p-10 xl:p-14">
           <Link to="/" className="display text-4xl tracking-tight" aria-label={`${BRAND.name} home`}>
             <PlusOneLockup />
           </Link>
           <div className="max-w-lg">
-            <p className="display text-[2.6rem] leading-tight">Your plus one for every event.</p>
-            <p className="mt-3 text-base opacity-90">
-              {BRAND.name} finds vendors, writes to them from your event&rsquo;s own inbox and reads their quotes into your
-              budget, so the legwork is done and the choices stay yours.
-            </p>
+            <p className="display text-[2.6rem] leading-tight">{vendor ? `${BRAND.name} Partner, for vendors.` : "Your plus one for every event."}</p>
+            <p className="mt-3 text-base opacity-90">{pitch}</p>
           </div>
         </div>
       </aside>
@@ -51,12 +60,11 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
         <PublicNav signIn={false} brand={false} />
         <div className="grid flex-1 place-items-center px-4 py-8">
         <div className="w-full max-w-md">
-        <p className="pub-eyebrow">{newHere ? "Create your account" : "Sign in"}</p>
-        <h1 className="pub-title !text-[2.4rem]">{newHere ? <>Let&rsquo;s plan <em>your event</em></> : <>Welcome <em>back</em></>}</h1>
-        <p className="mt-2 text-sm text-muted lg:hidden">
-          {BRAND.name} finds vendors, writes to them from your event&rsquo;s own inbox and reads their quotes into your budget,
-          so the legwork is done and the choices stay yours.
-        </p>
+        <p className="pub-eyebrow">{vendor ? `${BRAND.name} Partner` : newHere ? "Create your account" : "Sign in"}</p>
+        <h1 className="pub-title !text-[2.4rem]">
+          {vendor ? (newHere ? <>List <em>your business</em></> : <>Welcome <em>back</em></>) : newHere ? <>Let&rsquo;s plan <em>your event</em></> : <>Welcome <em>back</em></>}
+        </h1>
+        <p className="mt-2 text-sm text-muted lg:hidden">{pitch}</p>
         {error && <p role="alert" className="mt-4 rounded-[12px] bg-bad-bg px-4 py-3 text-sm text-bad">{error}</p>}
         <label className="mt-5 flex items-start gap-3 rounded-[12px] border border-line bg-cream px-4 py-3 text-sm leading-relaxed">
           <input
@@ -80,9 +88,9 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
           aria-disabled={!agreed}
         >
           {newHere ? (
-            <SignUp routing="hash" signInUrl="/signin" forceRedirectUrl={back} />
+            <SignUp routing="hash" signInUrl={here} forceRedirectUrl={back} />
           ) : (
-            <SignIn routing="hash" signUpUrl="/signin?new=1" forceRedirectUrl={back} signUpForceRedirectUrl={back} />
+            <SignIn routing="hash" signUpUrl={`${here}?new=1`} forceRedirectUrl={back} signUpForceRedirectUrl={back} />
           )}
         </div>
         <p className="mt-5 text-center text-sm text-muted">
@@ -92,9 +100,21 @@ export function SignInPage({ redirectTo }: { redirectTo?: string }) {
           </Link>{" "}
           first. No sign-up.
         </p>
+        <p className="mt-2 text-center text-sm text-muted">
+          {vendor ? "Planning an event? " : "A vendor? "}
+          <Link to={vendor ? "/signin" : "/partner"} className="text-accent underline underline-offset-2">
+            {vendor ? "Sign in here" : `Sign in to ${BRAND.name} Partner`}
+          </Link>
+          .
+        </p>
         </div>
         </div>
       </div>
     </main>
   );
+}
+
+/** The vendors' door, at /partner when signed out: the same accounts, landing on PlusOne Partner. */
+export function VendorSignInPage() {
+  return <SignInPage audience="vendor" />;
 }

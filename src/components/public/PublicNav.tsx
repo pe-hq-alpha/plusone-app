@@ -6,7 +6,7 @@ import { ThemeSwitch } from "../ui/ThemeSwitch";
 import "../../styles/public.css";
 
 /**
- * The home page's top bar, for the other public pages: the lockup, How it works, Pricing, Sign in and a
+ * The home page's top bar, for the other public pages: the lockup, How it works, Pricing, For vendors, Sign in and a
  * small theme switch. `brand={false}` hides the lockup on wide screens, where something beside it shows it.
  */
 export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; brand?: boolean }) {
@@ -20,6 +20,7 @@ export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; b
       <nav className="pub-links" aria-label="Main">
         <Link to="/how-it-works" className="pub-link pub-link--hide-sm" aria-current={here("/how-it-works")}>How it works</Link>
         <Link to="/pricing" className="pub-link" aria-current={here("/pricing")}>Pricing</Link>
+        <Link to="/partner" className="pub-link pub-link--hide-sm" aria-current={here("/partner")}>For vendors</Link>
         {signIn && <Link to="/signin" className="pub-link pub-link--accent">Sign in</Link>}
         <ThemeSwitch compact className="ml-2" />
       </nav>

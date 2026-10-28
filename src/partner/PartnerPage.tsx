@@ -23,7 +23,7 @@ export function PartnerPage() {
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
   if (mine === undefined || me === undefined) return <main id="main" className="page px-5 py-10 text-muted">Loading…</main>;
-  if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={() => void signOut().then(() => navigate("/signin"))} />;
+  if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={() => void signOut().then(() => navigate("/partner"))} />;
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
       <Link to="/" className="btn-quiet btn-sm gap-1.5 bg-cream">
