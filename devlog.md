@@ -13,14 +13,14 @@
 - **Hosting:** Cloudflare Pages for the app; Convex (Ireland) for the backend
 - **Auth:** Clerk; Convex Auth guest sessions for the sample events
 - **External services:** AgentMail (event inboxes), Firecrawl (vendor search), Resend (app emails), PostHog (usage), Meta Model API (Muse Spark)
-- **AI models (product):** muse-spark-1.3 (Meta Model API, Chat Completions with JSON Schema output) for every reading and writing step, live in production since 27 Oct; claude-haiku-5-5 and claude-sonnet-5-5 as the fallback when Meta can't answer. Coming: Muse Voice Transcribe, SAM 3.1, Muse Wonder, Muse Spark Open.
+- **AI models (product):** muse-spark-1.3 (Meta Model API, Chat Completions with JSON Schema output) for every reading and writing step, live in production since 27 Oct; claude-haiku-5-5 and claude-sonnet-5-5 as the fallback when Meta can't answer. Coming: Muse Voice Transcribe, SAM 3.1, Muse Wonder, and the open-weights Muse Glimmer on our own Modal endpoint.
 - **AI models (build):** Claude Code with claude-opus-5-5; Muse Code (Everyday plan, from 27 Oct), every session logged under Muse Code below
 - **Track:** Startup ("open to technical founders building a product"): the rules let a startup build on its existing product, provided what is new during the event is clearly identified, which this log and the cutoff above do
-- **Meta models used:** Muse Spark 1.3 (live); planned: Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Spark Open; Muse Code for building
-- **Credits spent:** under $0.01 of $150 in our own measured runs (27 Oct); every call is recorded in `modelCalls`, to be reconciled with Meta Billing
+- **Meta models used:** Muse Spark 1.3 (live); planned: Muse Wonder, Muse Voice Transcribe, SAM 3.1 and the open-weights Muse Glimmer (on Modal, $100 of Modal credit); Muse Code for building
+- **Credits spent:** under $0.01 of $150 in our own measured runs (27 Oct; none on 28 Oct); every call is recorded in `modelCalls`, to be reconciled with Meta Billing
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-10-27T20:55:00+05:30
+- **Last updated:** 2026-10-28T14:45:00+05:30
 
 ## Evidence
 
@@ -34,6 +34,8 @@
 | Screenshots of the Meta features | none yet | missing |
 | Demo video | not recorded | missing |
 | Live URL with the Meta features | plusoneevents.site runs Muse Spark in production (27 Oct) | done for Muse Spark |
+| Quotes comparable line by line, gaps flagged, market range | The standard sheet (`convex/lib/standardSheet.ts`), Compare line by line and the Chennai range, live 28 Oct; the gap rules pinned on the demo's real quotes in `convex/dashboard.test.ts` | done |
+| Vendors answer the same brief | PlusOne Partner live 28 Oct; a guest answers their own demo event as a sample caterer and the offer lands in Compare (checked in a headless walk on production) | done |
 | Muse Code used in the build | Everyday plan from 27 Oct; first session built the SAM 3.1 adapter (`46df7a5`), logged in the Muse Code table below | done: 2 sessions |
 
 ## Muse Code
@@ -46,6 +48,19 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 | 27 Oct, 21:07–21:09 IST | Event cards showed only the middle of their photo, cutting heads off: found the 16:7 slot against 4:5 photos and changed the slot to 4:5 so the whole photo shows. A follow-up asking it to update the devlog and commit stopped when the 5-hour quota ran out | `src/pages/HomePage.tsx` (one line) | muse-wonder-1.0 | 2 (the second used up the rest of the 5-hour quota) | Kept as is; Claude Code tested, committed (`96a4c0d`) and wrote this log |
 
 ## Log
+
+### 2026-10-28 - 80a23e5..1c405e7
+- **The centrepiece, live:** one brief becomes comparable offers. **The standard sheet** (`convex/lib/standardSheet.ts`) sets, for each kind of vendor, the unit a quote should be priced in and every charge it should state (GST, service staff, transport, crockery and water for a caterer; electricity, AC, cleaning and overtime for a hall; and so on). Muse Spark reads each emailed quote into those lines; fixed, tested rules decide what each leaves out and say what the others charge for it ("No water line, and one other charges ₹600"). **Compare** now shows every quote and offer line by line, with each price placed in the **Chennai range** for the same unit (Value, Standard, Premium, Luxury).
+- **PlusOne Partner and Ops:** vendor listings, claims and verification with a reviewer's checklist and evidence; customers send a need to verified vendors in their city, who answer on the same sheet, and the offer lands in Compare beside the emailed quotes. Price ranges are built from vendors' listed prices, with the sample vendors' kept apart from real ones. Real Chennai price points were collected from vendors' public pages with Firecrawl (29 points, about 27 calls) for the sample ranges.
+- **The demo shows both sides:** Amma's 60th gets offers from sample Partner vendors, and a guest can answer their own event's brief as a sample caterer and watch the offer arrive in Compare.
+- **Two doors:** customers (families and event managers) sign in at `/signin`, vendors at `/partner`, which opens on "List your business". Every public page links to the vendors' door, on phones too.
+- **Photos from everywhere:** Western celebrations (a back-garden birthday, a first dance, a rooftop launch, a housewarming dinner) beside the Indian ones; vendors at work on the vendors' door.
+- **Production deployed** twice (app.plusoneevents.site), after which a headless walk at 1440 and 390 px found no console errors and no sideways scroll.
+- **Critic review (afternoon):** 6.9 / 10, up from 6.3 (`docs/reviews/2026-10-28.md` in the team's notes). Fixed the same afternoon: "Back to the demo" in Partner had ended the guest session and lost the offer, and now returns to the guest's own Compare; "Ask verified vendors" is hidden and refused on booked needs; the Compare page is called Compare and leads with line by line; the offer form's charge choices read "In the price", "Added, in ₹" and "Extra"; the home page's bar fits a phone; the README no longer overclaims (the ranges and gaps are rules, not a model; unbuilt models are marked as building) and gives run steps from a clean clone (`scripts/auth-keys.mjs`). Under the hood can now show a recorded Muse Spark run on the demo's own quotes (`claude:readDemoQuotes`, `convex/lib/recordedRun.ts`), filled once that run is made.
+- **Plan:** Muse Glimmer portfolio tagging on our own Modal endpoint joins the plan for the open-weights prize ($100 of Modal credit claimed).
+- **Tests:** 487 passed in 48 files (from 441 in the morning); typecheck clean.
+- **Credits:** no Meta model calls today.
+- **Built with:** Claude Code, claude-opus-5-5.
 
 ### 2026-10-27 - 608627f..b623a3c
 - **Morning:** the Terms gained a plain confidentiality rule for what we show privately (conversations, demos, tools), with detailed protections left to a signed agreement; Privacy and Terms moved to a small line in the footer corner; the share image shows the current home page; internal working files left the repository; every green push to `main` now deploys to a staging site with its own backend (`.github/workflows/staging.yml`), while production stays a manual deploy.
