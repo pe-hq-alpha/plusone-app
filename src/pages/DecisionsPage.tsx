@@ -18,6 +18,12 @@ type VendorRow = Need["vendors"][number];
 type Quote = NonNullable<VendorRow["quote"]>;
 type QuotedRow = VendorRow & { quote: Quote };
 type Reading = Quote["readings"][number];
+/** A column of the line-by-line compare: a quote that came by email, or a verified vendor's offer. */
+type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> & {
+  id: string;
+  name: string;
+  from: "web" | "verified" | "sample";
+};
 
 /** What a quote's place in its city's range means. It places a price; it never calls one fair. */
 const TIER_NOTE =
@@ -64,7 +70,7 @@ export function DecisionsPage() {
 
   const t = board.totals;
   // A need nobody has written to yet is noise on a decision screen.
-  const shown = onlyLive ? board.needs.filter((n) => n.vendors.some((v) => v.state !== "not_contacted")) : board.needs;
+  const shown = onlyLive ? board.needs.filter((n) => n.offers.length > 0 || n.vendors.some((v) => v.state !== "not_contacted")) : board.needs;
 
   return (
     <>
@@ -175,6 +181,10 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
   const bestPerUnit = need.spread && perUnits.length > 1 ? Math.min(...perUnits) : null;
   const unitWord = need.basisLabel.toLowerCase().replace(/^per /, "");
   const quoted = live.filter((v): v is QuotedRow => v.quote !== null && v.state !== "declined");
+  const columns: Column[] = [
+    ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, ...v.quote })),
+    ...need.offers.map((o) => ({ id: o.offerId, from: o.sample ? ("sample" as const) : ("verified" as const), ...o })),
+  ];
 
   async function book(v: VendorRow, notify: boolean) {
     setBusy(v.vendorId);
@@ -225,7 +235,9 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
               {need.dearest !== null && need.dearest !== need.cheapest && <> – {money(need.dearest, currency)}</>} quoted
             </>
           ) : (
-            `${live.length} ${live.length === 1 ? "vendor" : "vendors"} asked, no prices yet`
+            need.offers.length > 0 && live.length === 0
+              ? `${need.offers.length} ${need.offers.length === 1 ? "offer" : "offers"} from verified vendors`
+              : `${live.length} ${live.length === 1 ? "vendor" : "vendors"} asked, no prices yet`
           )}
         </p>
         {need.market && (
@@ -240,6 +252,7 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
 
+      {live.length > 0 && (
       <div className="overflow-x-auto">
         <table className="w-full min-w-[54rem] text-sm">
           <caption className="sr-only">Everyone asked about {need.title}</caption>
@@ -401,45 +414,50 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
           </tbody>
         </table>
       </div>
+      )}
 
-      {need.sheet && quoted.length > 0 && <LineByLine sheet={need.sheet} quoted={quoted} unitWord={unitWord} city={need.market ? city : null} />}
+      {need.sheet && columns.length > 0 && <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} />}
     </section>
   );
 }
 
 /**
- * Every quote for a need on the same rows: the need's standard sheet, line by line, so a
- * charge one vendor names and another leaves out shows as a gap rather than a lower total.
+ * Every quote and offer for a need on the same rows: the need's standard sheet, line by
+ * line, so a charge one vendor names and another leaves out shows as a gap rather than a
+ * lower total. Quotes found on the open web and offers from verified vendors sit side by side.
  */
-function LineByLine({ sheet, quoted, unitWord, city }: { sheet: NonNullable<Need["sheet"]>; quoted: QuotedRow[]; unitWord: string; city: string | null }) {
+function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Need["sheet"]>; columns: Column[]; unitWord: string; city: string | null }) {
   return (
     <div className="border-t border-line px-6 pb-5 pt-4">
       <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
       <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-sm" style={{ minWidth: `${12 + quoted.length * 10}rem` }}>
-          <caption className="sr-only">Each quote against the same lines</caption>
+        <table className="w-full text-sm" style={{ minWidth: `${12 + columns.length * 10}rem` }}>
+          <caption className="sr-only">Each quote and offer against the same lines</caption>
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
               <th scope="col" className="py-2 pr-4 font-normal">
                 <span className="sr-only">Line</span>
               </th>
-              {quoted.map((v) => (
-                <th key={v.vendorId} scope="col" className="px-3 py-2 text-right font-medium text-ink">
-                  {v.name}
+              {columns.map((c) => (
+                <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink">
+                  {c.name}
+                  <span className={`block text-[11px] font-normal ${c.from === "web" ? "text-quiet" : "text-accent"}`}>
+                    {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : "Quote by email"}
+                  </span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
             <tr>
-              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Quoted total</th>
-              {quoted.map((v) => (
-                <td key={v.vendorId} className="px-3 py-2 text-right font-medium">
-                  {money(v.quote.total, v.quote.currency)}
-                  {v.quote.perUnit !== null && (
+              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Total</th>
+              {columns.map((c) => (
+                <td key={c.id} className="px-3 py-2 text-right font-medium">
+                  {money(c.total, c.currency)}
+                  {c.perUnit !== null && (
                     <span className="block text-xs font-normal text-muted">
-                      {money(v.quote.perUnit, v.quote.currency)} per {unitWord}
+                      {money(c.perUnit, c.currency)} per {unitWord}
                     </span>
                   )}
                 </td>
@@ -450,9 +468,9 @@ function LineByLine({ sheet, quoted, unitWord, city }: { sheet: NonNullable<Need
                 <th scope="row" className="py-2 pr-4 text-left font-normal text-muted" title={TIER_NOTE}>
                   In the {city} range
                 </th>
-                {quoted.map((v) => (
-                  <td key={v.vendorId} className="px-3 py-2 text-right text-muted">
-                    {v.quote.tier ?? "—"}
+                {columns.map((c) => (
+                  <td key={c.id} className="px-3 py-2 text-right text-muted">
+                    {c.tier ?? "—"}
                   </td>
                 ))}
               </tr>
@@ -460,12 +478,12 @@ function LineByLine({ sheet, quoted, unitWord, city }: { sheet: NonNullable<Need
             {sheet.lines.map((line) => (
               <tr key={line.key}>
                 <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
-                {quoted.map((v) => (
-                  <td key={v.vendorId} className="px-3 py-2 text-right">
+                {columns.map((c) => (
+                  <td key={c.id} className="px-3 py-2 text-right">
                     <LineCell
-                      reading={v.quote.readings.find((r) => r.key === line.key)}
-                      flagged={v.quote.missing.some((m) => m.key === line.key)}
-                      currency={v.quote.currency}
+                      reading={c.readings.find((r) => r.key === line.key)}
+                      flagged={c.missing.some((m) => m.key === line.key)}
+                      currency={c.currency}
                     />
                   </td>
                 ))}
@@ -473,9 +491,9 @@ function LineByLine({ sheet, quoted, unitWord, city }: { sheet: NonNullable<Need
             ))}
             <tr>
               <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Gaps to ask about</th>
-              {quoted.map((v) => (
-                <td key={v.vendorId} className={`px-3 py-2 text-right ${v.quote.missing.length ? "text-warn" : "text-ok"}`}>
-                  {v.quote.missing.length ? v.quote.missing.length : "None"}
+              {columns.map((c) => (
+                <td key={c.id} className={`px-3 py-2 text-right ${c.missing.length ? "text-warn" : "text-ok"}`}>
+                  {c.missing.length ? c.missing.length : "None"}
                 </td>
               ))}
             </tr>

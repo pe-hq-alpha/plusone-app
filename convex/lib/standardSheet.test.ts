@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { basisFor } from "./comparable";
-import { missingCharges, readQuote, sheetFor, STANDARD_SHEETS } from "./standardSheet";
+import { gapsIn, missingCharges, readQuote, sheetFor, STANDARD_SHEETS } from "./standardSheet";
 import { VENDOR_NEEDS } from "./vocab";
 
 const line = (item: string, kind: "core" | "extra" | "tax" | "fee", amount: number, more: object = {}) => ({
@@ -178,6 +178,21 @@ describe("missing charges", () => {
     expect(asMessages(missingCharges({ total: 60_000, taxIncluded: true, headcountAssumed: 150 }, catering, []))).not.toContain(
       "Doesn't say how many plates the price is for",
     );
+  });
+
+  test("a verified vendor's offer counts among what others charge", () => {
+    const offered = [[{ key: "transport", status: "priced" as const, amount: 1_200 }]];
+    expect(asMessages(missingCharges({ total: 40_000 }, decor, [], offered))).toContain("No transport line, and one other charges ₹1,200");
+  });
+
+  test("an offer's own answers are checked too: an extra with no price is flagged, a priced one isn't", () => {
+    const answers = [
+      { key: "gst", status: "extra" as const, amount: 4_410 },
+      { key: "transport", status: "priced" as const, amount: 1_200 },
+      { key: "setup", status: "included" as const },
+      { key: "lighting", status: "extra" as const },
+    ];
+    expect(asMessages(gapsIn(answers, decor, [], "INR"))).toEqual(["Lighting is extra, with no price given"]);
   });
 
   test("each flag names the sheet line it is about, so Compare can mark that row", () => {

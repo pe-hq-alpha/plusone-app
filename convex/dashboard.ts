@@ -6,9 +6,10 @@ import { slotStatus, threadStatus } from "./lib/validators";
 import type { Infer } from "convex/values";
 import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
-import { missingCharges, readQuote, sheetFor, type Sheet } from "./lib/standardSheet";
+import { gapsIn, missingCharges, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
 import { tierFor } from "./lib/marketplace";
-import { bandRow, tier } from "./marketplace/listings";
+import { badge, bandRow, tier } from "./marketplace/listings";
+import { offersForEvent } from "./marketplace/offers";
 
 /**
  * Everything the couple needs to decide, in one read.
@@ -18,6 +19,33 @@ import { bandRow, tier } from "./marketplace/listings";
  * and each need carries its own cheapest and dearest. Because it is a Convex query,
  * a reply that lands while the couple is looking moves the board under them.
  */
+
+/** One answer on a line of the need's standard sheet (lib/standardSheet). */
+const answer = v.object({
+  key: v.string(),
+  status: v.union(v.literal("priced"), v.literal("included"), v.literal("extra"), v.literal("unstated")),
+  amount: v.optional(v.number()),
+});
+const missingCharge = v.object({ key: v.string(), label: v.string(), message: v.string() });
+
+/** A verified Partner vendor's offer against the family's brief, on the same sheet as the quotes. */
+const offerRow = v.object({
+  offerId: v.id("vendorOffers"),
+  name: v.string(),
+  website: v.optional(v.string()),
+  badges: v.array(badge),
+  /** A sample vendor on a sample event, labelled as one. */
+  sample: v.boolean(),
+  total: v.number(),
+  currency: v.string(),
+  /** The total per plate or piece; null for an "all in" need. */
+  perUnit: v.union(v.number(), v.null()),
+  covers: v.optional(v.string()),
+  notes: v.optional(v.string()),
+  readings: v.array(answer),
+  missing: v.array(missingCharge),
+  tier: v.union(tier, v.null()),
+});
 
 const vendorRow = v.object({
   vendorId: v.id("vendors"),
@@ -64,15 +92,9 @@ const vendorRow = v.object({
       flags: v.array(v.string()),
       lines: v.array(v.object({ item: v.string(), amount: v.number(), optional: v.boolean() })),
       /** What the quote says about each line of the need's standard sheet (lib/standardSheet). */
-      readings: v.array(
-        v.object({
-          key: v.string(),
-          status: v.union(v.literal("priced"), v.literal("included"), v.literal("extra"), v.literal("unstated")),
-          amount: v.optional(v.number()),
-        }),
-      ),
-      /** Charges it leaves unsaid, against the sheet and the other quotes for the same need. */
-      missing: v.array(v.object({ key: v.string(), label: v.string(), message: v.string() })),
+      readings: v.array(answer),
+      /** Charges it leaves unsaid, against the sheet, the other quotes and the offers for the same need. */
+      missing: v.array(missingCharge),
       /** Where the quote sits in its city's range (Value, Standard, Premium, Luxury); null with no range. It places a price, never judges it. */
       tier: v.union(tier, v.null()),
     }),
@@ -92,20 +114,19 @@ function comparison(...args: Parameters<typeof compare>) {
   return { perUnit, atYourNumbers, flags };
 }
 
-/** Where a quote sits in its city's range, in the need's unit: the total for "all in" needs, per plate or piece for the rest. */
-function placeInBand(quote: Doc<"quotes">, ...[basis, units, band]: [Parameters<typeof compare>[1], number, Doc<"priceBands"> | null]) {
-  if (!band || band.currency !== quote.currency) return null;
-  const price = basis === "total" ? quote.total : compare(quote, basis, units).perUnit;
-  return price === null ? null : (tierFor(price, band) ?? null);
+/** Where a price, in the need's unit, sits in its city's range; null with no range, in another currency, or with no price in that unit. */
+function placeInBand(price: number | null, currency: string, band: Doc<"priceBands"> | null) {
+  if (!band || band.currency !== currency || price === null) return null;
+  return tierFor(price, band) ?? null;
 }
 
-/** A quote against its need's standard sheet: each line, and what it leaves unsaid. */
-function againstSheet(quote: Doc<"quotes">, sheet: Sheet | null, others: Doc<"quotes">[]) {
+/** An answer as the board returns it, without an empty amount. */
+const plain = ({ key, status, amount }: Answer) => (amount === undefined ? { key, status } : { key, status, amount });
+
+/** A quote against its need's standard sheet: each line, and what it leaves unsaid next to the other quotes and the offers. */
+function againstSheet(quote: Doc<"quotes">, sheet: Sheet | null, others: Doc<"quotes">[], offered: Answer[][]) {
   if (!sheet) return { readings: [], missing: [] };
-  return {
-    readings: readQuote(quote, sheet).map(({ key, status, amount }) => (amount === undefined ? { key, status } : { key, status, amount })),
-    missing: missingCharges(quote, sheet, others),
-  };
+  return { readings: readQuote(quote, sheet).map(plain), missing: missingCharges(quote, sheet, others, offered) };
 }
 
 export const board = query({
@@ -155,11 +176,17 @@ export const board = query({
           v.null(),
         ),
         vendors: v.array(vendorRow),
+        /** Offers from verified Partner vendors who answered the family's brief for this need. */
+        offers: v.array(offerRow),
       }),
     ),
   }),
   handler: async (ctx, args) => {
     const { event } = await requireMember(ctx, args.eventId);
+
+    // Verified vendors' offers against the family's briefs, by need.
+    const offersBySlot = new Map<Id<"vendorSlots">, Awaited<ReturnType<typeof offersForEvent>>>();
+    for (const o of await offersForEvent(ctx, args.eventId)) offersBySlot.set(o.slotId, [...(offersBySlot.get(o.slotId) ?? []), o]);
 
     const sessions = await ctx.db
       .query("sessions")
@@ -247,6 +274,8 @@ export const board = query({
       // A sample event sees ranges that count the sample vendors; a real family only real prices.
       const band = await bandRow(ctx, slot.category, basis, event.city, event.demo === true);
       const slotQuotes = vendors.map((vendor) => quoteByVendor.get(vendor._id)).filter((q): q is Doc<"quotes"> => !!q);
+      const slotOffers = offersBySlot.get(slot._id) ?? [];
+      const offered: Answer[][] = slotOffers.map((o) => o.lines);
 
       const rows: VendorRow[] = [];
       for (const vendor of vendors) {
@@ -313,9 +342,9 @@ export const board = query({
                 summary: quote.summary,
                 deltaVsBudget: quote.total - slot.budget,
                 ...comparison(quote, basis, units),
-                tier: placeInBand(quote, basis, units, band),
+                tier: placeInBand(basis === "total" ? quote.total : compare(quote, basis, units).perUnit, quote.currency, band),
                 lines: (quote.lines ?? []).slice(0, 12).map((l) => ({ item: l.item, amount: l.amount, optional: Boolean(l.optional) })),
-                ...againstSheet(quote, sheet, slotQuotes.filter((o) => o._id !== quote._id)),
+                ...againstSheet(quote, sheet, slotQuotes.filter((o) => o._id !== quote._id), offered),
               }
             : null,
           availableOnDates: availability?.verdict ?? null,
@@ -352,6 +381,26 @@ export const board = query({
         sheet: sheet && { covers: sheet.covers, lines: sheet.lines.map(({ key, label }) => ({ key, label })) },
         market: band && band.currency === event.currency ? { count: band.count, p25: band.p25, p50: band.p50, p75: band.p75, p90: band.p90, currency: band.currency } : null,
         vendors: rows,
+        offers: slotOffers.map((o, i) => {
+          // An offer priced in the need's own unit is placed per plate or piece; an "all in" need by its total.
+          const perUnit = basis === "total" || o.unit !== basis || o.quantity <= 0 ? null : Math.round(o.total / o.quantity);
+          const theirs = sheet ? [...slotQuotes.map((q) => readQuote(q, sheet)), ...offered.filter((_, j) => j !== i)] : [];
+          return {
+            offerId: o._id,
+            name: o.vendor.name,
+            website: o.vendor.website,
+            badges: o.vendor.badges,
+            sample: o.vendor.sample,
+            total: o.total,
+            currency: o.currency,
+            perUnit,
+            covers: o.covers,
+            notes: o.notes,
+            readings: o.lines.map(plain),
+            missing: sheet ? gapsIn(o.lines, sheet, theirs, o.currency) : [],
+            tier: placeInBand(basis === "total" ? o.total : perUnit, o.currency, band),
+          };
+        }),
       });
     }
 

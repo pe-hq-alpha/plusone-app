@@ -89,14 +89,38 @@ describe("missing charges on the decision board", () => {
           .vendors.filter((v) => v.quote)
           .map((v) => [v.name, v.quote!.missing.map((m) => m.message)]),
       );
+    // The verified sample vendors' offers count among what others charge: transport at
+    // ₹1,500 from Kalyana Saapadu, water at ₹600 extra from Komalam.
     expect(gapsIn("Catering")).toEqual({
-      "Annam Caterers": ["No transport line, and one other charges ₹2,500"],
-      "Saapadu Kitchen": [],
-      "Kaveri Feast Co.": ["GST is extra, with no amount given", "No service staff line, and one other charges ₹6,000"],
+      "Annam Caterers": ["No transport line, and two others charge ₹1,500–₹2,500", "No water line, and one other charges ₹600"],
+      "Saapadu Kitchen": ["No water line, and one other charges ₹600"],
+      "Kaveri Feast Co.": [
+        "GST is extra, with no amount given",
+        "No service staff line, and one other charges ₹6,000",
+        "No water line, and one other charges ₹600",
+      ],
     });
     expect(gapsIn("Venue")).toEqual({
       "Thamarai Hall": ["Doesn't say whether air conditioning is included", "Doesn't say what an extra hour costs"],
     });
+  });
+
+  test("Amma's 60th: verified vendors' offers sit beside the quotes, on the same lines, labelled as samples", async () => {
+    const t = setup();
+    const { userId, eventId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
+      return { userId, eventId: await seedBirthday(ctx, userId) };
+    });
+    const board = await as(t, userId).query(api.dashboard.board, { eventId });
+    const catering = board.needs.find((n) => n.category === "Catering")!;
+    expect(catering.offers.map((o) => [o.name, o.total, o.perUnit, o.sample])).toEqual([
+      ["Kalyana Saapadu Co.", 44_340, 370, true],
+      ["Komalam Caterers", 54_000, 450, true],
+    ]);
+    const komalam = catering.offers.find((o) => o.name === "Komalam Caterers")!;
+    expect(komalam.readings.find((r) => r.key === "water")).toEqual({ key: "water", status: "extra", amount: 600 });
+    expect(komalam.missing).toEqual([]);
+    expect(board.needs.find((n) => n.category === "Decor & Florals")!.offers.map((o) => o.name)).toEqual(["Jasmine Arch Decorators"]);
   });
 
   test("a need with no sheet has no rows and flags nothing", async () => {

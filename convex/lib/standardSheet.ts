@@ -245,9 +245,8 @@ const OTHERS = ["", "one other", "two others", "three others", "four others"];
  * the same need: "Doesn't say whether GST is included"; "No transport line, and two others
  * charge ₹2,000–₹3,000".
  */
-export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[]): MissingCharge[] {
+export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[], offered: Answer[][] = []): MissingCharge[] {
   const flags: MissingCharge[] = [];
-  const currency = q.currency ?? "INR";
   if (sheet.unit === "per_person" || sheet.unit === "per_piece") {
     const perUnit = (q.lines ?? []).some((l) => l.kind === "core" && l.unit === sheet.unit);
     if (!perUnit && !q.headcountAssumed) {
@@ -255,13 +254,25 @@ export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[]):
       flags.push({ key: "unit", label: `Number of ${what}`, message: `Doesn't say how many ${what} the price is for` });
     }
   }
+  const theirs = [...others.map((o) => readQuote(o, sheet)), ...offered];
+  return [...flags, ...gapsIn(readQuote(q, sheet), sheet, theirs, q.currency ?? "INR")];
+}
 
-  const theirs = others.map((o) => readQuote(o, sheet));
-  for (const r of readQuote(q, sheet)) {
-    const line = sheet.lines.find((s) => s.key === r.key)!;
+/** One answer on a sheet line: a quote's reading, or a Partner offer's answer as the vendor gave it. */
+export type Answer = Pick<LineReading, "key" | "status" | "amount">;
+
+/**
+ * The gaps in answers already made against a sheet: a quote's reading, or a verified vendor's
+ * offer. `theirs` are the other answers for the same need, whose prices say what others charge.
+ */
+export function gapsIn(answers: Answer[], sheet: Sheet, theirs: Answer[][], currency: string): MissingCharge[] {
+  const flags: MissingCharge[] = [];
+  for (const r of answers) {
+    const line = sheet.lines.find((s) => s.key === r.key);
+    if (!line) continue;
     const charged = theirs
       .map((rs) => rs.find((x) => x.key === r.key))
-      .filter((x): x is LineReading => !!x && x.amount !== undefined && (x.status === "priced" || x.status === "extra"))
+      .filter((x): x is Answer => !!x && x.amount !== undefined && (x.status === "priced" || x.status === "extra"))
       .map((x) => x.amount!);
     const elsewhere = charged.length ? `${countOthers(charged.length)} ${charged.length === 1 ? "charges" : "charge"} ${range(charged, currency)}` : "";
 
@@ -276,7 +287,7 @@ export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[]):
           ? `${line.label} is extra, with no amount given`
           : `${line.label} is extra, with no price given${charged.length ? `; ${elsewhere}` : ""}`;
     }
-    if (message) flags.push({ key: r.key, label: r.label, message });
+    if (message) flags.push({ key: r.key, label: line.label, message });
   }
   return flags;
 }
