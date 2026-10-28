@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { api, internal } from "./_generated/api";
 import { callRecord, costUsd } from "./lib/modelCost";
 import { generateText } from "./lib/models";
+import { RECORDED_RUN } from "./lib/recordedRun";
+import { seedBirthday } from "./demoBirthday";
 import schema from "./schema";
 
 const modules = import.meta.glob("./**/*.ts");
@@ -119,5 +121,47 @@ describe("under the hood", () => {
     expect(calls[0]).toMatchObject({ provider: "meta", model: "muse-spark-1.3", inputTokens: 2_000, outputTokens: 500, fellBack: false });
     expect(calls[0].durationMs).toBeGreaterThanOrEqual(0);
     await expect(t.withIdentity({ subject: `${strangerId}|s` }).query(api.modelCalls.forEvent, { eventId })).rejects.toThrow();
+  });
+});
+
+const QUOTE_READING = JSON.stringify({
+  classification: "quote", total: 66150, deposit: 15000, currency: "INR", availability: "free on the date", availableOnDates: "yes",
+  includes: [], excludes: [], lines: [], headcountAssumed: 150, taxIncluded: true, deadline: null, summary: "₹66,150.",
+  redFlags: [], attachmentKind: "none", pricesFromAttachment: false, optOut: false,
+});
+
+describe("the demo's recorded run", () => {
+  it("reads each of a sample event's catering replies on Muse Spark, one recorded call each", async () => {
+    const fetchFn = metaAnswers(QUOTE_READING);
+    const t = convexTest(schema, modules);
+    const eventId = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
+      return await seedBirthday(ctx, userId);
+    });
+    const readings = await t.action(internal.claude.readDemoQuotes, { eventId });
+    expect(readings.map((r) => r.vendorName).sort()).toEqual(["Annam Caterers", "Kaveri Feast Co.", "Saapadu Kitchen"]);
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(readings.map((r) => r.call?.feature)).toEqual(Array(3).fill("readVendorReply"));
+    const rows = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(rows.map((r) => [r.feature, r.eventId])).toEqual(Array(3).fill(["readVendorReply", eventId]));
+  });
+
+  it("shows on sample events only, as recorded steps with their date", async () => {
+    const t = convexTest(schema, modules);
+    const { userId, demoId, realId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
+      const demoId = await seedBirthday(ctx, userId);
+      const realId = await ctx.db.insert("events", {
+        name: "Aarav's 1st birthday", host: "Meera", coHost: "", startDate: "2027-01-24", endDate: "2027-01-24", city: "Mumbai",
+        currency: "INR", totalBudget: 300000, eventType: "birthday", createdBy: userId,
+      });
+      await ctx.db.insert("members", { eventId: realId, userId, role: "owner" });
+      return { userId, demoId, realId };
+    });
+    const as = t.withIdentity({ subject: `${userId}|s` });
+    const recorded = await as.query(api.modelCalls.recorded, { eventId: demoId });
+    expect(recorded.length).toBe(RECORDED_RUN.calls.length);
+    for (const row of recorded) expect(row).toMatchObject({ provider: "meta", recordedOn: RECORDED_RUN.on });
+    expect(await as.query(api.modelCalls.recorded, { eventId: realId })).toEqual([]);
   });
 });

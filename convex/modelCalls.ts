@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { internalMutation, query } from "./_generated/server";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import { requireMember } from "./lib/auth";
+import { RECORDED_RUN } from "./lib/recordedRun";
 import { modelCallFields } from "./schema";
 
 /**
@@ -53,5 +54,42 @@ export const forEvent = query({
       durationMs: r.durationMs,
       fellBack: r.fellBack,
     }));
+  },
+});
+
+/**
+ * On a sample event, the recorded Muse Spark run on its own catering quotes (`lib/recordedRun.ts`),
+ * so the demo shows real steps before anyone types. Real events get nothing here.
+ */
+export const recorded = query({
+  args: { eventId: v.id("events") },
+  returns: v.array(
+    v.object({
+      feature: v.string(),
+      note: v.string(),
+      provider: v.literal("meta"),
+      model: v.string(),
+      inputTokens: v.number(),
+      outputTokens: v.number(),
+      costUsd: v.number(),
+      durationMs: v.number(),
+      recordedOn: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    await requireMember(ctx, args.eventId, "viewer");
+    const event = await ctx.db.get(args.eventId);
+    if (event?.demo !== true) return [];
+    return RECORDED_RUN.calls.map((c) => ({ ...c, provider: "meta" as const, recordedOn: RECORDED_RUN.on }));
+  },
+});
+
+/** An event's newest call for one feature, as the cost record kept it. */
+export const latestFor = internalQuery({
+  args: { eventId: v.id("events"), feature: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db.query("modelCalls").withIndex("by_eventId", (q) => q.eq("eventId", args.eventId)).order("desc").take(100);
+    return rows.find((r) => r.feature === args.feature) ?? null;
   },
 });

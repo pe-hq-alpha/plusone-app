@@ -867,6 +867,31 @@ export const readVendorReplySample = internalAction({
   },
 });
 
+/**
+ * The guest demo's recorded run: read a sample event's quoted replies again, on whichever
+ * provider the deployment uses, each call landing in the cost record against that event.
+ * Run by hand on production (`npx convex run claude:readDemoQuotes`); its rows become
+ * `lib/recordedRun.ts`. Refuses a real event.
+ */
+export const readDemoQuotes = internalAction({
+  args: { eventId: v.optional(v.id("events")) },
+  returns: v.array(v.object({ vendorName: v.string(), reading: v.any(), call: v.any() })),
+  handler: async (ctx, args): Promise<Array<{ vendorName: string; reading: ReplyReading; call: Doc<"modelCalls"> | null }>> => {
+    const replies = await ctx.runQuery(internal.quotes.demoReplies, { eventId: args.eventId });
+    const out = [];
+    for (const r of replies) {
+      const context = await ctx.runQuery(internal.events.getContext, { eventId: r.eventId });
+      if (!context) continue;
+      const slot = await ctx.runQuery(internal.slots.getInternal, { slotId: r.slotId });
+      const reading = await readVendorReply(ctx, { event: context.event, slot, vendorName: r.vendorName, subject: r.subject, body: r.body });
+      // The cost row the call just wrote: what goes into lib/recordedRun.ts.
+      const call = await ctx.runQuery(internal.modelCalls.latestFor, { eventId: r.eventId, feature: "readVendorReply" });
+      out.push({ vendorName: r.vendorName, reading, call });
+    }
+    return out;
+  },
+});
+
 /** Classify + extract a vendor reply, then update quote / thread / budget / activity. */
 export const extractReply = internalAction({
   args: { messageId: v.id("messages") },

@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { internalMutation, mutation, query, type MutationCtx } from "./_generated/server";
+import { internalMutation, internalQuery, mutation, query, type MutationCtx } from "./_generated/server";
 import { logActivity, requireMember } from "./lib/auth";
 import { quoteDoc } from "./lib/docs";
 import { formatMoney } from "./lib/text";
@@ -255,5 +255,30 @@ export const upsertFromMessage = internalMutation({
     });
     await trackForEvent(ctx, "quote.received", thread.eventId, { fromAttachment: Boolean(args.fromAttachment), held: Boolean(held) });
     return quoteId;
+  },
+});
+
+/**
+ * A sample event's catering replies that carry a quote, for the demo's recorded run
+ * (`claude.readDemoQuotes`): the given sample event, or the newest one. Real events never.
+ */
+export const demoReplies = internalQuery({
+  args: { eventId: v.optional(v.id("events")) },
+  returns: v.array(v.object({ eventId: v.id("events"), slotId: v.id("vendorSlots"), vendorName: v.string(), subject: v.string(), body: v.string() })),
+  handler: async (ctx, args) => {
+    const event = args.eventId
+      ? await ctx.db.get(args.eventId)
+      : await ctx.db.query("events").withIndex("by_demo", (q) => q.eq("demo", true)).order("desc").first();
+    if (!event || event.demo !== true) return [];
+    const out = [];
+    for (const quote of await ctx.db.query("quotes").withIndex("by_eventId", (q) => q.eq("eventId", event._id)).take(50)) {
+      const slot = quote.slotId ? await ctx.db.get(quote.slotId) : null;
+      if (slot?.category !== "Catering" || !quote.messageId) continue;
+      const message = await ctx.db.get(quote.messageId);
+      const vendor = quote.vendorId ? await ctx.db.get(quote.vendorId) : null;
+      if (!message || !vendor) continue;
+      out.push({ eventId: event._id, slotId: slot._id, vendorName: vendor.name, subject: message.subject, body: message.bodyText });
+    }
+    return out;
   },
 });

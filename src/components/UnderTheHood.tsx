@@ -46,6 +46,7 @@ const clock = (at: number) => new Date(at).toLocaleTimeString([], { hour: "2-dig
  */
 export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onClose: () => void }) {
   const calls = useQuery(api.modelCalls.forEvent, { eventId });
+  const recorded = useQuery(api.modelCalls.recorded, { eventId });
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -79,7 +80,8 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
             <p className="text-sm text-muted">Loading…</p>
           ) : calls.length === 0 ? (
             <p className="text-sm text-muted">
-              Nothing yet. Ask {BRAND.name} something on Today, such as &ldquo;We&rsquo;re now 140 people&rdquo;, and the step shows up here.
+              {recorded?.length ? "Nothing from this visit yet. " : "Nothing yet. "}
+              Ask {BRAND.name} something on Today, such as &ldquo;We&rsquo;re now 140 people&rdquo;, and the step shows up here.
             </p>
           ) : (
             <ol className="grid gap-2.5">
@@ -99,6 +101,32 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
                 </li>
               ))}
             </ol>
+          )}
+
+          {recorded && recorded.length > 0 && (
+            <section className="mt-6" aria-labelledby="hood-recorded">
+              <h3 id="hood-recorded" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">
+                Recorded {recorded[0].recordedOn}
+              </h3>
+              <p className="mt-1 text-xs text-muted">
+                The real run that read this sample event&rsquo;s catering quotes into the lines Compare shows, kept so you can see it without waiting.
+              </p>
+              <ol className="mt-2.5 grid gap-2.5">
+                {recorded.map((c, i) => (
+                  <li key={i} className="card-quiet px-3.5 py-3">
+                    <p className="text-sm">{STEP[c.feature] ?? c.feature}: {c.note}</p>
+                    <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+                      <span className="chip-pending">{modelName(c.model, c.provider)}</span>
+                      <span className="tabular-nums">{seconds(c.durationMs)}</span>
+                      <span className="tabular-nums">
+                        {c.inputTokens.toLocaleString()} in · {c.outputTokens.toLocaleString()} out
+                      </span>
+                      <span className="tabular-nums">{dollars(c.costUsd)}</span>
+                    </p>
+                  </li>
+                ))}
+              </ol>
+            </section>
           )}
         </div>
 
