@@ -425,3 +425,51 @@ describe("briefs and offers", () => {
     expect(familyId).toBeDefined();
   });
 });
+
+describe("the guest demo's Partner side", () => {
+  test("a sample event gets complete offers from sample vendors, with sample ranges beside them", async () => {
+    const t = setup();
+    const { eventId } = await familyEvent(t, { demo: true });
+    await t.run(async (ctx) => {
+      const lunch = (await ctx.db.query("sessions").collect())[0];
+      for (const category of ["Decor & Florals", "Photographer"]) {
+        await ctx.db.insert("vendorSlots", { eventId, sessionIds: [lunch._id], category, title: category, budget: 30000, status: "research" });
+      }
+    });
+    expect(await t.mutation(internal.marketplace.samples.seedForEvent, { eventId })).toBe(4);
+
+    const offers = await t.query(internal.marketplace.offers.offersFor, { eventId });
+    const byVendor = Object.fromEntries(offers.map((o) => [o.vendor.name, o]));
+    expect(byVendor["Kalyana Saapadu Co."]).toMatchObject({ quantity: 120, total: 340 * 120 + 2040 + 1500 });
+    expect(byVendor["Komalam Caterers"].total).toBe(450 * 120);
+    expect(byVendor["Jasmine Arch Decorators"].total).toBe(24_500 + 1200);
+    expect(byVendor["Thinnai Photography"].total).toBe(12_500);
+    for (const o of offers) {
+      expect(o.vendor.sample).toBe(true);
+      expect(o.lines.every((l) => l.status !== "unstated")).toBe(true);
+    }
+
+    const band = await t.query(internal.marketplace.listings.bandFor, { category: "Catering", unit: "per_person", city: "Chennai", samples: true });
+    expect(band).toMatchObject({ count: 10, p50: 360 });
+    expect(await t.query(internal.marketplace.listings.bandFor, { category: "Catering", unit: "per_person", city: "Chennai" })).toBeNull();
+    expect(await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai" })).toEqual([]);
+
+    // Seeding the vendors again adds nobody twice.
+    expect(await t.mutation(internal.marketplace.samples.ensureVendors, {})).toBe(26);
+    expect((await t.run(async (ctx) => await ctx.db.query("vendorProfiles").collect())).length).toBe(26);
+  });
+
+  test("sample offers never go on a real family's event, and deleting an event takes its briefs and offers", async () => {
+    const t = setup();
+    const real = await familyEvent(t);
+    await expect(t.mutation(internal.marketplace.samples.seedForEvent, { eventId: real.eventId })).rejects.toThrow(/sample events only/);
+
+    const demo = await familyEvent(t, { demo: true });
+    await t.mutation(internal.marketplace.samples.seedForEvent, { eventId: demo.eventId });
+    expect(await t.query(internal.marketplace.offers.offersFor, { eventId: demo.eventId })).toHaveLength(2);
+    let done = false;
+    while (!done) done = (await t.mutation(internal.maintenance.deleteEvent, { eventId: demo.eventId })).done;
+    const left = await t.run(async (ctx) => [(await ctx.db.query("vendorBriefs").collect()).length, (await ctx.db.query("vendorOffers").collect()).length]);
+    expect(left).toEqual([0, 0]);
+  });
+});

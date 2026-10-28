@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "../_generated/server";
-import { requireStaff } from "../lib/auth";
+import { currentUserId, requireStaff } from "../lib/auth";
 import { profileStatus, vendorOfferingFields, vendorProfileFields, vettingReviewFields } from "../schema";
 
 /**
@@ -31,6 +31,17 @@ const queueClaim = v.object({
   claimantEmail: v.optional(v.string()),
   note: v.optional(v.string()),
   createdAt: v.number(),
+});
+
+/** The caller's role on the PlusOne team, or null, so the Ops page can say it's not for them. */
+export const amStaff = query({
+  args: {},
+  returns: v.union(v.literal("admin"), v.literal("reviewer"), v.null()),
+  handler: async (ctx) => {
+    const userId = await currentUserId(ctx);
+    const user = userId ? await ctx.db.get(userId) : null;
+    return user && !user.isAnonymous ? (user.staffRole ?? null) : null;
+  },
 });
 
 /** What's waiting for a person: sign-ups and changed listings to verify, and claims to check. */

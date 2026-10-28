@@ -797,6 +797,7 @@ export default defineSchema({
   priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),
 
   vendorBriefs: defineTable(vendorBriefFields)
+    .index("by_eventId", ["eventId"])
     .index("by_slotId", ["slotId"])
     .index("by_category_and_cityKey_and_status", ["category", "cityKey", "status"]),
 

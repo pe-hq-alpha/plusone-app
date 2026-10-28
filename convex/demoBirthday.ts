@@ -7,6 +7,7 @@ import { logActivity } from "./lib/auth";
 import { APP_ACTOR, BRAND } from "./lib/brand";
 import { DAY, addVendor, conversation, longDateIN, researched, slotsOf, type SeedVendor, seedBoard } from "./lib/demoKit";
 import { addDays } from "./lib/text";
+import { seedSampleOffers } from "./marketplace/samples";
 import { siteSlug } from "./site";
 
 /**
@@ -431,5 +432,7 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
       vendors: [thamarai],
     },
   ]);
+  // Verified Partner vendors answer the same brief on the standard sheet, beside the quotes found on the web.
+  await seedSampleOffers(ctx, eventId);
   return eventId;
 }
