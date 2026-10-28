@@ -101,7 +101,7 @@ export const submit = mutation({
     const { userId, profile } = await requireVendor(ctx);
     if (profile.status !== "verified") throw new ConvexError("You can answer customers once PlusOne has verified your business.");
     const brief = await ctx.db.get(args.briefId);
-    if (!brief || brief.status !== "open") throw new ConvexError("This family is no longer taking offers.");
+    if (!brief || brief.status !== "open") throw new ConvexError("This customer is no longer taking offers.");
     if (brief.demo !== (profile.sample === true) || brief.cityKey !== profile.cityKey || !profile.categories.includes(brief.category)) {
       throw new ConvexError("This request isn't for your kind of service or your city.");
     }
@@ -196,7 +196,7 @@ export const mine = query({
         return {
           _id: o._id,
           briefId: o.briefId,
-          briefTitle: brief?.title ?? "A family's request",
+          briefTitle: brief?.title ?? "A customer's request",
           occasion: brief?.occasion ?? "",
           date: brief?.date ?? "",
           briefOpen: brief?.status === "open",
