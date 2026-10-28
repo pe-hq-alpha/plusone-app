@@ -31,7 +31,12 @@ const TIER_NOTE =
 
 /** The quote's own warnings, less "GST extra" when the line-by-line gaps already say it. */
 function flagsBesideGaps(q: Quote): string[] {
-  return q.missing.some((m) => m.key === "gst") ? q.flags.filter((f) => !/^GST extra$/i.test(f)) : q.flags;
+  return besideGaps(q.flags, q);
+}
+
+/** Notes about a quote, less those about GST when a missing-charge line already says it, so it is said once. */
+function besideGaps(notes: string[], q: Quote): string[] {
+  return q.missing.some((m) => m.key === "gst") ? notes.filter((n) => !/\b(GST|tax(es)?)\b/i.test(n)) : notes;
 }
 
 /** How each state reads on the board, and what it looks like. */
@@ -140,7 +145,7 @@ export function DecisionsPage() {
       ) : (
         <div className="mt-7 grid gap-5">
           {shown.map((need) => (
-            <NeedBoard key={need.slotId} need={need} currency={board.currency} city={event.city} canEdit={canEdit} eventId={eventId} />
+            <NeedBoard key={need.slotId} need={need} currency={board.currency} city={event.city} demo={event.demo === true} canEdit={canEdit} eventId={eventId} />
           ))}
         </div>
       )}
@@ -167,7 +172,7 @@ function Kpi({ label, value, note, tone }: { label: string; value: string; note:
 }
 
 /** One need, with everyone in the running side by side. */
-function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; currency: string; city: string; canEdit: boolean; eventId: Id<"events"> }) {
+function NeedBoard({ need, currency, city, demo, canEdit, eventId }: { need: Need; currency: string; city: string; demo: boolean; canEdit: boolean; eventId: Id<"events"> }) {
   const markBooked = useMutation(api.slots.markBooked);
   const setStatus = useMutation(api.threads.setStatus);
   const [busy, setBusy] = useState<string | null>(null);
@@ -360,11 +365,11 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
                     ) : (
                       <span className="text-quiet">—</span>
                     )}
-                    {v.quote && v.quote.excludes.length > 0 && (
-                      <p className="mt-1 max-w-[18rem] text-xs text-quiet">Not included: {v.quote.excludes.slice(0, 2).join(", ")}</p>
+                    {v.quote && besideGaps(v.quote.excludes, v.quote).length > 0 && (
+                      <p className="mt-1 max-w-[18rem] text-xs text-quiet">Not included: {besideGaps(v.quote.excludes, v.quote).slice(0, 2).join(", ")}</p>
                     )}
-                    {v.quote && v.quote.redFlags.length > 0 && (
-                      <p className="mt-1 max-w-[18rem] text-xs text-warn">{v.quote.redFlags.slice(0, 2).join("; ")}</p>
+                    {v.quote && besideGaps(v.quote.redFlags, v.quote).length > 0 && (
+                      <p className="mt-1 max-w-[18rem] text-xs text-warn">{besideGaps(v.quote.redFlags, v.quote).slice(0, 2).join("; ")}</p>
                     )}
                     {v.quote && v.quote.missing.length > 0 && (
                       <ul className="mt-1.5 max-w-[18rem] space-y-0.5 text-xs leading-relaxed text-warn" aria-label={`What ${v.name}'s quote leaves unsaid`}>
@@ -416,7 +421,9 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
       </div>
       )}
 
-      {need.sheet && columns.length > 0 && <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} />}
+      {need.sheet && columns.length > 0 && (
+        <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} vendorSide={demo && need.offers.length > 0} />
+      )}
     </section>
   );
 }
@@ -426,17 +433,37 @@ function NeedBoard({ need, currency, city, canEdit, eventId }: { need: Need; cur
  * line, so a charge one vendor names and another leaves out shows as a gap rather than a
  * lower total. Quotes found on the open web and offers from verified vendors sit side by side.
  */
-function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Need["sheet"]>; columns: Column[]; unitWord: string; city: string | null }) {
+function LineByLine({
+  sheet,
+  columns,
+  unitWord,
+  city,
+  vendorSide,
+}: {
+  sheet: NonNullable<Need["sheet"]>;
+  columns: Column[];
+  unitWord: string;
+  city: string | null;
+  /** On a sample event, a way to answer the brief as a sample vendor. */
+  vendorSide: boolean;
+}) {
   return (
     <div className="border-t border-line px-6 pb-5 pt-4">
-      <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
+        {vendorSide && (
+          <Link to="/partner" className="text-xs text-accent underline-offset-4 hover:underline">
+            See the vendor&rsquo;s side &rarr;
+          </Link>
+        )}
+      </div>
       <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full text-sm" style={{ minWidth: `${12 + columns.length * 10}rem` }}>
+        <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
           <caption className="sr-only">Each quote and offer against the same lines</caption>
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
-              <th scope="col" className="py-2 pr-4 font-normal">
+              <th scope="col" className="sticky left-0 z-[1] bg-cream py-2 pr-4 font-normal">
                 <span className="sr-only">Line</span>
               </th>
               {columns.map((c) => (
@@ -451,7 +478,7 @@ function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Nee
           </thead>
           <tbody className="divide-y divide-line">
             <tr>
-              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Total</th>
+              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Total</th>
               {columns.map((c) => (
                 <td key={c.id} className="px-3 py-2 text-right font-medium">
                   {money(c.total, c.currency)}
@@ -465,7 +492,7 @@ function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Nee
             </tr>
             {city && (
               <tr>
-                <th scope="row" className="py-2 pr-4 text-left font-normal text-muted" title={TIER_NOTE}>
+                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted" title={TIER_NOTE}>
                   In the {city} range
                 </th>
                 {columns.map((c) => (
@@ -477,7 +504,7 @@ function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Nee
             )}
             {sheet.lines.map((line) => (
               <tr key={line.key}>
-                <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
+                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
                 {columns.map((c) => (
                   <td key={c.id} className="px-3 py-2 text-right">
                     <LineCell
@@ -490,7 +517,7 @@ function LineByLine({ sheet, columns, unitWord, city }: { sheet: NonNullable<Nee
               </tr>
             ))}
             <tr>
-              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Gaps to ask about</th>
+              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Gaps to ask about</th>
               {columns.map((c) => (
                 <td key={c.id} className={`px-3 py-2 text-right ${c.missing.length ? "text-warn" : "text-ok"}`}>
                   {c.missing.length ? c.missing.length : "None"}
