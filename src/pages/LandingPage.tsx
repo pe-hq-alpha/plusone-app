@@ -41,7 +41,7 @@ const HOW_VENDORS = [
   { title: "Be compared fairly", text: "Your offer sits line by line beside the others, so what you include counts, not just the total." },
 ];
 
-/** Three celebrations fanned under the hero's actions, Western and Indian. Generated images, not customers' events. */
+/** Three celebrations fanned beside How it works' heading, Western and Indian. Generated images, not customers' events. */
 const FAN = [
   { src: "/photos/first-birthday.jpg", alt: "A baby in a high chair reaching for a small white cake at a first birthday, parents and grandparents laughing, pastel balloons behind" },
   { src: "/photos/sangeet.jpg", alt: "Family dancing at a sangeet night under marigold garlands and fairy lights" },
@@ -62,7 +62,7 @@ const KINDS = [
 ];
 
 /** What rises into place as it scrolls into view, and the parent whose children step in one after another. */
-const REVEAL = ".rs-sec .rs-h2, .rs-sec .rs-lede, .rs-line__stop, .rs-card, .rs-kinds__group, .rs-photo, .rs-compare, .rs-close__inner > *";
+const REVEAL = ".rs-sec .rs-h2, .rs-sec .rs-lede, .rs-fan, .rs-line__stop, .rs-card, .rs-kinds__group, .rs-photo, .rs-compare, .rs-close__inner > *";
 
 /** Sections rise into place as they come into view; nothing is hidden when motion is unwelcome or unsupported. */
 function useReveal() {
@@ -139,9 +139,6 @@ export function LandingPage() {
               Vendors: get found by people planning near you, with or without a website.{" "}
               <Link to={partnerHref("/")}>List your business &rarr;</Link>
             </p>
-            <div className="rs__fan">
-              {FAN.map((p) => <img key={p.src} src={p.src} alt={p.alt} width={560} height={700} decoding="async" />)}
-            </div>
           </div>
 
           <section className="rs__status" aria-labelledby="status-title">
@@ -167,8 +164,15 @@ export function LandingPage() {
 
       <section id="how" className="rs-sec" aria-labelledby="how-title">
         <div className="rs-wrap">
-          <h2 id="how-title" className="rs-h2">One app for the whole event. <em>Every quote on the same lines.</em></h2>
-          <p className="rs-lede">Planning usually means calls, chats, email and a spreadsheet, and no two quotes written alike. {BRAND.name} puts the plan in one place for the people planning, and gives vendors one sheet to answer on, so every price can be compared.</p>
+          <div className="rs-split rs-how-head">
+            <div>
+              <h2 id="how-title" className="rs-h2">One app for the whole event. <em>Every quote on the same lines.</em></h2>
+              <p className="rs-lede">Planning usually means calls, chats, email and a spreadsheet, and no two quotes written alike. {BRAND.name} puts the plan in one place for the people planning, and gives vendors one sheet to answer on, so every price can be compared.</p>
+            </div>
+            <div className="rs__fan rs-fan">
+              {FAN.map((p) => <img key={p.src} src={p.src} alt={p.alt} width={560} height={700} loading="lazy" decoding="async" />)}
+            </div>
+          </div>
           <div className="rs-track">
             <h3 className="rs-track__head">For families, teams and event planners</h3>
             <ol className="rs-line">

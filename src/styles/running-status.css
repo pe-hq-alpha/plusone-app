@@ -46,16 +46,17 @@
 
 .rs__body > * { position: absolute; }
 
-.rs__pitch { left: 11.08%; top: calc(190 / 20.48 * 1cqw); width: 40%; }
+/* Centred on the status card beside it, so the two columns sit level whatever the headline's length. */
+.rs__pitch { left: 11.08%; top: calc(563 / 20.48 * 1cqw); translate: 0 -50%; width: 40%; }
 .rs__title {
   margin: 0; font-family: var(--font-display); font-weight: 400;
   font-size: calc(110 / 20.48 * 1cqw); line-height: 1.05; letter-spacing: -0.01em; color: var(--color-ink-deep);
 }
 .rs__title em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-accent); }
 .rs__lede {
-  margin: calc(30 / 20.48 * 1cqw) 0 0; font-size: calc(26 / 20.48 * 1cqw); line-height: 1.55; color: var(--color-muted);
+  margin: calc(38 / 20.48 * 1cqw) 0 0; font-size: calc(26 / 20.48 * 1cqw); line-height: 1.55; color: var(--color-muted);
 }
-.rs__actions { display: flex; gap: calc(30 / 20.48 * 1cqw); margin-top: calc(48 / 20.48 * 1cqw); }
+.rs__actions { display: flex; gap: calc(30 / 20.48 * 1cqw); margin-top: calc(60 / 20.48 * 1cqw); }
 .rs__pill {
   display: inline-flex; align-items: center; justify-content: center;
   height: calc(74 / 20.48 * 1cqw); min-width: calc(256 / 20.48 * 1cqw); padding: 0 calc(36 / 20.48 * 1cqw);
@@ -77,7 +78,7 @@
 /* A phrase that breaks as one: "in one place." never leaves "place." alone on a line. */
 .rs__keep { white-space: nowrap; }
 /* The one line for vendors under the hero's buttons. */
-.rs__vendors { margin: calc(22 / 20.48 * 1cqw) 0 0; font-size: 0.95rem; color: var(--color-muted); }
+.rs__vendors { margin: calc(34 / 20.48 * 1cqw) 0 0; font-size: calc(20 / 20.48 * 1cqw); color: var(--color-muted); }
 .rs__vendors a { color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 
 .rs__route { list-style: none; margin: calc(18 / 20.48 * 1cqw) 0 0; padding: 0; display: grid; gap: calc(13 / 20.48 * 1cqw); position: relative; }
@@ -155,7 +156,8 @@
   .rs__title { font-size: clamp(2.6rem, 9vw, 4rem); }
   .rs__lede { margin-top: 16px; font-size: 1.08rem; }
   .rs__actions { flex-wrap: wrap; gap: 12px; margin-top: 24px; }
-  .rs__vendors { margin-top: 16px; }
+  .rs__pitch { translate: none; }
+  .rs__vendors { margin-top: 16px; font-size: 0.95rem; }
   .rs__pill { height: 50px; min-width: 0; flex: 1 1 10rem; padding: 0 24px; font-size: 1.02rem; }
   .rs__pill--outline { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
   .rs__status-title { font-size: 1.5rem; }
@@ -312,14 +314,16 @@
   background: color-mix(in srgb, var(--color-paper) 86%, transparent); color: var(--color-ink); }
 @media (max-width: 860px) { .rs-photos { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
 
-/* Three celebrations fanned under the hero's actions: a first birthday, a sangeet, an anniversary. */
+/* Three celebrations fanned beside How it works' heading: a first birthday, a sangeet, an anniversary. */
 .rs__fan { position: relative; height: calc(250 / 20.48 * 1cqw); margin-top: calc(52 / 20.48 * 1cqw); }
 .rs__fan img { position: absolute; top: 0; width: calc(180 / 20.48 * 1cqw); aspect-ratio: 4 / 5; object-fit: cover;
   border-radius: calc(16 / 20.48 * 1cqw); border: 3px solid var(--color-paper); box-shadow: var(--shadow-card); }
 .rs__fan img:nth-child(1) { left: 0; transform: rotate(-6deg); top: calc(12 / 20.48 * 1cqw); }
 .rs__fan img:nth-child(2) { left: calc(150 / 20.48 * 1cqw); transform: rotate(2deg); z-index: 1; }
 .rs__fan img:nth-child(3) { left: calc(300 / 20.48 * 1cqw); transform: rotate(7deg); top: calc(16 / 20.48 * 1cqw); }
+.rs-fan { width: calc(480 / 20.48 * 1cqw); margin: 0 auto; }
 @media (max-width: 1100px) {
+  .rs-fan { width: auto; margin: 0; }
   .rs__fan { display: flex; gap: 10px; height: auto; margin-top: 28px; }
   .rs__fan img { position: static; width: calc((100% - 20px) / 3); max-height: 300px; border-radius: 14px; }
   .rs__fan img:nth-child(n) { transform: none; }
