@@ -270,6 +270,8 @@ function SlotPanel({
         </section>
       )}
 
+      <AskVerified eventId={event._id} slotId={slot._id} canEdit={canEdit} />
+
       <section aria-labelledby="found-h">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -500,6 +502,65 @@ function SlotPanel({
 
       {error && <p role="alert" className="text-sm text-bad">{error}</p>}
     </div>
+  );
+}
+
+/**
+ * Ask PlusOne Partner's verified vendors to price this need on the standard sheet, the same
+ * lines every quote is read into. The family's name, contact details and budget stay private;
+ * offers land in Compare beside the quotes.
+ */
+function AskVerified({ eventId, slotId, canEdit }: { eventId: Id<"events">; slotId: Id<"vendorSlots">; canEdit: boolean }) {
+  const brief = useQuery(api.marketplace.briefs.forSlot, { eventId, slotId });
+  const ask = useMutation(api.marketplace.briefs.ask);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (brief === undefined) return null;
+  const open = brief?.status === "open";
+
+  async function send() {
+    setBusy(true);
+    setError(null);
+    try {
+      await ask({ eventId, slotId });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "That request didn't go. Try again in a moment.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="card-quiet flex flex-wrap items-center justify-between gap-3 px-5 py-4" aria-labelledby="verified-h">
+      <div className="min-w-0">
+        <h3 id="verified-h" className="text-sm font-medium">
+          Verified vendors on {BRAND.name}
+        </h3>
+        <p className="mt-0.5 text-xs text-muted">
+          {open
+            ? brief.offers > 0
+              ? `${brief.offers} ${brief.offers === 1 ? "offer" : "offers"} so far, on the same lines as your quotes.`
+              : "Asked. Their offers land in Compare, on the same lines as your quotes."
+            : "Ask them to price this on the same lines as every quote. Your name, contact details and budget stay private."}
+        </p>
+        {error && (
+          <p role="alert" className="mt-1 text-xs text-bad">
+            {error}
+          </p>
+        )}
+      </div>
+      {open ? (
+        <Link to={`/e/${eventId}/decisions#need-${slotId}`} className="btn-quiet btn-sm shrink-0">
+          See them in Compare
+        </Link>
+      ) : (
+        canEdit && (
+          <button type="button" className="btn-ghost btn-sm shrink-0" disabled={busy} onClick={() => void send()}>
+            {busy ? "Asking…" : brief ? "Ask again" : "Ask verified vendors"}
+          </button>
+        )
+      )}
+    </section>
   );
 }
 
