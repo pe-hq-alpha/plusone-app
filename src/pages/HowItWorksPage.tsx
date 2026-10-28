@@ -107,7 +107,7 @@ export function HowItWorksPage() {
             predictable way to get it done. Fair pricing here means informed and comparable: never one price for everyone, and never simply the cheapest.
           </p>
           <p className="mt-3 max-w-[46rem] leading-relaxed text-muted">
-            Plan with the co-pilot, free until launch, or with a person from our team beside you once we launch. <Link to="/pricing" className="text-accent underline underline-offset-2">See pricing</Link>.
+            Plan on Basic, the complete app, free until launch, or on Premium, with a person from our team beside you once we launch. <Link to="/pricing" className="text-accent underline underline-offset-2">See pricing</Link>.
           </p>
         </section>
       </main>

@@ -15,7 +15,7 @@ import { useTheme } from "../lib/theme";
 type StepState = "done" | "now" | "waiting" | "next";
 const STATE_LABEL: Record<StepState, string> = { done: "Done", now: "Now", waiting: "Waiting", next: "Next" };
 
-/** The example event's running status: what the co-pilot has done, is doing and will do next. */
+/** The example event's running status: what PlusOne has done, is doing and will do next. */
 const route = (plan: string): { state: StepState; text: string }[] => [
   { state: "done", text: plan },
   { state: "done", text: "Found 8 caterers, 5 decorators and 3 photographers" },
@@ -128,9 +128,9 @@ export function LandingPage() {
               for <em>every event.</em>
             </h1>
             <p className="rs__lede">
-              Your complete co-pilot for event planning.
+              One app for the whole event, and people on your side.
               <br />
-              <span className="rs__lede-strong">Someone with you, from the first idea to the day itself.</span>
+              <span className="rs__lede-strong">Every quote on the same lines, so you pay what&rsquo;s fair.</span>
             </p>
             <div className="rs__actions">
               <Link to="/signin?new=1" className="rs__pill rs__pill--solid">Plan an event</Link>
@@ -142,7 +142,7 @@ export function LandingPage() {
           </div>
 
           <section className="rs__status" aria-labelledby="status-title">
-            <h2 id="status-title" className="rs__status-title">The co-pilot at work</h2>
+            <h2 id="status-title" className="rs__status-title">{BRAND.name} at work</h2>
             <p className="rs__example">Example</p>
             <p className="rs__event">
               <span>{ex.hero.event}</span> · <span>{ex.hero.city}</span> · <span>Sat 24 Jan</span> · about {ex.hero.people} people
@@ -201,15 +201,15 @@ export function LandingPage() {
           <h2 id="ways-title" className="rs-h2">Two ways <em>to plan</em></h2>
           <div className="rs-ways">
             <article className="rs-card">
-              <h3 className="rs-card__title">Your co-pilot</h3>
-              <p className="rs-card__text">The plan, the vendors, the replies and the budget, with the legwork done for you. You see every step and make every call.</p>
+              <h3 className="rs-card__title">Basic</h3>
+              <p className="rs-card__text">The complete planning app: the plan and budget, vendors found and written to, and every quote on the same lines. You see every step and make every call.</p>
             </article>
             <article className="rs-card">
-              <h3 className="rs-card__title">Your co-pilot and our team</h3>
-              <p className="rs-card__text">Everything the co-pilot does, plus people who plan it with you and are on the ground when the day needs them.</p>
+              <h3 className="rs-card__title">Premium</h3>
+              <p className="rs-card__text">Everything in Basic, plus a planner from our team who plans it with you, pushes for a fair price and is there when the day needs them.</p>
             </article>
           </div>
-          <p className="rs-note">Your co-pilot is free to use until launch; our team joins after launch. <Link to="/pricing">See pricing</Link>.</p>
+          <p className="rs-note">Basic is free to use until launch; Premium opens after launch. <Link to="/pricing">See everything in each plan</Link>.</p>
         </div>
       </section>
 

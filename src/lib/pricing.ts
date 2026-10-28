@@ -1,13 +1,13 @@
 /**
- * The two plans' introductory monthly prices at launch. Until launch Co-pilot is free to use,
- * and Assisted opens only after the introductory phase. Visitors in India see rupees,
+ * The two plans' introductory monthly prices at launch. Until launch Basic is free to use,
+ * and Premium opens only after the introductory phase. Visitors in India see rupees,
  * everyone else dollars.
  */
-export type PlanId = "copilot" | "assisted";
+export type PlanId = "basic" | "premium";
 
 const MONTHLY: Record<"INR" | "USD", Record<PlanId, number>> = {
-  INR: { copilot: 1000, assisted: 2500 },
-  USD: { copilot: 10, assisted: 25 },
+  INR: { basic: 1000, premium: 2500 },
+  USD: { basic: 10, premium: 25 },
 };
 
 export function pricingCurrency(region: string | undefined): "INR" | "USD" {
