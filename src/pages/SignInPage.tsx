@@ -8,6 +8,18 @@ import { PublicNav } from "../components/public/PublicNav";
 import { pendingAgreement, rememberAgreement, TERMS_VERSION } from "../lib/terms";
 import { Backdrop } from "../components/ui/Backdrop";
 
+/** Vendors at work, for the vendors' door. Generated images, not real vendors. */
+const VENDOR_PHOTOS = [
+  {
+    src: "/photos/vendor-decorator.jpg",
+    alt: "A decorator in a saree tying marigold strings onto a stage backdrop while her assistant fixes jasmine from a ladder, crates of flowers and brass lamps at their feet",
+  },
+  {
+    src: "/photos/vendor-caterer.jpg",
+    alt: "A catering team in a kitchen before service: a chef finishing plates on a steel counter while servers carry trays out",
+  },
+];
+
 /**
  * Sign in or create an account. The form itself is Clerk's (email and password, a code
  * by email, or Google), in the app's colours. It stays on this page's address, so it
@@ -25,6 +37,8 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
   const newHere = params.get("new") === "1";
   const { error } = useAuthActions();
   const vendor = audience === "vendor";
+  // The people who make events happen, Indian and Western, one of them per visit.
+  const [vendorPhoto] = useState(() => VENDOR_PHOTOS[Math.floor(Math.random() * VENDOR_PHOTOS.length)]);
   const here = vendor ? "/partner" : "/signin";
   const back = redirectTo ?? (window.location.pathname === here ? (vendor ? "/partner" : "/") : window.location.pathname + window.location.search);
   const pitch = vendor
@@ -41,7 +55,7 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
       {/* A celebration on the left on wide screens; the form on the right, so it all fits without scrolling. */}
       <aside className="photo-panel relative hidden overflow-hidden lg:block">
         {vendor ? (
-          <img src="/photos/sangeet.jpg" alt="Guests dancing at a sangeet under marigold garlands and strings of lights" className="absolute inset-0 size-full object-cover" />
+          <img src={vendorPhoto.src} alt={vendorPhoto.alt} className="absolute inset-0 size-full object-cover" />
         ) : (
           <img src="/photos/housewarming.jpg" alt="Friends raising their glasses over dinner in a new apartment, a moving box and the city lights behind them" className="absolute inset-0 size-full object-cover" />
         )}
