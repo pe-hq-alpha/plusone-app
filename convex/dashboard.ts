@@ -6,6 +6,7 @@ import { slotStatus, threadStatus } from "./lib/validators";
 import type { Infer } from "convex/values";
 import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
+import { missingCharges, readQuote, sheetFor, type Sheet } from "./lib/standardSheet";
 
 /**
  * Everything the couple needs to decide, in one read.
@@ -60,6 +61,16 @@ const vendorRow = v.object({
       atYourNumbers: v.number(),
       flags: v.array(v.string()),
       lines: v.array(v.object({ item: v.string(), amount: v.number(), optional: v.boolean() })),
+      /** What the quote says about each line of the need's standard sheet (lib/standardSheet). */
+      readings: v.array(
+        v.object({
+          key: v.string(),
+          status: v.union(v.literal("priced"), v.literal("included"), v.literal("extra"), v.literal("unstated")),
+          amount: v.optional(v.number()),
+        }),
+      ),
+      /** Charges it leaves unsaid, against the sheet and the other quotes for the same need. */
+      missing: v.array(v.object({ key: v.string(), label: v.string(), message: v.string() })),
     }),
     v.null(),
   ),
@@ -75,6 +86,15 @@ type VendorRow = Infer<typeof vendorRow>;
 function comparison(...args: Parameters<typeof compare>) {
   const { perUnit, atYourNumbers, flags } = compare(...args);
   return { perUnit, atYourNumbers, flags };
+}
+
+/** A quote against its need's standard sheet: each line, and what it leaves unsaid. */
+function againstSheet(quote: Doc<"quotes">, sheet: Sheet | null, others: Doc<"quotes">[]) {
+  if (!sheet) return { readings: [], missing: [] };
+  return {
+    readings: readQuote(quote, sheet).map(({ key, status, amount }) => (amount === undefined ? { key, status } : { key, status, amount })),
+    missing: missingCharges(quote, sheet, others),
+  };
 }
 
 export const board = query({
@@ -116,6 +136,8 @@ export const board = query({
         units: v.number(),
         /** Lowest and highest per-unit figures among the quotes, when two or more compare. */
         spread: v.union(v.object({ low: v.number(), high: v.number() }), v.null()),
+        /** The need's standard sheet, whose lines are the rows of a line-by-line compare; null when it has none. */
+        sheet: v.union(v.object({ covers: v.string(), lines: v.array(v.object({ key: v.string(), label: v.string() })) }), v.null()),
         vendors: v.array(vendorRow),
       }),
     ),
@@ -205,6 +227,8 @@ export const board = query({
       const served = sessions.filter((e) => slot.sessionIds.includes(e._id));
       const people = Math.max(0, ...served.map((e) => e.guestCount), served.length ? 0 : event.guestEstimate ?? 0);
       const units = basis === "per_day" ? Math.max(1, new Set(served.map((e) => e.date)).size) : people;
+      const sheet = sheetFor(slot.category);
+      const slotQuotes = vendors.map((vendor) => quoteByVendor.get(vendor._id)).filter((q): q is Doc<"quotes"> => !!q);
 
       const rows: VendorRow[] = [];
       for (const vendor of vendors) {
@@ -272,6 +296,7 @@ export const board = query({
                 deltaVsBudget: quote.total - slot.budget,
                 ...comparison(quote, basis, units),
                 lines: (quote.lines ?? []).slice(0, 12).map((l) => ({ item: l.item, amount: l.amount, optional: Boolean(l.optional) })),
+                ...againstSheet(quote, sheet, slotQuotes.filter((o) => o._id !== quote._id)),
               }
             : null,
           availableOnDates: availability?.verdict ?? null,
@@ -305,6 +330,7 @@ export const board = query({
         basisLabel: basisLabel(basis, slot.category),
         units,
         spread: spread(rows.filter((r) => r.state !== "declined").map((r) => r.quote?.perUnit ?? null)),
+        sheet: sheet && { covers: sheet.covers, lines: sheet.lines.map(({ key, label }) => ({ key, label })) },
         vendors: rows,
       });
     }

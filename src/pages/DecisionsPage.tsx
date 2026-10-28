@@ -15,6 +15,14 @@ type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Board = NonNullable<FunctionReturnType<typeof api.dashboard.board>>;
 type Need = Board["needs"][number];
 type VendorRow = Need["vendors"][number];
+type Quote = NonNullable<VendorRow["quote"]>;
+type QuotedRow = VendorRow & { quote: Quote };
+type Reading = Quote["readings"][number];
+
+/** The quote's own warnings, less "GST extra" when the line-by-line gaps already say it. */
+function flagsBesideGaps(q: Quote): string[] {
+  return q.missing.some((m) => m.key === "gst") ? q.flags.filter((f) => !/^GST extra$/i.test(f)) : q.flags;
+}
 
 /** How each state reads on the board, and what it looks like. */
 const STATE: Record<VendorRow["state"], { label: string; cls: string }> = {
@@ -162,6 +170,7 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
   const perUnits = live.map((v) => v.quote?.perUnit ?? null).filter((x): x is number => x !== null);
   const bestPerUnit = need.spread && perUnits.length > 1 ? Math.min(...perUnits) : null;
   const unitWord = need.basisLabel.toLowerCase().replace(/^per /, "");
+  const quoted = live.filter((v): v is QuotedRow => v.quote !== null && v.state !== "declined");
 
   async function book(v: VendorRow, notify: boolean) {
     setBusy(v.vendorId);
@@ -295,7 +304,9 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
                             {v.quote.atYourNumbers !== v.quote.total && <> · {money(v.quote.atYourNumbers, v.quote.currency)} for your {need.units}</>}
                           </span>
                         )}
-                        {v.quote.flags.length > 0 && <span className="mt-0.5 block text-xs text-warn">{v.quote.flags.slice(0, 2).join(" · ")}</span>}
+                        {flagsBesideGaps(v.quote).length > 0 && (
+                          <span className="mt-0.5 block text-xs text-warn">{flagsBesideGaps(v.quote).slice(0, 2).join(" · ")}</span>
+                        )}
                         <span className="block text-xs text-quiet">
                           {v.quote.deltaVsBudget <= 0
                             ? `${money(-v.quote.deltaVsBudget, currency)} under`
@@ -323,6 +334,14 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
                     )}
                     {v.quote && v.quote.redFlags.length > 0 && (
                       <p className="mt-1 max-w-[18rem] text-xs text-warn">{v.quote.redFlags.slice(0, 2).join("; ")}</p>
+                    )}
+                    {v.quote && v.quote.missing.length > 0 && (
+                      <ul className="mt-1.5 max-w-[18rem] space-y-0.5 text-xs leading-relaxed text-warn" aria-label={`What ${v.name}'s quote leaves unsaid`}>
+                        {v.quote.missing.slice(0, 3).map((m) => (
+                          <li key={m.key}>{m.message}</li>
+                        ))}
+                        {v.quote.missing.length > 3 && <li className="text-quiet">and {v.quote.missing.length - 3} more, line by line below</li>}
+                      </ul>
                     )}
                   </td>
 
@@ -364,6 +383,95 @@ function NeedBoard({ need, currency, canEdit, eventId }: { need: Need; currency:
           </tbody>
         </table>
       </div>
+
+      {need.sheet && quoted.length > 0 && <LineByLine sheet={need.sheet} quoted={quoted} unitWord={unitWord} />}
     </section>
+  );
+}
+
+/**
+ * Every quote for a need on the same rows: the need's standard sheet, line by line, so a
+ * charge one vendor names and another leaves out shows as a gap rather than a lower total.
+ */
+function LineByLine({ sheet, quoted, unitWord }: { sheet: NonNullable<Need["sheet"]>; quoted: QuotedRow[]; unitWord: string }) {
+  return (
+    <div className="border-t border-line px-6 pb-5 pt-4">
+      <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
+      <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full text-sm" style={{ minWidth: `${12 + quoted.length * 10}rem` }}>
+          <caption className="sr-only">Each quote against the same lines</caption>
+          <thead>
+            <tr className="border-b border-line text-left text-xs text-muted">
+              <th scope="col" className="py-2 pr-4 font-normal">
+                <span className="sr-only">Line</span>
+              </th>
+              {quoted.map((v) => (
+                <th key={v.vendorId} scope="col" className="px-3 py-2 text-right font-medium text-ink">
+                  {v.name}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            <tr>
+              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Quoted total</th>
+              {quoted.map((v) => (
+                <td key={v.vendorId} className="px-3 py-2 text-right font-medium">
+                  {money(v.quote.total, v.quote.currency)}
+                  {v.quote.perUnit !== null && (
+                    <span className="block text-xs font-normal text-muted">
+                      {money(v.quote.perUnit, v.quote.currency)} per {unitWord}
+                    </span>
+                  )}
+                </td>
+              ))}
+            </tr>
+            {sheet.lines.map((line) => (
+              <tr key={line.key}>
+                <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
+                {quoted.map((v) => (
+                  <td key={v.vendorId} className="px-3 py-2 text-right">
+                    <LineCell
+                      reading={v.quote.readings.find((r) => r.key === line.key)}
+                      flagged={v.quote.missing.some((m) => m.key === line.key)}
+                      currency={v.quote.currency}
+                    />
+                  </td>
+                ))}
+              </tr>
+            ))}
+            <tr>
+              <th scope="row" className="py-2 pr-4 text-left font-normal text-muted">Gaps to ask about</th>
+              {quoted.map((v) => (
+                <td key={v.vendorId} className={`px-3 py-2 text-right ${v.quote.missing.length ? "text-warn" : "text-ok"}`}>
+                  {v.quote.missing.length ? v.quote.missing.length : "None"}
+                </td>
+              ))}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/** One quote's answer on one line: its price, included, extra, or not said. */
+function LineCell({ reading, flagged, currency }: { reading: Reading | undefined; flagged: boolean; currency: string }) {
+  if (!reading || reading.status === "unstated") {
+    return <span className={flagged ? "text-warn" : "text-quiet"}>Not stated</span>;
+  }
+  if (reading.status === "included") {
+    return (
+      <span className="inline-flex items-center gap-1 text-ok">
+        <Icon name="check" size={13} /> Included
+      </span>
+    );
+  }
+  if (reading.status === "priced") return <span>{money(reading.amount, currency)}</span>;
+  return reading.amount !== undefined ? (
+    <span className="text-muted">+{money(reading.amount, currency)} extra</span>
+  ) : (
+    <span className="text-warn">Extra, no price</span>
   );
 }

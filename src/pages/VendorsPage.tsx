@@ -1,5 +1,6 @@
 import { anOccasion } from "../../convex/lib/occasion";
 import { defaultSearchText, partOfNeed } from "../../convex/lib/searchTerms";
+import { missingCharges, sheetFor } from "../../convex/lib/standardSheet";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
@@ -126,6 +127,10 @@ function SlotPanel({
   const run = useQuery(api.research.latestForSlot, { slotId: slot._id });
   const drafts = useQuery(api.outreach.listDrafts, { slotId: slot._id })?.map((d) => ({ ...d.message, vendor: d.vendor }));
   const quotes = useQuery(api.quotes.compareForSlot, { slotId: slot._id })?.map((q) => ({ ...q.quote, vendorName: q.vendor.name, isBooked: q.isBooked }));
+  // What each quote leaves unsaid, against the need's standard sheet and the other quotes.
+  const sheet = sheetFor(slot.category);
+  const gapsFor = (q: NonNullable<typeof quotes>[number]) =>
+    sheet && quotes ? missingCharges(q, sheet, quotes.filter((o) => o._id !== q._id)).map((m) => m.message) : [];
   const startResearch = useMutation(api.research.start);
   const toggleShortlist = useMutation(api.vendors.toggleShortlist);
   const setEmail = useMutation(api.vendors.setEmail);
@@ -459,7 +464,7 @@ function SlotPanel({
                   <td className="py-2 pr-4">{money(q.total, q.currency)}</td>
                   <td className="py-2 pr-4">{q.deposit ? money(q.deposit, q.currency) : "—"}</td>
                   <td className="py-2 pr-4 text-xs text-muted">{q.includes.slice(0, 3).join(", ") || "—"}</td>
-                  <td className="py-2 pr-4 text-xs text-warn">{q.redFlags.slice(0, 2).join("; ") || "—"}</td>
+                  <td className="py-2 pr-4 text-xs text-warn">{[...q.redFlags.slice(0, 2), ...gapsFor(q).slice(0, 3)].join("; ") || "—"}</td>
                   <td className="py-2 text-right">
                     {canEdit && slot.status !== "booked" && (
                       <BookButton vendorName={q.vendorName} className="btn-ghost btn-sm" onBook={(notify) => markBooked({ slotId: slot._id, vendorId: q.vendorId, notify })} />
