@@ -2,7 +2,7 @@
 
 The vendors' side of PlusOne. Vendors list their business, price their packages in the units customers compare, and answer a customer's brief on the same lines. **PlusOne Ops** is the PlusOne team's side of it: a person verifies each vendor before families and event managers see them.
 
-Built during the hackathon and live since 28 October 2026 at [app.plusoneevents.site/partner](https://app.plusoneevents.site/partner). The vendors in the demo are samples, and are labelled as samples.
+Built during the hackathon and live since 28 October 2026. Its own address, `partner.plusoneevents.site`, is built and going live; until then it is at [app.plusoneevents.site/partner](https://app.plusoneevents.site/partner). It has its own demo, separate from the customers': [try it as a sample caterer](https://app.plusoneevents.site/partner/demo), with no sign-up. The vendors in the demo are samples, and are labelled as samples.
 
 ## How it connects to PlusOne Events
 
@@ -17,11 +17,12 @@ Partner isn't a separate app. It runs in the same app as PlusOne Events, on the 
 
 | Route | File | For | What it does |
 |---|---|---|---|
-| `/partner` | `PartnerPage.tsx` | Vendors | Sign in, list a business or claim one PlusOne added from public pages, price packages on the standard sheet, see open briefs and send offers. A demo guest can try it as a sample caterer and answer their own demo event |
+| `/` on Partner's address (`/partner` on one address) | `PartnerPage.tsx` | Vendors | Sign in, list a business or claim one PlusOne added from public pages, price packages on the standard sheet, see open briefs and send offers. In the demo, the offer also shows the way the customer sees it, line by line beside their quotes |
+| `/demo` (`/partner/demo`) | `VendorDemoPage.tsx` | Visitors | The vendors' demo: straight in as a sample caterer, with a customer's catering request to answer (`demo.startVendor` in `convex/demo.ts`) |
 | `/ops` | `OpsPage.tsx` | The PlusOne team | The queue of vendors and claims waiting, each vendor's profile and evidence, and the decision: verify, turn down or pause |
 | | `shared.tsx` | Both | Pieces both pages use |
 
-Signed out, `/partner` opens the vendors' own sign-in page (`VendorSignInPage` in `src/pages/SignInPage.tsx`), separate from the customers' one at `/signin`.
+Signed out, Partner opens the vendors' own sign-in page (`VendorSignInPage` in `src/pages/SignInPage.tsx`), separate from the customers' one at `/signin`. Which address serves what is in `src/lib/hosts.ts`: the home page, the app and Partner are one build on three addresses.
 
 ## Backend: `convex/marketplace/`
 
