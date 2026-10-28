@@ -135,7 +135,7 @@ export default function App() {
 }
 
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
+const APP_PUBLIC = /^\/(signin|partner|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
 
 /**
  * Keeps each page on its own address. On the home address, anything that goes into
