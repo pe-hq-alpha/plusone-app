@@ -6,6 +6,8 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
 import { money } from "../lib/format";
+import { onOpsHost } from "../lib/hosts";
+import { useAuthActions } from "../lib/session";
 import { errorText, unitWord } from "./shared";
 
 /**
@@ -19,11 +21,30 @@ export function OpsPage() {
   if (role === null) {
     return (
       <main id="main" className="page px-5 py-10 md:px-8">
-        <EmptyState icon="settings" title="This page is for the PlusOne team" action={<Link to="/" className="btn-quiet">Home</Link>} />
+        <EmptyState icon="settings" title="This page is for the PlusOne team" action={<HomeOrLeave />} />
       </main>
     );
   }
   return <Queue />;
+}
+
+/** On Ops' own address "/" is this page, so the way out is signing out; on one address, the app's home. */
+function HomeOrLeave({ small = false }: { small?: boolean }) {
+  const { signOut } = useAuthActions();
+  const className = small ? "btn-quiet btn-sm gap-1.5 bg-cream" : "btn-quiet";
+  if (onOpsHost()) {
+    return (
+      <button type="button" className={className} onClick={() => void signOut()}>
+        Sign out
+      </button>
+    );
+  }
+  return (
+    <Link to="/" className={className}>
+      {small && <Icon name="arrow" size={15} className="rotate-180" />}
+      Home
+    </Link>
+  );
 }
 
 function Queue() {
@@ -31,10 +52,7 @@ function Queue() {
   const [open, setOpen] = useState<Id<"vendorProfiles"> | null>(null);
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
-      <Link to="/" className="btn-quiet btn-sm gap-1.5 bg-cream">
-        <Icon name="arrow" size={15} className="rotate-180" />
-        Home
-      </Link>
+      <HomeOrLeave small />
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Ops</em></h1>
       <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, and claims on listings we added.</p>
 

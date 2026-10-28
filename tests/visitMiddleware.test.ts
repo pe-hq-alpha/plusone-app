@@ -11,6 +11,7 @@ import {
   verifyClerkSession,
   visitorCookie,
   visitorIdFrom,
+  withoutWww,
 } from "../functions/_middleware";
 
 const HTML = "text/html,application/xhtml+xml,*/*;q=0.8";
@@ -108,6 +109,16 @@ describe("shapeVisit", () => {
 
 describe("onRequest", () => {
   const page = () => request("/", { "cf-connecting-ip": "203.0.113.7", accept: HTML });
+
+  test("www. goes to the bare address, keeping the path and query", async () => {
+    expect(withoutWww(new URL("https://www.plusoneevents.site/pricing?from=x"))).toBe("https://plusoneevents.site/pricing?from=x");
+    expect(withoutWww(new URL("https://app.plusoneevents.site/"))).toBeNull();
+    const next = vi.fn(async () => new Response("ok"));
+    const res = await onRequest({ request: new Request("https://www.plusoneevents.site/how-it-works"), env: {}, waitUntil: vi.fn(), next });
+    expect(res.status).toBe(301);
+    expect(res.headers.get("location")).toBe("https://plusoneevents.site/how-it-works");
+    expect(next).not.toHaveBeenCalled();
+  });
 
   test("passes straight through when not configured", async () => {
     const waitUntil = vi.fn();

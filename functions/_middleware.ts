@@ -275,7 +275,15 @@ export function shapeVisit(
 
 // ---------------------------------------------------------------- the middleware
 
+/** www. is the same site under a second name: send it to the one address, path and query kept. */
+export function withoutWww(url: URL): string | null {
+  if (!url.hostname.startsWith("www.")) return null;
+  return `${url.protocol}//${url.hostname.slice(4)}${url.pathname}${url.search}`;
+}
+
 export const onRequest = async (context: Context): Promise<Response> => {
+  const bare = withoutWww(new URL(context.request.url));
+  if (bare) return Response.redirect(bare, 301);
   let newVisitorId: string | undefined;
   try {
     const { request, env } = context;

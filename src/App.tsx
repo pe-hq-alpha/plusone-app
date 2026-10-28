@@ -1,7 +1,7 @@
 import { Authenticated, AuthLoading, Unauthenticated, useConvexAuth } from "convex/react";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
-import { goHome, goToApp, goToPartner, hasPartnerHost, HOME_PATHS, ON_PARTNER_PATH, onAppHost, onHomeHost, onPartnerHost, PARTNER_PATHS } from "./lib/hosts";
+import { goHome, goToApp, goToOps, goToPartner, hasOpsHost, hasPartnerHost, HOME_PATHS, ON_OPS_PATH, ON_PARTNER_PATH, onAppHost, onHomeHost, onOpsHost, onPartnerHost, OPS_PATHS, PARTNER_PATHS } from "./lib/hosts";
 import { LandingPage } from "./pages/LandingPage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EventLayout } from "./components/EventLayout";
@@ -59,7 +59,7 @@ export default function App() {
       <UpdatePrompt />
       <Suspense fallback={<FullPage>Loading…</FullPage>}>
       <HostGate>
-      {onPartnerHost() ? <PartnerRoutes /> : (
+      {onPartnerHost() ? <PartnerRoutes /> : onOpsHost() ? <OpsRoutes /> : (
       <Routes>
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/pricing" element={<PricingPage />} />
@@ -172,10 +172,42 @@ function PartnerRoutes() {
 }
 
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|partner|partner\/demo|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
+const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
 
 /**
- * Keeps each page on its own address. Partner's pages (/partner, /partner/demo) move to
+ * Ops on its own address: the team's queue at /, sign-in when signed out. Everything
+ * else on this address belongs to the app.
+ */
+function OpsRoutes() {
+  return (
+    <Routes>
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route
+        path="/*"
+        element={
+          <>
+            <AuthLoading>
+              <FullPage>Loading…</FullPage>
+            </AuthLoading>
+            <Unauthenticated>
+              <SignInPage />
+            </Unauthenticated>
+            <Authenticated>
+              <a href="#main" className="skip-link">Skip to content</a>
+              <ErrorBoundary>
+                <OpsPage />
+              </ErrorBoundary>
+            </Authenticated>
+          </>
+        }
+      />
+    </Routes>
+  );
+}
+
+/**
+ * Keeps each page on its own address. Ops (/ops) moves to Ops' address, and Partner's pages (/partner, /partner/demo) move to
  * Partner's address from anywhere else. On the home address, anything that goes into
  * the app (sign in, the demo, an event) moves to the app's address, and so does anything
  * on Partner's address that isn't Partner's. On the app's address, someone signed out
@@ -184,15 +216,22 @@ const APP_PUBLIC = /^\/(signin|partner|partner\/demo|demo|guest|how-it-works|pri
 function HostGate({ children }: { children: ReactNode }) {
   const { pathname, search, hash } = useLocation();
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const toPartner = hasPartnerHost() && !onPartnerHost() && ON_PARTNER_PATH.test(pathname);
-  const toApp = !toPartner && ((onHomeHost() && !HOME_PATHS.has(pathname)) || (onPartnerHost() && !PARTNER_PATHS.has(pathname)));
-  const toHome = !toPartner && onAppHost() && !isLoading && !isAuthenticated && !APP_PUBLIC.test(pathname);
+  const toOps = hasOpsHost() && !onOpsHost() && ON_OPS_PATH.test(pathname);
+  const toPartner = !toOps && hasPartnerHost() && !onPartnerHost() && ON_PARTNER_PATH.test(pathname);
+  const toApp =
+    !toOps &&
+    !toPartner &&
+    ((onHomeHost() && !HOME_PATHS.has(pathname)) ||
+      (onPartnerHost() && !PARTNER_PATHS.has(pathname)) ||
+      (onOpsHost() && !OPS_PATHS.has(pathname)));
+  const toHome = !toOps && !toPartner && onAppHost() && !isLoading && !isAuthenticated && !APP_PUBLIC.test(pathname);
   useEffect(() => {
-    if (toPartner) goToPartner(pathname, search + hash);
+    if (toOps) goToOps(search + hash);
+    else if (toPartner) goToPartner(pathname, search + hash);
     else if (toApp) goToApp(pathname + search + hash);
     else if (toHome) goHome();
-  }, [toPartner, toApp, toHome, pathname, search, hash]);
-  if (toPartner || toApp || toHome) return <FullPage>Loading…</FullPage>;
+  }, [toOps, toPartner, toApp, toHome, pathname, search, hash]);
+  if (toOps || toPartner || toApp || toHome) return <FullPage>Loading…</FullPage>;
   return <>{children}</>;
 }
 

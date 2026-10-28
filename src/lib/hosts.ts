@@ -1,13 +1,15 @@
 /**
- * Three addresses, one build. The home page lives on the bare domain
+ * Four addresses, one build. The home page lives on the bare domain
  * (plusoneevents.site); everything inside the app lives on app.plusoneevents.site;
  * PlusOne Partner, for vendors, has its own, partner.plusoneevents.site, with its own
- * demo. Set at build time; with none set (local dev), everything stays on one address
- * and Partner sits at /partner.
+ * demo; and Ops, the PlusOne team's side, has ops.plusoneevents.site, so it can sit
+ * behind its own access rule. Set at build time; with none set (local dev), everything
+ * stays on one address, with Partner at /partner and Ops at /ops.
  */
 const HOME = (import.meta.env.VITE_HOME_ORIGIN as string | undefined)?.replace(/\/$/, "");
 const APP = (import.meta.env.VITE_APP_ORIGIN as string | undefined)?.replace(/\/$/, "");
 const PARTNER = (import.meta.env.VITE_PARTNER_ORIGIN as string | undefined)?.replace(/\/$/, "");
+const OPS = (import.meta.env.VITE_OPS_ORIGIN as string | undefined)?.replace(/\/$/, "");
 
 /** The pages the home address serves itself. Anything else belongs to the app. */
 export const HOME_PATHS = new Set(["/", "/how-it-works", "/pricing", "/privacy", "/terms"]);
@@ -17,6 +19,12 @@ export const PARTNER_PATHS = new Set(["/", "/demo", "/privacy", "/terms"]);
 
 /** A Partner page on the one-address setup: /partner, /partner/demo. */
 export const ON_PARTNER_PATH = /^\/partner(\/|$)/;
+
+/** The pages Ops' address serves itself. */
+export const OPS_PATHS = new Set(["/", "/privacy", "/terms"]);
+
+/** Ops on the one-address setup. */
+export const ON_OPS_PATH = /^\/ops\/?$/;
 
 export function onHomeHost(): boolean {
   if (!HOME || !APP) return false;
@@ -30,6 +38,10 @@ export function onAppHost(): boolean {
 
 export function onPartnerHost(): boolean {
   return Boolean(PARTNER && window.location.origin === PARTNER);
+}
+
+export function onOpsHost(): boolean {
+  return Boolean(OPS && window.location.origin === OPS);
 }
 
 /**
@@ -55,6 +67,15 @@ export function goToPartner(pathname: string, rest = ""): void {
 
 export function hasPartnerHost(): boolean {
   return Boolean(PARTNER);
+}
+
+/** Leave for Ops' address, keeping the query and anchor: /ops here is / there. */
+export function goToOps(rest = ""): void {
+  window.location.replace(`${OPS}/${rest}`);
+}
+
+export function hasOpsHost(): boolean {
+  return Boolean(OPS);
 }
 
 /** Back to the home page on the bare domain. */
