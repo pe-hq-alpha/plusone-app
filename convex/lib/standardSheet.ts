@@ -69,9 +69,10 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
   venue: {
     need: "venue",
     unit: "total",
-    covers: "The hall for the hours agreed, with its chairs and dining hall",
+    covers: "The hall for the hours agreed, with its chairs",
     lines: [
       GST,
+      { key: "dining", label: "Dining hall and kitchen", kind: "fee", usually: "included", match: /\b(dining( hall)?|kitchen)\b/i },
       { key: "electricity", label: "Electricity and generator", kind: "fee", usually: "extra", match: /\b(eb|electricity|power|generator|genset|diesel)\b/i },
       { key: "ac", label: "Air conditioning", kind: "fee", usually: "extra", match: /\b(a\/?c|air[- ]?condition\w*)\b/i },
       { key: "cleaning", label: "Cleaning", kind: "fee", usually: "extra", match: /\b(clean\w*|housekeeping|maintenance)\b/i },
@@ -89,7 +90,7 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         label: "Service staff",
         kind: "fee",
         usually: "extra",
-        match: /\b(service staff|serving staff|waiters?|servers?|service boys|staff|service charges?)\b/i,
+        match: /\b(service staff|serving staff|catering staff|waiters?|servers?|service boys|service charges?)\b/i,
       },
       TRANSPORT,
       {
@@ -97,7 +98,7 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         label: "Crockery and serving ware",
         kind: "fee",
         usually: "included",
-        match: /\b(crocker\w*|cutlery|serving ware|banana leaf|leaf plates?|disposables?|tableware)\b/i,
+        match: /\b(crocker\w*|cutlery|serving ware|banana[- ]leaf|leaf plates?|disposables?|tableware)\b/i,
       },
       { key: "water", label: "Water", kind: "extra", usually: "included", match: /\bwater\b/i },
     ],
@@ -207,11 +208,23 @@ const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 /** One quote against its sheet: what it says about each line. */
 export function readQuote(q: QuoteLike, sheet: Sheet): LineReading[] {
   // The price of the thing itself ("Veg meals per plate") is never one of the sheet's charges.
+  // Each charge counts once, for the sheet line it names first: "Transport of vessels and
+  // staff" is transport, not service staff too.
   const charges = (q.lines ?? []).filter((l) => l.kind !== "core" && l.kind !== "discount");
+  const ownerOf = (l: QuoteLine): string | undefined => {
+    if (l.kind === "tax") return sheet.lines.find((s) => s.kind === "tax")?.key;
+    let best: { key: string; at: number } | undefined;
+    for (const s of sheet.lines) {
+      const at = l.item.search(s.match);
+      if (at >= 0 && (!best || at < best.at)) best = { key: s.key, at };
+    }
+    return best?.key;
+  };
+  const owners = charges.map(ownerOf);
   return sheet.lines.map((s) => {
     const base = { key: s.key, label: s.label };
     const names = (text: string) => s.match.test(text);
-    const charged = charges.filter((l) => names(l.item) || (s.kind === "tax" && l.kind === "tax"));
+    const charged = charges.filter((_, i) => owners[i] === s.key);
     const inTotal = charged.filter((l) => !l.optional);
     if (inTotal.length) return { ...base, status: "priced" as const, amount: sum(inTotal.map((l) => l.amount)) };
     if ((q.includes ?? []).some(names) || (s.kind === "tax" && q.taxIncluded === true)) return { ...base, status: "included" as const };
@@ -257,7 +270,11 @@ export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[]):
       if (charged.length) message = `No ${inSentence(line.label)} line, and ${elsewhere}`;
       else if (line.usually === "extra") message = line.ask ?? `Doesn't say whether ${inSentence(line.label)} is included`;
     } else if (r.status === "extra" && r.amount === undefined) {
-      message = `${line.label} is extra, with no price given${charged.length ? `; ${elsewhere}` : ""}`;
+      // GST is a share of each price, so another vendor's GST figure says nothing about this one.
+      message =
+        line.kind === "tax"
+          ? `${line.label} is extra, with no amount given`
+          : `${line.label} is extra, with no price given${charged.length ? `; ${elsewhere}` : ""}`;
     }
     if (message) flags.push({ key: r.key, label: r.label, message });
   }

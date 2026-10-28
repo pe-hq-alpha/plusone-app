@@ -83,6 +83,23 @@ describe("reading a quote against its sheet", () => {
     expect(Object.fromEntries(readQuote({ ...quote, taxIncluded: false }, catering).map((r) => [r.key, r.status])).gst).toBe("extra");
   });
 
+  test("a line that names two charges counts once, for the one it names first", () => {
+    const vessels = { total: 56_500, lines: [line("Transport of vessels and staff", "fee", 2_500)] };
+    const r = Object.fromEntries(readQuote(vessels, catering).map((x) => [x.key, x]));
+    expect(r.transport).toMatchObject({ status: "priced", amount: 2_500 });
+    expect(r.service_staff.status).toBe("unstated");
+  });
+
+  test("'banana-leaf' with a hyphen is still the serving ware", () => {
+    const leaf = { total: 62_000, includes: ["Banana-leaf lunch with two sweets"] };
+    expect(Object.fromEntries(readQuote(leaf, catering).map((x) => [x.key, x.status])).crockery).toBe("included");
+  });
+
+  test("a service charge for staff and cleaning is the service staff line", () => {
+    const annam = { total: 63_000, lines: [line("Service charge (staff and cleaning)", "fee", 6_000)] };
+    expect(Object.fromEntries(readQuote(annam, catering).map((x) => [x.key, x])).service_staff).toMatchObject({ status: "priced", amount: 6_000 });
+  });
+
   test("the price of the food itself never counts as a charge: 'per plate' is not crockery", () => {
     const plain = { total: 57_000, lines: [{ item: "Veg meals per plate", kind: "core" as const, unit: "per_person" as const, amount: 57_000 }] };
     expect(Object.fromEntries(readQuote(plain, catering).map((r) => [r.key, r.status])).crockery).toBe("unstated");
@@ -123,6 +140,19 @@ describe("missing charges", () => {
     expect(asMessages(missingCharges({ total: 40_000, excludes: ["Transport"] }, decor, others))).toContain(
       "Transport is extra, with no price given; one other charges ₹3,000",
     );
+  });
+
+  test("GST left out isn't compared with another quote's GST, since GST is a share of each price", () => {
+    const others = [{ total: 66_150, lines: [line("Lunch", "core", 63_000), line("GST at 5%", "tax", 3_150)] }];
+    expect(asMessages(missingCharges({ total: 56_500, taxIncluded: false }, sheetFor("catering")!, others))).toContain("GST is extra, with no amount given");
+  });
+
+  test("a hall that charges for its dining hall and kitchen shows it on its own line", () => {
+    const hall = { total: 80_000, lines: [line("Hall rent", "core", 68_000), line("Dining hall and kitchen", "fee", 8_000), line("Electricity and cleaning", "fee", 4_000)], includes: ["Electricity and cleaning"] };
+    const r = Object.fromEntries(readQuote(hall, sheetFor("venue")!).map((x) => [x.key, x]));
+    expect(r.dining).toMatchObject({ status: "priced", amount: 8_000 });
+    expect(r.electricity).toMatchObject({ status: "priced", amount: 4_000 });
+    expect(r.cleaning.status).toBe("included");
   });
 
   test("a quote that prices or includes every usual extra has nothing missing", () => {

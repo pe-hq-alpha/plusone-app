@@ -5,6 +5,7 @@ import { describe, expect, test } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import schema from "./schema";
+import { seedBirthday } from "./demoBirthday";
 
 const modules = import.meta.glob("./**/*.ts");
 function setup() {
@@ -72,6 +73,30 @@ describe("missing charges on the decision board", () => {
     expect(kalyan.quote?.missing.map((m) => m.message)).toEqual(
       expect.arrayContaining(["Doesn't say whether GST is included", "No transport line, and one other charges ₹2,500"]),
     );
+  });
+
+  test("Amma's 60th, the guest demo: each quote shows the gaps a host should ask about", async () => {
+    const t = setup();
+    const { userId, eventId } = await t.run(async (ctx) => {
+      const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
+      return { userId, eventId: await seedBirthday(ctx, userId) };
+    });
+    const board = await as(t, userId).query(api.dashboard.board, { eventId });
+    const gapsIn = (category: string) =>
+      Object.fromEntries(
+        board.needs
+          .find((n) => n.category === category)!
+          .vendors.filter((v) => v.quote)
+          .map((v) => [v.name, v.quote!.missing.map((m) => m.message)]),
+      );
+    expect(gapsIn("Catering")).toEqual({
+      "Annam Caterers": ["No transport line, and one other charges ₹2,500"],
+      "Saapadu Kitchen": [],
+      "Kaveri Feast Co.": ["GST is extra, with no amount given", "No service staff line, and one other charges ₹6,000"],
+    });
+    expect(gapsIn("Venue")).toEqual({
+      "Thamarai Hall": ["Doesn't say whether air conditioning is included", "Doesn't say what an extra hour costs"],
+    });
   });
 
   test("a need with no sheet has no rows and flags nothing", async () => {
