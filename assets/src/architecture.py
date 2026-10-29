@@ -13,6 +13,7 @@ SERIF = "'EB Garamond', Georgia, 'Times New Roman', serif"
 MONO = "ui-monospace, SFMono-Regular, Menlo, monospace"
 
 ICONS = {  # lucide paths, 24 x 24
+    "search": '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     "mic": '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
     "mail": '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
     "phone": '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>',
@@ -178,6 +179,7 @@ outputs = [
     (330, "columns", "Compare", "line by line, gaps flagged"),
     (460, "sparkles", "Venue, dressed", "the real stage, a look on it"),
     (590, "shield", "PlusOne Ops", "a person decides"),
+    (720, "search", "Find vendors", "open, priced on the sheet"),
 ]
 for y, ic, t, s in outputs:
     out.append(card(1390, y, 180, 92))
@@ -191,12 +193,13 @@ flow(curve(1030, MODEL_Y[5], 1390, 650), 3.0)
 flow(curve(1390, 196, 1340, 214), 3.2)
 out.append(text(1365, 240, "offers", 11, MUTED, anchor="middle"))
 flow("M1570 636 C1600 636 1600 196 1570 196", 4.0)
+flow(curve(1340, 266, 1390, 766), 3.5)
 out.append(text(1588, 420, "verified only", 11, MUTED, anchor="middle", family=SANS).replace("<text", '<text transform="rotate(90 1588 420)"'))
 
 # Footer: the rest of the stack and a legend
 out.append(f'<line x1="40" y1="836" x2="1560" y2="836" stroke="{LINE}"/>')
 fx = 40
-for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "688 tests")]:
+for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "706 tests")]:
     out.append(logo(name, fx, 852, 20))
     out.append(text(fx + 28, 867, label, 12.5, MUTED))
     fx += 40 + len(label) * 7.5
@@ -218,7 +221,7 @@ for n, (d, delay, color) in enumerate(flows):
         f'<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="{delay}s;f{n}a.begin" /></circle>'
     )
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model wrapper on Convex to the Meta model suited to each; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner">
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model wrapper on Convex to the Meta model suited to each; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet">
 <style>.dash{{animation:run 1.2s linear infinite}}@keyframes run{{to{{stroke-dashoffset:-18}}}}@media (prefers-reduced-motion:reduce){{.dash{{animation:none}}}}</style>
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a6378"/></marker></defs>
 {"".join(out[:1])}

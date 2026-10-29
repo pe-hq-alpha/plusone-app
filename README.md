@@ -355,7 +355,7 @@ PlusOne Ops, at `/ops`, is the PlusOne team's side. A queue holds vendors and li
 
 ## Architecture
 
-<img src="assets/architecture.svg" width="100%" alt="PlusOne end to end: a spoken brief, vendors' quotes, a recorded call, a price list, the hall's photo and photos of work go through one model wrapper on Convex to the Meta model suited to each (Muse Spark 1.3, Muse Voice Transcribe, Muse Spark Open on Baseten, SAM 3.1, Muse Glimmer 30B on our Modal GPU, Muse Wonder), with Claude only as a fallback; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner">
+<img src="assets/architecture.svg" width="100%" alt="PlusOne end to end: a spoken brief, vendors' quotes, a recorded call, a price list, the hall's photo and photos of work go through one model wrapper on Convex to the Meta model suited to each (Muse Spark 1.3, Muse Voice Transcribe, Muse Spark Open on Baseten, SAM 3.1, Muse Glimmer 30B on our Modal GPU, Muse Wonder), with Claude only as a fallback; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet">
 
 <sub>Drawn by <code>assets/src/architecture.py</code>; the dots move along each path a request takes.</sub>
 
