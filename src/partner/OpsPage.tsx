@@ -394,8 +394,15 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
             </dd>
           </>
         )}
-        <dt className="text-muted">Account</dt>
-        <dd>{ownerEmail ?? "Not claimed"}</dd>
+        {profile.email && (
+          <>
+            <dt className="text-muted">Email</dt>
+            <dd className="min-w-0"><a className="break-words underline" href={`mailto:${profile.email}`}>{profile.email}</a></dd>
+          </>
+        )}
+        {/* The account they signed in with, which may be a personal address; the business's own is Email above. */}
+        <dt className="text-muted">Signed in as</dt>
+        <dd className="min-w-0 break-words">{ownerEmail ?? "Not claimed"}</dd>
         {profile.about && (
           <>
             <dt className="text-muted">About</dt>
@@ -473,7 +480,7 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </details>
       )}
 
-      <div className="sticky bottom-0 -mx-6 mt-8 rounded-b-[18px] border-t border-line bg-cream/95 px-6 py-4 backdrop-blur md:-mx-7 md:px-7">
+      <div className="sticky bottom-0 -mx-6 mt-8 rounded-b-[18px] border-t border-line bg-cream px-6 py-4 md:-mx-7 md:px-7">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
           <div className="min-w-0">
             <label className="label" htmlFor="r-notes">Notes (the vendor sees these if turned down or paused)</label>
