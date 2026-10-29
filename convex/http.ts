@@ -134,6 +134,19 @@ http.route({
   }),
 });
 
+/** For the uptime check: 200 when the backend and its database answer. */
+http.route({
+  path: "/health",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const status = await ctx.runQuery(internal.health.status, {});
+    return new Response(JSON.stringify({ ok: true, ...status }), {
+      status: 200,
+      headers: { "content-type": "application/json", "cache-control": "no-store" },
+    });
+  }),
+});
+
 registerStaticRoutes(http, components.staticHosting);
 
 export default http;

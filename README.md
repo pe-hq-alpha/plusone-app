@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-671_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-672_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -122,9 +122,9 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 | Criterion (weight) | What PlusOne shows | Where to look |
 |---|---|---|
-| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **The pain:** planning is spread across calls, chats, email and spreadsheets, and no two quotes are written alike, so charges turn up late. **Who benefits:** families, teams and event managers planning events of any size, and vendors with no website or listing, who can't be found. **What PlusOne does:** one all-in-one app for the whole plan, and every quote and offer on the same lines, with missing charges flagged and the market range. **Real-world potential:** every event needs vendors and quotes, at every budget; the aim is to standardise how they are planned and bought, with four revenue streams. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above. On 18 realistic Chennai quotes, PlusOne flagged all 37 charges a careful planner would have had to chase ([Evaluation](#evaluation-missing-charges)). | [The business](#the-business), [How it works](#how-it-works) |
+| **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | **The pain:** planning is spread across calls, chats, email and spreadsheets, and no two quotes are written alike, so charges turn up late. **Who benefits:** families, teams and event managers planning events of any size, and vendors with no website or listing, who can't be found. **What PlusOne does:** one all-in-one app for the whole plan, and every quote and offer on the same lines, with missing charges flagged and the market range. **Real-world potential:** every event needs vendors and quotes, at every budget; the aim is to standardise how they are planned and bought, with four revenue streams, ending in a disclosed commission on every booking paid through PlusOne. **Could people use it:** it is live at plusoneevents.site, free until launch, with a guest demo that needs no sign-up. **Fit:** Build for Your World, answered row by row above. On 18 realistic Chennai quotes, PlusOne flagged all 37 charges a careful planner would have had to chase ([Evaluation](#evaluation-missing-charges)). | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Each model does the job it is best at, chained into one flow. Today, Muse Spark reads every reply, PDF, quote and WhatsApp photo of a price list, in Tamil and English, into the same lines, and fixed rules then flag what each leaves out; Muse Voice Transcribe hears a spoken brief and Muse Spark turns it into the plan. Muse Wonder gathers evidence about a vendor for Ops, with its sources. Muse Spark Open, open weights on Baseten, reads a vendor's price list, typed or photographed, into packages on their trade's sheet. Muse Glimmer, open weights on our own Modal GPU, checks and tags photos of vendors' work. Muse Spark boxes the stage in the hall's own photo and SAM 3.1 cuts it out to dress it in a look. Muse Code is our pair programmer. Every call shows in Under the hood with its model, time and cost. Each piece's status is in the table above | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 671 tests. Measured: on 18 realistic Chennai quotes with a hand-marked key, Muse Spark reading plus the rules found 37 of 37 charges to ask about at 90% precision (92% and 87% before three rule fixes); see [Evaluation](#evaluation-missing-charges). | [Architecture](#architecture), [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide what to ask next, when a plan is ready, when a quote may move the budget and what a quote leaves out. One wrapper sends structured output checked against Zod schemas, retries that honour `Retry-After`, falls back with a log and writes a cost row per call. Durable workflows, scheduling, webhooks and rate limits run on Convex, with 672 tests. Measured: on 18 realistic Chennai quotes with a hand-marked key, Muse Spark reading plus the rules found 37 of 37 charges to ask about at 90% precision (92% and 87% before three rule fixes); see [Evaluation](#evaluation-missing-charges). | [Architecture](#architecture), [The tech, part by part](#the-tech-part-by-part), [Real runs](#real-runs) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | A live guest demo with no sign-up and three sample events. It holds up live with retries, a fallback, rate limits and made-up vendors, so nothing is really sent. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo) |
 
 ## Meta's models in PlusOne
@@ -176,7 +176,7 @@ SAM cut out exactly what it was given every time; the miss was the judgement of 
 | Muse Spark reading the demo's quotes | The three caterers' replies read on `muse-spark-1.3` in production, each right first time: Annam ₹66,150 in three lines (150 plates at ₹380, ₹6,000 service, ₹3,150 GST), priced for 150; Saapadu ₹62,000 all in for 120 with the ₹480 extra plate kept apart; Kaveri ₹54,000 plus ₹2,500 for vessels and staff, GST extra. 7.1–14.4 s each, 4,329 tokens in and 6,570 out, $0.033 in all, no fallback | 28 Oct 2026 | `npx convex run claude:readDemoQuotes`; the rows are Under the hood's recorded run |
 | Muse Voice Transcribe in production | A note spoken into the live app's Today box came back as text in the box, first try; the recording was deleted after reading | 28 Oct 2026 | By hand on app.plusoneevents.site, in the founder's own voice |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 671 passed in 67 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, Muse Spark Open on Baseten and its move to Muse Spark, the photo checks on Muse Glimmer (its retries through a cold start, the tag list, the limits and the Ops decisions), the venue view (boxes to SAM's objects, the mask cache, taps, limits and where the backdrop is drawn), the price list (only the sheet's units and the list's own prices kept, a photo deleted once read), the photos customers see, WhatsApp and call links, the cost record, the voice brief's limits and clean-up, the vendor check's tool loop, source rules, limits and cost on failure, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 29 Oct 2026 | `npm test` |
+| Tests | 672 passed in 68 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, Muse Spark Open on Baseten and its move to Muse Spark, the photo checks on Muse Glimmer (its retries through a cold start, the tag list, the limits and the Ops decisions), the venue view (boxes to SAM's objects, the mask cache, taps, limits and where the backdrop is drawn), the price list (only the sheet's units and the list's own prices kept, a photo deleted once read), the photos customers see, WhatsApp and call links, the cost record, the voice brief's limits and clean-up, the vendor check's tool loop, source rules, limits and cost on failure, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 29 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 28 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
@@ -188,8 +188,10 @@ SAM cut out exactly what it was given every time; the miss was the judgement of 
 |---|---|---|
 | **Basic** subscription | The planner app does the legwork; the host decides | Free until launch, then ₹1,000 or $10 a month ([pricing](https://plusoneevents.site/pricing)) |
 | **Premium** planning | A real person from the PlusOne team plans with you, in real time and on call | ₹2,500 or $25 a month, after launch |
-| **Booking fee** | A disclosed fee on bookings completed through PlusOne | Planned, with booking in the app |
+| **Commission on bookings** | A disclosed percentage of the money that moves from customer to vendor through PlusOne, booked and paid in stages in the app | The end goal; planned, with booking in the app |
 | **Vendor subscription** | Partner tools for vendors: quotations, leads, scheduling and analytics | Planned; listing is free first |
+
+**Where the money is.** Subscriptions and the vendor plan pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne, and a disclosed share of each booking is PlusOne's. Every step built now leads there: quotes on the same lines make a booking easy to agree, verified vendors with a track record make it safe, and the final bill read against the quote shows it was kept. A first birthday, a 60th or a team offsite is a booking, not only a wedding, so the commission comes from every size of event.
 
 Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne shows each price itemised, beside the others and the market range. It never sets one price for everyone or picks the cheapest bid by default. For now, customers pay vendors directly.
 
@@ -282,34 +284,9 @@ PlusOne Ops, at `/ops`, is the PlusOne team's side. A queue holds vendors and li
 
 ## Architecture
 
-```mermaid
-flowchart TD
-  IN["<b>What arrives</b><br/>a spoken brief · an emailed quote or PDF · a WhatsApp photo of a price list<br/>a recorded call · a vendor's own price list · the hall's photo · photos of a vendor's work"]
-  W["<b>One model wrapper</b> on Convex (convex/lib/models.ts)<br/>output checked against a schema · retries · a logged fallback · a cost row per call"]
-  subgraph Meta["Meta's models"]
-    direction LR
-    MS["Muse Spark 1.3<br/>reads and writes"]
-    VT["Muse Voice Transcribe<br/>briefs and calls"]
-    SO["Muse Spark Open<br/>price lists, on Baseten"]
-    SAM["SAM 3.1<br/>cuts out the stage"]
-    GL["Muse Glimmer 30B<br/>checks work photos, on our Modal GPU"]
-    MW["Muse Wonder<br/>gathers a vendor's evidence"]
-  end
-  SHEET["<b>The standard sheet</b><br/>every quote and every offer on the same lines"]
-  R["<b>Fixed, tested rules</b><br/>missing charges · the city's market range · when a quote may move the budget"]
-  OUT["<b>Compare, Today and the venue view</b><br/>for families, teams and event managers"]
-  P["<b>PlusOne Partner</b><br/>vendors answer the same brief"]
-  OPS["<b>PlusOne Ops</b><br/>a person verifies vendors, photos and listing changes"]
-  CL["Claude, only when a Meta model can't answer"]
-  IN --> W --> Meta
-  Meta --> SHEET
-  P --> SHEET
-  SHEET --> R --> OUT
-  GL --> OPS
-  MW --> OPS
-  OPS -- "verified vendors only" --> P
-  W -.-> CL
-```
+<img src="assets/architecture.svg" width="100%" alt="PlusOne end to end: a spoken brief, vendors' quotes, a recorded call, a price list, the hall's photo and photos of work go through one model wrapper on Convex to the Meta model suited to each (Muse Spark 1.3, Muse Voice Transcribe, Muse Spark Open on Baseten, SAM 3.1, Muse Glimmer 30B on our Modal GPU, Muse Wonder), with Claude only as a fallback; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner">
+
+<sub>Drawn by <code>assets/src/architecture.py</code>; the dots move along each path a request takes.</sub>
 
 Whatever arrives goes through the one wrapper to the Meta model suited to it and comes back as structured output checked against a schema. Quotes, calls and price lists land on the standard sheet, beside Partner vendors' offers to the same brief. From there the decisions are fixed, tested rules, not the model: what a quote leaves out, where a price sits in the city's range, and whether a quote may move the budget. Every call writes a cost row, which is what **Under the hood** shows.
 

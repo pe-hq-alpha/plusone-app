@@ -37,6 +37,7 @@ import type * as followups from "../followups.js";
 import type * as gifts from "../gifts.js";
 import type * as guestImport from "../guestImport.js";
 import type * as guests from "../guests.js";
+import type * as health from "../health.js";
 import type * as housekeeping from "../housekeeping.js";
 import type * as http from "../http.js";
 import type * as inbound from "../inbound.js";
@@ -176,6 +177,7 @@ declare const fullApi: ApiFromModules<{
   gifts: typeof gifts;
   guestImport: typeof guestImport;
   guests: typeof guests;
+  health: typeof health;
   housekeeping: typeof housekeeping;
   http: typeof http;
   inbound: typeof inbound;
