@@ -15,6 +15,7 @@ import { RenameTitle } from "../components/ui/RenameTitle";
 import { VendorCard } from "../components/VendorCard";
 import { ConfirmOutreach } from "../components/ConfirmOutreach";
 import { BRAND } from "../lib/brand";
+import { vendorHello } from "../lib/contact";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 
@@ -366,6 +367,8 @@ function SlotPanel({
                       onToggleSelected={(next) => toggleSelected(v._id, next)}
                       onToggleShortlist={() => void toggleShortlist({ vendorId: v._id })}
                       onSetEmail={(email) => void setEmail({ vendorId: v._id, email })}
+                      hello={vendorHello(v.name, { name: event.name, city: event.city }, slot.title)}
+                      sample={event.demo === true}
                     />
                   ))}
                 </ul>
@@ -391,6 +394,8 @@ function SlotPanel({
                       onToggleSelected={(next) => toggleSelected(v._id, next)}
                       onToggleShortlist={() => void toggleShortlist({ vendorId: v._id })}
                       onSetEmail={(email) => void setEmail({ vendorId: v._id, email })}
+                      hello={vendorHello(v.name, { name: event.name, city: event.city }, slot.title)}
+                      sample={event.demo === true}
                     />
                   ))}
                 </ul>

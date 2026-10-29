@@ -12,6 +12,8 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { Icon } from "../components/ui/Icon";
 import { BRAND } from "../lib/brand";
 import { partnerHref } from "../lib/hosts";
+import { ContactLinks } from "../components/ContactLinks";
+import { vendorHello } from "../lib/contact";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Board = NonNullable<FunctionReturnType<typeof api.dashboard.board>>;
@@ -28,7 +30,7 @@ type SheetQuantity = NonNullable<Need["sheet"]>["quantities"][number];
  * an emailed quote is a later step.
  */
 type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> &
-  Partial<Pick<Offer, "priceUnit" | "quantities" | "photos">> & {
+  Partial<Pick<Offer, "priceUnit" | "quantities" | "photos" | "phone" | "whatsapp">> & {
     id: string;
     name: string;
     from: "web" | "verified" | "sample";
@@ -59,6 +61,13 @@ const STATE: Record<VendorRow["state"], { label: string; cls: string }> = {
   needs_attention: { label: "Needs you", cls: "chip-warn" },
   not_contacted: { label: "Not asked", cls: "chip-quiet" },
 };
+
+/** "2027-01-30" as "30 Jan", for a first message to a vendor. */
+function dayMonth(iso: string | undefined): string | undefined {
+  if (!iso) return undefined;
+  const d = new Date(`${iso}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? undefined : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
 
 export function DecisionsPage() {
   const { event, role } = useOutletContext<EventData>();
@@ -154,7 +163,17 @@ export function DecisionsPage() {
       ) : (
         <div className="mt-7 grid gap-5">
           {shown.map((need) => (
-            <NeedBoard key={need.slotId} need={need} currency={board.currency} city={event.city} demo={event.demo === true} canEdit={canEdit} eventId={eventId} />
+            <NeedBoard
+              key={need.slotId}
+              need={need}
+              currency={board.currency}
+              city={event.city}
+              demo={event.demo === true}
+              canEdit={canEdit}
+              eventId={eventId}
+              eventName={event.name}
+              eventDate={dayMonth(event.startDate)}
+            />
           ))}
         </div>
       )}
@@ -193,7 +212,27 @@ export function CustomerCompare({ eventId, category, city }: { eventId: Id<"even
   return <NeedBoard need={need} currency={board.currency} city={city} demo={false} canEdit={false} eventId={eventId} compareOnly />;
 }
 
-function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly = false }: { need: Need; currency: string; city: string; demo: boolean; canEdit: boolean; eventId: Id<"events">; compareOnly?: boolean }) {
+function NeedBoard({
+  need,
+  currency,
+  city,
+  demo,
+  canEdit,
+  eventId,
+  eventName,
+  eventDate,
+  compareOnly = false,
+}: {
+  need: Need;
+  currency: string;
+  city: string;
+  demo: boolean;
+  canEdit: boolean;
+  eventId: Id<"events">;
+  eventName?: string;
+  eventDate?: string;
+  compareOnly?: boolean;
+}) {
   const markBooked = useMutation(api.slots.markBooked);
   const setStatus = useMutation(api.threads.setStatus);
   const [busy, setBusy] = useState<string | null>(null);
@@ -208,7 +247,7 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly =
   const unitWord = need.basisLabel.toLowerCase().replace(/^per /, "");
   const quoted = live.filter((v): v is QuotedRow => v.quote !== null && v.state !== "declined");
   const columns: Column[] = [
-    ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, ...v.quote })),
+    ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, phone: v.phone, ...v.quote })),
     ...need.offers.map((o) => ({ id: o.offerId, from: o.sample ? ("sample" as const) : ("verified" as const), ...o })),
   ];
 
@@ -284,7 +323,15 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly =
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
 
       {need.sheet && columns.length > 0 && (
-        <LineByLine sheet={need.sheet} columns={columns} unitWord={unitWord} city={need.market ? city : null} vendorSide={demo && need.offers.length > 0} />
+        <LineByLine
+          sheet={need.sheet}
+          columns={columns}
+          unitWord={unitWord}
+          city={need.market ? city : null}
+          vendorSide={demo && need.offers.length > 0}
+          // A vendor looking at the customer's view gets no way to message the others.
+          contact={compareOnly ? null : { demo, need: need.title, event: { name: eventName ?? "an event", date: eventDate, city } }}
+        />
       )}
 
       {live.length > 0 && !compareOnly && (
@@ -466,6 +513,7 @@ function LineByLine({
   unitWord,
   city,
   vendorSide,
+  contact,
 }: {
   sheet: NonNullable<Need["sheet"]>;
   columns: Column[];
@@ -473,6 +521,8 @@ function LineByLine({
   city: string | null;
   /** On a sample event, a way to answer the brief as a sample vendor. */
   vendorSide: boolean;
+  /** WhatsApp and Call under each vendor's name, with the first message written; none on the vendor's own view. */
+  contact: { demo: boolean; need: string; event: { name: string; date?: string; city?: string } } | null;
 }) {
   return (
     <div className="px-6 pb-5 pt-4">
@@ -499,6 +549,15 @@ function LineByLine({
                   <span className={`block text-[11px] font-normal ${c.from === "web" ? "text-quiet" : "text-accent"}`}>
                     {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : "Quote by email"}
                   </span>
+                  {contact && (
+                    <ContactLinks
+                      className="mt-0.5 justify-end text-[11px] font-normal text-muted"
+                      phone={c.phone}
+                      whatsapp={c.whatsapp}
+                      sample={contact.demo || c.from === "sample"}
+                      text={vendorHello(c.name, contact.event, contact.need)}
+                    />
+                  )}
                 </th>
               ))}
             </tr>

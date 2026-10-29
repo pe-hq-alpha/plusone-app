@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { money } from "../lib/format";
 import { Icon } from "./ui/Icon";
 import { usePrivacy } from "../lib/privacy";
+import { ContactLinks } from "./ContactLinks";
 
 type Vendor = FunctionReturnType<typeof api.vendors.listBySlot>[number];
 
@@ -127,6 +128,8 @@ export function VendorCard({
   onToggleSelected,
   onToggleShortlist,
   onSetEmail,
+  hello,
+  sample = false,
 }: {
   vendor: Vendor;
   /** 1, 2 or 3 for a top pick; undefined for the rest. */
@@ -141,6 +144,10 @@ export function VendorCard({
   onToggleSelected: (next: boolean) => void;
   onToggleShortlist: () => void;
   onSetEmail: (email: string) => void;
+  /** The first WhatsApp message to this vendor, written for the event; no links without it. */
+  hello?: string;
+  /** A sample event's vendor: no number, so the links say what would happen. */
+  sample?: boolean;
 }) {
   const privacy = usePrivacy();
   const [pictureOk, setPictureOk] = useState(true);
@@ -210,6 +217,7 @@ export function VendorCard({
             Website <Icon name="external" size={12} />
           </a>
         )}
+        {hello && <ContactLinks phone={vendor.phone} text={hello} sample={sample} />}
         {otherSources(vendor).map((u) => (
           <a key={u} className="text-quiet underline decoration-line hover:text-accent" href={u} target="_blank" rel="noreferrer">
             {sourceName(u)}

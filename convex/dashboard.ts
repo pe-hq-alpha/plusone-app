@@ -52,6 +52,9 @@ const offerRow = v.object({
   quantities: v.record(v.string(), v.number()),
   /** Photos of the vendor's past work customers may see. */
   photos: v.array(customerPhoto),
+  /** How to reach them: WhatsApp and a call, as the vendor gave them on Partner. */
+  phone: v.optional(v.string()),
+  whatsapp: v.optional(v.string()),
 });
 
 const vendorRow = v.object({
@@ -59,6 +62,8 @@ const vendorRow = v.object({
   threadId: v.union(v.id("threads"), v.null()),
   name: v.string(),
   email: v.optional(v.string()),
+  /** From the vendor's own pages, for WhatsApp and a call. */
+  phone: v.optional(v.string()),
   website: v.optional(v.string()),
   rating: v.optional(v.number()),
   reviewCount: v.optional(v.number()),
@@ -338,6 +343,7 @@ export const board = query({
           threadId: thread?._id ?? null,
           name: vendor.name,
           email: vendor.email,
+          ...(vendor.phone ? { phone: vendor.phone } : {}),
           website: vendor.website,
           rating: vendor.rating,
           reviewCount: vendor.reviewCount,
@@ -426,6 +432,8 @@ export const board = query({
             ...(sheet ? { priceUnit: priceUnitOf(sheet, o.priceUnit).key } : o.priceUnit ? { priceUnit: o.priceUnit } : {}),
             quantities: o.quantities ?? {},
             photos: o.vendor.photos,
+            ...(o.vendor.phone ? { phone: o.vendor.phone } : {}),
+            ...(o.vendor.whatsapp ? { whatsapp: o.vendor.whatsapp } : {}),
           };
         }),
       });
