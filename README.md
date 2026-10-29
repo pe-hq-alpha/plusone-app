@@ -246,6 +246,18 @@ Eighteen replies in the shapes Chennai vendors send (six caterers, four halls, f
 
 Run 1's misses showed three general misreadings, each now fixed and pinned by tests: "Plates and glasses ₹1,500" wasn't read as crockery, so other caterers' silence on it went unflagged; "GST 5% extra" was asked about though a rate is a figure (now priced on the quote's total); "price includes service" wasn't read as service staff. Run 2 is the better number but was measured on the same quotes the fixes came from, so treat it as optimistic. Its four remaining false alarms: two "GST 18% extra" where the reading dropped the rate, one "after that ₹8,000 per hour" not read as overtime, and one "No album, digital only" flagged as an album to ask about.
 
+## Evaluation: finding the stage
+
+Six hall photos of different kinds (generated with Pollinations, labelled as samples): a mandapam, a hotel banquet room, a rooftop deck, a hall with the stage to one side, a stage already decorated, and a living room with no stage at all. Each went through the venue view's own path on production: Muse Spark boxes the stage and the wall behind it, SAM 3.1 cuts both out (`evals:venueStage`; raw results in `scripts/venue-stage-run1.json`). Judged by eye against each photo:
+
+| Photos | Right | Wrong | Time each | Cost |
+|---|---|---|---|---|
+| 6 | 5 | 1: the living room's sofa taken for a stage, where there was none | 4.5–8 s | about $0.05 in all |
+
+SAM cut out exactly what it was given every time; the miss was the judgement of what counts as a stage, and a tap on the photo re-picks it.
+
+<img src="assets/screens/venue-eval.jpg" width="100%" alt="Six hall photos with the outlines found drawn in gold: a mandapam's carved frame and stage front, a banquet hall's panelled wall and low platform, a rooftop's wall and wooden deck, a community hall's side wall and platform, a decorated stage's curtains and skirted platform, and in a living room with no stage, the window wall and the sofa">
+
 ## Real runs
 
 | What | Result | When | How |

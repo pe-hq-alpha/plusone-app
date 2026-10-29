@@ -79,6 +79,7 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 - **Demo sample brief** (`12567a6`): "Play a sample" on the demo's Today box plays a recorded brief and hears it like a spoken one; English for now (the generated voice mispronounced Tamil), a founder's recording to follow.
 - **Track record in Compare** (`89417d2`): each verified vendor's level (New, Trusted, Top, from events done through PlusOne, never bought) and events done, beside the price; web-found vendors show as not on PlusOne yet. From Paddy's question on paying a little more for a trusted vendor: fair means informed, not cheapest; the business answer (ratings only from real bookings, final bill against quote, PlusOne Assured) went into the strategy note, for Coming next.
 - **The models card:** Muse Code marked as our pair programmer and the fallback as live, both shown active.
+- **Stage-finding evaluation** (`81aa195`): six generated hall photos of different kinds through the venue view's own path on production (Muse Spark boxes, SAM 3.1 cuts). Judged by eye: 5 of 6 right; the living room with no stage had its sofa taken for one. 4.5–8 s each, about $0.05. SAM cut out exactly what it was given every time.
 - **Tests:** 671 passed in 67 files; typecheck clean.
 
 ### 2026-10-28 - 80a23e5..de4af23
