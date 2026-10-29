@@ -61,6 +61,8 @@ Planning an event means juggling: vendors on calls and WhatsApp, quotes in email
 
 The aim is to standardise a segment of the market, how events are planned and bought, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
 
+<img src="assets/overview.svg" width="100%" alt="How PlusOne works: customers, families and event managers, describe their event in PlusOne; vendors get the same brief and send quotes back; PlusOne puts every quote on the same lines, flags missing charges and shows prices in the open, so the customer compares them line by line; the PlusOne team verifies every vendor">
+
 PlusOne is one platform with three layers that feed each other:
 
 | Layer | For | What it does | Today |
@@ -78,7 +80,7 @@ Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), wi
 
 PlusOne began as a wedding planner and placed second at Convex's All Gas hackathon in September 2026. For the Meta Global AI Developer Hackathon (Startup track), it moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
 
-**Team:** Padmanabhan Rajendrakumar (representative), who builds the core product and its move to Meta's models, and Sharmila Raghu, who leads PlusOne Partner and the design of every app. The two of them founded PlusOne.
+**Team:** Padmanabhan Rajendrakumar, Founder (representative), who builds the core product and its move to Meta's models, and Sharmila Raghu, Co-Founder, who leads PlusOne Partner and the design of every app.
 
 ## For the judges
 
