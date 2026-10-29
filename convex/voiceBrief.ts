@@ -20,6 +20,8 @@ const UNAVAILABLE = "Speaking the plan isn't available right now. Type it instea
 const NOT_HEARD = "We couldn't hear that. Try again, or type it.";
 // Two minutes of 16 kHz mono WAV is 3.84 MB; anything much bigger didn't come from our recorder.
 const MAX_BYTES = 5 * 1024 * 1024;
+/** A call with a vendor runs longer: up to 10 minutes of 16 kHz mono is about 19 MB. */
+const MAX_CALL_BYTES = 20 * 1024 * 1024;
 
 /**
  * Each voice note spends one from the person's allowance (a guest's is small, per day) and one
@@ -54,7 +56,7 @@ export const uploadUrl = mutation({
 
 /** For `transcribe`, which has no db: who's speaking, whether they may plan the event, and what the file is. */
 export const prepare = internalQuery({
-  args: { userId: v.id("users"), storageId: v.id("_storage"), eventId: v.optional(v.id("events")) },
+  args: { userId: v.id("users"), storageId: v.id("_storage"), eventId: v.optional(v.id("events")), call: v.optional(v.boolean()) },
   returns: v.object({ isGuest: v.boolean(), canPlan: v.boolean(), isVoiceNote: v.boolean() }),
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
@@ -71,7 +73,7 @@ export const prepare = internalQuery({
       isGuest: Boolean(user?.isAnonymous),
       canPlan,
       // A file stored without a type is judged by its header once it's read.
-      isVoiceNote: Boolean(file) && (file?.contentType ?? "audio/wav") === "audio/wav" && (file?.size ?? 0) <= MAX_BYTES,
+      isVoiceNote: Boolean(file) && (file?.contentType ?? "audio/wav") === "audio/wav" && (file?.size ?? 0) <= (args.call ? MAX_CALL_BYTES : MAX_BYTES),
     };
   },
 });
@@ -85,9 +87,12 @@ function isWav(bytes: Uint8Array): boolean {
   }
 }
 
-/** Muse Voice Transcribe, tried once more when Meta says it's busy. There is no other provider for voice. */
-async function listen(bytes: Uint8Array): Promise<VoiceResult> {
-  const options: VoiceOptions = { mode: "PUSH_TO_TALK", languageBias: ["Tamil", "English"], keywords: VOICE_WORDS };
+/**
+ * Muse Voice Transcribe, tried once more when Meta says it's busy. There is no other provider
+ * for voice. A call is heard with diarization, so each turn says which speaker said it.
+ */
+async function listen(bytes: Uint8Array, call: boolean): Promise<VoiceResult> {
+  const options: VoiceOptions = { mode: call ? "DIARIZATION" : "PUSH_TO_TALK", languageBias: ["Tamil", "English"], keywords: VOICE_WORDS };
   try {
     return await voiceTranscribe(bytes, options);
   } catch (error) {
@@ -98,12 +103,17 @@ async function listen(bytes: Uint8Array): Promise<VoiceResult> {
   }
 }
 
+/**
+ * A voice note, or with `call`, the recording of a call with a vendor: heard with who said
+ * what, so the vendor's spoken quote can be read into the sheet like a pasted message.
+ */
 export const transcribe = action({
-  args: { storageId: v.id("_storage"), eventId: v.optional(v.id("events")) },
-  returns: v.object({ text: v.string(), seconds: v.number() }),
-  handler: async (ctx, args): Promise<{ text: string; seconds: number }> => {
+  args: { storageId: v.id("_storage"), eventId: v.optional(v.id("events")), call: v.optional(v.boolean()) },
+  returns: v.object({ text: v.string(), seconds: v.number(), turns: v.array(v.object({ speaker: v.optional(v.string()), text: v.string() })) }),
+  handler: async (ctx, args): Promise<{ text: string; seconds: number; turns: { speaker?: string; text: string }[] }> => {
     const userId = await requireActionUserId(ctx);
-    const file = await ctx.runQuery(internal.voiceBrief.prepare, { userId, storageId: args.storageId, eventId: args.eventId });
+    const call = args.call === true;
+    const file = await ctx.runQuery(internal.voiceBrief.prepare, { userId, storageId: args.storageId, eventId: args.eventId, call });
     // Only a voice note is read or deleted here; any other file someone names is left alone.
     if (!file.isVoiceNote) throw new ConvexError(NOT_HEARD);
     const blob = await ctx.storage.get(args.storageId);
@@ -115,12 +125,12 @@ export const transcribe = action({
       await allowance(ctx, userId, file.isGuest, true);
 
       const started = Date.now();
-      const result = await listen(bytes).catch(() => {
+      const result = await listen(bytes, call).catch(() => {
         throw new ConvexError(NOT_HEARD);
       });
       try {
         await ctx.runMutation(internal.modelCalls.record, {
-          feature: "voiceBrief",
+          feature: call ? "vendorCall" : "voiceBrief",
           provider: "meta",
           model: result.model,
           inputTokens: 0,
@@ -133,7 +143,11 @@ export const transcribe = action({
       } catch (error) {
         console.warn(`Could not record the voiceBrief model call: ${error instanceof Error ? error.message : String(error)}`);
       }
-      return { text: result.text, seconds: result.seconds };
+      return {
+        text: result.text,
+        seconds: result.seconds,
+        turns: result.turns.map((t) => ({ ...(t.speaker ? { speaker: t.speaker } : {}), text: t.text })),
+      };
     } finally {
       // We never keep a recording, whatever happened above.
       await ctx.storage.delete(args.storageId).catch(() => undefined);

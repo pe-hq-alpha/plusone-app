@@ -2,7 +2,7 @@ import { anOccasion } from "../../convex/lib/occasion";
 import { defaultSearchText, partOfNeed } from "../../convex/lib/searchTerms";
 import { missingCharges, sheetFor } from "../../convex/lib/standardSheet";
 import { useEffect, useMemo, useState } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -16,6 +16,7 @@ import { VendorCard } from "../components/VendorCard";
 import { ConfirmOutreach } from "../components/ConfirmOutreach";
 import { BRAND } from "../lib/brand";
 import { vendorHello } from "../lib/contact";
+import { callText, toWav16k } from "../lib/audio";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 
@@ -485,7 +486,7 @@ function SlotPanel({
       )}
 
       {canEdit && slot.status !== "booked" && vendors && vendors.length > 0 && (
-        <SharedQuote eventId={event._id} vendors={vendors.map((v) => ({ _id: v._id, name: v.name }))} />
+        <SharedQuote eventId={event._id} vendors={vendors.map((v) => ({ _id: v._id, name: v.name }))} demo={event.demo === true} />
       )}
 
       {canEdit && (
@@ -518,9 +519,12 @@ function SlotPanel({
  * A quote that came outside the inbox: a WhatsApp photo, a screenshot, a PDF or a pasted
  * message. It is read like an emailed reply, into the same lines, and lands in Compare.
  */
-function SharedQuote({ eventId, vendors }: { eventId: Id<"events">; vendors: Array<{ _id: Id<"vendors">; name: string }> }) {
+function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendors: Array<{ _id: Id<"vendors">; name: string }>; demo: boolean }) {
   const uploadUrl = useMutation(api.sharedQuotes.generateUploadUrl);
   const add = useMutation(api.sharedQuotes.add);
+  const voiceUploadUrl = useMutation(api.voiceBrief.uploadUrl);
+  const hear = useAction(api.voiceBrief.transcribe);
+  const [hearing, setHearing] = useState(false);
   const [vendorId, setVendorId] = useState<Id<"vendors">>(vendors[0]._id);
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -550,10 +554,34 @@ function SharedQuote({ eventId, vendors }: { eventId: Id<"events">; vendors: Arr
     }
   }
 
+  /**
+   * A call with the vendor: the recording is heard speaker by speaker and its words put in the
+   * box, for the person to check before the quote is read like any pasted message.
+   */
+  async function hearCall(recording: Blob) {
+    setHearing(true);
+    setError(null);
+    setDone(null);
+    try {
+      const wav = await toWav16k(recording);
+      const res = await fetch(await voiceUploadUrl({}), { method: "POST", headers: { "Content-Type": "audio/wav" }, body: wav as unknown as BodyInit });
+      if (!res.ok) throw new Error("That recording didn't go. Try again.");
+      const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+      const heard = await hear({ storageId, eventId, call: true });
+      const name = vendors.find((v) => v._id === vendorId)?.name ?? "the vendor";
+      setText(callText(name, heard.turns.length ? heard.turns : [{ text: heard.text }]));
+      setDone("Here's the call, speaker by speaker. Check it, then read the quote.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message.replace(/^.*ConvexError: /, "") : "We couldn't hear that recording. Try again.");
+    } finally {
+      setHearing(false);
+    }
+  }
+
   return (
     <details className="card p-5">
-      <summary className="cursor-pointer text-sm font-medium">Add a quote they sent on WhatsApp or by hand</summary>
-      <p className="mt-1 text-xs text-muted">A photo or screenshot of their price list, a PDF, or their message pasted in. It&rsquo;s read into the same lines as every other quote.</p>
+      <summary className="cursor-pointer text-sm font-medium">Add a quote they sent on WhatsApp, by hand or on a call</summary>
+      <p className="mt-1 text-xs text-muted">A photo or screenshot of their price list, a PDF, their message pasted in, or a recording of your call with them. It&rsquo;s read into the same lines as every other quote.</p>
       <form
         className="mt-3 grid gap-2"
         onSubmit={(e) => {
@@ -567,6 +595,36 @@ function SharedQuote({ eventId, vendors }: { eventId: Id<"events">; vendors: Arr
           ))}
         </select>
         <textarea className="input min-h-20" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste their message (optional with a photo)" aria-label="Their message" />
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <label className={`btn-quiet btn-sm cursor-pointer bg-cream ${hearing || busy ? "pointer-events-none opacity-60" : ""}`}>
+            {hearing ? "Listening to the call…" : "Add a recording of your call"}
+            <input
+              type="file"
+              className="hidden"
+              accept="audio/*"
+              disabled={hearing || busy}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (f) void hearCall(f);
+              }}
+            />
+          </label>
+          {demo && (
+            <button
+              type="button"
+              className="btn-quiet btn-sm"
+              disabled={hearing || busy}
+              onClick={() =>
+                void fetch("/sample-call.mp3")
+                  .then((r) => r.blob())
+                  .then(hearCall)
+              }
+            >
+              Try a sample call
+            </button>
+          )}
+        </div>
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp,application/pdf"

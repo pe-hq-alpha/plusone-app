@@ -88,6 +88,37 @@ describe("voiceBrief transcribe", () => {
     expect(await t.run((ctx) => ctx.storage.get(storageId))).toBeNull();
   });
 
+  test("a call with a vendor is heard with diarization and comes back speaker by speaker", async () => {
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "test-key");
+    const reply = {
+      transcript: "Your rate? 460 per plate, GST extra.",
+      audioDurationMs: 500,
+      turns: [
+        { turnId: 1, startMs: 0, endMs: 200, transcript: "Your rate?", speaker: "A" },
+        { turnId: 2, startMs: 200, endMs: 500, transcript: "460 per plate, GST extra.", speaker: "B" },
+      ],
+    };
+    const fetchFn = vi.fn(async (_url: unknown, _init?: RequestInit) => Response.json(reply));
+    vi.stubGlobal("fetch", fetchFn);
+
+    const t = setup();
+    const userId = await t.run((ctx) => ctx.db.insert("users", { email: "a@example.com", name: "A" }));
+    const storageId = await storeWav(t, wav(0.5, 16_000));
+    const as = t.withIdentity({ subject: `${userId}|s` });
+    const result = await as.action(api.voiceBrief.transcribe, { storageId, call: true });
+    expect(result.turns).toEqual([
+      { speaker: "A", text: "Your rate?" },
+      { speaker: "B", text: "460 per plate, GST extra." },
+    ]);
+    const form = (fetchFn.mock.calls[0][1] as RequestInit).body as FormData;
+    const request = form.get("request");
+    expect(typeof request === "string" ? request : await (request as Blob).text()).toContain("DIARIZATION");
+    const rows = await t.run((ctx) => ctx.db.query("modelCalls").take(5));
+    expect(rows).toMatchObject([{ feature: "vendorCall" }]);
+    expect(await t.run((ctx) => ctx.db.system.get("_storage", storageId))).toBeNull();
+  });
+
   test("deletes the file even when Meta returns 400", async () => {
     vi.stubEnv("MODEL_PROVIDER", "meta");
     vi.stubEnv("MODEL_API_KEY", "test-key");
