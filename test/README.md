@@ -9,7 +9,7 @@ npm test             # 676 tests in 69 files: the backend, the rules and the app
 npm run typecheck    # app and backend
 ```
 
-The tests sit beside the code they test (`convex/**/*.test.ts`, `src/**/*.test.ts`), because Convex's test runner
+The tests sit beside the code they test (`convex/**/*.test.ts`, `src/**/*.test.ts`), with the Cloudflare middleware's here (`test/visitMiddleware.test.ts`), because Convex's test runner
 finds each backend module by its place in `convex/`. They never call a live model: every model reply is a fixture.
 
 ## 2. The browser walk (before every deploy that changes a screen)

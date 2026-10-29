@@ -437,6 +437,7 @@ What is built is above. These come after the hackathon, in this order, each feed
 | `convex/marketplace/` | PlusOne Partner's backend: listings and claims, briefs and offers, Ops decisions, the vendor check and city price ranges |
 | `convex/lib/` | Pure rules shared with the app: quote comparison, the standard sheet and its missing charges, the planning conversation's rules, event types and their words, templates, inbox names, search terms |
 | `scripts/` | The evaluations' raw results (`missing-charges-run1.json`, `missing-charges-run2.json`, `venue-stage-run1.json`); `auth-keys.mjs` makes the demo's guest-token keys; `agentmail-setup.mjs` registers a deployment's inbox webhook; `fake-webhook.mjs` sends a signed test email to it |
+| `test/` | How PlusOne is tested: the hands-on [checklist](test/checklist.md) for every feature, a browser walk of the live demos at phone and laptop width (`walk.mjs`), and the middleware's tests |
 | `functions/` | Cloudflare Pages Functions: `geo.ts` for a visit's country and state, `ingest/` for analytics |
 | `public/` | Icons, the install manifest, the share image and the mail logo |
 | `assets/` | This README's banner and Meta models image (sources in `assets/src/`), screenshots and logos |
