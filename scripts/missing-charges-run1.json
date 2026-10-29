@@ -1,0 +1,340 @@
+{
+  "ranAt": "2026-10-29T06:22:06.039Z",
+  "scores": [
+    {
+      "category": "Catering",
+      "expected": [
+        "water"
+      ],
+      "extra": [
+        "gst"
+      ],
+      "flagged": [
+        "gst",
+        "water"
+      ],
+      "hits": [
+        "water"
+      ],
+      "missed": [],
+      "vendor": "Annapoorna Catering"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "hits": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "missed": [
+        "crockery"
+      ],
+      "vendor": "Saravana Caterers"
+    },
+    {
+      "category": "Catering",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Mylai Kitchen"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery"
+      ],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [
+        "crockery"
+      ],
+      "vendor": "Krishna Bhavan Caterers"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "hits": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "missed": [],
+      "vendor": "Sri Vaari Foods"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "transport"
+      ],
+      "extra": [
+        "service_staff"
+      ],
+      "flagged": [
+        "service_staff",
+        "transport"
+      ],
+      "hits": [
+        "transport"
+      ],
+      "missed": [
+        "crockery"
+      ],
+      "vendor": "Thali Express"
+    },
+    {
+      "category": "Venue",
+      "expected": [],
+      "extra": [
+        "gst"
+      ],
+      "flagged": [
+        "gst"
+      ],
+      "hits": [],
+      "missed": [],
+      "vendor": "Thamarai Hall"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "ac",
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "extra": [],
+      "flagged": [
+        "ac",
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "ac",
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Sri Kalyana Mandapam"
+    },
+    {
+      "category": "Venue",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Green Palace"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "extra": [],
+      "flagged": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Lotus Hall"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [],
+      "extra": [
+        "gst"
+      ],
+      "flagged": [
+        "gst"
+      ],
+      "hits": [],
+      "missed": [],
+      "vendor": "Jasmine Arch Decor"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Rangoli Room"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "hits": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Pushpa Decorators"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "lighting",
+        "setup"
+      ],
+      "extra": [],
+      "flagged": [
+        "lighting",
+        "setup"
+      ],
+      "hits": [
+        "lighting",
+        "setup"
+      ],
+      "missed": [],
+      "vendor": "Malar Florists"
+    },
+    {
+      "category": "Photographer",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Thinnai Photography"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "extra": [],
+      "flagged": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "hits": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Click Studio"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "drone",
+        "gst"
+      ],
+      "extra": [
+        "album"
+      ],
+      "flagged": [
+        "album",
+        "drone",
+        "gst"
+      ],
+      "hits": [
+        "drone",
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Muthu Moments"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "extra": [],
+      "flagged": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "hits": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Vilakku Studio"
+    }
+  ],
+  "seconds": 64,
+  "totals": {
+    "exactQuotes": 11,
+    "expected": 37,
+    "falseAlarms": 5,
+    "found": 34,
+    "missed": 3,
+    "precision": 0.8717948717948718,
+    "quotes": 18,
+    "recall": 0.918918918918919
+  }
+}

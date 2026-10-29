@@ -146,7 +146,8 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         label: "Service staff",
         kind: "fee",
         usually: "extra",
-        match: /\b(service staff|serving staff|catering staff|waiters?|servers?|service boys|service charges?)\b/i,
+        // "Service" alone counts only as an item of its own ("includes service and GST"), never inside "banana leaf service".
+        match: /\b(service staff|serving staff|catering staff|waiters?|servers?|service boys|service charges?)\b|^\s*service\b(?!\s*tax)/i,
       },
       TRANSPORT,
       {
@@ -154,7 +155,7 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         label: "Crockery and serving ware",
         kind: "fee",
         usually: "included",
-        match: /\b(crocker\w*|cutlery|serving ware|banana[- ]leaf|leaf plates?|disposables?|tableware)\b/i,
+        match: /\b(crocker\w*|cutlery|serving ware|serving vessels?|banana[- ]leaf|leaf plates?|disposables?|tableware|(?<!per )plates|glass(es)?|tumblers?)\b/i,
       },
       { key: "water", label: "Water", kind: "extra", usually: "included", match: /\bwater\b/i },
     ],
@@ -401,9 +402,32 @@ export function readQuote(q: QuoteLike, sheet: Sheet): LineReading[] {
     if ((q.includes ?? []).some(names) || (s.kind === "tax" && q.taxIncluded === true)) return { ...base, status: "included" as const };
     const addOns = charged.filter((l) => l.optional);
     if (addOns.length) return { ...base, status: "extra" as const, amount: sum(addOns.map((l) => l.amount)) };
+    if (s.kind === "tax" && q.taxIncluded !== true) {
+      // "GST 5% extra" is a rate the family can work out, so it is priced on the quote's own total.
+      const rate = taxRate(q, s.match);
+      if (rate !== null && q.total > 0) return { ...base, status: "extra" as const, amount: Math.round((q.total * rate) / 100) };
+    }
     if ((q.excludes ?? []).some(names) || (s.kind === "tax" && q.taxIncluded === false)) return { ...base, status: "extra" as const };
     return { ...base, status: "unstated" as const };
   });
+}
+
+/**
+ * A tax rate the quote states in words ("GST 5% extra", "+18% GST"), from its lines, its
+ * exclusions or its inclusions; null when it gives none. Only a figure beside the tax's own
+ * name counts, so "10% advance" is never read as tax.
+ */
+export function taxRate(q: QuoteLike, taxName: RegExp): number | null {
+  const texts = [...(q.lines ?? []).filter((l) => l.kind === "tax").map((l) => l.item), ...(q.excludes ?? []), ...(q.includes ?? [])];
+  for (const t of texts) {
+    if (!taxName.test(t)) continue;
+    const m = t.match(/(\d{1,2}(?:\.\d+)?)\s*%/);
+    if (m) {
+      const rate = Number(m[1]);
+      if (rate > 0 && rate <= 28) return rate;
+    }
+  }
+  return null;
 }
 
 /** A charge a quote doesn't state, or states without a price. `key` is the sheet line, so Compare can mark that row. */

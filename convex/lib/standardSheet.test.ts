@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { basisFor } from "./comparable";
-import { amountFor, basisUnitOf, describeOffer, gapsIn, missingCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, readQuote, sheetFor, STANDARD_SHEETS, timesFor } from "./standardSheet";
+import { amountFor, basisUnitOf, describeOffer, gapsIn, missingCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, readQuote, sheetFor, STANDARD_SHEETS, timesFor, taxRate } from "./standardSheet";
 import { VENDOR_NEEDS } from "./vocab";
 
 const line = (item: string, kind: "core" | "extra" | "tax" | "fee", amount: number, more: object = {}) => ({
@@ -324,5 +324,33 @@ describe("the line a customer reads", () => {
     expect(quantityValue(q("delivery"), 1)).toBe("1 week");
     expect(quantityValue(q("photos"), 1200)).toBe("1,200");
     expect(quantityText(q("photographers"), 1)).toBe("1 photographer");
+  });
+});
+
+describe("charges written the way vendors write them (from the missing-charge evaluation, 29 Oct)", () => {
+  const sheet = sheetFor("Catering")!;
+  const statusOf = (q: Parameters<typeof readQuote>[0]) => Object.fromEntries(readQuote(q, sheet).map((r) => [r.key, r]));
+
+  test("a GST rate is priced on the quote's total, so it isn't asked about", () => {
+    const r = statusOf({ total: 50_400, taxIncluded: false, excludes: ["GST 5% extra"] });
+    expect(r.gst).toMatchObject({ status: "extra", amount: 2_520 });
+  });
+
+  test("a percentage that isn't beside the tax's name is never read as tax", () => {
+    expect(taxRate({ total: 50_000, excludes: ["10% advance to confirm"] }, /\bgst\b/i)).toBeNull();
+    expect(statusOf({ total: 50_000, taxIncluded: false, excludes: ["10% advance"] }).gst).toMatchObject({ status: "extra" });
+    expect(statusOf({ total: 50_000, taxIncluded: false, excludes: ["10% advance"] }).gst.amount).toBeUndefined();
+  });
+
+  test("plates, glasses and tumblers are crockery, but a price per plate is not", () => {
+    const line = (item: string) => ({ item, kind: "extra" as const, unit: "total" as const, amount: 1_500 });
+    expect(statusOf({ total: 1_500, lines: [line("Plates and glasses")] }).crockery).toMatchObject({ status: "priced", amount: 1_500 });
+    expect(statusOf({ total: 0, includes: ["Plates, tumblers and serving vessels"] }).crockery).toMatchObject({ status: "included" });
+    expect(statusOf({ total: 0, includes: ["Rs 400 per plate"] }).crockery).toMatchObject({ status: "unstated" });
+  });
+
+  test("\"service\" on its own is service staff, but not inside \"banana leaf service\"", () => {
+    expect(statusOf({ total: 0, includes: ["service", "GST"] }).service_staff).toMatchObject({ status: "included" });
+    expect(statusOf({ total: 0, includes: ["Banana leaf service"] }).service_staff).toMatchObject({ status: "unstated" });
   });
 });
