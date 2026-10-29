@@ -226,7 +226,7 @@ function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean
           <VoiceButton
             eventId={eventId}
             disabled={busy}
-            // On the demo, a recorded brief in Tamil and English, for a visitor who can't or won't speak.
+            // On the demo, a recorded brief, for a visitor who can't or won't speak.
             sampleUrl={demo ? "/sample-brief.mp3" : undefined}
             onText={(t) => {
               setText((prev) => (prev ? `${prev} ${t}` : t));
