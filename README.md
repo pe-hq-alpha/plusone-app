@@ -20,29 +20,23 @@
 
 <table align="center">
 <tr>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Spark</b><br><sub>Reads every vendor's quote into the same lines</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Voice Transcribe</b><br><sub>Hears plans and vendor calls in Tamil and English</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Wonder</b><br><sub>Checks a vendor is genuine before they're listed</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>SAM 3.1</b><br><sub>Shows decor on a photo of your own hall</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Glimmer</b><br><sub>Checks vendors' photos are their own work</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Spark Open</b><br><sub>Turns a vendor's rate card into packages</sub></td>
-<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Code</b><br><sub>Our pair programmer</sub></td>
-<td align="center" width="84"><img src="assets/logos/modal.svg" width="30" height="30" alt="Modal"><br><b>Modal</b><br><sub>Runs Muse Glimmer on our own GPU</sub></td>
-<td align="center" width="84"><img src="assets/logos/baseten.png" width="30" height="30" alt="Baseten"><br><b>Baseten</b><br><sub>Runs Muse Spark Open</sub></td>
-<td align="center" width="84"><img src="assets/logos/convex.svg" width="30" height="30" alt="Convex"><br><b>Convex</b><br><sub>Database, server code and background jobs</sub></td>
-<td align="center" width="84"><img src="assets/logos/claude.svg" width="30" height="30" alt="Claude"><br><b>Claude</b><br><sub>Backup when a Meta model can't answer</sub></td>
+<td align="center" width="200" rowspan="2"><a href="#metas-models-in-plusone"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"></a><br><b><a href="#metas-models-in-plusone">Meta's models</a></b><br><sub>Muse Spark, Muse Voice Transcribe, Muse Wonder, SAM 3.1, and the open-weights Muse Glimmer and Muse Spark Open, with Muse Code as our pair programmer. <a href="#metas-models-in-plusone">What each one does</a></sub></td>
+<td align="center" width="96"><img src="assets/logos/modal.svg" width="30" height="30" alt="Modal"><br><b>Modal</b><br><sub>Runs Muse Glimmer on our own GPU</sub></td>
+<td align="center" width="96"><img src="assets/logos/baseten.png" width="30" height="30" alt="Baseten"><br><b>Baseten</b><br><sub>Runs Muse Spark Open</sub></td>
+<td align="center" width="96"><img src="assets/logos/convex.svg" width="30" height="30" alt="Convex"><br><b>Convex</b><br><sub>Database, server code and background jobs</sub></td>
+<td align="center" width="96"><img src="assets/logos/claude.svg" width="30" height="30" alt="Claude"><br><b>Claude</b><br><sub>Backup when a Meta model can't answer</sub></td>
+<td align="center" width="96"><img src="assets/logos/firecrawl.png" width="30" height="30" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites</sub></td>
+<td align="center" width="96"><img src="assets/logos/agentmail.png" width="30" height="30" alt="AgentMail"><br><b>AgentMail</b><br><sub>Gives each event its own email inbox</sub></td>
+<td align="center" width="96"><img src="assets/logos/clerk.svg" width="30" height="30" alt="Clerk"><br><b>Clerk</b><br><sub>Sign-in for customers, vendors and our team</sub></td>
 </tr>
 <tr>
-<td align="center" width="84"><img src="assets/logos/react.svg" width="30" height="30" alt="React"><br><b>React</b><br><sub>The app's screens</sub></td>
-<td align="center" width="84"><img src="assets/logos/vite.svg" width="30" height="30" alt="Vite"><br><b>Vite</b><br><sub>Builds the app</sub></td>
-<td align="center" width="84"><img src="assets/logos/tailwind.svg" width="30" height="30" alt="Tailwind CSS"><br><b>Tailwind</b><br><sub>The app's styling</sub></td>
-<td align="center" width="84"><img src="assets/logos/vitest.svg" width="30" height="30" alt="Vitest"><br><b>Vitest</b><br><sub>Runs the test suite</sub></td>
-<td align="center" width="84"><img src="assets/logos/firecrawl.png" width="30" height="30" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites</sub></td>
-<td align="center" width="84"><img src="assets/logos/agentmail.png" width="30" height="30" alt="AgentMail"><br><b>AgentMail</b><br><sub>Gives each event its own email inbox</sub></td>
-<td align="center" width="84"><img src="assets/logos/clerk.svg" width="30" height="30" alt="Clerk"><br><b>Clerk</b><br><sub>Sign-in for customers, vendors and our team</sub></td>
-<td align="center" width="84"><img src="assets/logos/resend.svg" width="30" height="30" alt="Resend"><br><b>Resend</b><br><sub>Sends the app's own emails</sub></td>
-<td align="center" width="84"><img src="assets/logos/cloudflare.svg" width="30" height="30" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Hosts the website and app</sub></td>
-<td align="center" width="84"><img src="assets/logos/posthog.svg" width="30" height="30" alt="PostHog"><br><b>PostHog</b><br><sub>Usage numbers, only with consent</sub></td>
+<td align="center" width="96"><img src="assets/logos/react.svg" width="30" height="30" alt="React"><br><b>React</b><br><sub>The app's screens</sub></td>
+<td align="center" width="96"><img src="assets/logos/vite.svg" width="30" height="30" alt="Vite"><br><b>Vite</b><br><sub>Builds the app</sub></td>
+<td align="center" width="96"><img src="assets/logos/tailwind.svg" width="30" height="30" alt="Tailwind CSS"><br><b>Tailwind</b><br><sub>The app's styling</sub></td>
+<td align="center" width="96"><img src="assets/logos/vitest.svg" width="30" height="30" alt="Vitest"><br><b>Vitest</b><br><sub>Runs the test suite</sub></td>
+<td align="center" width="96"><img src="assets/logos/resend.svg" width="30" height="30" alt="Resend"><br><b>Resend</b><br><sub>Sends the app's own emails</sub></td>
+<td align="center" width="96"><img src="assets/logos/cloudflare.svg" width="30" height="30" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Hosts the website and app</sub></td>
+<td align="center" width="96"><img src="assets/logos/posthog.svg" width="30" height="30" alt="PostHog"><br><b>PostHog</b><br><sub>Usage numbers, only with consent</sub></td>
 </tr>
 </table>
 
