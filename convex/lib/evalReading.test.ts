@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { READING_CASES, scoreReading, statedFigures } from "./evalReading";
+import { READING_CASES, scoreReading, statedFigures, TAMIL_CASES } from "./evalReading";
 
 describe("the quote-reading evaluation", () => {
   test("has its six hand-keyed quotes", () => {
@@ -21,5 +21,11 @@ describe("the quote-reading evaluation", () => {
     const wrong = scoreReading(c, "pdf", { total: 31_500, lines: [{ amount: 31_500 }] });
     expect(wrong.totalRight).toBe(false);
     expect(wrong.lost).toEqual([5670]);
+  });
+
+  test("reads Rs 15k as 15,000, and has four Tamil and Tanglish quotes", () => {
+    expect(statedFigures("Full day photography Rs 15k. Album Rs 5k extra.")).toEqual([5000, 15000]);
+    expect(TAMIL_CASES).toHaveLength(4);
+    expect(statedFigures(TAMIL_CASES[0].text)).toEqual([450, 2000, 54000]);
   });
 });

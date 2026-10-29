@@ -1,0 +1,77 @@
+[
+  {
+    "found": [
+      {
+        "box": {
+          "x1": 339,
+          "x2": 1427,
+          "y1": 527,
+          "y2": 631
+        },
+        "confidence": 0.8476190567016602
+      }
+    ],
+    "ms": 2192,
+    "name": "sample hall"
+  },
+  {
+    "found": [
+      {
+        "box": {
+          "x1": 686,
+          "x2": 1024,
+          "y1": 446,
+          "y2": 579
+        },
+        "confidence": 0.8987342119216919
+      }
+    ],
+    "ms": 1063,
+    "name": "mandapam, stage at the side"
+  },
+  {
+    "found": [
+      {
+        "box": {
+          "x1": 380,
+          "x2": 639,
+          "y1": 564,
+          "y2": 595
+        },
+        "confidence": 0.7620818018913269
+      },
+      {
+        "box": {
+          "x1": 199,
+          "x2": 814,
+          "y1": 592,
+          "y2": 664
+        },
+        "confidence": 0.7344398498535156
+      }
+    ],
+    "ms": 996,
+    "name": "garden pandal, stage at the far end",
+    "note": "first try: SAM 503 persistence service error; asked again"
+  },
+  {
+    "found": [
+      {
+        "box": {
+          "x1": 97,
+          "x2": 936,
+          "y1": 447,
+          "y2": 499
+        },
+        "confidence": 0.8083832263946533
+      }
+    ],
+    "ms": 1101,
+    "name": "auditorium"
+  },
+  {
+    "found": [],
+    "ms": 659,
+    "name": "terrace with no stage"
+  }
+]

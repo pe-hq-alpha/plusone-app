@@ -1,0 +1,156 @@
+{
+  "ranAt": "2026-10-29T09:38:46.601Z",
+  "seconds": 103,
+  "byFormat": {
+    "email": {
+      "right": 3,
+      "of": 4,
+      "figuresKept": 10,
+      "figures": 10
+    },
+    "photo": {
+      "right": 4,
+      "of": 4,
+      "figuresKept": 10,
+      "figures": 10
+    }
+  },
+  "scores": [
+    {
+      "figures": [
+        450,
+        2000,
+        54000
+      ],
+      "format": "email",
+      "kept": [
+        450,
+        2000,
+        54000
+      ],
+      "lost": [],
+      "ms": 7511,
+      "total": 56000,
+      "totalRight": true,
+      "vendor": "Meenakshi Samayal"
+    },
+    {
+      "figures": [
+        450,
+        2000,
+        54000
+      ],
+      "format": "photo",
+      "kept": [
+        450,
+        2000,
+        54000
+      ],
+      "lost": [],
+      "ms": 11642,
+      "total": 56000,
+      "totalRight": true,
+      "vendor": "Meenakshi Samayal"
+    },
+    {
+      "figures": [
+        400,
+        1500,
+        48000
+      ],
+      "format": "email",
+      "kept": [
+        400,
+        1500,
+        48000
+      ],
+      "lost": [],
+      "ms": 7201,
+      "total": 51975,
+      "totalRight": true,
+      "vendor": "Ganesh Caterers"
+    },
+    {
+      "figures": [
+        400,
+        1500,
+        48000
+      ],
+      "format": "photo",
+      "kept": [
+        400,
+        1500,
+        48000
+      ],
+      "lost": [],
+      "ms": 14141,
+      "total": 51975,
+      "totalRight": true,
+      "vendor": "Ganesh Caterers"
+    },
+    {
+      "figures": [
+        3000,
+        25000
+      ],
+      "format": "email",
+      "kept": [
+        3000,
+        25000
+      ],
+      "lost": [],
+      "ms": 15753,
+      "total": 25000,
+      "totalRight": false,
+      "vendor": "Malligai Decors"
+    },
+    {
+      "figures": [
+        3000,
+        25000
+      ],
+      "format": "photo",
+      "kept": [
+        3000,
+        25000
+      ],
+      "lost": [],
+      "ms": 18484,
+      "total": 28000,
+      "totalRight": true,
+      "vendor": "Malligai Decors"
+    },
+    {
+      "figures": [
+        5000,
+        15000
+      ],
+      "format": "email",
+      "kept": [
+        5000,
+        15000
+      ],
+      "lost": [],
+      "ms": 8385,
+      "total": 15000,
+      "totalRight": true,
+      "vendor": "Click Kannan Studio"
+    },
+    {
+      "figures": [
+        5000,
+        15000
+      ],
+      "format": "photo",
+      "kept": [
+        5000,
+        15000
+      ],
+      "lost": [],
+      "ms": 8502,
+      "total": 15000,
+      "totalRight": true,
+      "vendor": "Click Kannan Studio"
+    }
+  ]
+}

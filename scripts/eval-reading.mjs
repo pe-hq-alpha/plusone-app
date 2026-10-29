@@ -3,6 +3,7 @@
 // all three forms on the deployment `npx convex run` reaches, and writes the scores.
 //   node scripts/eval-reading.mjs [out.json]      (with CONVEX_DEPLOY_KEY set for production)
 //   node scripts/eval-reading.mjs --render        (only make the PDFs and photos)
+//   node scripts/eval-reading.mjs --tamil [out]   (the Tamil and Tanglish quotes, as an email and a photo)
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -10,10 +11,13 @@ import { chromium } from "playwright-core";
 
 const DIR = "scripts/eval-reading";
 const RENDER_ONLY = process.argv[2] === "--render";
-const OUT = (!RENDER_ONLY && process.argv[2]) || "scripts/quote-reading-run1.json";
-const cases = JSON.parse(
+const TAMIL = process.argv[2] === "--tamil";
+const OUT = TAMIL ? (process.argv[3] ?? "scripts/quote-reading-tamil-run1.json") : (!RENDER_ONLY && process.argv[2]) || "scripts/quote-reading-run1.json";
+const FORMATS = TAMIL ? ["email", "photo"] : ["email", "pdf", "photo"];
+const allCases = JSON.parse(
   execFileSync("npx", ["convex", "run", "evals:readingCases"], { encoding: "utf8" }),
 );
+const cases = allCases.filter((c) => (TAMIL ? c.set === "tamil" : !c.set));
 const slug = (s) => s.toLowerCase().replace(/[^a-z]+/g, "-");
 
 function page(c) {
@@ -47,7 +51,7 @@ if (RENDER_ONLY) process.exit(0);
 const scores = [];
 const started = Date.now();
 for (const c of cases) {
-  for (const format of ["email", "pdf", "photo"]) {
+  for (const format of FORMATS) {
     const file = format === "email" ? undefined : fs.readFileSync(path.join(DIR, `${slug(c.vendor)}.${format === "pdf" ? "pdf" : "jpg"}`)).toString("base64");
     const args = JSON.stringify({ vendor: c.vendor, format, ...(file ? { fileBase64: file } : {}) });
     const out = execFileSync("npx", ["convex", "run", "evals:readOne", args], { encoding: "utf8", maxBuffer: 1 << 24 });
@@ -57,7 +61,7 @@ for (const c of cases) {
   }
 }
 const byFormat = Object.fromEntries(
-  ["email", "pdf", "photo"].map((f) => {
+  FORMATS.map((f) => {
     const r = scores.filter((s) => s.format === f);
     return [f, { right: r.filter((s) => s.totalRight).length, of: r.length, figuresKept: r.reduce((n, s) => n + s.kept.length, 0), figures: r.reduce((n, s) => n + s.figures.length, 0) }];
   }),

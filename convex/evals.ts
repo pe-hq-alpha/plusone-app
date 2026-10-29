@@ -3,11 +3,12 @@ import type { Doc } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import { readVendorReply } from "./modelTasks";
 import { internal } from "./_generated/api";
-import { wonderCostUsd } from "./lib/modelCost";
+import { SAM_USD_PER_IMAGE, wonderCostUsd } from "./lib/modelCost";
 import { verifyVendor } from "./lib/wonder";
+import { samSegment } from "./lib/sam";
 import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
-import { FORMATS, READING_CASES, type ReadingScore, scoreReading } from "./lib/evalReading";
+import { ALL_READING_CASES, FORMATS, type ReadingScore, scoreReading } from "./lib/evalReading";
 import { type QuoteScore, scoreQuote, totals } from "./lib/evalScore";
 import { missingCharges as flagMissing, sheetFor } from "./lib/standardSheet";
 import type { QuoteLine } from "./lib/validators";
@@ -92,7 +93,7 @@ export const venueStage = internalAction({
 export const readingCases = internalAction({
   args: {},
   returns: v.any(),
-  handler: async () => READING_CASES,
+  handler: async () => ALL_READING_CASES,
 });
 
 /**
@@ -109,7 +110,7 @@ export const readOne = internalAction({
   },
   returns: v.any(),
   handler: async (ctx, args): Promise<ReadingScore & { ms: number }> => {
-    const c = READING_CASES.find((x) => x.vendor === args.vendor);
+    const c = ALL_READING_CASES.find((x) => x.vendor === args.vendor);
     if (!c || !FORMATS.includes(args.format)) throw new Error(`No reading case for ${args.vendor}`);
     if (args.format !== "email" && !args.fileBase64) throw new Error("A PDF or photo needs its file.");
     const started = Date.now();
@@ -171,6 +172,39 @@ export const vendorCheck = internalAction({
       checks: run.report.checks,
       summary: run.report.summary,
     };
+  },
+});
+
+/**
+ * SAM 3.1 on its own, from one word (`npx convex run evals:samConcept` on production): every
+ * region it finds for the concept in each photo, to compare with the boxes Muse Spark draws
+ * for the venue view.
+ */
+export const samConcept = internalAction({
+  args: { concept: v.string(), photos: v.array(v.object({ name: v.string(), url: v.string(), width: v.number(), height: v.number() })) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    const out = [];
+    for (const photo of args.photos) {
+      const started = Date.now();
+      try {
+        const segments = await samSegment({ prompt: { concept: args.concept }, image: { url: photo.url, width: photo.width, height: photo.height } });
+        await ctx.runMutation(internal.modelCalls.record, {
+          feature: "samConceptEval",
+          provider: "meta",
+          model: "sam-3.1",
+          inputTokens: 0,
+          outputTokens: 0,
+          costUsd: SAM_USD_PER_IMAGE,
+          fellBack: false,
+          durationMs: Date.now() - started,
+        });
+        out.push({ name: photo.name, ms: Date.now() - started, found: segments.map((s) => ({ box: s.box, confidence: s.confidence })) });
+      } catch (error) {
+        out.push({ name: photo.name, ms: Date.now() - started, error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+    return out;
   },
 });
 

@@ -88,7 +88,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 **Money, in one line.** Finding vendors is free. The planner is paid (Basic ₹1,000 a month after launch, Premium ₹2,500), vendors pay a small fee to be listed, and in the end a disclosed commission on each booking paid through PlusOne ([The business](#the-business)).
 
-**Measured, not claimed.** On 18 realistic Chennai quotes with a hand-marked key, PlusOne found [all 37 charges a planner would have to chase](#evaluation-missing-charges) at 90% precision; six quotes, each sent as an email, a PDF and a phone photo, were [read right all 18 times](#evaluation-reading-quotes-in-any-form); on ten kinds of hall photo it [found and cut out the stage in nine](#evaluation-finding-the-stage); Muse Wonder [never confirmed a made-up vendor](#evaluation-checking-a-vendor) and backed three real ones with sources; and every model's live runs, with times and costs, are in [Real runs](#real-runs).
+**Measured, not claimed.** On 18 realistic Chennai quotes with a hand-marked key, PlusOne found [all 37 charges a planner would have to chase](#evaluation-missing-charges) at 90% precision; six quotes, each sent as an email, a PDF and a phone photo, were [read right all 18 times](#evaluation-reading-quotes-in-any-form), and Tamil and Tanglish quotes 7 of 8; on ten kinds of hall photo it [found and cut out the stage in nine](#evaluation-finding-the-stage); Muse Wonder [never confirmed a made-up vendor](#evaluation-checking-a-vendor) and backed three real ones with sources; and every model's live runs, with times and costs, are in [Real runs](#real-runs).
 
 ### The theme: Build for Your World
 
@@ -175,6 +175,15 @@ A quote arrives as an email, a PDF or a photo of a printed page sent on WhatsApp
 
 All 18 right on 29 Oct, 205 s in all. The photos are clean renders, not real phone shots in poor light, so treat this as the reader's ceiling; a set of real WhatsApp photos is next.
 
+**In Tamil and Tanglish.** Four more quotes the way Chennai vendors write them on WhatsApp, two in Tamil script and two in Tanglish ("120 per head ku Rs 400 … GST 5% separate-a varum", "Album venumna Rs 5k extra"), each with a hand-marked total, read as an email and as a phone photo (`TAMIL_CASES` in `convex/lib/evalReading.ts`; `scripts/quote-reading-tamil-run1.json`):
+
+| Form | Totals right | Rupee amounts kept | Time each |
+|---|---|---|---|
+| Email | 3 of 4 | 10 of 10 | 7.2–15.8 s |
+| Phone photo | 4 of 4 | 10 of 10 | 8.5–18.5 s |
+
+The one miss: a decorator's email in Tamil said lighting was ₹3,000 "தனியாக" (separately), and the reading kept the ₹3,000 but left it out of the total, as an optional extra; the photo of the same quote was read right.
+
 ## Evaluation: finding the stage
 
 Ten hall photos of different kinds (generated with Pollinations, labelled as samples), including two with no stage at all, a test of whether it invents one. Each went through the venue view's own path on production: Muse Spark boxes the stage and the wall behind it, SAM 3.1 cuts both out (`evals:venueStage`; raw results in `scripts/venue-stage-run1.json` and `-run2.json`). Judged by eye against each photo:
@@ -184,7 +193,9 @@ Ten hall photos of different kinds (generated with Pollinations, labelled as sam
 | 1 (29 Oct) | 6: a mandapam, a hotel banquet room, a rooftop deck, a hall with the stage to one side, a stage already decorated, a living room with no stage | 5 | 1: the living room's sofa taken for a stage | 4.5–8 s | about $0.05 |
 | 2 (29 Oct) | 4: a mandapam with the stage at the side, a garden pandal, an auditorium, a terrace with no stage | 4 | 0: the terrace correctly came back with nothing | 3.1–5.5 s | about $0.03 |
 
-SAM cut out exactly what it was given every time; the one miss was the judgement of what counts as a stage, and a tap on the photo re-picks it. Run 2 also found a bug: a stage drawn to the photo's right edge was refused by SAM as "outside the frame", so boxes now stop at the last pixel (fixed, tested and redeployed the same hour).
+SAM cut out exactly what it was given every time; the one miss was the judgement of what counts as a stage, and a tap on the photo re-picks it.
+
+**Why Muse Spark draws the boxes.** SAM 3.1 can also find a stage from the word alone. Asked for "stage" on five of the photos (`evals:samConcept`, `scripts/sam-concept-run1.json`, about $0.01), it agreed closely with Muse Spark's boxes (overlap, as intersection over union, 0.95 on the side-stage mandapam, 0.94 on the garden pandal, 0.78 on the auditorium) and found nothing on the terrace with no stage. But on the pandal it also returned the dance floor in front as a second stage, and a word can't ask for "the wall behind the stage". So Muse Spark judges which part is the stage and which wall is behind it, and SAM cuts out exactly that. Run 2 also found a bug: a stage drawn to the photo's right edge was refused by SAM as "outside the frame", so boxes now stop at the last pixel (fixed, tested and redeployed the same hour).
 
 <img src="assets/screens/venue-eval.jpg" width="100%" alt="Run 1: six hall photos with the outlines found drawn in gold: a mandapam's carved frame and stage front, a banquet hall's panelled wall and low platform, a rooftop's wall and wooden deck, a community hall's side wall and platform, a decorated stage's curtains and skirted platform, and in a living room with no stage, the window wall and the sofa">
 
