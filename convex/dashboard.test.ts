@@ -94,11 +94,9 @@ describe("missing charges on the decision board", () => {
     expect(gapsIn("Catering")).toEqual({
       "Annam Caterers": ["No transport line, and two others charge ₹1,500–₹2,500", "No water line, and one other charges ₹600"],
       "Saapadu Kitchen": ["No water line, and one other charges ₹600"],
-      "Kaveri Feast Co.": [
-        "GST is extra, with no amount given",
-        "No service staff line, and one other charges ₹6,000",
-        "No water line, and one other charges ₹600",
-      ],
+      // Kaveri's ₹2,500 brings "the vessels and staff": Muse Spark's own reading of the charges
+      // knows the staff are covered, where matching lines with fixed rules asked about them.
+      "Kaveri Feast Co.": ["GST is extra, with no amount given", "No water line, and one other charges ₹600"],
     });
     expect(gapsIn("Venue")).toEqual({
       "Thamarai Hall": ["Doesn't say whether air conditioning is included", "Doesn't say what an extra hour costs"],

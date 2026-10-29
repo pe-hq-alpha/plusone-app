@@ -213,6 +213,8 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
     ],
     headcountAssumed: 150, taxIncluded: true,
     state: "applied", appliedAt: now - 6 * DAY, before: { threadStatus: "sent", slotStatus: "contacted", committed: 0 },
+    // Muse Spark's own reading of each charge, from a real run on this reply (29 Oct, scripts/demo-charges-run1.json).
+    charges: [{ key: "gst", status: "priced", amount: 3150 }, { key: "service_staff", status: "priced", amount: 6000 }, { key: "transport", status: "not_mentioned" }, { key: "crockery", status: "included" }, { key: "water", status: "not_mentioned" }],
   });
 
   const saapaduMail = await conversation(ctx, eventId, catering, saapadu, "hello@saapadu-kitchen.example", cateringSubject, [
@@ -227,6 +229,8 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
     lines: [{ item: "Family-function package for 120, all in", kind: "core", unit: "total", amount: 62_000 }],
     headcountAssumed: 120, taxIncluded: true,
     state: "applied", appliedAt: now - 3 * DAY, before: { threadStatus: "sent", slotStatus: "quoted", committed: 66_150 },
+    // Muse Spark's own reading of each charge, from a real run on this reply (29 Oct, scripts/demo-charges-run1.json).
+    charges: [{ key: "gst", status: "included" }, { key: "service_staff", status: "included" }, { key: "transport", status: "included" }, { key: "crockery", status: "not_mentioned" }, { key: "water", status: "not_mentioned" }],
   });
 
   const kaveriMail = await conversation(ctx, eventId, catering, kaveri, "hello@kaveri-feast.example", cateringSubject, [
@@ -248,6 +252,8 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
     ],
     headcountAssumed: 120, taxIncluded: false,
     state: "applied", appliedAt: now - 20 * HOUR, before: { threadStatus: "sent", slotStatus: "quoted", committed: 62_000 },
+    // Muse Spark's own reading of each charge, from a real run on this reply (29 Oct, scripts/demo-charges-run1.json).
+    charges: [{ key: "gst", status: "extra_without_price" }, { key: "service_staff", status: "included" }, { key: "transport", status: "priced", amount: 2500 }, { key: "crockery", status: "included" }, { key: "water", status: "not_mentioned" }],
   });
   // The budget follows the latest live quote until a caterer is chosen.
   await ctx.db.patch(catering._id, { status: "quoted" });

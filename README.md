@@ -172,7 +172,7 @@ Run 1's misses showed three general misreadings, each now fixed and pinned by te
 | Muse Spark asked directly which charges to ask about | 36 of 37, 95%, 15 of 18 | 37 of 37, 95%, 18 of 20 |
 | The sheet's keywords on the raw text, no model | 28 of 37, 88%, 8 of 18 | 30 of 37, 62%, 5 of 20 |
 
-The held-out set shows what the tuned set hid: the fixed rules that match a line to a charge are where the false alarms come from (15–18 on new shapes), while Muse Spark choosing from the fixed list kept to one. Its answer is also structured (a status and an amount for every line on the sheet), so it can feed Compare the way the rules do, which asking directly can't. Moving Compare to it is the next step.
+The held-out set shows what the tuned set hid: the fixed rules that match a line to a charge are where the false alarms come from (15–18 on new shapes), while Muse Spark choosing from the fixed list kept to one. Its answer is also structured (a status and an amount for every line on the sheet), so it can feed Compare the way the rules do, which asking directly can't. **Compare now runs on it** (29 Oct): after each reply is read, a second, constrained Muse Spark read names every charge on the sheet, Compare's missing-charge flags come from those statuses, and the line-matching rules are kept only as the fallback for a quote without them (`convex/lib/charges.ts`). On the demo it dropped one false alarm at once: Kaveri's ₹2,500 for "the vessels and staff" no longer reads as a missing service-staff line.
 
 ## Evaluation: reading quotes in any form
 

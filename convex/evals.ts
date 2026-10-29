@@ -298,3 +298,27 @@ export const compare = internalAction({
   },
 });
 
+/**
+ * The product's charge reading on one given text (`npx convex run evals:chargesFor` on
+ * production), so the demo's sample quotes can carry a real reading, as their lines do.
+ */
+export const chargesFor = internalAction({
+  args: { category: v.string(), vendor: v.string(), text: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    const sheet = sheetFor(args.category);
+    if (!sheet) throw new Error(`No standard sheet for ${args.category}`);
+    const started = Date.now();
+    const { object } = await generateObject({
+      ctx,
+      feature: "readCharges",
+      model: MODEL_FAST,
+      effort: "low",
+      system: CHARGES_INSTRUCTIONS,
+      prompt: chargesPrompt(args.category, sheet, args.vendor, args.text),
+      schema: chargesSchema(sheet),
+    });
+    return { vendor: args.vendor, ms: Date.now() - started, charges: object.charges };
+  },
+});
+

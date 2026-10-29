@@ -1,0 +1,95 @@
+[
+  {
+    "charges": [
+      {
+        "amount": 3150,
+        "key": "gst",
+        "status": "priced"
+      },
+      {
+        "amount": 6000,
+        "key": "service_staff",
+        "status": "priced"
+      },
+      {
+        "amount": null,
+        "key": "transport",
+        "status": "not_mentioned"
+      },
+      {
+        "amount": null,
+        "key": "crockery",
+        "status": "included"
+      },
+      {
+        "amount": null,
+        "key": "water",
+        "status": "not_mentioned"
+      }
+    ],
+    "ms": 5567,
+    "vendor": "Annam Caterers"
+  },
+  {
+    "charges": [
+      {
+        "amount": null,
+        "key": "gst",
+        "status": "included"
+      },
+      {
+        "amount": null,
+        "key": "service_staff",
+        "status": "included"
+      },
+      {
+        "amount": null,
+        "key": "transport",
+        "status": "included"
+      },
+      {
+        "amount": null,
+        "key": "crockery",
+        "status": "not_mentioned"
+      },
+      {
+        "amount": null,
+        "key": "water",
+        "status": "not_mentioned"
+      }
+    ],
+    "ms": 2081,
+    "vendor": "Saapadu Kitchen"
+  },
+  {
+    "charges": [
+      {
+        "amount": null,
+        "key": "gst",
+        "status": "extra_without_price"
+      },
+      {
+        "amount": null,
+        "key": "service_staff",
+        "status": "included"
+      },
+      {
+        "amount": 2500,
+        "key": "transport",
+        "status": "priced"
+      },
+      {
+        "amount": null,
+        "key": "crockery",
+        "status": "included"
+      },
+      {
+        "amount": null,
+        "key": "water",
+        "status": "not_mentioned"
+      }
+    ],
+    "ms": 7139,
+    "vendor": "Kaveri Feast Co."
+  }
+]
