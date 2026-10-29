@@ -12,6 +12,7 @@ import { keepKnownTags, photoFlags, PHOTO_INSTRUCTIONS, shownToCustomers, tagsFo
 import { rateLimiter } from "../rateLimits";
 import { vendorPhotoCheck } from "../schema";
 import { requireVendor } from "./vendors";
+import { claimUpload } from "../lib/uploads";
 
 /**
  * Photos of a vendor's past work. A vendor adds up to 12; each is checked in the
@@ -129,6 +130,7 @@ export const add = mutation({
       .withIndex("by_profileId", (q) => q.eq("profileId", profile._id))
       .take(MAX_PHOTOS + 1);
     if (held.length >= MAX_PHOTOS) throw new ConvexError("Twelve photos are enough for a listing. Remove one to add another.");
+    await claimUpload(ctx, args.storageId, userId);
     const file = await ctx.db.system.get("_storage", args.storageId);
     if (!file || !PHOTO_TYPES.has(file.contentType ?? "") || file.size > MAX_PHOTO_BYTES) {
       try {
@@ -386,7 +388,23 @@ export const run = internalAction({
           process.env,
           fetch,
         );
-        const object = parseAnswer(extractJsonText(result.text), photoCheckSchema);
+        let object;
+        try {
+          object = parseAnswer(extractJsonText(result.text), photoCheckSchema);
+        } catch (error) {
+          // The GPU time was spent even though the answer can't be used, so it is costed before Muse Spark takes over.
+          await ctx.runMutation(internal.modelCalls.record, {
+            feature: "vendorPhotoCheck",
+            provider: "glimmer",
+            model: "muse-glimmer-30b",
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
+            costUsd: glimmerCostUsd(result.ms / 1000),
+            fellBack: true,
+            durationMs: Math.round(result.ms),
+          });
+          throw error;
+        }
         const tags = keepKnownTags(object.tags, loaded.allowed);
         await ctx.runMutation(internal.marketplace.photos.checked, {
           photoId: args.photoId,

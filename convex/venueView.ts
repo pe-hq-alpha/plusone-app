@@ -4,7 +4,7 @@ import type { Doc, Id } from "./_generated/dataModel";
 import { internalAction, internalMutation, internalQuery, mutation, type MutationCtx, query } from "./_generated/server";
 import { requireMember } from "./lib/auth";
 import { SAM_USD_PER_IMAGE } from "./lib/modelCost";
-import { generateObject, MODEL_FAST } from "./lib/models";
+import { generateObject, MODEL_FAST, withMetaRetries } from "./lib/models";
 import { samSegment, type SamObject } from "./lib/sam";
 import {
   FIND_STAGE_INSTRUCTIONS,
@@ -21,6 +21,7 @@ import {
 } from "./lib/venue";
 import { rateLimiter } from "./rateLimits";
 import { venueParts } from "./schema";
+import { claimUpload } from "./lib/uploads";
 
 /**
  * "See it on your venue". A family adds a photo of their hall, or tries the sample hall;
@@ -109,6 +110,7 @@ export const setPhoto = mutation({
   returns: v.id("venueViews"),
   handler: async (ctx, args) => {
     const { userId } = await requireMember(ctx, args.eventId, "planner");
+    await claimUpload(ctx, args.storageId, userId);
     const file = await ctx.db.system.get("_storage", args.storageId);
     const sized = [args.width, args.height].every((n) => Number.isInteger(n) && n >= 200 && n <= MAX_VENUE_SIDE);
     if (!file || !VENUE_PHOTO_TYPES.has(file.contentType ?? "") || file.size > MAX_VENUE_PHOTO_BYTES || !sized) {
@@ -154,6 +156,7 @@ const loaded = v.object({
   eventId: v.id("events"),
   imageKey: v.string(),
   url: v.string(),
+  mediaType: v.string(),
   width: v.number(),
   height: v.number(),
   parts: venueParts,
@@ -167,7 +170,9 @@ export const load = internalQuery({
     if (!view) return null;
     const url = view.storageId ? await ctx.storage.getUrl(view.storageId) : SAMPLE_HALL.url;
     if (!url) return null;
-    return { eventId: view.eventId, imageKey: view.imageKey, url, width: view.width, height: view.height, parts: view.parts };
+    const file = view.storageId ? await ctx.db.system.get("_storage", view.storageId) : null;
+    const mediaType = file?.contentType ?? "image/jpeg";
+    return { eventId: view.eventId, imageKey: view.imageKey, url, mediaType, width: view.width, height: view.height, parts: view.parts };
   },
 });
 
@@ -222,7 +227,7 @@ async function cutOut(
   objects: SamObject[],
 ) {
   const started = Date.now();
-  const segments = await samSegment({ prompt: { objects }, image: { url: view.url, width: view.width, height: view.height } });
+  const segments = await withMetaRetries(() => samSegment({ prompt: { objects }, image: { url: view.url, width: view.width, height: view.height } }));
   await ctx.runMutation(internal.modelCalls.record, {
     feature: "venueCutOut",
     provider: "meta",
@@ -243,7 +248,7 @@ async function cutOut(
  */
 export async function findParts(
   ctx: Parameters<typeof generateObject>[0]["ctx"],
-  view: { eventId?: Id<"events">; url: string; width: number; height: number },
+  view: { eventId?: Id<"events">; url: string; width: number; height: number; mediaType?: string },
 ) {
   const { object } = await generateObject({
     ctx,
@@ -256,7 +261,7 @@ export async function findParts(
       {
         role: "user",
         content: [
-          { type: "file", data: new URL(view.url), mediaType: "image/jpeg" },
+          { type: "file", data: new URL(view.url), mediaType: view.mediaType ?? "image/jpeg" },
           { type: "text", text: "Find the stage and the backdrop in this hall." },
         ],
       },
@@ -274,7 +279,9 @@ export const find = internalAction({
   handler: async (ctx, args): Promise<null> => {
     const view = await ctx.runQuery(internal.venueView.load, { viewId: args.viewId });
     if (!view) return null;
-    const hit = await ctx.runQuery(internal.venueView.cached, { imageKey: view.imageKey, promptKey: "find" });
+    // The masks are in the photo's own pixels, so the cache is keyed on its size too.
+    const promptKey = `find:${view.width}x${view.height}`;
+    const hit = await ctx.runQuery(internal.venueView.cached, { imageKey: view.imageKey, promptKey });
     if (hit) {
       const found = Object.keys(hit).length > 0;
       await ctx.runMutation(internal.venueView.save, { viewId: args.viewId, status: found ? "ready" : "none", parts: hit, source: "found" });
@@ -288,7 +295,8 @@ export const find = internalAction({
         status: found ? "ready" : "none",
         parts,
         source: "found",
-        cache: { imageKey: view.imageKey, promptKey: "find", parts },
+        // Only a find is kept for the next person; finding nothing is asked again.
+        ...(found ? { cache: { imageKey: view.imageKey, promptKey, parts } } : {}),
       });
     } catch (error) {
       console.error(`Finding the stage in ${args.viewId} failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -306,7 +314,7 @@ export const segmentAt = internalAction({
     const view = await ctx.runQuery(internal.venueView.load, { viewId: args.viewId });
     if (!view) return null;
     const which = args.part as VenuePart;
-    const promptKey = tapKey(which, args.x, args.y, view.width, view.height);
+    const promptKey = `${tapKey(which, args.x, args.y, view.width, view.height)}:${view.width}x${view.height}`;
     try {
       let cut = await ctx.runQuery(internal.venueView.cached, { imageKey: view.imageKey, promptKey });
       const fresh = !cut;

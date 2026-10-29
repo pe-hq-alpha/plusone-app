@@ -143,6 +143,9 @@ describe("a vendor's work photo", () => {
     const photo = await t.run((ctx) => ctx.db.get(photoId));
     expect(photo?.status).toBe("checked");
     expect(photo?.check?.provider).toBe("spark");
+    // Glimmer's GPU time is costed although its answer was thrown away.
+    const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(calls.map((c) => [c.provider, c.fellBack])).toContainEqual(["glimmer", true]);
   });
 
   test("a placeholder for what the photo shows is not accepted from Glimmer", async () => {
@@ -252,6 +255,19 @@ describe("a vendor's work photo", () => {
     await expect(as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) })).rejects.toThrow(/Twelve photos/);
     await t.finishAllScheduledFunctions(vi.runAllTimers);
     expect(await t.run((ctx) => ctx.db.query("vendorPhotos").collect())).toHaveLength(12);
+  });
+
+  test("a photo someone else uploaded is refused and not deleted", async () => {
+    const t = setup();
+    const { userId } = await seedVendor(t);
+    const { userId: other } = await seedVendor(t, { email: "other@example.com" });
+    const storageId = await jpeg(t);
+    await as(t, userId).mutation(api.marketplace.photos.add, { storageId });
+    const textFile = await storePhoto(t, new Uint8Array([104, 105]), "text/plain");
+    await t.run((ctx) => ctx.db.insert("uploadClaims", { storageId: textFile, userId, claimedAt: Date.now() }));
+    // Naming another vendor's file, even an invalid one that would be deleted, is refused first.
+    await expect(as(t, other).mutation(api.marketplace.photos.add, { storageId: textFile })).rejects.toThrow(/didn't come from you/);
+    expect(await t.run((ctx) => ctx.db.system.get("_storage", textFile))).not.toBeNull();
   });
 
   test("a text file is refused and leaves no photo", async () => {

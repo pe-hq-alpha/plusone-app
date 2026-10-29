@@ -113,6 +113,8 @@ export const transcribe = action({
   handler: async (ctx, args): Promise<{ text: string; seconds: number; turns: { speaker?: string; text: string }[] }> => {
     const userId = await requireActionUserId(ctx);
     const call = args.call === true;
+    // Someone else's recording is refused here, before it can be read or deleted.
+    await ctx.runMutation(internal.uploads.claim, { storageId: args.storageId, userId });
     const file = await ctx.runQuery(internal.voiceBrief.prepare, { userId, storageId: args.storageId, eventId: args.eventId, call });
     // Only a voice note is read or deleted here; any other file someone names is left alone.
     if (!file.isVoiceNote) throw new ConvexError(NOT_HEARD);

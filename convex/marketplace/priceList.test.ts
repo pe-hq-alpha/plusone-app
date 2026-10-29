@@ -100,6 +100,22 @@ describe("bring your price list", () => {
     expect(await t.run((ctx) => ctx.db.system.get("_storage", storageId))).toBeNull();
   });
 
+  test("another person's upload is refused, and left as it was", async () => {
+    sparkOpenAnswers([invented]);
+    const t = setup();
+    const owner = await seedVendor(t);
+    const storageId = await t.run(async (ctx) => {
+      const id = await ctx.storage.store(new Blob([new Uint8Array([0xff, 0xd8, 0xff, 0xe0])], { type: "image/jpeg" }));
+      await ctx.db.patch(id as never, { contentType: "image/jpeg" } as never);
+      return id;
+    });
+    const other = await t.run((ctx) => ctx.db.insert("users", { email: "other@example.com" }));
+    // The owner uses it first, then someone who learned its id tries.
+    await t.run((ctx) => ctx.db.insert("uploadClaims", { storageId, userId: owner, claimedAt: Date.now() }));
+    await expect(as(t, other).action(api.marketplace.priceList.read, { category: "Catering", storageId })).rejects.toThrow(/didn't come from you/);
+    expect(await t.run((ctx) => ctx.db.system.get("_storage", storageId))).not.toBeNull();
+  });
+
   test("someone without a listing, or for a service they don't offer, is refused", async () => {
     sparkOpenAnswers([lunch]);
     const t = setup();

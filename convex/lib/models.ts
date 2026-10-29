@@ -112,6 +112,22 @@ const META_ATTEMPTS = 3;
 const MAX_RETRY_WAIT_MS = 20_000;
 
 /**
+ * A Meta call outside the chat wrapper (SAM 3.1), retried on the same terms: 429, 500, 503
+ * and lost connections, honouring Retry-After, three attempts in all.
+ */
+export async function withMetaRetries<T>(call: () => Promise<T>, sleep: (ms: number) => Promise<void> = (ms) => new Promise((r) => setTimeout(r, ms))): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await call();
+    } catch (error) {
+      if (!(error instanceof MetaError) || !error.retryable || attempt >= META_ATTEMPTS) throw error;
+      const backoff = 1000 * 2 ** (attempt - 1) + Math.floor(Math.random() * 250);
+      await sleep(Math.min(error.retryAfterMs ?? backoff, MAX_RETRY_WAIT_MS));
+    }
+  }
+}
+
+/**
  * Run a request on the chosen provider. Meta and Baseten calls retry on 429, 500 and 503
  * (and lost connections), waiting as long as Retry-After asks. When Meta can't answer for
  * a reason Claude can cover (key, billing, access, timeouts, retries used up), that one

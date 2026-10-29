@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { mutation } from "./_generated/server";
 import { requireMember } from "./lib/auth";
 import { spend } from "./rateLimits";
+import { claimUpload } from "./lib/uploads";
 
 /**
  * A quote the host was sent outside the event's inbox: a WhatsApp photo of a price list,
@@ -41,6 +42,7 @@ export const add = mutation({
     if (!slotId) throw new ConvexError("Add this vendor to a need first, so the quote has somewhere to go.");
     const { userId, event } = await requireMember(ctx, vendor.eventId, "planner");
     const text = args.text?.trim().slice(0, 20_000) ?? "";
+    if (args.storageId) await claimUpload(ctx, args.storageId, userId);
     const file = args.storageId ? await ctx.db.system.get(args.storageId) : null;
     if (args.storageId && !file) throw new ConvexError("That upload didn't arrive. Try adding it again.");
     const contentType = file?.contentType ?? args.contentType ?? "";

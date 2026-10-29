@@ -69,6 +69,8 @@ export const read = action({
   returns: v.object({ packages: v.array(draft), fromPhoto: v.boolean() }),
   handler: async (ctx, args): Promise<{ packages: PackageDraft[]; fromPhoto: boolean }> => {
     const userId = await requireActionUserId(ctx);
+    // Someone else's upload is refused here, before it can be read or deleted.
+    if (args.storageId) await ctx.runMutation(internal.uploads.claim, { storageId: args.storageId, userId });
     // A photo is never kept, whatever happens below.
     const forgetPhoto = async (): Promise<void> => {
       if (args.storageId) await ctx.runMutation(internal.marketplace.priceList.forget, { storageId: args.storageId });

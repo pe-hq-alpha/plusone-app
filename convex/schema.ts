@@ -427,7 +427,7 @@ export const venueViewFields = {
 /** SAM 3.1's masks for an image and a prompt, so the same hall and tap are never paid for twice. */
 export const segmentCacheFields = {
   imageKey: v.string(),
-  /** "find", or a tap on a 2% grid: "tap:backdrop:25:30". */
+  /** "find:1600x1200", or a tap on a 2% grid: "tap:backdrop:25:30:1600x1200"; the size is the photo's, since masks are in its pixels. */
   promptKey: v.string(),
   parts: venueParts,
   at: v.number(),
@@ -963,6 +963,8 @@ export default defineSchema({
   vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
 
   vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]).index("by_status", ["status"]),
+  /** Who each uploaded file belongs to: the first person to use it (convex/lib/uploads.ts). */
+  uploadClaims: defineTable({ storageId: v.id("_storage"), userId: v.id("users"), claimedAt: v.number() }).index("by_storageId", ["storageId"]),
   listingChanges: defineTable(listingChangeFields).index("by_status", ["status"]).index("by_profileId_and_status", ["profileId", "status"]),
   venueViews: defineTable(venueViewFields).index("by_eventId", ["eventId"]),
   segmentCache: defineTable(segmentCacheFields).index("by_imageKey_and_promptKey", ["imageKey", "promptKey"]),

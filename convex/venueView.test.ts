@@ -4,6 +4,7 @@ import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
+import { MetaError } from "./lib/meta";
 import type { SamSegment } from "./lib/sam";
 import schema from "./schema";
 
@@ -157,6 +158,26 @@ describe("see it on your venue", () => {
     await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
     expect((await as(t, ownerId).query(api.venueView.get, { eventId }))?.status).toBe("failed");
+  });
+
+  test("finding no stage is not kept, so the next person's try asks again", async () => {
+    sparkFinds({ stage: null, backdrop: null });
+    const t = setup();
+    const { ownerId, eventId } = await seed(t);
+    await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    expect(await t.run((ctx) => ctx.db.query("segmentCache").collect())).toEqual([]);
+  });
+
+  test("SAM busy once is asked again, and the view is ready", async () => {
+    sparkFinds(STAGE_AND_WALL);
+    samSegment.mockRejectedValueOnce(new MetaError("SAM returned 429", 429, true, true, 10)).mockResolvedValueOnce([segment("1", 0.9), segment("2", 0.8)]);
+    const t = setup();
+    const { ownerId, eventId } = await seed(t);
+    await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    expect((await as(t, ownerId).query(api.venueView.get, { eventId }))?.status).toBe("ready");
+    expect(samSegment).toHaveBeenCalledTimes(2);
   });
 
   test("only the event's planners add a photo, and only its members see it", async () => {
