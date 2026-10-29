@@ -58,6 +58,7 @@ import type * as lib_docs from "../lib/docs.js";
 import type * as lib_emailTemplates from "../lib/emailTemplates.js";
 import type * as lib_entities from "../lib/entities.js";
 import type * as lib_evalQuotes from "../lib/evalQuotes.js";
+import type * as lib_evalReading from "../lib/evalReading.js";
 import type * as lib_evalScore from "../lib/evalScore.js";
 import type * as lib_glimmer from "../lib/glimmer.js";
 import type * as lib_helpWith from "../lib/helpWith.js";
@@ -199,6 +200,7 @@ declare const fullApi: ApiFromModules<{
   "lib/emailTemplates": typeof lib_emailTemplates;
   "lib/entities": typeof lib_entities;
   "lib/evalQuotes": typeof lib_evalQuotes;
+  "lib/evalReading": typeof lib_evalReading;
   "lib/evalScore": typeof lib_evalScore;
   "lib/glimmer": typeof lib_glimmer;
   "lib/helpWith": typeof lib_helpWith;

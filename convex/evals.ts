@@ -4,6 +4,7 @@ import { internalAction } from "./_generated/server";
 import { readVendorReply } from "./claude";
 import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
+import { FORMATS, READING_CASES, type ReadingScore, scoreReading } from "./lib/evalReading";
 import { type QuoteScore, scoreQuote, totals } from "./lib/evalScore";
 import { missingCharges as flagMissing, sheetFor } from "./lib/standardSheet";
 import type { QuoteLine } from "./lib/validators";
@@ -83,3 +84,45 @@ export const venueStage = internalAction({
     return out;
   },
 });
+
+/** The reading evaluation's quotes and their hand-marked totals, for the runner script. No model call. */
+export const readingCases = internalAction({
+  args: {},
+  returns: v.any(),
+  handler: async () => READING_CASES,
+});
+
+/**
+ * The quote-reading evaluation, one quote in one form at a time
+ * (`node scripts/eval-reading.mjs` runs all eighteen on production): the quote as an
+ * email's text, or as a PDF or phone photo of it, read by the same reader replies go
+ * through, and scored against its hand-marked total and the figures it states.
+ */
+export const readOne = internalAction({
+  args: {
+    vendor: v.string(),
+    format: v.union(v.literal("email"), v.literal("pdf"), v.literal("photo")),
+    fileBase64: v.optional(v.string()),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<ReadingScore & { ms: number }> => {
+    const c = READING_CASES.find((x) => x.vendor === args.vendor);
+    if (!c || !FORMATS.includes(args.format)) throw new Error(`No reading case for ${args.vendor}`);
+    if (args.format !== "email" && !args.fileBase64) throw new Error("A PDF or photo needs its file.");
+    const started = Date.now();
+    const file = args.fileBase64 ? Uint8Array.from(atob(args.fileBase64), (ch) => ch.charCodeAt(0)) : null;
+    const r = await readVendorReply(ctx, {
+      event: EVENT,
+      slot: null,
+      vendorName: c.vendor,
+      subject: "Re: your enquiry",
+      body: args.format === "email" ? c.text : "Please find our quotation attached.",
+      ...(file
+        ? { pdf: { bytes: file.buffer as ArrayBuffer, filename: args.format === "pdf" ? "quotation.pdf" : "quotation.jpg", mediaType: args.format === "pdf" ? "application/pdf" : "image/jpeg" } }
+        : {}),
+    });
+    const score = scoreReading(c, args.format, { total: r.total ?? 0, lines: r.lines.map((l) => ({ amount: l.amount, unitPrice: l.unitPrice ?? undefined, quantity: l.quantity ?? undefined })) });
+    return { ...score, ms: Date.now() - started };
+  },
+});
+
