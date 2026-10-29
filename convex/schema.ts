@@ -157,14 +157,14 @@ export const sessionFields = {
 export const modelCallFields = {
   /** What the call was for, e.g. "planSearch" or "readRsvp". */
   feature: v.string(),
-  provider: v.union(v.literal("meta"), v.literal("claude")),
+  provider: v.union(v.literal("meta"), v.literal("claude"), v.literal("spark_open")),
   model: v.string(),
   inputTokens: v.number(),
   /** Includes reasoning tokens, which are billed as output. */
   outputTokens: v.number(),
   /** At list price; absent for a model with no known price. */
   costUsd: v.optional(v.number()),
-  /** Meta was chosen but could not answer, so Claude did. */
+  /** The chosen model could not answer, so another did: Claude for Meta, Muse Spark (or Claude) for Spark Open. */
   fellBack: v.boolean(),
   /** The event the call was for, when there is one; "Under the hood" lists an event's calls. */
   eventId: v.optional(v.id("events")),

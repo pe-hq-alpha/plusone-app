@@ -5,6 +5,7 @@ import type { ActionCtx } from "../_generated/server";
 import { claudeComplete } from "./claude";
 import { MetaError, metaComplete } from "./meta";
 import { callRecord } from "./modelCost";
+import { sparkOpenComplete, sparkOpenReady } from "./sparkOpen";
 import { type Completion, type CompletionRequest, type Effort, type Message, ModelAnswerError, type Part, type Provider, type Tier } from "./modelShared";
 
 export { ModelAnswerError, type Completion, type Effort, type Message, type Part, type Provider, type Tier };
@@ -60,6 +61,12 @@ type CallInput = {
   prompt?: string;
   messages?: Message[];
   effort?: Effort;
+  /**
+   * Run on Muse Spark Open, Meta's open-weights model on Baseten, instead of the
+   * deployment's choice. Without Baseten's key, or when Baseten can't answer, the call
+   * goes to the deployment's choice as usual.
+   */
+  provider?: "spark_open";
 };
 
 function toRequest(input: CallInput, schema?: z.ZodType): CompletionRequest {
@@ -76,7 +83,7 @@ function toRequest(input: CallInput, schema?: z.ZodType): CompletionRequest {
 let warnedNoKey = false;
 
 /** Meta when the deployment asks for it and has a key; Claude otherwise. */
-export function chosenProvider(env: Record<string, string | undefined> = process.env): Provider {
+export function chosenProvider(env: Record<string, string | undefined> = process.env): "meta" | "claude" {
   if (env.MODEL_PROVIDER !== "meta") return "claude";
   if (env.MODEL_API_KEY) return "meta";
   if (!warnedNoKey) {
@@ -89,36 +96,41 @@ export function chosenProvider(env: Record<string, string | undefined> = process
 type Providers = {
   meta: (req: CompletionRequest) => Promise<Completion>;
   claude: (req: CompletionRequest) => Promise<Completion>;
+  sparkOpen?: (req: CompletionRequest) => Promise<Completion>;
   sleep: (ms: number) => Promise<void>;
 };
 
 const defaults: Providers = {
   meta: metaComplete,
   claude: claudeComplete,
+  sparkOpen: sparkOpenComplete,
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
-/** Attempts per Meta call, counting the first. */
+/** Attempts per Meta or Baseten call, counting the first. */
 const META_ATTEMPTS = 3;
 const MAX_RETRY_WAIT_MS = 20_000;
 
 /**
- * Run a request on the chosen provider. Meta calls retry on 429, 500 and 503 (and lost
- * connections), waiting as long as Retry-After asks. When Meta can't answer for a reason
- * Claude can cover (key, billing, access, timeouts, retries used up), that one call goes
- * to Claude and the switch is logged. A request Meta rejects as malformed is not retried
- * or moved: it is a bug to fix, and Claude would hide it.
+ * Run a request on the chosen provider. Meta and Baseten calls retry on 429, 500 and 503
+ * (and lost connections), waiting as long as Retry-After asks. When Meta can't answer for
+ * a reason Claude can cover (key, billing, access, timeouts, retries used up), that one
+ * call goes to Claude and the switch is logged; a Spark Open call that can't be answered
+ * goes to `fallback`, the deployment's own choice. A request rejected as malformed is
+ * not retried or moved: it is a bug to fix, and another model would hide it.
  */
 export async function complete(
   req: CompletionRequest,
   provider: Provider = chosenProvider(),
   deps: Providers = defaults,
+  fallback: "meta" | "claude" = chosenProvider(),
 ): Promise<Completion> {
   if (provider === "claude") return deps.claude(req);
+  const call = provider === "spark_open" ? (deps.sparkOpen ?? sparkOpenComplete) : deps.meta;
   let lastError: unknown;
   for (let attempt = 1; attempt <= META_ATTEMPTS; attempt++) {
     try {
-      return await deps.meta(req);
+      return await call(req);
     } catch (error) {
       lastError = error;
       if (!(error instanceof MetaError)) throw error;
@@ -131,7 +143,12 @@ export async function complete(
       break;
     }
   }
-  console.warn(`Meta call fell back to Claude: ${lastError instanceof Error ? lastError.message : String(lastError)}`);
+  const reason = lastError instanceof Error ? lastError.message : String(lastError);
+  if (provider === "spark_open") {
+    console.warn(`Spark Open call moved to ${fallback}: ${reason}`);
+    return complete(req, fallback, deps);
+  }
+  console.warn(`Meta call fell back to Claude: ${reason}`);
   return deps.claude(req);
 }
 
@@ -190,7 +207,7 @@ type Served = Pick<Completion, "provider" | "model" | "usage">;
  * never fails the call.
  */
 async function completeAndRecord(input: CallInput, req: CompletionRequest): Promise<Completion> {
-  const chosen = chosenProvider();
+  const chosen = input.provider === "spark_open" && sparkOpenReady() ? "spark_open" : chosenProvider();
   const started = Date.now();
   const completion = await complete(req, chosen);
   try {

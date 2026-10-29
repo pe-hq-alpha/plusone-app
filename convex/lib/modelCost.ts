@@ -13,6 +13,8 @@ const PRICES: [prefix: string, price: Price][] = [
   ["muse-spark-1.2-contributor", { input: 0.1, output: 0.2 }],
   ["muse-spark-1.", { input: 1.25, output: 4.25 }],
   ["muse-wonder-1.0", { input: 4, output: 20 }],
+  // Baseten's per-token price for Muse Spark Open (re-read 29 Oct), paid from Baseten's credit, not the Meta key.
+  ["meta-models/muse-spark-open", { input: 1.25, output: 4.25 }],
   ["claude-haiku-5-5", { input: 0.1, output: 0.5, longAfter: 100_000, long: { input: 0.5, output: 2.5 } }],
   ["claude-sonnet-5-5", { input: 2, output: 10 }],
 ];
@@ -59,7 +61,7 @@ export function callRecord(
     inputTokens: served.usage.inputTokens,
     outputTokens: served.usage.outputTokens,
     ...(cost === undefined ? {} : { costUsd: cost }),
-    fellBack: chosen === "meta" && served.provider === "claude",
+    fellBack: served.provider !== chosen,
     ...(extra.eventId ? { eventId: extra.eventId } : {}),
     ...(extra.durationMs !== undefined ? { durationMs: Math.round(extra.durationMs) } : {}),
   };

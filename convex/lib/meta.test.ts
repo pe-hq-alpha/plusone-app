@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { MetaError, metaBody, metaComplete, metaModel } from "./meta";
+import { callRecord } from "./modelCost";
 import { chosenProvider, complete, type Completion, ModelAnswerError } from "./models";
+import { SPARK_OPEN_MODEL, sparkOpenComplete } from "./sparkOpen";
 import type { CompletionRequest } from "./modelShared";
 
 const env = { MODEL_API_KEY: "LLM_1_test" };
@@ -116,12 +118,57 @@ describe("a Meta reply", () => {
   });
 });
 
+describe("Muse Spark Open on Baseten", () => {
+  it("sends the hackathon model id to Baseten with Baseten's key, not Meta's", async () => {
+    const fetchFn = vi.fn(async () => reply({ ...answer("{}"), model: SPARK_OPEN_MODEL }));
+    await sparkOpenComplete(request(), { BASETEN_API_KEY: "bt_test", MODEL_API_KEY: "LLM_1_test" }, fetchFn as unknown as typeof fetch);
+    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://inference.baseten.co/v1/chat/completions");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer bt_test");
+    expect(JSON.parse(init.body as string).model).toBe("meta-models/muse-spark-open-1026");
+  });
+
+  it("returns only the answer, never the reasoning Baseten sends beside it", async () => {
+    const body = {
+      model: SPARK_OPEN_MODEL,
+      choices: [{ finish_reason: "stop", message: { reasoning_content: "Let me think about plates.", content: '{"ok":true}' } }],
+      usage: { prompt_tokens: 50, completion_tokens: 300 },
+    };
+    const fetchFn = vi.fn(async () => reply(body));
+    const result = await sparkOpenComplete(request(), { BASETEN_API_KEY: "bt_test" }, fetchFn as unknown as typeof fetch);
+    expect(result).toMatchObject({ text: '{"ok":true}', provider: "spark_open", usage: { inputTokens: 50, outputTokens: 300 } });
+  });
+
+  it("is priced at Baseten's rate, and a call Muse Spark had to take counts as a fallback", () => {
+    const served: Completion = { text: "", provider: "meta", model: "muse-spark-1.3", usage: { inputTokens: 1_000_000, outputTokens: 0 } };
+    expect(callRecord("priceUnits", "spark_open", served).fellBack).toBe(true);
+    expect(callRecord("priceUnits", "spark_open", { ...served, provider: "spark_open", model: SPARK_OPEN_MODEL })).toMatchObject({ fellBack: false, costUsd: 1.25 });
+  });
+});
+
 describe("choosing and falling back", () => {
-  const ok = (provider: "meta" | "claude"): Completion => ({
+  const ok = (provider: "meta" | "claude" | "spark_open"): Completion => ({
     text: "ok",
     provider,
-    model: provider === "meta" ? "muse-spark-1.3" : "claude-haiku-5-5",
+    model: provider === "meta" ? "muse-spark-1.3" : provider === "spark_open" ? SPARK_OPEN_MODEL : "claude-haiku-5-5",
     usage: { inputTokens: 1, outputTokens: 1 },
+  });
+
+  it("moves a Spark Open call to Muse Spark when Baseten is down, not straight to Claude", async () => {
+    const sparkOpen = vi.fn().mockRejectedValue(new MetaError("Baseten returned 503", 503, true, true));
+    const meta = vi.fn(async () => ok("meta"));
+    const claude = vi.fn();
+    const result = await complete(request(), "spark_open", { meta, claude, sparkOpen, sleep: async () => {} }, "meta");
+    expect(sparkOpen).toHaveBeenCalledTimes(3);
+    expect(result.provider).toBe("meta");
+    expect(claude).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a Spark Open request Baseten finds malformed", async () => {
+    const sparkOpen = vi.fn().mockRejectedValue(new MetaError("bad schema", 400, false, false));
+    const meta = vi.fn();
+    await expect(complete(request(), "spark_open", { meta, claude: vi.fn(), sparkOpen, sleep: async () => {} }, "meta")).rejects.toThrow("bad schema");
+    expect(meta).not.toHaveBeenCalled();
   });
 
   it("uses Meta only when asked for and its key is set", () => {

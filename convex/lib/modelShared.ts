@@ -24,7 +24,8 @@ export type CompletionRequest = {
   schema?: z.ZodType;
 };
 
-export type Provider = "claude" | "meta";
+/** Who answered: Claude, Meta's API (Muse Spark), or Muse Spark Open on Baseten. */
+export type Provider = "claude" | "meta" | "spark_open";
 
 export type Completion = {
   text: string;

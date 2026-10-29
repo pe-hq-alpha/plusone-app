@@ -27,7 +27,8 @@ const STEP: Record<string, string> = {
 };
 
 /** A model id as people would say it. */
-function modelName(model: string, provider: "meta" | "claude"): string {
+function modelName(model: string, provider: "meta" | "claude" | "spark_open"): string {
+  if (provider === "spark_open") return "Meta Muse Spark Open";
   const spark = model.match(/^muse-spark-(\d+(?:\.\d+)?)/);
   if (spark) return `Meta Muse Spark ${spark[1]}`;
   if (model.startsWith("muse-wonder")) return "Meta Muse Wonder";
@@ -89,7 +90,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
                 <li key={c._id} className="card-quiet px-3.5 py-3">
                   <p className="text-sm">{STEP[c.feature] ?? c.feature}</p>
                   <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                    <span className={c.provider === "meta" ? "chip-pending" : "chip-quiet"}>{modelName(c.model, c.provider)}</span>
+                    <span className={c.provider === "claude" ? "chip-quiet" : "chip-pending"}>{modelName(c.model, c.provider)}</span>
                     {c.fellBack && <span className="chip-warn">Meta was busy; the backup answered</span>}
                     <span className="tabular-nums">{seconds(c.durationMs)}</span>
                     <span className="tabular-nums">

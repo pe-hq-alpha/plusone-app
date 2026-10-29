@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { type Completion, type CompletionRequest, type Part, type Tier, filesFirst, ModelAnswerError, toBase64 } from "./modelShared";
+import { type Completion, type CompletionRequest, type Part, type Provider, type Tier, filesFirst, ModelAnswerError, toBase64 } from "./modelShared";
 
 /**
  * Meta's Model API through Chat Completions, where structured output is
@@ -86,6 +86,11 @@ export async function metaBody(
   env: Record<string, string | undefined> = process.env,
   fetchFn: typeof fetch = fetch,
 ): Promise<Record<string, unknown>> {
+  return chatBody(req, metaModel(req.tier, env), fetchFn);
+}
+
+/** A Chat Completions body for any OpenAI-compatible host: Meta's API, or Baseten for Muse Spark Open. */
+export async function chatBody(req: CompletionRequest, model: string, fetchFn: typeof fetch = fetch): Promise<Record<string, unknown>> {
   const messages: ChatMessage[] = [{ role: "system", content: req.system }];
   for (const m of req.messages) {
     messages.push({
@@ -97,7 +102,7 @@ export async function metaBody(
     });
   }
   return {
-    model: metaModel(req.tier, env),
+    model,
     messages,
     max_tokens: req.maxOutputTokens,
     reasoning_effort: req.effort,
@@ -107,6 +112,7 @@ export async function metaBody(
   };
 }
 
+/** Reasoning, where a host returns it, comes back in `reasoning_content` and is never read: only `content` is the answer. */
 type ChatResponse = {
   model?: string;
   choices?: { finish_reason?: string | null; message?: { content?: string | { type: string; text?: string }[] | null } }[];
@@ -119,20 +125,28 @@ export async function metaComplete(
   fetchFn: typeof fetch = fetch,
 ): Promise<Completion> {
   const body = await metaBody(req, env, fetchFn);
+  return chatComplete({ name: "Meta", url: env.META_BASE_URL ?? BASE_URL, key: env.MODEL_API_KEY, provider: "meta" }, body, fetchFn);
+}
+
+/** Where a Chat Completions request goes, and how its errors and cost row name it. */
+export type ChatHost = { name: string; url: string; key: string | undefined; provider: Provider };
+
+/** Send a Chat Completions body and read the answer, with errors classed as Meta's docs class them. */
+export async function chatComplete(host: ChatHost, body: Record<string, unknown>, fetchFn: typeof fetch = fetch): Promise<Completion> {
   let res: Response;
   try {
-    res = await fetchFn(`${env.META_BASE_URL ?? BASE_URL}/chat/completions`, {
+    res = await fetchFn(`${host.url}/chat/completions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.MODEL_API_KEY}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${host.key}` },
       body: JSON.stringify(body),
     });
   } catch (error) {
-    throw new MetaError(`Meta request failed: ${error instanceof Error ? error.message : String(error)}`, null, true, true);
+    throw new MetaError(`${host.name} request failed: ${error instanceof Error ? error.message : String(error)}`, null, true, true);
   }
   if (!res.ok) {
     const detail = (await res.text().catch(() => "")).slice(0, 300);
     throw new MetaError(
-      `Meta returned ${res.status}: ${detail}`,
+      `${host.name} returned ${res.status}: ${detail}`,
       res.status,
       RETRYABLE.has(res.status),
       !MALFORMED.has(res.status),
@@ -149,7 +163,7 @@ export async function metaComplete(
   const text = typeof content === "string" ? content : (content ?? []).map((c) => c.text ?? "").join("");
   return {
     text,
-    provider: "meta",
+    provider: host.provider,
     model: json.model ?? (body.model as string),
     usage: { inputTokens: json.usage?.prompt_tokens ?? 0, outputTokens: json.usage?.completion_tokens ?? 0 },
   };
