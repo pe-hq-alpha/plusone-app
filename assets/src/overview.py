@@ -108,7 +108,7 @@ out.append(text(742, 268, "PlusOne", 44, family=SERIF))
 out.append(text(800, 310, "one app for planning and buying events", 16, MUTED, anchor="middle"))
 out.append(f'<line x1="610" y1="336" x2="990" y2="336" stroke="{LINE}"/>')
 out.append(text(800, 368, "every quote on the same lines,", 15.5, TEXT, anchor="middle"))
-out.append(text(800, 392, "missing charges flagged, prices in the open", 15.5, TEXT, anchor="middle"))
+out.append(text(800, 392, "missing charges flagged, every price comparable", 15.5, TEXT, anchor="middle"))
 
 # The people who use it
 person(220, 300, "users", "Customers", "families and event managers")
@@ -138,7 +138,7 @@ for n, (d, delay, color) in enumerate(flows):
         f'<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="{delay}s;f{n}a.begin" /></circle>'
     )
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="How PlusOne works: customers, families and event managers, describe their event in PlusOne; vendors get the same brief and send quotes back; PlusOne puts every quote on the same lines, flags missing charges and shows prices in the open, so the customer compares them line by line; the PlusOne team verifies every vendor">
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="How PlusOne works: customers, families and event managers, describe their event in PlusOne; vendors get the same brief and send quotes back; PlusOne puts every quote on the same lines, flags missing charges and makes every price comparable, so the customer compares them line by line; the PlusOne team verifies every vendor">
 <style>.dash{{animation:run 1.2s linear infinite}}@keyframes run{{to{{stroke-dashoffset:-18}}}}@media (prefers-reduced-motion:reduce){{.dash{{animation:none}}}}</style>
 <defs><radialGradient id="glow"><stop offset="0" stop-color="#f4b53a" stop-opacity=".22"/><stop offset="1" stop-color="#f4b53a" stop-opacity="0"/></radialGradient><radialGradient id="disc" cx=".35" cy=".3"><stop offset="0" stop-color="#3a3524"/><stop offset="1" stop-color="#1c1f29"/></radialGradient><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a6378"/></marker></defs>
 {"".join(out[:1])}

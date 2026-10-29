@@ -40,7 +40,7 @@ export function FindVendorsPage() {
       <PublicNav wide />
       <main id="main" className="w-full px-3 pb-16 sm:px-4">
         <div className="pt-6 sm:pt-8">
-          <h1 className="pub-title !text-left !text-[clamp(1.8rem,3vw,2.5rem)]">Vendors, <em>priced in the open</em></h1>
+          <h1 className="pub-title !text-left !text-[clamp(1.8rem,3vw,2.5rem)]">Vendors, <em>with prices you can compare</em></h1>
           <p className="mt-2 max-w-3xl text-sm text-muted sm:text-base">Caterers, decorators, photographers, halls and more, each with their packages on the same lines. Free to use, with no plan to buy.</p>
         </div>
 
