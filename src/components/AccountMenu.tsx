@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthActions } from "../lib/session";
+import { BRAND } from "../lib/brand";
+import { homeHref } from "../lib/hosts";
 import type { Role } from "../../convex/lib/validators";
 import { Icon } from "./ui/Icon";
 import { ThemeSwitch } from "./ui/ThemeSwitch";
@@ -71,6 +73,19 @@ export function AccountMenu({ role }: { role: Role }) {
       >
         <p className="px-3 pb-2.5 pt-2 text-xs text-quiet">{ROLE_LINE[role]}</p>
         <div className="border-t border-line pt-1.5">
+          {/* The ways out of an event: the rest of the app, the directory and the public site. */}
+          <Link to="/" className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent">
+            <Icon name="calendar" size={17} className="text-muted" />
+            Your events
+          </Link>
+          <Link to="/vendors" className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent">
+            <Icon name="search" size={17} className="text-muted" />
+            Find vendors
+          </Link>
+          <a href={homeHref()} className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent">
+            <Icon name="home" size={17} className="text-muted" />
+            {BRAND.name} home
+          </a>
           <Link
             to="/account"
             className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent"

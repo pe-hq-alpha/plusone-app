@@ -220,6 +220,8 @@ function Header({ onSignOut }: { onSignOut: () => void }) {
         <PlusOneLockup />
       </Link>
       <div className="flex min-w-0 items-center gap-2">
+      <Link to="/vendors" className="btn-quiet btn-sm bg-paper/90 text-ink">Find vendors</Link>
+      <Link to="/pricing" className="btn-quiet btn-sm hidden bg-paper/90 text-ink sm:inline-flex">Pricing</Link>
       <UserChip to="/account" className="hidden max-w-[15rem] sm:inline-flex" />
       <button onClick={onSignOut} className="btn-quiet btn-sm gap-1.5 bg-paper/90 text-ink shadow-[inset_0_0_0_1px_var(--color-line),0_6px_18px_-8px_rgb(var(--shadow-rgb)/0.35)] backdrop-blur-sm">
         <Icon name="signout" size={15} />

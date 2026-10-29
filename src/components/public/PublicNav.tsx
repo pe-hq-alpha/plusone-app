@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useConvexAuth } from "convex/react";
 import { BRAND } from "../../lib/brand";
 import { onPartnerHost, partnerHref } from "../../lib/hosts";
 import { PlusOneLockup } from "../brand/Wordmarks";
@@ -12,6 +13,7 @@ import "../../styles/public.css";
  */
 export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; brand?: boolean }) {
   const { pathname } = useLocation();
+  const { isAuthenticated } = useConvexAuth();
   const here = (path: string) => (pathname === path ? "page" : undefined);
   return (
     <header className={`pub-nav${brand ? "" : " pub-nav--no-brand"}`}>
@@ -26,7 +28,11 @@ export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; b
           <span className="max-sm:hidden">For vendors</span>
           <span className="sm:hidden">Partner</span>
         </Link>
-        {signIn && <Link to="/signin" className="pub-link pub-link--accent">Sign in</Link>}
+        {signIn && (isAuthenticated ? (
+          <Link to="/" className="pub-link pub-link--accent">Your events</Link>
+        ) : (
+          <Link to="/signin" className="pub-link pub-link--accent">Sign in</Link>
+        ))}
         {/* On a phone the bar keeps its links; the theme follows the device. */}
         <ThemeSwitch compact className="ml-2 max-sm:hidden" />
       </nav>

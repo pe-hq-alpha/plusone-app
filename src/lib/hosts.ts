@@ -79,6 +79,11 @@ export function hasOpsHost(): boolean {
 }
 
 /** Back to the home page on the bare domain. */
+/** The public home page: its own address when there is one, else "/" on this one. */
+export function homeHref(): string {
+  return HOME ? `${HOME}/` : "/";
+}
+
 export function goHome(): void {
   window.location.replace(`${HOME}/`);
 }
