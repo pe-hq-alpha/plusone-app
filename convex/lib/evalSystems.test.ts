@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { answersFrom, keywordFlags } from "./evalSystems";
+import { answersFrom } from "./charges";
+import { keywordFlags } from "./evalSystems";
 import { gapsIn, sheetFor } from "./standardSheet";
 
 const catering = sheetFor("Catering")!;

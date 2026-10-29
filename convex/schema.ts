@@ -626,6 +626,23 @@ export const quoteFields = {
   headcountAssumed: v.optional(v.number()),
   /** Whether the total already includes tax (GST); missing when the reply didn't say. */
   taxIncluded: v.optional(v.boolean()),
+  // Each charge on the trade's sheet as Muse Spark read it; Compare uses it before the line-matching rules
+  charges: v.optional(
+    v.array(
+      v.object({
+        key: v.string(),
+        status: v.union(
+          v.literal("priced"),
+          v.literal("included"),
+          v.literal("extra_with_amount_or_rate"),
+          v.literal("extra_without_price"),
+          v.literal("not_offered"),
+          v.literal("not_mentioned"),
+        ),
+        amount: v.optional(v.number()),
+      }),
+    ),
+  ),
   /**
    * Whether the quote has changed the plan. Missing means applied (every quote from
    * before this existed). "waiting": read from a reply but held for the couple to check;

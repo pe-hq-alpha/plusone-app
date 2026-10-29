@@ -75,6 +75,19 @@ describe("quotes read from replies", () => {
     expect(await committed(t, s.slotId)).toBe(0);
   });
 
+  test("charges are stored, replaced on a fresh reading, and cleared when it has none", async () => {
+    const t = setup();
+    const s = await seed(t);
+    const charges = [{ key: "gst", status: "extra_with_amount_or_rate" as const, amount: 195 }, { key: "travel", status: "not_mentioned" as const }];
+    const id = (await t.mutation(internal.quotes.upsertFromMessage, { ...quote(s.messageId, 3900), charges }))!;
+    expect((await t.run((ctx) => ctx.db.get(id)))?.charges).toEqual(charges);
+    const next = [{ key: "gst", status: "included" as const }];
+    await t.mutation(internal.quotes.upsertFromMessage, { ...quote(s.messageId, 4000), charges: next });
+    expect((await t.run((ctx) => ctx.db.get(id)))?.charges).toEqual(next);
+    await t.mutation(internal.quotes.upsertFromMessage, quote(s.messageId, 4000));
+    expect((await t.run((ctx) => ctx.db.get(id)))?.charges).toBeUndefined();
+  });
+
   test("hold reasons", () => {
     const base = { total: 4000, currency: "USD", eventCurrency: "USD", budget: 4000, slotBooked: false, reviewFirst: false };
     expect(holdReason(base)).toBeNull();

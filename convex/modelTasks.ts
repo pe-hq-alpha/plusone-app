@@ -30,6 +30,8 @@ import {
   type VendorCard,
 } from "./lib/validators";
 import { BRAND } from "./lib/brand";
+import { CHARGES_INSTRUCTIONS, chargesPrompt, chargesSchema, type ChargeStatus } from "./lib/charges";
+import { sheetFor } from "./lib/standardSheet";
 
 
 const PAGE_CHARS = 12_000;
@@ -847,6 +849,48 @@ export async function readVendorReply(ctx: ActionCtx, args: {
   return object;
 }
 
+/**
+ * What the quote says about each charge on its trade's sheet, named by Muse Spark itself
+ * from the sheet's fixed list; undefined for a need with no sheet.
+ */
+export async function readCharges(
+  ctx: ActionCtx,
+  args: {
+    event: Doc<"events">;
+    slot: Doc<"vendorSlots"> | null;
+    vendorName: string;
+    body: string;
+    file?: { bytes: ArrayBuffer; filename: string; mediaType?: string };
+  },
+): Promise<{ key: string; status: ChargeStatus; amount?: number }[] | undefined> {
+  const sheet = args.slot ? sheetFor(args.slot.category) : null;
+  if (!sheet || !args.slot) return undefined;
+  const prompt = chargesPrompt(args.slot.category, sheet, args.vendorName, args.body);
+  const { object } = await generateObject({
+    ctx,
+    feature: "readCharges",
+    eventId: args.event._id,
+    model: MODEL_FAST,
+    effort: "low",
+    system: CHARGES_INSTRUCTIONS,
+    schema: chargesSchema(sheet),
+    ...(args.file
+      ? {
+          messages: [
+            {
+              role: "user" as const,
+              content: [
+                { type: "text" as const, text: prompt },
+                { type: "file" as const, data: args.file.bytes, mediaType: args.file.mediaType ?? "application/pdf", filename: args.file.filename },
+              ],
+            },
+          ],
+        }
+      : { prompt }),
+  });
+  return object.charges.map((c) => ({ key: c.key, status: c.status, ...(c.amount !== null ? { amount: c.amount } : {}) }));
+}
+
 /** The same reading on plain inputs, to check the prompt against sample replies and PDFs. */
 export const readVendorReplySample = internalAction({
   args: {
@@ -911,13 +955,17 @@ export const extractReply = internalAction({
       message.attachments.find((f) => f.contentType.includes("pdf") || f.filename.toLowerCase().endsWith(".pdf")) ??
       message.attachments.find((f) => /^image\/(jpeg|png|webp|gif)$/.test(f.contentType));
     const blob = attached ? await ctx.storage.get(attached.storageId) : null;
+    const file =
+      attached && blob
+        ? { bytes: await blob.arrayBuffer(), filename: attached.filename, mediaType: attached.contentType.startsWith("image/") ? attached.contentType : undefined }
+        : undefined;
     const object = await readVendorReply(ctx, {
       event,
       slot,
       vendorName: vendor?.name ?? message.fromAddress,
       subject: message.subject,
       body: message.bodyText,
-      pdf: attached && blob ? { bytes: await blob.arrayBuffer(), filename: attached.filename, mediaType: attached.contentType.startsWith("image/") ? attached.contentType : undefined } : undefined,
+      pdf: file,
     });
     if (attached && object.attachmentKind === "contract" && !attached.contentType.startsWith("image/")) {
       await ctx.runMutation(internal.inbound.createContractCheck, {
@@ -950,6 +998,14 @@ export const extractReply = internalAction({
     }
     await ctx.runMutation(internal.threads.applyClassification, { threadId: thread._id, classification: object.classification });
     if (extracted.total !== undefined && extracted.total > 0) {
+      // A failed second read must never lose the quote, so it is saved without charges and Compare falls back to the line-matching rules.
+      let charges: Awaited<ReturnType<typeof readCharges>>;
+      try {
+        charges = await readCharges(ctx, { event, slot, vendorName: vendor?.name ?? message.fromAddress, body: message.bodyText, file });
+      } catch (err) {
+        console.warn("readCharges: the charge reading failed, saving the quote without it", err instanceof Error ? err.message : err);
+        charges = undefined;
+      }
       await ctx.runMutation(internal.quotes.upsertFromMessage, {
         messageId: args.messageId,
         total: extracted.total,
@@ -974,6 +1030,7 @@ export const extractReply = internalAction({
           : undefined,
         headcountAssumed: nn(object.headcountAssumed),
         taxIncluded: object.taxIncluded ?? undefined,
+        charges,
       });
     }
     return { classification: object.classification, total: extracted.total ?? null };

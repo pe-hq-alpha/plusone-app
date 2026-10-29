@@ -354,3 +354,56 @@ describe("charges written the way vendors write them (from the missing-charge ev
     expect(statusOf({ total: 0, includes: ["Banana leaf service"] }).service_staff).toMatchObject({ status: "unstated" });
   });
 });
+
+describe("readQuote with charges", () => {
+  const sheet = sheetFor("Catering")!;
+
+  test("uses the charges and ignores lines the rules would have matched differently", () => {
+    const quote = {
+      total: 59_500,
+      lines: [line("Transport", "fee", 2_500)],
+      includes: ["Banana leaf service"],
+      charges: [
+        { key: "gst" as const, status: "included" as const },
+        { key: "transport" as const, status: "not_mentioned" as const },
+        { key: "water" as const, status: "priced" as const, amount: 1_800 },
+      ],
+    };
+    const reading = Object.fromEntries(readQuote(quote, sheet).map((r) => [r.key, r]));
+    // The rules would call transport priced from its line; the charge reading says it was never mentioned.
+    expect(reading.transport).toMatchObject({ status: "unstated" });
+    expect(reading.gst).toMatchObject({ status: "included" });
+    expect(reading.water).toMatchObject({ status: "priced", amount: 1_800 });
+    expect(reading.crockery).toMatchObject({ status: "unstated" });
+  });
+
+  test("an empty charges list falls back to the line-matching rules", () => {
+    const quote = { total: 59_500, lines: [line("Transport", "fee", 2_500)], charges: [] };
+    expect(Object.fromEntries(readQuote(quote, sheet).map((r) => [r.key, r])).transport).toMatchObject({ status: "priced", amount: 2_500 });
+  });
+
+  test("missingCharges flags water on the silent quote when the other prices it", () => {
+    const silent = {
+      total: 57_000,
+      charges: [
+        { key: "gst" as const, status: "included" as const },
+        { key: "water" as const, status: "not_mentioned" as const },
+      ],
+    };
+    const other = {
+      total: 58_200,
+      charges: [
+        { key: "gst" as const, status: "included" as const },
+        { key: "water" as const, status: "priced" as const, amount: 1_200 },
+      ],
+    };
+    expect(missingCharges(silent, sheet, [other]).map((m) => m.message)).toContain("No water line, and one other charges ₹1,200");
+  });
+});
+
+test("a GST rate read by Muse Spark is priced on the quote's total, never shown as nothing", () => {
+  const sheet = sheetFor("Catering")!;
+  const q = { total: 48_000, excludes: ["GST 5% extra"], charges: [{ key: "gst", status: "extra_with_amount_or_rate" as const }] };
+  expect(readQuote(q, sheet).find((r) => r.key === "gst")).toMatchObject({ status: "extra", amount: 2_400 });
+});
+

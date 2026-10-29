@@ -16,6 +16,7 @@ const STEP: Record<string, string> = {
   draftInquiries: "Wrote the first emails to vendors",
   draftFollowUp: "Wrote a follow-up to a quiet vendor",
   readVendorReply: "Read a vendor's reply into a quote",
+  readCharges: "Read what each charge in a quote says",
   decideVendorReply: "Decided what a vendor's reply needs",
   writeVendorReply: "Answered a vendor's question",
   writeAgentEmail: "Wrote an email to a vendor",

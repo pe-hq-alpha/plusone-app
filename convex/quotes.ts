@@ -184,6 +184,22 @@ export const upsertFromMessage = internalMutation({
     lines: v.optional(v.array(quoteLine)),
     headcountAssumed: v.optional(v.number()),
     taxIncluded: v.optional(v.boolean()),
+    charges: v.optional(
+      v.array(
+        v.object({
+          key: v.string(),
+          status: v.union(
+            v.literal("priced"),
+            v.literal("included"),
+            v.literal("extra_with_amount_or_rate"),
+            v.literal("extra_without_price"),
+            v.literal("not_offered"),
+            v.literal("not_mentioned"),
+          ),
+          amount: v.optional(v.number()),
+        }),
+      ),
+    ),
   },
   returns: v.union(v.id("quotes"), v.null()),
   handler: async (ctx, args) => {
@@ -215,6 +231,10 @@ export const upsertFromMessage = internalMutation({
       ...(args.lines?.length ? { lines: args.lines.slice(0, 30) } : {}),
       ...(args.headcountAssumed && args.headcountAssumed > 0 ? { headcountAssumed: Math.round(args.headcountAssumed) } : {}),
       ...(args.taxIncluded !== undefined ? { taxIncluded: args.taxIncluded } : {}),
+      // A fresh reading replaces the old charges; one with none clears them, so Compare never mixes readings.
+      charges: args.charges?.length
+        ? args.charges.map((c) => ({ key: c.key, status: c.status, ...(c.amount !== undefined ? { amount: c.amount } : {}) }))
+        : undefined,
     };
     // One quote per message: re-running extraction updates instead of duplicating.
     const existing = (

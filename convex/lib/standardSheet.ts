@@ -1,4 +1,6 @@
 import type { Basis } from "./comparable";
+import { readingsFrom } from "./charges";
+import type { ChargeStatus } from "./charges";
 import { formatMoney, inSentence } from "./text";
 import type { QuoteLine } from "./validators";
 import { VENDOR_NEEDS, type VendorNeedKey } from "./vocab";
@@ -7,8 +9,8 @@ import { VENDOR_NEEDS, type VendorNeedKey } from "./vocab";
  * The standard sheet: for each kind of vendor, the unit a quote should be priced in and
  * the charges it should state (GST, transport, setup, overtime and the rest). Quotes are
  * read against it in Events and Partner vendors price their offers on it, so every offer
- * for a need speaks the same lines. The rules here are fixed and tested; a model only
- * reads the quote into lines, never decides what's missing.
+ * for a need speaks the same lines. The rules here are fixed and tested; the model now
+ * names each charge's status, and the rules compare those readings to decide what's missing.
  */
 
 export type SheetLine = {
@@ -366,6 +368,7 @@ type QuoteLike = {
   excludes?: string[];
   taxIncluded?: boolean;
   headcountAssumed?: number;
+  charges?: { key: string; status: ChargeStatus; amount?: number }[];
 };
 
 /**
@@ -379,6 +382,19 @@ const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
 
 /** One quote against its sheet: what it says about each line. */
 export function readQuote(q: QuoteLike, sheet: Sheet): LineReading[] {
+  // A charge reading Muse Spark named itself settles each line; the line-matching rules below are the fallback for quotes without one.
+  if (q.charges?.length) {
+    return readingsFrom(q.charges, sheet).map((r) => {
+      const line = sheet.lines.find((l) => l.key === r.key);
+      // "GST 18% extra" comes back with a rate and no rupee amount; price the rate on the quote's
+      // total, as the rules do, so Compare never shows the tax as ₹0.
+      if (line?.kind === "tax" && r.status === "extra" && !r.amount) {
+        const rate = taxRate(q, line.match);
+        return rate !== null && q.total > 0 ? { ...r, amount: Math.round((q.total * rate) / 100) } : { ...r, amount: undefined };
+      }
+      return r;
+    });
+  }
   // The price of the thing itself ("Veg meals per plate") is never one of the sheet's charges.
   // Each charge counts once, for the sheet line it names first: "Transport of vessels and
   // staff" is transport, not service staff too.

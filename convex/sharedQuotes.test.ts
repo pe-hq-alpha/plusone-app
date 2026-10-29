@@ -29,17 +29,44 @@ const READING = {
   lines: [{ item: "Lunch, 120 plates at ₹400", kind: "core", unit: "per_person", quantity: 120, unitPrice: 400, amount: 48000, optional: false }],
 };
 
-/** Meta on, answering every call with the reading; the requests are kept to look at. Nothing reaches the network. */
+const CHARGES = {
+  charges: [
+    { key: "gst", status: "extra_with_amount_or_rate", amount: null },
+    { key: "service_staff", status: "not_mentioned", amount: null },
+    { key: "transport", status: "priced", amount: 2500 },
+    { key: "crockery", status: "included", amount: null },
+    { key: "water", status: "extra_without_price", amount: null },
+  ],
+};
+
+/** Meta on, answering the reply reading first and the charges second; the requests are kept to look at. Nothing reaches the network. */
 function metaReads() {
   vi.stubEnv("MODEL_PROVIDER", "meta");
   vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
-  const fetchFn = vi.fn(async (_url: unknown, _init?: RequestInit) =>
-    Response.json({
+  const fetchFn = vi.fn(async (_url: unknown, init?: RequestInit) => {
+    const content = String(init?.body ?? "").includes("The charges for") ? JSON.stringify(CHARGES) : JSON.stringify(READING);
+    return Response.json({
+      model: "muse-spark-1.3",
+      choices: [{ finish_reason: "stop", message: { content } }],
+      usage: { prompt_tokens: 1_500, completion_tokens: 900 },
+    });
+  });
+  vi.stubGlobal("fetch", fetchFn);
+  return fetchFn;
+}
+
+/** Meta on, answering the reply reading but failing the charges reading. Nothing reaches the network. */
+function metaReadsFailingCharges() {
+  vi.stubEnv("MODEL_PROVIDER", "meta");
+  vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+  const fetchFn = vi.fn(async (_url: unknown, init?: RequestInit) => {
+    if (String(init?.body ?? "").includes("The charges for")) return new Response("bad request", { status: 400 });
+    return Response.json({
       model: "muse-spark-1.3",
       choices: [{ finish_reason: "stop", message: { content: JSON.stringify(READING) } }],
       usage: { prompt_tokens: 1_500, completion_tokens: 900 },
-    }),
-  );
+    });
+  });
   vi.stubGlobal("fetch", fetchFn);
   return fetchFn;
 }
@@ -75,7 +102,7 @@ describe("a quote the host was sent outside the inbox", () => {
     await as(t, ownerId).mutation(api.sharedQuotes.add, { vendorId, storageId, filename: "WhatsApp Image.jpeg", contentType: "image/jpeg" });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
 
-    expect(fetchFn).toHaveBeenCalledOnce();
+    expect(fetchFn).toHaveBeenCalledTimes(2);
     const body = JSON.parse(String(fetchFn.mock.calls[0][1]?.body));
     const parts = body.messages.at(-1).content as Array<{ type: string; image_url?: { url: string } }>;
     expect(parts.some((p) => p.type === "image_url" && p.image_url!.url.startsWith("data:image/jpeg;base64,"))).toBe(true);
@@ -102,5 +129,42 @@ describe("a quote the host was sent outside the inbox", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({ direction: "in", kind: "vendor_reply", bodyText: "Sir, ₹400 per plate for 120, GST extra. Advance ₹10,000." });
     expect(await t.run((ctx) => ctx.db.query("quotes").collect())).toHaveLength(1);
+  });
+
+  test("the saved quote carries the charges from the second reading, with no amount where there was none", async () => {
+    vi.useFakeTimers();
+    metaReads();
+    const t = setup();
+    const { ownerId, vendorId } = await eventWithVendor(t);
+
+    await as(t, ownerId).mutation(api.sharedQuotes.add, { vendorId, text: "Sir, ₹400 per plate for 120, GST extra. Advance ₹10,000." });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const quotes = await t.run((ctx) => ctx.db.query("quotes").collect());
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0].charges).toEqual([
+      { key: "gst", status: "extra_with_amount_or_rate" },
+      { key: "service_staff", status: "not_mentioned" },
+      { key: "transport", status: "priced", amount: 2500 },
+      { key: "crockery", status: "included" },
+      { key: "water", status: "extra_without_price" },
+    ]);
+  });
+
+  test("the quote is still saved, without charges, when the second reading fails", async () => {
+    vi.useFakeTimers();
+    metaReadsFailingCharges();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const t = setup();
+    const { ownerId, vendorId } = await eventWithVendor(t);
+
+    await as(t, ownerId).mutation(api.sharedQuotes.add, { vendorId, text: "Sir, ₹400 per plate for 120, GST extra. Advance ₹10,000." });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const quotes = await t.run((ctx) => ctx.db.query("quotes").collect());
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]).toMatchObject({ total: 48000 });
+    expect(quotes[0].charges).toBeUndefined();
+    warn.mockRestore();
   });
 });

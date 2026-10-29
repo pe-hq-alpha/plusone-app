@@ -12,7 +12,8 @@ import { ALL_READING_CASES, FORMATS, type ReadingScore, scoreReading } from "./l
 import { type QuoteScore, scoreQuote, totals } from "./lib/evalScore";
 import { gapsIn, missingCharges as flagMissing, sheetFor, type Answer } from "./lib/standardSheet";
 import { HELD_OUT_GROUPS } from "./lib/evalHeldOut";
-import { answersFrom, CHARGE_STATUSES, keywordFlags } from "./lib/evalSystems";
+import { keywordFlags } from "./lib/evalSystems";
+import { answersFrom, CHARGES_INSTRUCTIONS, chargesPrompt, chargesSchema } from "./lib/charges";
 import { generateObject, MODEL_FAST } from "./lib/models";
 import { z } from "zod";
 import type { EvalGroup } from "./lib/evalQuotes";
@@ -217,14 +218,6 @@ const groupsFor = (set: "tuned" | "heldout"): EvalGroup[] => (set === "tuned" ? 
 // "unit" (how many plates) is the pipeline's own check, not a charge; it is left out so every system is scored on the same charges.
 const chargesOnly = (keys: string[]) => keys.filter((k) => k !== "unit");
 
-const CHARGES_INSTRUCTIONS =
-  "You read one vendor's quote for an event and say, for each charge on the list, what the quote says about it. " +
-  "priced: it has its own amount inside the total. included: the quote says the price covers it. " +
-  "extra_with_amount_or_rate: it is outside the price, with an amount or a rate (\"GST 18% extra\" has a rate). " +
-  "extra_without_price: it is outside the price with no amount or rate (\"setup charges extra\", \"at actuals\"). " +
-  "not_offered: the quote says it isn't part of the service. not_mentioned: the quote says nothing about it. " +
-  "Give the amount in rupees when there is one, otherwise null. Read Tamil, Tanglish, lakh and k amounts as written.";
-
 const DIRECT_INSTRUCTIONS =
   "You help a family planning an event compare vendors' quotes. From the list, name every charge a careful planner " +
   "would still have to ask this vendor about: ones the quote never mentions that are usually charged on top, ones other " +
@@ -265,7 +258,7 @@ export const compare = internalAction({
         }));
         flagged = quotes.map((q, i) => flagMissing(q, sheet, quotes.filter((_, j) => j !== i)).map((m) => m.key));
       } else if (args.system === "charges") {
-        const schema = z.object({ charges: z.array(z.object({ key: z.enum(keys), status: z.enum(CHARGE_STATUSES), amount: z.number().nullable() })) });
+        const schema = chargesSchema(sheet);
         const answers: Answer[][] = await Promise.all(
           group.quotes.map(async (q) => {
             const { object } = await generateObject({
@@ -274,7 +267,7 @@ export const compare = internalAction({
               model: MODEL_FAST,
               effort: "low",
               system: CHARGES_INSTRUCTIONS,
-              prompt: `The charges for ${group.category}: ${keys.join(", ")}.\n\nThe quote from ${q.vendor}:\n${q.text}`,
+              prompt: chargesPrompt(group.category, sheet, q.vendor, q.text),
               schema,
             });
             return answersFrom(object.charges, sheet);
