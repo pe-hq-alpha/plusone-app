@@ -30,9 +30,9 @@ const reading = z.object({
     .object({
       eventType: z.enum(TYPE_IDS).nullable(),
       occasionLabel: z.string().nullable().describe("their own words for it, e.g. Amma's 60th, Griha pravesam"),
-      name: z.string().nullable().describe("what to call the event, as they would: Paddy and Sharmila's wedding, Amma's 60th, the Acme Diwali party"),
-      host: z.string().nullable().describe("first name of the main person the event is for or who is organising it, when one is named; for 'Paddy and Sharmila's wedding' it is Paddy. Never ask for it: null when nobody is named"),
-      coHost: z.string().nullable().describe("the second person's first name when two are named, e.g. Sharmila"),
+      name: z.string().nullable().describe("what to call the event, as they would: Arjun and Meera's wedding, Amma's 60th, the Acme Diwali party"),
+      host: z.string().nullable().describe("first name of the main person the event is for or who is organising it, when one is named; for 'Arjun and Meera's wedding' it is Arjun. Never ask for it: null when nobody is named"),
+      coHost: z.string().nullable().describe("the second person's first name when two are named, e.g. Meera"),
       organisation: z.string().nullable().describe("company, college or community holding it, for work or community events"),
       city: z.string().nullable(),
       area: z.string().nullable().describe("neighbourhood or locality"),

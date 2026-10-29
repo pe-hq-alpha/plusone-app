@@ -32,7 +32,7 @@ export function has(f: Facts, field: Field): boolean {
     case "eventType":
       return Boolean(f.eventType);
     case "host":
-      // What the event is called or whose it is: "Paddy and Sharmila's wedding", "Amma's 60th", a company's party.
+      // What the event is called or whose it is: "Arjun and Meera's wedding", "Amma's 60th", a company's party.
       return Boolean(f.name.trim() || f.host.trim() || f.organisation.trim());
     case "city":
       return Boolean(f.city.trim());
@@ -207,7 +207,7 @@ const QUESTION: Record<Field, (f: Facts) => string> = {
   host: (f) =>
     isWork(f.eventType)
       ? "What should we call it? Usually the company, team or college and the occasion, like the Acme Diwali party."
-      : "What should we call it? Whose event is it, like Paddy and Sharmila's wedding or Amma's 60th.",
+      : "What should we call it? Whose event is it, like Arjun and Meera's wedding or Amma's 60th.",
   city: () => "Which city is it in? The neighbourhood helps too, if you know it.",
   date: () => "When is it? A date if you have one, or the month if it isn't fixed yet.",
   guests: () => "Roughly how many people are you expecting? \"Not sure\" is fine.",
