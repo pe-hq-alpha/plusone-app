@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "finding": "not_found",
+      "key": "identity",
+      "label": "The business exists",
+      "note": "Searches for the exact name did not return a matching Chennai catering business. Results were for differently named caterers, such as Thirumal Cattering Service and Sri Thirumala Catering Services, which cannot be treated as the same business. Presence in Chennai was not independently confirmed.",
+      "sources": [
+        {
+          "title": "Thirumal Cattering Service - Price & Reviews | Chennai - Wedding Caterers",
+          "url": "https://www.weddingbazaar.com/catering/chennai/thirumalai-cattering-service"
+        },
+        {
+          "title": "Sri Thirumala Catering Services in Periyamet, Chennai - Justdial",
+          "url": "https://www.justdial.com/Chennai/Sri-Thirumala-Catering-Services-Periyamet/044PXX44-XX44-230824120826-I1J1_BZDET"
+        },
+        {
+          "title": "Thirumala Catering Services in Kodungaiyur, Chennai - Sulekha",
+          "url": "https://www.sulekha.com/thirumala-catering-services-kodungaiyur-chennai-contact-address"
+        }
+      ]
+    },
+    {
+      "finding": "not_found",
+      "key": "website",
+      "label": "The website is theirs",
+      "note": "The supplied website could not be opened or read during the check, and searches for its domain did not produce a matching business result. Ownership and name matching could not be verified.",
+      "sources": []
+    },
+    {
+      "finding": "not_found",
+      "key": "contact",
+      "label": "Their contact details",
+      "note": "The supplied phone number was not found in a matching page or business listing for Thirumalai Royal Feasts. Search results for the number were unrelated documents, so the contact details could not be corroborated. No email address was supplied or verified.",
+      "sources": [
+        {
+          "title": "Caterers & Catering Services in Chennai - Contact List",
+          "url": "https://starleads.in/data/caterers-catering-services-in-chennai/sample.pdf"
+        }
+      ]
+    },
+    {
+      "finding": "not_found",
+      "key": "location",
+      "label": "Where they work",
+      "note": "Chennai is the claimed city, but no matching listing or accessible business page for Thirumalai Royal Feasts confirmed that it operates or serves there. A similarly named caterer in Tambaram West is not evidence for this vendor.",
+      "sources": [
+        {
+          "title": "Thirumal Catering Services, Tambaram West, Chennai - Justdial",
+          "url": "https://www.justdial.com/Chennai/Thirumal-Catering-Services-Near-Vao-Office-Tambaram-West/044PXX44-XX44-220312225014-I3K8_BZDET/photos?ncatid=&mncatname="
+        }
+      ]
+    },
+    {
+      "finding": "not_found",
+      "key": "prices",
+      "label": "Their prices",
+      "note": "No offerings or prices were provided by the vendor, and no published pricing for Thirumalai Royal Feasts was found. Pricing therefore cannot be compared or confirmed.",
+      "sources": [
+        {
+          "title": "Thirumal Catering Services - Price & Reviews | Chennai - Wedding Caterers",
+          "url": "https://www.weddingbazaar.com/catering/chennai/thirumal-catering-services"
+        }
+      ]
+    },
+    {
+      "finding": "not_found",
+      "key": "complaints",
+      "label": "Complaints",
+      "note": "No serious public complaints, fraud reports, or closure reports specifically naming Thirumalai Royal Feasts were found. This is not a positive endorsement because the business identity itself could not be corroborated; the search results were unrelated documents.",
+      "sources": [
+        {
+          "title": "Search result unrelated to the vendor",
+          "url": "https://journal.hmjournals.com/index.php/JMCC/article/download/637/1788"
+        },
+        {
+          "title": "Search result unrelated to the vendor",
+          "url": "https://redhallgroup.co.uk/36929293/ecomposedi/cincorrectq/glistlessh/thirumalai"
+        }
+      ]
+    }
+  ],
+  "costUsd": 0.2368,
+  "findings": {
+    "complaints": "not_found",
+    "contact": "not_found",
+    "identity": "not_found",
+    "location": "not_found",
+    "prices": "not_found",
+    "website": "not_found"
+  },
+  "label": "made-up caterer",
+  "pagesRead": 0,
+  "searches": 8,
+  "seconds": 39,
+  "summary": "Hold for human review. None of the six checks could be positively verified from public sources: the exact business identity, functioning website, contact details, Chennai service area, and published pricing were all not_found, and no specific complaints were found. Do not treat the similarly named Chennai caterers in the search results as this vendor without further evidence.",
+  "turns": 3
+}

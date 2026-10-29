@@ -130,8 +130,8 @@ const hostOf = (url: string | undefined): string | null => {
 };
 
 /**
- * Everything a turn sends besides its input. It goes with every turn, since
- * previous_response_id carries the conversation but not the instructions, tools or format.
+ * Everything a turn sends besides its input. It goes with every turn, since each turn
+ * stands alone: the conversation so far travels in the input.
  */
 function turnSettings(facts: VendorFacts, env: Record<string, string | undefined>, searchesLeft: number): Record<string, unknown> {
   return {
@@ -155,11 +155,15 @@ function turnSettings(facts: VendorFacts, env: Record<string, string | undefined
         },
       },
     ],
-    include: ["web_search_call.results"],
+    include: ["web_search_call.results", "reasoning.encrypted_content"],
     reasoning: { effort: "medium" },
     // Built-in calls only; at least one, as a cap of zero may be refused.
     max_tool_calls: Math.max(1, searchesLeft),
     text: { format: { type: "json_schema", name: "verification_report", schema: jsonSchemaFor(verificationReportSchema), strict: true } },
+    // Each turn carries the whole conversation instead of pointing back with
+    // previous_response_id: the first live run (29 Oct) failed its second turn with
+    // "referenced response not found or expired", so nothing is left stored with Meta.
+    store: false,
   };
 }
 
@@ -312,7 +316,8 @@ export async function verifyVendor(
   let turns = 0;
   let inputTokens = 0;
   let outputTokens = 0;
-  let previousId: string | null = null;
+  /** The conversation so far: the first message, then each turn's output and our answers to it. */
+  let history: unknown[] = [];
 
   async function post(body: Record<string, unknown>): Promise<unknown> {
     for (let attempt = 1; ; attempt++) {
@@ -351,17 +356,14 @@ export async function verifyVendor(
 
   /** One turn: send, then count what came back. */
   async function turn(input: unknown): Promise<unknown> {
-    const json = await post({
-      ...turnSettings(facts, env, MAX_SEARCHES - searches),
-      ...(previousId ? { previous_response_id: previousId } : {}),
-      input,
-    });
+    const sent = [...history, ...(typeof input === "string" ? [{ role: "user", content: input }] : (input as unknown[]))];
+    const json = await post({ ...turnSettings(facts, env, MAX_SEARCHES - searches), input: sent });
     turns++;
     const usage = usageOf(json);
     inputTokens += usage.input;
     outputTokens += usage.output;
-    const id = (json as { id?: unknown }).id;
-    if (typeof id === "string") previousId = id;
+    const output = (json as { output?: unknown }).output;
+    history = [...sent, ...(Array.isArray(output) ? output : [])];
     searches += webSearchCallsOf(json).length;
     seenUrlsFromResponse(json, seen);
     deps.onTurn?.({ model, inputTokens, outputTokens, searches, pagesRead, turns });

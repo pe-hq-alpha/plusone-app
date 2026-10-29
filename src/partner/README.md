@@ -52,7 +52,7 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 
 | What | Meta model | Status |
 |---|---|---|
-| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live run next |
+| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live runs 29 Oct, in the main README's evaluation |
 | A vendor's phone call with a customer (the customer adds the recording), transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Live, 29 Oct (`convex/voiceBrief.ts`, `src/lib/audio.ts`): the demo's sample call lands as Kaveri Feast Co.'s column in Compare |
 | Changes to a verified listing (packages, prices, details, contact numbers) wait for a person in Ops before customers see them | — | Live, 29 Oct (`convex/marketplace/changes.ts`) |
 | Bring your price list: a vendor pastes or photographs the list they already send customers, and each package is drafted on their trade's sheet for them to check and save | Muse Spark Open (open weights, on Baseten) | Live, 29 Oct (`convex/marketplace/priceList.ts`) |

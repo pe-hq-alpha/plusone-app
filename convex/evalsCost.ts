@@ -53,3 +53,16 @@ export const perEvent = internalQuery({
     return { calls: calls.length, usdWithoutEvent: Math.round(noEvent * 10000) / 10000, events };
   },
 });
+
+/** The newest cost rows for one feature, without an event (`npx convex run evalsCost:recent '{"feature":"vendorCheckEval"}'`). */
+export const recent = internalQuery({
+  args: { feature: v.string() },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db.query("modelCalls").order("desc").take(300);
+    return rows
+      .filter((r) => r.feature === args.feature)
+      .slice(0, 20)
+      .map((r) => ({ at: new Date(r._creationTime).toISOString(), model: r.model, inputTokens: r.inputTokens, outputTokens: r.outputTokens, costUsd: r.costUsd, durationMs: r.durationMs }));
+  },
+});

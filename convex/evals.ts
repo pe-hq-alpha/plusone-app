@@ -2,6 +2,9 @@ import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import { readVendorReply } from "./modelTasks";
+import { internal } from "./_generated/api";
+import { wonderCostUsd } from "./lib/modelCost";
+import { verifyVendor } from "./lib/wonder";
 import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
 import { FORMATS, READING_CASES, type ReadingScore, scoreReading } from "./lib/evalReading";
@@ -123,6 +126,51 @@ export const readOne = internalAction({
     });
     const score = scoreReading(c, args.format, { total: r.total ?? 0, lines: r.lines.map((l) => ({ amount: l.amount, unitPrice: l.unitPrice ?? undefined, quantity: l.quantity ?? undefined })) });
     return { ...score, ms: Date.now() - started };
+  },
+});
+
+/**
+ * Muse Wonder's vendor check on given facts, outside Ops (`npx convex run evals:vendorCheck`
+ * on production): real businesses' public facts, a made-up vendor, or a planted page. The
+ * same check Ops runs, with its pages read through Firecrawl under the same rules, and a
+ * cost row for each run.
+ */
+export const vendorCheck = internalAction({
+  args: {
+    label: v.string(),
+    facts: v.object({ name: v.string(), categories: v.array(v.string()), city: v.string(), website: v.optional(v.string()), phone: v.optional(v.string()) }),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    const started = Date.now();
+    const run = await verifyVendor(
+      { ...args.facts, offerings: [] },
+      { readPage: (url: string) => ctx.runAction(internal.firecrawl.readPage, { url }).then((r) => r.text) },
+    );
+    const costUsd = wonderCostUsd({ inputTokens: run.inputTokens, outputTokens: run.outputTokens }, run.searches);
+    await ctx.runMutation(internal.modelCalls.record, {
+      feature: "vendorCheckEval",
+      provider: "meta",
+      model: run.model,
+      inputTokens: run.inputTokens,
+      outputTokens: run.outputTokens,
+      costUsd,
+      fellBack: false,
+      durationMs: Date.now() - started,
+    });
+    return {
+      label: args.label,
+      seconds: Math.round((Date.now() - started) / 1000),
+      costUsd: Math.round(costUsd * 10000) / 10000,
+      searches: run.searches,
+      pagesRead: run.pagesRead,
+      turns: run.turns,
+      inputTokens: run.inputTokens,
+      outputTokens: run.outputTokens,
+      findings: Object.fromEntries(run.report.checks.map((c) => [c.key, c.finding])),
+      checks: run.report.checks,
+      summary: run.report.summary,
+    };
   },
 });
 

@@ -27,6 +27,7 @@ const STEP: Record<string, string> = {
   findStage: "Found the stage in your hall photo",
   vendorCall: "Heard a call with a vendor, speaker by speaker",
   vendorPhotoCheck: "Checked a vendor's photo of past work",
+  vendorCheck: "Checked a vendor's public evidence for our team",
   sparkOpenQuote: "Read a quote on Meta's open-weights model",
   venueCutOut: "Cut out the stage and the wall behind it",
 };
