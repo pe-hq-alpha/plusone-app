@@ -9,14 +9,15 @@ import "../../styles/public.css";
 
 /**
  * The home page's top bar, for the other public pages: the lockup, How it works, Find vendors, Pricing, For vendors, Sign in and a
- * small theme switch. `brand={false}` hides the lockup on wide screens, where something beside it shows it.
+ * small theme switch. `brand={false}` hides the lockup on wide screens, where something beside it shows it. `wide` lets the bar
+ * run the full width of the screen, for a page that fills it.
  */
-export function PublicNav({ signIn = true, brand = true }: { signIn?: boolean; brand?: boolean }) {
+export function PublicNav({ signIn = true, brand = true, wide = false }: { signIn?: boolean; brand?: boolean; wide?: boolean }) {
   const { pathname } = useLocation();
   const { isAuthenticated } = useConvexAuth();
   const here = (path: string) => (pathname === path ? "page" : undefined);
   return (
-    <header className={`pub-nav${brand ? "" : " pub-nav--no-brand"}`}>
+    <header className={`pub-nav${brand ? "" : " pub-nav--no-brand"}${wide ? " pub-nav--wide" : ""}`}>
       <Link to="/" className="pub-brand" aria-label={`${BRAND.name} Events home`}>
         <PlusOneLockup className="text-[1.9rem]" />
       </Link>

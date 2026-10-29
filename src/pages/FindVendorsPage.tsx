@@ -8,7 +8,7 @@ import { BRAND } from "../lib/brand";
 import { money } from "../lib/format";
 import { useAuthActions } from "../lib/session";
 import { Backdrop } from "../components/ui/Backdrop";
-import { PublicHero, PublicNav } from "../components/public/PublicNav";
+import { PublicNav } from "../components/public/PublicNav";
 
 /**
  * Find vendors: the vendor directory, open to anyone, with no plan bought. Vendors listed
@@ -37,15 +37,14 @@ export function FindVendorsPage() {
   return (
     <div className="relative isolate min-h-screen">
       <Backdrop />
-      <PublicNav />
-      <main id="main" className="mx-auto max-w-4xl px-4 pb-16">
-        <PublicHero
-          eyebrow="Find vendors"
-          title={<>Vendors, <em>priced in the open</em></>}
-          lede={`Caterers, decorators, photographers, halls and more, each with their packages on the same lines. Free to use, with no plan to buy.`}
-        />
+      <PublicNav wide />
+      <main id="main" className="w-full px-3 pb-16 sm:px-4">
+        <div className="pt-6 sm:pt-8">
+          <h1 className="pub-title !text-left !text-[clamp(1.8rem,3vw,2.5rem)]">Vendors, <em>priced in the open</em></h1>
+          <p className="mt-2 max-w-3xl text-sm text-muted sm:text-base">Caterers, decorators, photographers, halls and more, each with their packages on the same lines. Free to use, with no plan to buy.</p>
+        </div>
 
-        <div className="mt-8 rounded-[16px] border border-line bg-cream px-4 py-4 sm:px-5">
+        <div className="mt-5 rounded-[16px] border border-line bg-cream px-4 py-4 sm:px-5">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted">What you need</p>
             <label className="flex items-center gap-1.5 text-sm text-muted">
@@ -86,7 +85,7 @@ export function FindVendorsPage() {
                   These are sample vendors, made up to show how listings look. Real vendors join as {city} opens.
                 </p>
               )}
-              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {found.vendors.map((v) => (
                   <li key={v._id}><ListingCard card={v} category={category} /></li>
                 ))}

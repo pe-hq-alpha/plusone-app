@@ -4,6 +4,7 @@
   width: 100%; max-width: 1180px; margin: 0 auto; padding: 26px 24px 0; }
 .pub-brand { display: grid; justify-items: start; text-decoration: none; line-height: 1; }
 @media (min-width: 1024px) { .pub-nav--no-brand { justify-content: flex-end; } .pub-nav--no-brand .pub-brand { display: none; } }
+.pub-nav--wide { max-width: none; padding-left: 16px; padding-right: 16px; }
 .pub-links { display: flex; align-items: center; gap: 0; }
 .pub-link { padding: 4px 14px; font-size: 0.9rem; color: var(--color-ink); text-decoration: none; }
 .pub-link + .pub-link { border-left: 1px solid var(--color-line); }
