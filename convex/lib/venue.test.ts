@@ -9,6 +9,7 @@ const seg = (id: string, confidence: number | undefined): SamSegment => ({
   confidence,
   mask: { size: [100, 100], counts: `c${id}${confidence}` },
   path: `p${id}${confidence}`,
+  maskBox: { x1: 1, y1: 2, x2: 3, y2: 4 },
 });
 
 describe("the stage's boxes", () => {

@@ -2,20 +2,21 @@ import { describe, expect, it } from "vitest";
 import { backdropArea, LOOKS } from "./venueLooks";
 
 const path = "M0 0z";
+const rle = { size: [10, 10] };
 
 describe("where the backdrop is drawn", () => {
   it("sits on the wall behind the stage, as wide as the stage and half its width high", () => {
-    const area = backdropArea({ stage: { box: { x1: 400, y1: 600, x2: 1200, y2: 700 }, path }, backdrop: { box: { x1: 0, y1: 0, x2: 1600, y2: 650 }, path } });
+    const area = backdropArea({ stage: { box: { x1: 400, y1: 600, x2: 1200, y2: 700 }, path, rle }, backdrop: { box: { x1: 0, y1: 0, x2: 1600, y2: 650 }, path, rle } });
     expect(area).toEqual({ x1: 448, x2: 1152, y1: 200, y2: 615 });
   });
 
   it("stays inside the wall SAM found", () => {
-    const area = backdropArea({ stage: { box: { x1: 400, y1: 600, x2: 1200, y2: 700 }, path }, backdrop: { box: { x1: 500, y1: 300, x2: 1100, y2: 640 }, path } });
+    const area = backdropArea({ stage: { box: { x1: 400, y1: 600, x2: 1200, y2: 700 }, path, rle }, backdrop: { box: { x1: 500, y1: 300, x2: 1100, y2: 640 }, path, rle } });
     expect(area).toEqual({ x1: 500, x2: 1100, y1: 300, y2: 615 });
   });
 
   it("uses the middle of the wall when there is no stage, and nothing when neither was found", () => {
-    expect(backdropArea({ backdrop: { box: { x1: 0, y1: 100, x2: 1000, y2: 500 }, path } })).toEqual({ x1: 150, x2: 850, y1: 100, y2: 500 });
+    expect(backdropArea({ backdrop: { box: { x1: 0, y1: 100, x2: 1000, y2: 500 }, path, rle } })).toEqual({ x1: 150, x2: 850, y1: 100, y2: 500 });
     expect(backdropArea({})).toBeNull();
   });
 

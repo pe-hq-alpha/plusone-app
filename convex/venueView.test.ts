@@ -43,6 +43,7 @@ const segment = (id: string, confidence: number, x1 = 400): SamSegment => ({
   confidence,
   mask: { size: [1200, 1600], counts: `rle-${id}-${confidence}` },
   path: `M${x1} 300h800v400h-800z`,
+  maskBox: { x1, y1: 300, x2: 1200, y2: 700 },
 });
 
 /** Muse Spark answering with boxes on its 0–1000 grid; SAM is mocked above. */

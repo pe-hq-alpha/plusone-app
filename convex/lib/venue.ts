@@ -86,8 +86,9 @@ export function tapObject(part: VenuePart, x: number, y: number, width: number, 
 export type PartMask = {
   box: SamBox;
   rle: { size: [number, number]; counts: string };
-  /** The outline as an SVG path in the image's pixels, which the page clips its drawing to. */
+  /** The outline as an SVG path in the mask's own pixels (`rle.size`), to place in `maskBox`. */
   path: string;
+  maskBox: SamBox;
   confidence?: number;
 };
 
@@ -102,6 +103,7 @@ export function partsFrom(segments: SamSegment[]): Partial<Record<VenuePart, Par
       box: best.box,
       rle: { size: [best.mask.size[0], best.mask.size[1]], counts: best.mask.counts },
       path: best.path,
+      maskBox: best.maskBox,
       ...(best.confidence === undefined ? {} : { confidence: best.confidence }),
     };
   }

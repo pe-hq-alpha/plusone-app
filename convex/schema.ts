@@ -363,8 +363,10 @@ export const vendorCheckFields = {
 export const venuePartMask = v.object({
   box: v.object({ x1: v.number(), y1: v.number(), x2: v.number(), y2: v.number() }),
   rle: v.object({ size: v.array(v.number()), counts: v.string() }),
-  /** The outline as an SVG path in the image's pixels, which the page clips its drawing to. */
+  /** The outline as an SVG path in the mask's own pixels (`rle.size`, height then width), placed in `maskBox`. */
   path: v.string(),
+  /** Where the mask sits in the image's pixels; absent on masks cut before 29 Oct, 09:30, which use `box`. */
+  maskBox: v.optional(v.object({ x1: v.number(), y1: v.number(), x2: v.number(), y2: v.number() })),
   confidence: v.optional(v.number()),
 });
 

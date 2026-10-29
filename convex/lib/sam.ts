@@ -51,8 +51,14 @@ export type SamSegment = {
   /** Absent when the API sent no score; absence never counts as zero. */
   confidence: number | undefined;
   mask: RLEObject;
-  /** The mask's outline as an SVG path in the image's pixels, for a page to clip a drawing to. */
+  /**
+   * The mask's outline as an SVG path. SAM sends a mask cropped to `maskBox` and resized
+   * (a 1,103 by 112 pixel stage came back as 1,024 by 104, 29 Oct), so the path is in the
+   * mask's own pixels: place it in `maskBox` and stretch it to fit.
+   */
   path: string;
+  /** Where the mask sits in the image's pixels. */
+  maskBox: { x1: number; y1: number; x2: number; y2: number };
 };
 
 /** A coordinate in displayed pixels; preview taps must be scaled up to the image first. */
@@ -221,6 +227,7 @@ export function parseSamOutput(text: string, image: SamImage, minConfidence: num
       confidence,
       mask: decodeMaskToRLE(mask.mask),
       path: decodeMaskToSVGPath(mask.mask),
+      maskBox: { x1: mask.bounds.left, y1: mask.bounds.top, x2: mask.bounds.right, y2: mask.bounds.bottom },
     });
   }
   return segments;

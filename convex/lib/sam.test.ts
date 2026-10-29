@@ -120,6 +120,7 @@ describe("a SAM reply", () => {
           confidence: 0.9,
           mask: { size: [4, 8], counts: "rle:8x4" },
           path: "M0 0h8v4h-8z",
+          maskBox: { x1: 10, y1: 20, x2: 100, y2: 200 },
         },
       ]);
     } finally {

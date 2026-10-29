@@ -25,7 +25,37 @@ export const LOOKS: Look[] = [
 ];
 
 type Box = { x1: number; y1: number; x2: number; y2: number };
-export type DrawPart = { box: Box; path: string };
+/** A cut-out part: its box, and its outline in the mask's own pixels, placed in `maskBox` (or `box`). */
+export type DrawPart = { box: Box; path: string; rle: { size: number[] }; maskBox?: Box };
+
+/**
+ * Clip to a part. SAM's mask is cropped to its box and resized, so its outline is moved
+ * into the box and stretched to fit, then the drawing goes back to the photo's pixels.
+ */
+function clipTo(ctx: CanvasRenderingContext2D, part: DrawPart, scale: number) {
+  const frame = part.maskBox ?? part.box;
+  const [maskH, maskW] = part.rle.size;
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.translate(frame.x1, frame.y1);
+  ctx.scale((frame.x2 - frame.x1) / maskW, (frame.y2 - frame.y1) / maskH);
+  ctx.clip(new Path2D(part.path));
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+}
+
+function outline(ctx: CanvasRenderingContext2D, part: DrawPart, scale: number, width: number) {
+  const frame = part.maskBox ?? part.box;
+  const [maskH, maskW] = part.rle.size;
+  const sx = (frame.x2 - frame.x1) / maskW;
+  const sy = (frame.y2 - frame.y1) / maskH;
+  ctx.save();
+  ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  ctx.translate(frame.x1, frame.y1);
+  ctx.scale(sx, sy);
+  ctx.lineWidth = width / Math.max(sx, sy);
+  ctx.strokeStyle = "rgba(244,181,58,0.95)";
+  ctx.stroke(new Path2D(part.path));
+  ctx.restore();
+}
 export type DrawParts = { backdrop?: DrawPart; stage?: DrawPart };
 
 /**
@@ -166,7 +196,7 @@ export function drawVenue(
   parts: DrawParts,
   look: Look,
   after: boolean,
-  outline: boolean,
+  showOutline: boolean,
 ) {
   const { width, height, scale } = size;
   ctx.clearRect(0, 0, width * scale, height * scale);
@@ -177,21 +207,19 @@ export function drawVenue(
     const area = backdropArea(parts);
     if (area) {
       ctx.save();
-      if (parts.backdrop) ctx.clip(new Path2D(parts.backdrop.path));
+      if (parts.backdrop) clipTo(ctx, parts.backdrop, scale);
       drawBackdrop(ctx, area, look);
       ctx.restore();
     }
     if (parts.stage) {
       ctx.save();
-      ctx.clip(new Path2D(parts.stage.path));
+      clipTo(ctx, parts.stage, scale);
       drawStageSkirt(ctx, parts.stage.box, look);
       ctx.restore();
     }
   }
-  if (outline) {
-    ctx.lineWidth = Math.max(2, width / 400);
-    ctx.strokeStyle = "rgba(244,181,58,0.95)";
-    for (const part of [parts.backdrop, parts.stage]) if (part) ctx.stroke(new Path2D(part.path));
+  if (showOutline) {
+    for (const part of [parts.backdrop, parts.stage]) if (part) outline(ctx, part, scale, Math.max(2, width / 400));
   }
   ctx.restore();
 }

@@ -317,3 +317,17 @@ export const segmentAt = internalAction({
     return null;
   },
 });
+
+/** Forget an image's cached masks, run by hand after a change to how masks are read (`npx convex run venueView:clearCache '{"imageKey": "sample-hall"}'`). */
+export const clearCache = internalMutation({
+  args: { imageKey: v.string() },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const rows = await ctx.db
+      .query("segmentCache")
+      .withIndex("by_imageKey_and_promptKey", (q) => q.eq("imageKey", args.imageKey))
+      .take(500);
+    for (const row of rows) await ctx.db.delete(row._id);
+    return rows.length;
+  },
+});

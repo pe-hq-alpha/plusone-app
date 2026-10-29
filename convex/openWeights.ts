@@ -7,6 +7,8 @@ import { glimmerCostUsd } from "./lib/modelCost";
 import { generateObject, MODEL_FAST, parseAnswer } from "./lib/models";
 import { tagsFor } from "./lib/photoTags";
 import { photoCheckSchema, photoPrompt } from "./marketplace/photos";
+import { samSegment } from "./lib/sam";
+import { SAMPLE_HALL } from "./lib/venue";
 
 /**
  * A live check that Muse Spark Open answers on Baseten with our structured output, run by
@@ -77,5 +79,36 @@ export const glimmerSmoke = internalAction({
       ms: result.ms,
       costUsd,
     };
+  },
+});
+
+/**
+ * A live check of SAM 3.1 on the sample hall with fixed boxes, run by hand
+ * (`npx convex run openWeights:samSmoke`): what pixel space its boxes and masks come
+ * back in. One image, $0.0025 of the Meta key.
+ */
+export const samSmoke = internalAction({
+  args: {},
+  returns: v.any(),
+  handler: async () => {
+    const segments = await samSegment({
+      prompt: { objects: [{ id: 1, box: { x1: 430, y1: 210, x2: 1290, y2: 520 } }, { id: 2, box: { x1: 330, y1: 510, x2: 1400, y2: 625 } }] },
+      image: { url: SAMPLE_HALL.url, width: SAMPLE_HALL.width, height: SAMPLE_HALL.height },
+    });
+    return segments.map((s) => {
+      const nums = (s.path.match(/-?\d+(\.\d+)?/g) ?? []).map(Number);
+      const xs = nums.filter((_, i) => i % 2 === 0);
+      const ys = nums.filter((_, i) => i % 2 === 1);
+      return {
+        id: s.id,
+        box: s.box,
+        size: s.size,
+        confidence: s.confidence,
+        rleSize: s.mask.size,
+        pathStart: s.path.slice(0, 80),
+        pathX: [Math.min(...xs), Math.max(...xs)],
+        pathY: [Math.min(...ys), Math.max(...ys)],
+      };
+    });
   },
 });
