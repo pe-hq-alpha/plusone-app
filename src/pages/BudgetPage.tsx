@@ -165,7 +165,7 @@ export function BudgetPage() {
           <h2 id="lines-h" className="display text-xl">Every cost</h2>
           <p className="text-xs text-quiet">A vendor's committed amount comes from its quote when you book it.</p>
         </div>
-        <div className="mt-3 overflow-x-auto">
+        <div className="relative mt-3 overflow-x-auto">
           <table className="w-full min-w-[40rem] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-xs uppercase tracking-[0.08em] text-quiet">

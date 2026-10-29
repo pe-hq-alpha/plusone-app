@@ -472,3 +472,30 @@ export const seedSamples = internalAction({
     return { added, skipped };
   },
 });
+
+/** What the check found on each sample photo, for a person deciding what to approve (`npx convex run marketplace/photos:sampleReport`). */
+export const sampleReport = internalQuery({
+  args: {},
+  returns: v.array(v.object({ key: v.string(), status, flags: v.array(v.string()), tags: v.array(v.string()), shows: v.optional(v.string()), doubt: v.optional(v.string()), review: v.union(decision, v.null()) })),
+  handler: async (ctx) => {
+    const out = [];
+    for (const s of SAMPLE_WORK) {
+      const profiles = await ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified")).take(500);
+      const profile = profiles.find((p) => p.sample === true && !p.ownerUserId && p.name === s.vendor);
+      if (!profile) continue;
+      const photos = await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profile._id)).take(MAX_PHOTOS + 1);
+      const photo = photos.find((p) => p.sampleKey === s.key);
+      if (!photo) continue;
+      out.push({
+        key: s.key,
+        status: photo.status,
+        flags: photo.check ? photoFlags(photo.check).map((f) => f.key) : [],
+        tags: photo.check?.tags ?? [],
+        ...(photo.check?.shows ? { shows: photo.check.shows } : {}),
+        ...(photo.check?.doubt ? { doubt: photo.check.doubt } : {}),
+        review: photo.review?.decision ?? null,
+      });
+    }
+    return out;
+  },
+});

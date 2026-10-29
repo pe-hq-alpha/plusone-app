@@ -288,7 +288,7 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly =
       )}
 
       {live.length > 0 && !compareOnly && (
-      <div className={`overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
+      <div className={`relative overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
         <table className="w-full min-w-[54rem] text-sm">
           <caption className="sr-only">Everyone asked about {need.title}</caption>
           <thead>
@@ -485,7 +485,7 @@ function LineByLine({
         )}
       </div>
       <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
-      <div className="mt-3 overflow-x-auto">
+      <div className="relative mt-3 overflow-x-auto">
         <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
           <caption className="sr-only">Each quote and offer against the same lines</caption>
           <thead>

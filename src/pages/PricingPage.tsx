@@ -158,7 +158,7 @@ export function PricingPage() {
 
       <section className="card mt-6 overflow-hidden" aria-labelledby="all-h">
         <h2 id="all-h" className="display px-6 pb-2 pt-5 text-xl">Everything in each plan</h2>
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto">
           <table className="w-full text-sm">
             <caption className="sr-only">Every feature and the plans it comes in</caption>
             <thead>

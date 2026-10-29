@@ -446,7 +446,7 @@ function SlotPanel({
       )}
 
       {quotes && quotes.length > 0 && (
-        <section aria-labelledby="quotes-h" className="card overflow-x-auto p-5">
+        <section aria-labelledby="quotes-h" className="card relative overflow-x-auto p-5">
           <h3 id="quotes-h" className="text-lg">Quotes side by side</h3>
           <table className="mt-3 w-full text-sm">
             <thead className="text-left text-xs uppercase tracking-wide text-muted">
