@@ -52,9 +52,13 @@ export const FIND_STAGE_INSTRUCTIONS =
   "up to about the ceiling or a sensible height). Keep each box tight to what you see. If there is no stage or " +
   "no wall behind it, give null for that one. Never guess at a part you can't see.";
 
-/** A 0–1000 grid box in the image's pixels, ordered and inside the image; null when it has no area. */
+/**
+ * A 0–1000 grid box in the image's pixels, ordered and inside the image; null when it has no area.
+ * SAM refuses a box that reaches the frame's edge ("lies outside the 1024x768 frame"), so the
+ * last pixel is width - 1.
+ */
 export function gridToPixels(box: z.infer<typeof gridBox>, width: number, height: number): SamBox | null {
-  const clampTo = (v: number, max: number) => Math.min(max, Math.max(0, Math.round((v / 1000) * max)));
+  const clampTo = (v: number, size: number) => Math.min(size - 1, Math.max(0, Math.round((v / 1000) * size)));
   const x1 = clampTo(Math.min(box.x1, box.x2), width);
   const x2 = clampTo(Math.max(box.x1, box.x2), width);
   const y1 = clampTo(Math.min(box.y1, box.y2), height);
@@ -77,8 +81,8 @@ export function objectsFor(finding: StageFinding, width: number, height: number)
 
 /** A tap on the photo, in the image's pixels, as one SAM object for the chosen part. */
 export function tapObject(part: VenuePart, x: number, y: number, width: number, height: number): SamObject {
-  const px = Math.min(width, Math.max(0, Math.round(x)));
-  const py = Math.min(height, Math.max(0, Math.round(y)));
+  const px = Math.min(width - 1, Math.max(0, Math.round(x)));
+  const py = Math.min(height - 1, Math.max(0, Math.round(y)));
   return { id: PART_IDS[part], points: [{ x: px, y: py }] };
 }
 

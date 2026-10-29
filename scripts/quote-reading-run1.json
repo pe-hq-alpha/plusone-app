@@ -1,0 +1,344 @@
+{
+  "ranAt": "2026-10-29T07:50:45.125Z",
+  "seconds": 205,
+  "byFormat": {
+    "email": {
+      "right": 6,
+      "of": 6,
+      "figuresKept": 17,
+      "figures": 17
+    },
+    "pdf": {
+      "right": 6,
+      "of": 6,
+      "figuresKept": 17,
+      "figures": 17
+    },
+    "photo": {
+      "right": 6,
+      "of": 6,
+      "figuresKept": 17,
+      "figures": 17
+    }
+  },
+  "scores": [
+    {
+      "figures": [
+        420,
+        2000,
+        50400
+      ],
+      "format": "email",
+      "kept": [
+        420,
+        2000,
+        50400
+      ],
+      "lost": [],
+      "ms": 10106,
+      "total": 55020,
+      "totalRight": true,
+      "vendor": "Annapoorna Catering"
+    },
+    {
+      "figures": [
+        420,
+        2000,
+        50400
+      ],
+      "format": "pdf",
+      "kept": [
+        420,
+        2000,
+        50400
+      ],
+      "lost": [],
+      "ms": 13148,
+      "total": 52400,
+      "totalRight": true,
+      "vendor": "Annapoorna Catering"
+    },
+    {
+      "figures": [
+        420,
+        2000,
+        50400
+      ],
+      "format": "photo",
+      "kept": [
+        420,
+        2000,
+        50400
+      ],
+      "lost": [],
+      "ms": 12493,
+      "total": 52400,
+      "totalRight": true,
+      "vendor": "Annapoorna Catering"
+    },
+    {
+      "figures": [
+        58000
+      ],
+      "format": "email",
+      "kept": [
+        58000
+      ],
+      "lost": [],
+      "ms": 4477,
+      "total": 58000,
+      "totalRight": true,
+      "vendor": "Mylai Kitchen"
+    },
+    {
+      "figures": [
+        58000
+      ],
+      "format": "pdf",
+      "kept": [
+        58000
+      ],
+      "lost": [],
+      "ms": 13845,
+      "total": 58000,
+      "totalRight": true,
+      "vendor": "Mylai Kitchen"
+    },
+    {
+      "figures": [
+        58000
+      ],
+      "format": "photo",
+      "kept": [
+        58000
+      ],
+      "lost": [],
+      "ms": 9027,
+      "total": 58000,
+      "totalRight": true,
+      "vendor": "Mylai Kitchen"
+    },
+    {
+      "figures": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "format": "email",
+      "kept": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "lost": [],
+      "ms": 7636,
+      "total": 61900,
+      "totalRight": true,
+      "vendor": "Krishna Bhavan Caterers"
+    },
+    {
+      "figures": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "format": "pdf",
+      "kept": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "lost": [],
+      "ms": 19130,
+      "total": 61900,
+      "totalRight": true,
+      "vendor": "Krishna Bhavan Caterers"
+    },
+    {
+      "figures": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "format": "photo",
+      "kept": [
+        450,
+        1200,
+        2700,
+        4000,
+        54000
+      ],
+      "lost": [],
+      "ms": 10346,
+      "total": 61900,
+      "totalRight": true,
+      "vendor": "Krishna Bhavan Caterers"
+    },
+    {
+      "figures": [
+        8000,
+        110000
+      ],
+      "format": "email",
+      "kept": [
+        8000,
+        110000
+      ],
+      "lost": [],
+      "ms": 3913,
+      "total": 110000,
+      "totalRight": true,
+      "vendor": "Green Palace"
+    },
+    {
+      "figures": [
+        8000,
+        110000
+      ],
+      "format": "pdf",
+      "kept": [
+        8000,
+        110000
+      ],
+      "lost": [],
+      "ms": 18694,
+      "total": 110000,
+      "totalRight": true,
+      "vendor": "Green Palace"
+    },
+    {
+      "figures": [
+        8000,
+        110000
+      ],
+      "format": "photo",
+      "kept": [
+        8000,
+        110000
+      ],
+      "lost": [],
+      "ms": 8093,
+      "total": 110000,
+      "totalRight": true,
+      "vendor": "Green Palace"
+    },
+    {
+      "figures": [
+        5670,
+        31500
+      ],
+      "format": "email",
+      "kept": [
+        5670,
+        31500
+      ],
+      "lost": [],
+      "ms": 5063,
+      "total": 37170,
+      "totalRight": true,
+      "vendor": "Malar Florists"
+    },
+    {
+      "figures": [
+        5670,
+        31500
+      ],
+      "format": "pdf",
+      "kept": [
+        5670,
+        31500
+      ],
+      "lost": [],
+      "ms": 9460,
+      "total": 37170,
+      "totalRight": true,
+      "vendor": "Malar Florists"
+    },
+    {
+      "figures": [
+        5670,
+        31500
+      ],
+      "format": "photo",
+      "kept": [
+        5670,
+        31500
+      ],
+      "lost": [],
+      "ms": 5429,
+      "total": 37170,
+      "totalRight": true,
+      "vendor": "Malar Florists"
+    },
+    {
+      "figures": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "format": "email",
+      "kept": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "lost": [],
+      "ms": 5124,
+      "total": 12500,
+      "totalRight": true,
+      "vendor": "Thinnai Photography"
+    },
+    {
+      "figures": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "format": "pdf",
+      "kept": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "lost": [],
+      "ms": 13648,
+      "total": 12500,
+      "totalRight": true,
+      "vendor": "Thinnai Photography"
+    },
+    {
+      "figures": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "format": "photo",
+      "kept": [
+        3000,
+        5000,
+        6500,
+        12500
+      ],
+      "lost": [],
+      "ms": 9374,
+      "total": 12500,
+      "totalRight": true,
+      "vendor": "Thinnai Photography"
+    }
+  ]
+}

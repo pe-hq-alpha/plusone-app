@@ -14,7 +14,9 @@ const seg = (id: string, confidence: number | undefined): SamSegment => ({
 
 describe("the stage's boxes", () => {
   it("turns Muse Spark's 0–1000 grid into the photo's pixels, ordered and inside it", () => {
-    expect(gridToPixels({ x1: 250, y1: 500, x2: 750, y2: 1000 }, 1600, 1200)).toEqual({ x1: 400, y1: 600, x2: 1200, y2: 1200 });
+    expect(gridToPixels({ x1: 250, y1: 500, x2: 750, y2: 1000 }, 1600, 1200)).toEqual({ x1: 400, y1: 600, x2: 1200, y2: 1199 });
+    // SAM refuses a box that touches the frame's edge (29 Oct, a stage drawn to the right edge of a 1024-wide photo).
+    expect(gridToPixels({ x1: 800, y1: 200, x2: 1000, y2: 600 }, 1024, 768)).toEqual({ x1: 819, y1: 154, x2: 1023, y2: 461 });
     expect(gridToPixels({ x1: 750, y1: 900, x2: 250, y2: 100 }, 1000, 1000)).toEqual({ x1: 250, y1: 100, x2: 750, y2: 900 });
   });
 
@@ -24,7 +26,7 @@ describe("the stage's boxes", () => {
 
   it("asks SAM for each part Muse Spark found, under its id, and skips one it didn't", () => {
     const objects = objectsFor({ stage: { x1: 0, y1: 500, x2: 1000, y2: 700 }, backdrop: null }, 1000, 1000);
-    expect(objects).toEqual([{ id: 2, box: { x1: 0, y1: 500, x2: 1000, y2: 700 } }]);
+    expect(objects).toEqual([{ id: 2, box: { x1: 0, y1: 500, x2: 999, y2: 700 } }]);
   });
 
   it("puts a tap inside the photo as a point for the part chosen", () => {
