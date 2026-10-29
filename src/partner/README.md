@@ -54,6 +54,7 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 |---|---|---|
 | The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live run next |
 | A vendor's phone call with a customer, transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Building, 29–30 Oct |
+| Bring your price list: a vendor pastes or photographs the list they already send customers, and each package is drafted on their trade's sheet for them to check and save | Muse Spark Open (open weights, on Baseten) | Live, 29 Oct (`convex/marketplace/priceList.ts`) |
 | Photos of a vendor's work checked (real work or stock, another business's watermark, faces) and tagged for their trade; flags go to Ops, and checked photos sit beside the vendor's offers in Compare | Muse Glimmer 30B (open weights, our own Modal endpoint) | Live, 29 Oct (`convex/marketplace/photos.ts`) |
 
 ## Run and test
