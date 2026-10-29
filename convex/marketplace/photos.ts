@@ -142,7 +142,7 @@ export const add = mutation({
     const mine = await rateLimiter.limit(ctx, user?.isAnonymous ? "vendorPhotoAddDemo" : "vendorPhotoAdd", { key: userId });
     if (!mine.ok) throw new ConvexError("You've added as many photos as you can today. Try again tomorrow.");
     const all = await rateLimiter.limit(ctx, "vendorPhotoAddAll");
-    if (!all.ok) throw new ConvexError("You've added as many photos as you can today. Try again tomorrow.");
+    if (!all.ok) throw new ConvexError("We're checking a lot of photos today. Try adding this one tomorrow.");
     const photoId = await ctx.db.insert("vendorPhotos", {
       profileId: profile._id,
       storageId: args.storageId,
@@ -378,7 +378,8 @@ export const run = internalAction({
     }
     const bytes = new Uint8Array(await blob.arrayBuffer());
     const mediaType = blob.type || sniffPhotoType(bytes) || "";
-    if (process.env.GLIMMER_BASE_URL) {
+    // Past the day's GPU budget, the check goes straight to Muse Spark.
+    if (process.env.GLIMMER_BASE_URL && (await rateLimiter.limit(ctx, "glimmerAll")).ok) {
       try {
         const result = await glimmerComplete(
           { images: [{ data: bytes, mediaType }], prompt: loaded.prompt, schema: photoCheckSchema },

@@ -29,6 +29,7 @@ import type * as doNotContact from "../doNotContact.js";
 import type * as drafts from "../drafts.js";
 import type * as dues from "../dues.js";
 import type * as evals from "../evals.js";
+import type * as evalsCost from "../evalsCost.js";
 import type * as events from "../events.js";
 import type * as exports from "../exports.js";
 import type * as feedback from "../feedback.js";
@@ -169,6 +170,7 @@ declare const fullApi: ApiFromModules<{
   drafts: typeof drafts;
   dues: typeof dues;
   evals: typeof evals;
+  evalsCost: typeof evalsCost;
   events: typeof events;
   exports: typeof exports;
   feedback: typeof feedback;

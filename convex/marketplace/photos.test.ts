@@ -5,6 +5,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import schema from "../schema";
+import { rateLimiter } from "../rateLimits";
 
 // Keys come out mixed ("../schema" beside "./photos"); make them relative to convex/,
 // which is what convex-test looks up.
@@ -172,6 +173,24 @@ describe("a vendor's work photo", () => {
     const photo = await t.run((ctx) => ctx.db.get(photoId));
     expect(photo?.status).toBe("checked");
     expect(photo?.check?.provider).toBe("spark");
+  });
+
+  test("past the day's GPU budget, a photo goes straight to Muse Spark", async () => {
+    vi.useFakeTimers();
+    const fetchFn = glimmerAnswers(["buffet"]);
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const t = setup();
+    const { userId } = await seedVendor(t);
+    await t.run(async (ctx) => {
+      await rateLimiter.limit(ctx, "glimmerAll", { count: 40 });
+    });
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    expect((await t.run((ctx) => ctx.db.get(photoId)))?.check).toMatchObject({ provider: "spark" });
+    expect((fetchFn.mock.calls as unknown[][]).some(([u]) => String(u).startsWith("https://glimmer.test"))).toBe(false);
   });
 
   test("with the endpoint down it is checked on Muse Spark instead", async () => {

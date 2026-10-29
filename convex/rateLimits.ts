@@ -90,6 +90,9 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   vendorPhotoAdd: { kind: "fixed window", rate: 30, period: DAY },
   vendorPhotoAddDemo: { kind: "fixed window", rate: 3, period: DAY },
   vendorPhotoAddAll: { kind: "fixed window", rate: 300, period: DAY },
+  // Muse Glimmer's checks, across everyone: each can wake our H200 on Modal (about $0.28 a
+  // cold start, plus idle time before it scales to zero). Past this, checks go to Muse Spark.
+  glimmerAll: { kind: "fixed window", rate: 40, period: DAY },
   // SAM 3.1 and Muse Spark on a hall photo: $0.0025 an image plus one small read, and cached.
   venueSam: { kind: "fixed window", rate: 60, period: DAY },
   venueSamDemo: { kind: "fixed window", rate: 15, period: DAY },
