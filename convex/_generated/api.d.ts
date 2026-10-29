@@ -63,6 +63,7 @@ import type * as lib_evalReading from "../lib/evalReading.js";
 import type * as lib_evalScore from "../lib/evalScore.js";
 import type * as lib_evalSystems from "../lib/evalSystems.js";
 import type * as lib_glimmer from "../lib/glimmer.js";
+import type * as lib_glimmerEval from "../lib/glimmerEval.js";
 import type * as lib_helpWith from "../lib/helpWith.js";
 import type * as lib_inboxName from "../lib/inboxName.js";
 import type * as lib_kinds from "../lib/kinds.js";
@@ -211,6 +212,7 @@ declare const fullApi: ApiFromModules<{
   "lib/evalScore": typeof lib_evalScore;
   "lib/evalSystems": typeof lib_evalSystems;
   "lib/glimmer": typeof lib_glimmer;
+  "lib/glimmerEval": typeof lib_glimmerEval;
   "lib/helpWith": typeof lib_helpWith;
   "lib/inboxName": typeof lib_inboxName;
   "lib/kinds": typeof lib_kinds;
