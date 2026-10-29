@@ -86,6 +86,11 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   partnerSignUps: { kind: "token bucket", rate: 100, period: HOUR, capacity: 40 },
   partnerEdits: { kind: "token bucket", rate: 120, period: HOUR, capacity: 40 },
 
+  // Photos of a vendor's past work: per account, per demo guest, and across everyone.
+  vendorPhotoAdd: { kind: "fixed window", rate: 30, period: DAY },
+  vendorPhotoAddDemo: { kind: "fixed window", rate: 3, period: DAY },
+  vendorPhotoAddAll: { kind: "fixed window", rate: 300, period: DAY },
+
   // New demos opened, across everyone.
   demoStarts: { kind: "fixed window", rate: 2000, period: DAY },
 

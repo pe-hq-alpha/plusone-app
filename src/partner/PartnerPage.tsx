@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
@@ -394,6 +394,7 @@ function Dashboard({
           onSaved={() => setEditing(false)}
         />
       )}
+      <Photos />
       <Briefs verified={profile.status === "verified"} />
       <SentOffers />
       <Prices profile={profile} offerings={offerings} />
@@ -415,6 +416,140 @@ function StatusLine({ profile }: { profile: Profile }) {
       <span className="chip-warn mr-2">{profile.status === "suspended" ? "Paused" : "Not approved"}</span>
       {profile.statusReason ?? "Customers can't see this listing. Write to us if you think that's wrong."}
     </p>
+  );
+}
+
+// ---------------------------------------------------------------- photos of your work
+
+type MinePhoto = {
+  _id: Id<"vendorPhotos">;
+  url: string | null;
+  status: "checking" | "checked" | "failed";
+  tags: { key: string; label: string }[];
+  flags: { key: string; text: string }[];
+  review: "approved" | "removed" | null;
+};
+
+/** The longest side a work photo is sent at: plenty to judge the work, and well under the 5 MB the server takes. */
+const PHOTO_EDGE = 2048;
+
+/**
+ * A phone photo shrunk to PHOTO_EDGE as a JPEG before it goes up, since a camera's own
+ * file is often over 5 MB. A photo the browser can't redraw goes up as it is, and the
+ * server decides.
+ */
+async function shrinkPhoto(file: File): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, PHOTO_EDGE / Math.max(bitmap.width, bitmap.height));
+    if (scale === 1 && file.size <= 1_500_000 && file.type === "image/jpeg") return file;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
+/** Photos of the vendor's past work, checked before customers see them. */
+function Photos() {
+  const photos = useQuery(api.marketplace.photos.mine);
+  const generateUploadUrl = useMutation(api.marketplace.photos.generateUploadUrl);
+  const add = useMutation(api.marketplace.photos.add);
+  const remove = useMutation(api.marketplace.photos.remove);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const pick = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    e.target.value = "";
+    if (!files?.length || busy) return;
+    setBusy(true);
+    setError(null);
+    void (async () => {
+      for (const file of Array.from(files)) {
+        const photo = await shrinkPhoto(file);
+        const url = await generateUploadUrl({});
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": photo.type || file.type }, body: photo });
+        if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+        const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+        await add({ storageId });
+      }
+    })()
+      .catch((err) => setError(errorText(err, "Those photos didn't go through. Try again.")))
+      .finally(() => setBusy(false));
+  };
+
+  const takeOff = (photoId: Id<"vendorPhotos">) => {
+    setError(null);
+    void remove({ photoId }).catch((err) => setError(errorText(err, "That photo didn't come off. Try again.")));
+  };
+
+  return (
+    <section className="card mt-5 p-6 md:p-7" aria-labelledby="photos-h">
+      <h2 id="photos-h" className="display text-xl">Photos of your work</h2>
+      <p className="mt-1 text-sm text-muted">Add up to 12 photos of events you&apos;ve done. We check each one before customers see it.</p>
+      <div className="mt-3">
+        <label className="btn-quiet btn-sm cursor-pointer bg-cream">
+          {busy ? "Adding…" : "Add photos"}
+          <input type="file" className="hidden" multiple accept="image/jpeg,image/png,image/webp" onChange={pick} disabled={busy} />
+        </label>
+      </div>
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+      {photos === undefined ? (
+        <p className="mt-4 text-sm text-muted">Loading…</p>
+      ) : photos.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">No photos yet. Show the work you&apos;re proudest of.</p>
+      ) : (
+        <ul className="mt-4 grid min-w-0 grid-cols-2 gap-3 md:grid-cols-3">
+          {photos.map((p) => (
+            <PhotoItem key={p._id} photo={p} onRemove={() => takeOff(p._id)} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function PhotoItem({ photo, onRemove }: { photo: MinePhoto; onRemove: () => void }) {
+  const others = photo.flags.filter((f) => f.key !== "faces");
+  const faces = photo.flags.find((f) => f.key === "faces");
+  return (
+    <li className="min-w-0">
+      {photo.url ? (
+        <img src={photo.url} alt="" className="aspect-square w-full rounded object-cover" />
+      ) : (
+        <div className="aspect-square w-full rounded bg-cream" aria-hidden />
+      )}
+      {photo.status === "checking" && (
+        <p className="mt-1 text-sm text-muted" role="status">Checking…</p>
+      )}
+      {photo.status === "failed" && (
+        <p className="mt-1 text-sm text-muted">We couldn&apos;t check this photo. Try adding it again.</p>
+      )}
+      {photo.status === "checked" && photo.tags.length > 0 && (
+        <p className="mt-2 flex min-w-0 flex-wrap gap-1">
+          {photo.tags.map((t) => (
+            <span key={t.key} className="chip-quiet">{t.label}</span>
+          ))}
+        </p>
+      )}
+      {others.length > 0 && (
+        <p className="mt-1 text-sm break-words text-muted">{others.map((f) => f.text).join(" ")}</p>
+      )}
+      {faces && <p className="mt-1 text-xs break-words text-quiet">{faces.text}</p>}
+      {photo.status === "checked" && others.length > 0 && photo.review === null && (
+        <p className="mt-1 text-sm text-muted">Waiting for our team</p>
+      )}
+      {photo.review === "removed" && <p className="mt-1 text-sm text-muted">Removed by our team</p>}
+      <button type="button" className="btn-quiet btn-sm mt-1" onClick={onRemove}>
+        Remove
+      </button>
+    </li>
   );
 }
 

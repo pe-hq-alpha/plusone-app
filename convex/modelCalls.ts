@@ -26,7 +26,7 @@ export const forEvent = query({
       _id: v.id("modelCalls"),
       at: v.number(),
       feature: v.string(),
-      provider: v.union(v.literal("meta"), v.literal("claude"), v.literal("spark_open")),
+      provider: v.union(v.literal("meta"), v.literal("claude"), v.literal("spark_open"), v.literal("glimmer")),
       model: v.string(),
       inputTokens: v.number(),
       outputTokens: v.number(),

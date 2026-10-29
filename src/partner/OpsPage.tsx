@@ -237,6 +237,8 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
 
       <VendorCheck profileId={profileId} onUseSources={addEvidenceSources} />
 
+      <VendorPhotos profileId={profileId} />
+
       <fieldset className="mt-6">
         <legend className="label">Checks</legend>
         <ul className="grid gap-2">
@@ -297,6 +299,67 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </>
       )}
     </section>
+  );
+}
+
+/** The vendor's work photos for the reviewer: what was found on each, and the decision on it. */
+function VendorPhotos({ profileId }: { profileId: Id<"vendorProfiles"> }) {
+  const photos = useQuery(api.marketplace.photos.forOps, { profileId });
+  const review = useMutation(api.marketplace.photos.review);
+  const [error, setError] = useState<string | null>(null);
+
+  if (photos === undefined) return <p className="mt-6 text-sm text-muted">Loading…</p>;
+  if (photos.length === 0) return null;
+
+  const decide = (photoId: Id<"vendorPhotos">, decision: "approved" | "removed") => {
+    setError(null);
+    void review({ photoId, decision }).catch((e) => setError(errorText(e, "That decision didn't save.")));
+  };
+
+  return (
+    <div className="card-quiet mt-6 p-4">
+      <h3 className="label">Photos</h3>
+      <ul className="mt-3 grid gap-4">
+        {photos.map((p) => (
+          <li key={p._id} className="grid min-w-0 gap-3 sm:grid-cols-[10rem_1fr]">
+            {p.url ? (
+              <img src={p.url} alt="" className="aspect-square w-full rounded object-cover" />
+            ) : (
+              <div className="aspect-square w-full rounded bg-cream" aria-hidden />
+            )}
+            <div className="min-w-0 text-sm">
+              {p.status === "checking" && <p className="text-muted">Checking…</p>}
+              {p.status === "failed" && <p className="text-muted">Couldn&apos;t be checked</p>}
+              {p.provider === "glimmer" && <p className="text-xs text-quiet">Checked by Muse Glimmer</p>}
+              {p.provider === "spark" && <p className="text-xs text-quiet">Checked by Muse Spark</p>}
+              {p.shows && <p className="mt-1">{p.shows}</p>}
+              {p.tags.length > 0 && (
+                <p className="mt-1 flex min-w-0 flex-wrap gap-1">
+                  {p.tags.map((t) => (
+                    <span key={t.key} className="chip-quiet">{t.label}</span>
+                  ))}
+                </p>
+              )}
+              {p.flags.map((f) => (
+                <p key={f.key} className="mt-1 break-words text-muted">{f.text}</p>
+              ))}
+              {p.doubt && <p className="mt-1 break-words text-muted">Not sure: {p.doubt}</p>}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {p.review === "approved" && <span className="chip-ok">Approved</span>}
+                {p.review === "removed" && <span className="chip-warn">Removed</span>}
+                <button type="button" className="btn-primary btn-sm" onClick={() => decide(p._id, "approved")}>
+                  Approve
+                </button>
+                <button type="button" className="btn-quiet btn-sm" onClick={() => decide(p._id, "removed")}>
+                  Remove
+                </button>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+    </div>
   );
 }
 

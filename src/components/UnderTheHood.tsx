@@ -27,8 +27,9 @@ const STEP: Record<string, string> = {
 };
 
 /** A model id as people would say it. */
-function modelName(model: string, provider: "meta" | "claude" | "spark_open"): string {
+function modelName(model: string, provider: "meta" | "claude" | "spark_open" | "glimmer"): string {
   if (provider === "spark_open") return "Meta Muse Spark Open";
+  if (provider === "glimmer") return "Meta Muse Glimmer 30B";
   const spark = model.match(/^muse-spark-(\d+(?:\.\d+)?)/);
   if (spark) return `Meta Muse Spark ${spark[1]}`;
   if (model.startsWith("muse-wonder")) return "Meta Muse Wonder";

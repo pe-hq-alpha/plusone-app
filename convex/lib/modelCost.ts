@@ -46,6 +46,23 @@ export function wonderCostUsd(usage: { inputTokens: number; outputTokens: number
   return tokens + (Math.max(0, searches) * 2.5) / 1000;
 }
 
+/**
+ * What the GPU behind our Glimmer endpoint costs an hour: Modal's H200 at $0.001261 a
+ * second ($4.54 an hour, modal.com/pricing, read 29 Oct), plus about $0.11 for the CPU
+ * and memory that come with it. A check's row counts only its own seconds; the start-up
+ * and the idle minutes before Modal scales to zero are billed too, and are measured apart.
+ */
+export const GLIMMER_GPU_USD_PER_HOUR = 4.65;
+
+/**
+ * What a Glimmer photo check cost, billed in whole seconds of the call's wall time,
+ * like voice: a call of 0.1 seconds bills as one second, 1.1 as two.
+ */
+export function glimmerCostUsd(seconds: number): number {
+  const billed = Math.ceil(Math.max(0, seconds));
+  return (billed * GLIMMER_GPU_USD_PER_HOUR) / 3600;
+}
+
 /** The `modelCalls` row for a finished call. */
 export function callRecord(
   feature: string,

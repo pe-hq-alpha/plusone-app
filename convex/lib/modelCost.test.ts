@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { costUsd, wonderCostUsd } from "./modelCost";
+import { costUsd, glimmerCostUsd, wonderCostUsd } from "./modelCost";
+
+describe("glimmerCostUsd", () => {
+  it("bills whole seconds of GPU time, at the rate set for Modal's GPU", () => {
+    expect(glimmerCostUsd(0.1)).toBeCloseTo(4.65 / 3600, 8);
+    expect(glimmerCostUsd(65)).toBeCloseTo((65 * 4.65) / 3600, 8);
+  });
+});
 
 describe("wonderCostUsd", () => {
   it("adds the search price to the token price", () => {

@@ -157,7 +157,7 @@ export const sessionFields = {
 export const modelCallFields = {
   /** What the call was for, e.g. "planSearch" or "readRsvp". */
   feature: v.string(),
-  provider: v.union(v.literal("meta"), v.literal("claude"), v.literal("spark_open")),
+  provider: v.union(v.literal("meta"), v.literal("claude"), v.literal("spark_open"), v.literal("glimmer")),
   model: v.string(),
   inputTokens: v.number(),
   /** Includes reasoning tokens, which are billed as output. */
@@ -356,6 +356,42 @@ export const vendorCheckFields = {
   costUsd: v.optional(v.number()),
   /** A short plain message when the run failed, for the reviewer to read. */
   error: v.optional(v.string()),
+};
+
+/** What the photo check found: plain booleans, one sentence on what it shows, and up to 5 tags by key. */
+export const vendorPhotoCheck = v.object({
+  realWork: v.boolean(),
+  stock: v.boolean(),
+  watermark: v.boolean(),
+  faces: v.boolean(),
+  unsafe: v.boolean(),
+  shows: v.string(),
+  tags: v.array(v.string()),
+  /** What the check wasn't sure about, in its own words. */
+  doubt: v.optional(v.string()),
+  provider: v.union(v.literal("glimmer"), v.literal("spark")),
+  model: v.string(),
+  checkedAt: v.number(),
+});
+
+/** What Ops decided about a photo, and who decided it. Removing hides it; it never deletes the file. */
+export const vendorPhotoReview = v.object({
+  decision: v.union(v.literal("approved"), v.literal("removed")),
+  reviewedBy: v.id("users"),
+  reviewedAt: v.number(),
+});
+
+/** One photo of a vendor's past work, checked before customers see it. */
+export const vendorPhotoFields = {
+  profileId: v.id("vendorProfiles"),
+  storageId: v.id("_storage"),
+  addedBy: v.id("users"),
+  addedAt: v.number(),
+  status: v.union(v.literal("checking"), v.literal("checked"), v.literal("failed")),
+  check: v.optional(vendorPhotoCheck),
+  review: v.optional(vendorPhotoReview),
+  /** A short plain message when the run failed, for the vendor to read. */
+  failure: v.optional(v.string()),
 };
 
 /**
@@ -848,6 +884,8 @@ export default defineSchema({
   vettingReviews: defineTable(vettingReviewFields).index("by_profileId", ["profileId"]),
 
   vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
+
+  vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]),
 
   priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),
 
