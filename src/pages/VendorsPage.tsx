@@ -525,6 +525,8 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
   const voiceUploadUrl = useMutation(api.voiceBrief.uploadUrl);
   const hear = useAction(api.voiceBrief.transcribe);
   const [hearing, setHearing] = useState(false);
+  // The demo's sample call is with Kaveri Feast Co., one of its caterers, so it is offered on Catering only.
+  const sampleCallee = vendors.find((v) => /^Kaveri Feast/.test(v.name));
   const [vendorId, setVendorId] = useState<Id<"vendors">>(vendors[0]._id);
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -558,7 +560,7 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
    * A call with the vendor: the recording is heard speaker by speaker and its words put in the
    * box, for the person to check before the quote is read like any pasted message.
    */
-  async function hearCall(recording: Blob) {
+  async function hearCall(recording: Blob, callee?: string) {
     setHearing(true);
     setError(null);
     setDone(null);
@@ -568,7 +570,7 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
       if (!res.ok) throw new Error("That recording didn't go. Try again.");
       const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
       const heard = await hear({ storageId, eventId, call: true });
-      const name = vendors.find((v) => v._id === vendorId)?.name ?? "the vendor";
+      const name = callee ?? vendors.find((v) => v._id === vendorId)?.name ?? "the vendor";
       setText(callText(name, heard.turns.length ? heard.turns : [{ text: heard.text }]));
       setDone("Here's the call, speaker by speaker. Check it, then read the quote.");
     } catch (e) {
@@ -610,20 +612,22 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
               }}
             />
           </label>
-          {demo && (
+          {demo && sampleCallee && (
             <button
               type="button"
               className="btn-quiet btn-sm"
               disabled={hearing || busy}
-              onClick={() =>
+              onClick={() => {
+                setVendorId(sampleCallee._id);
                 void fetch("/sample-call.mp3")
                   .then((r) => r.blob())
-                  .then(hearCall)
-              }
+                  .then((blob) => hearCall(blob, sampleCallee.name));
+              }}
             >
               Try a sample call
             </button>
           )}
+          {demo && !sampleCallee && <span className="text-xs text-muted">A sample call with a caterer is on Catering.</span>}
         </div>
         <input
           type="file"
