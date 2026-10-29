@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Plan it all in one place. Pay what's fair.', the line 'One app from the first idea to the day itself, with every quote and every vendor's offer on the same lines', and chips saying birthdays to offsites and that it reads and writes with Meta's Muse Spark, beside the Today screen of a sample 60th birthday">
+<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Plan it all in one place. Know what you're paying for.', the line 'One app from the first idea to the day itself, with every quote and every vendor's offer on the same lines', and chips saying birthdays to offsites and that it reads and writes with Meta's Muse Spark, beside the Today screen of a sample 60th birthday">
 
 # PlusOne Events
 
@@ -295,7 +295,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 
 One app, two sides working on the same lines: customers plan and compare, vendors answer, and the PlusOne team checks every vendor before customers see them.
 
-<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Plan it all in one place. Pay what's fair.' over a gold line drawing of a garden dinner, with Plan an event and See the demo, a line for vendors, and PlusOne at work for a sample first birthday: done, now, waiting and next">
+<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Plan it all in one place. Know what you're paying for.' over a gold line drawing of a garden dinner, with Plan an event and See the demo, a line for vendors, and PlusOne at work for a sample first birthday: done, now, waiting and next">
 
 ### Planning an event
 

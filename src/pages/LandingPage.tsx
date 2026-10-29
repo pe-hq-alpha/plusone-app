@@ -126,7 +126,7 @@ export function LandingPage() {
           <div className="rs__pitch">
             <h1 id="hero-title" className="rs__title">
               Plan it all <span className="rs__keep">in one place.</span> <br />
-              <em>Pay what&rsquo;s fair.</em>
+              <em>Know what you&rsquo;re <span className="rs__keep">paying for.</span></em>
             </h1>
             <p className="rs__lede">
               One app from the first idea to the day itself,{" "}

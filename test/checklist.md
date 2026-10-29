@@ -30,7 +30,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 
 ## 2. Home site (plusoneevents.site)
 
-- [ ] The hero reads "Plan it all in one place. Pay what's fair." with Plan an event and See the demo; both work.
+- [ ] The hero reads "Plan it all in one place. Know what you're paying for." with Plan an event and See the demo; both work.
 - [ ] The line drawing sits behind the hero; the page moves gently (hero rises in, sections rise into view) and nothing jumps.
 - [ ] Theme: Light, Dark and Device each apply, and the choice carries into the app (dark and light).
 - [ ] The example and prices show rupees from India (and dollars from the US, with a VPN if available).
