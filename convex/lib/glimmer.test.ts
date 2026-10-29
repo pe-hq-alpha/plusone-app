@@ -18,7 +18,7 @@ const answer = (content: string) =>
   });
 
 describe("the Glimmer request", () => {
-  it("puts the image before the text, with the reasoning line, sampling and response format", () => {
+  it("puts the image before the text, with the reasoning line, sampling and the JSON shape in words", () => {
     const body = glimmerBody({ images: [image], prompt: "Tag this photo.", schema }, env);
     expect(body).toMatchObject({
       model: "inference-1",
@@ -26,11 +26,13 @@ describe("the Glimmer request", () => {
       temperature: 1.0,
       top_p: 0.95,
       top_k: 64,
-      response_format: { type: "json_schema", json_schema: { name: "photo" } },
     });
+    // Forcing the format left Glimmer no room to reason, so the shape is asked for in the instructions.
+    expect(body).not.toHaveProperty("response_format");
     const messages = body.messages as { role: string; content: unknown }[];
     expect(messages[0].role).toBe("system");
     expect(messages[0].content).toContain("Reasoning strength: low");
+    expect(messages[0].content).toContain('"realWork"');
     const content = messages[1].content as { type: string }[];
     expect(content[0].type).toBe("image_url");
     expect(content[1]).toEqual({ type: "text", text: "Tag this photo." });

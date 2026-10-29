@@ -44,13 +44,23 @@ function assertSendable(images: GlimmerImage[]): void {
   }
 }
 
-/** The Chat Completions body: the instructions up front, then the image ahead of its text. */
+/**
+ * The Chat Completions body: the instructions up front, then the image ahead of its text.
+ * The JSON shape is asked for in words, not forced with `response_format`: forced from
+ * the first token, Glimmer had nowhere to reason and wrote its thinking into the answer's
+ * first text field (29 Oct, on production). Left free, the endpoint returns the reasoning
+ * apart and the answer is cut out of the reply and checked against the schema.
+ */
 export function glimmerBody(req: GlimmerRequest, env: GlimmerEnv = process.env): Record<string, unknown> {
   assertSendable(req.images);
+  const shape = JSON.stringify(jsonSchemaFor(req.schema));
   return {
     model: glimmerModel(env),
     messages: [
-      { role: "system", content: `${PHOTO_INSTRUCTIONS}\nReasoning strength: low` },
+      {
+        role: "system",
+        content: `${PHOTO_INSTRUCTIONS}\nReply with one JSON object and nothing else, matching this JSON Schema: ${shape}\nReasoning strength: low`,
+      },
       {
         role: "user",
         content: [
@@ -66,7 +76,6 @@ export function glimmerBody(req: GlimmerRequest, env: GlimmerEnv = process.env):
     temperature: 1.0,
     top_p: 0.95,
     top_k: 64,
-    response_format: { type: "json_schema", json_schema: { name: "photo", schema: jsonSchemaFor(req.schema) } },
   };
 }
 
