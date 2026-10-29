@@ -183,7 +183,8 @@ describe("a vendor's work photo", () => {
     const photo = await t.run((ctx) => ctx.db.get(photoId));
     expect(photo?.status).toBe("checked");
     expect(photo?.check).toMatchObject({ provider: "spark", tags: ["buffet"] });
-    expect(fetchFn.mock.calls.filter(([u]) => String(u).startsWith("https://glimmer.test"))).toHaveLength(5);
+    // Glimmer is asked until the seven-minute deadline, then Muse Spark takes the photo.
+    expect(fetchFn.mock.calls.filter(([u]) => String(u).startsWith("https://glimmer.test")).length).toBeGreaterThan(5);
 
     const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
     expect(calls).toHaveLength(1);

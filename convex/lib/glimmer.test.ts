@@ -92,6 +92,27 @@ describe("a request that never goes out", () => {
 });
 
 describe("a cold start that never ends", () => {
+  it("keeps knocking through a start of several minutes, as the H200 takes", async () => {
+    let clock = 1_000_000;
+    const now = vi.spyOn(Date, "now").mockImplementation(() => clock);
+    let calls = 0;
+    // "no upstreams available" for the first eight tries: about four minutes of waiting.
+    const fetchFn = vi.fn(async () =>
+      ++calls <= 8 ? new Response('{"error":"no upstreams available"}', { status: 503 }) : answer('{"realWork":true,"shows":"A stage.","tags":[]}'),
+    );
+    const wait = vi.fn(async (ms: number) => {
+      clock += ms;
+    });
+    try {
+      const result = await glimmerComplete({ images: [image], prompt: "Tag it.", schema }, env, fetchFn as unknown as typeof fetch, wait);
+      expect(result.text).toContain("A stage.");
+      expect(fetchFn).toHaveBeenCalledTimes(9);
+      expect(clock - 1_000_000).toBeGreaterThan(3 * 60_000);
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it("gives up once the deadline has passed, as a failure Muse Spark can take over", async () => {
     let clock = 1_000_000;
     const now = vi.spyOn(Date, "now").mockImplementation(() => clock);

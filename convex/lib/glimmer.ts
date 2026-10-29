@@ -100,9 +100,10 @@ function readText(json: ChatResponse, bodyModel: string): { text: string; model:
 }
 
 /**
- * Send the request, retrying 502, 503 and 504 and lost connections up to four times
- * with backoff (5 s, 15 s, 45 s and once more), honouring Retry-After, since those are
- * the GPU starting, and giving up once GLIMMER_DEADLINE_MS has passed. Anything else throws as it came back, marked the way meta.ts marks
+ * Send the request, retrying 502, 503 and 504 ("no upstreams available") and lost
+ * connections, since those are the GPU starting: about 3.6 minutes from cold on the H200
+ * (measured 29 Oct), so the retries run until GLIMMER_DEADLINE_MS rather than for a count,
+ * waiting 5 s, 15 s, then every 30 s, or as long as Retry-After asks. Anything else throws as it came back, marked the way meta.ts marks
  * its errors: retryable on 429, 500 and 503, and fallback for everything but a malformed
  * request.
  */
@@ -117,7 +118,7 @@ export async function glimmerComplete(
   if (!env.MODAL_PROXY_TOKEN) throw new Error("Set MODAL_PROXY_TOKEN to check photos with Muse Glimmer.");
   assertSendable(req.images);
   const body = glimmerBody(req, env);
-  const backoffs = [5_000, 15_000, 45_000, 45_000];
+  const backoffs = [5_000, 15_000, 30_000];
   const deadline = Date.now() + GLIMMER_DEADLINE_MS;
   const outOfTime = () => new MetaError("Glimmer didn't answer in time", null, true, true);
   for (let attempt = 0; ; attempt++) {
@@ -132,21 +133,22 @@ export async function glimmerComplete(
         signal: AbortSignal.timeout(Math.min(GLIMMER_TIMEOUT_MS, deadline - started)),
       });
     } catch (error) {
-      if (attempt < backoffs.length) {
-        if (Date.now() + backoffs[attempt] >= deadline) throw outOfTime();
-        await wait(backoffs[attempt]);
-        continue;
+      const pause = backoffs[Math.min(attempt, backoffs.length - 1)];
+      if (Date.now() + pause >= deadline) {
+        throw new MetaError(`Glimmer request failed: ${error instanceof Error ? error.message : String(error)}`, null, true, true);
       }
-      throw new MetaError(`Glimmer request failed: ${error instanceof Error ? error.message : String(error)}`, null, true, true);
+      await wait(pause);
+      continue;
     }
     if (res.ok) {
       const json = (await res.json()) as ChatResponse;
       const { text, model, usage } = readText(json, body.model as string);
       return { text, model, usage, ms: Date.now() - started };
     }
-    if ((res.status === 502 || res.status === 503 || res.status === 504) && attempt < backoffs.length) {
-      const pause = retryAfterMs(res.headers.get("retry-after")) ?? backoffs[attempt];
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      const pause = retryAfterMs(res.headers.get("retry-after")) ?? backoffs[Math.min(attempt, backoffs.length - 1)];
       if (Date.now() + pause >= deadline) throw outOfTime();
+      await res.body?.cancel();
       await wait(pause);
       continue;
     }

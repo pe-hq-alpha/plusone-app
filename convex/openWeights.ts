@@ -1,7 +1,12 @@
 import { v } from "convex/values";
 import { z } from "zod";
 import { internalAction } from "./_generated/server";
-import { generateObject, MODEL_FAST } from "./lib/models";
+import { internal } from "./_generated/api";
+import { extractJsonText, glimmerComplete } from "./lib/glimmer";
+import { glimmerCostUsd } from "./lib/modelCost";
+import { generateObject, MODEL_FAST, parseAnswer } from "./lib/models";
+import { tagsFor } from "./lib/photoTags";
+import { photoCheckSchema, photoPrompt } from "./marketplace/photos";
 
 /**
  * A live check that Muse Spark Open answers on Baseten with our structured output, run by
@@ -31,6 +36,46 @@ export const smoke = internalAction({
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       ms: Date.now() - started,
+    };
+  },
+});
+
+/**
+ * A live check of Muse Glimmer on our Modal endpoint with one photo by URL, run by hand
+ * (`npx convex run openWeights:glimmerSmoke '{"url": "…", "category": "Decor & Florals"}'`).
+ * A cold endpoint takes minutes to start, which counts against Modal's credit.
+ */
+export const glimmerSmoke = internalAction({
+  args: { url: v.string(), category: v.string() },
+  returns: v.object({ answer: v.any(), model: v.string(), inputTokens: v.number(), outputTokens: v.number(), ms: v.number(), costUsd: v.number() }),
+  handler: async (ctx, args) => {
+    const res = await fetch(args.url);
+    if (!res.ok) throw new Error(`Could not fetch the photo (${res.status})`);
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    const allowed = tagsFor([args.category]);
+    const result = await glimmerComplete({
+      images: [{ data: bytes, mediaType: res.headers.get("content-type") ?? "image/jpeg" }],
+      prompt: photoPrompt("Sample Decorators", allowed),
+      schema: photoCheckSchema,
+    });
+    const costUsd = glimmerCostUsd(result.ms / 1000);
+    await ctx.runMutation(internal.modelCalls.record, {
+      feature: "openWeightsSmoke",
+      provider: "glimmer",
+      model: "muse-glimmer-30b",
+      inputTokens: result.usage.inputTokens,
+      outputTokens: result.usage.outputTokens,
+      costUsd,
+      fellBack: false,
+      durationMs: Math.round(result.ms),
+    });
+    return {
+      answer: parseAnswer(extractJsonText(result.text), photoCheckSchema),
+      model: result.model,
+      inputTokens: result.usage.inputTokens,
+      outputTokens: result.usage.outputTokens,
+      ms: result.ms,
+      costUsd,
     };
   },
 });

@@ -60,7 +60,7 @@ function sniffPhotoType(bytes: Uint8Array): string | null {
 const status = v.union(v.literal("checking"), v.literal("checked"), v.literal("failed"));
 const decision = v.union(v.literal("approved"), v.literal("removed"));
 
-const photoCheckSchema = z.object({
+export const photoCheckSchema = z.object({
   realWork: z.boolean(),
   stock: z.boolean(),
   watermark: z.boolean(),
@@ -72,7 +72,7 @@ const photoCheckSchema = z.object({
 });
 
 /** What the photo is from and which tags to choose, in plain words. */
-function photoPrompt(profileName: string, allowed: PhotoTag[]): string {
+export function photoPrompt(profileName: string, allowed: PhotoTag[]): string {
   return (
     `The photo is from the past work of "${profileName}". Its own name on the photo is fine; another business's name is not.\n\n` +
     `Tag it with up to 5 of these, by key:\n${allowed.map((t) => `- ${t.key}: ${t.label}`).join("\n")}`
