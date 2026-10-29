@@ -2,7 +2,7 @@
 
 The vendors' side of PlusOne. Vendors list their business, price their packages in the units customers compare, and answer a customer's brief on the same lines. **PlusOne Ops** is the PlusOne team's side of it: a person verifies each vendor before families and event managers see them.
 
-Built during the hackathon and live since 28 October 2026. Its own address, `partner.plusoneevents.site`, is built and going live; until then it is at [app.plusoneevents.site/partner](https://app.plusoneevents.site/partner). It has its own demo, separate from the customers': [try it as a sample caterer](https://app.plusoneevents.site/partner/demo), with no sign-up. The vendors in the demo are samples, and are labelled as samples.
+Built during the hackathon and live since 28 October 2026. It has its own address, [partner.plusoneevents.site](https://partner.plusoneevents.site), and its own demo, separate from the customers': [try it as a sample caterer](https://partner.plusoneevents.site/demo), with no sign-up. The vendors in the demo are samples, and are labelled as samples.
 
 ## How it connects to PlusOne Events
 
@@ -48,12 +48,12 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 - **A range places a price; it never calls one fair.** Fewer than eight prices means no range.
 - **Samples stay apart from real vendors.** Sample vendors answer sample events only. Each range is worked out twice, from real vendors for real customers, and with the samples for the demo. A demo guest's own sample business answers only their own demo event and never shows up in a search or a range.
 
-## Building next
+## Built during the hackathon
 
 | What | Meta model | Status |
 |---|---|---|
 | The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live run next |
-| A vendor's phone call with a customer, transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Building, 29–30 Oct |
+| A vendor's phone call with a customer (the customer adds the recording), transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Live, 29 Oct (`convex/voiceBrief.ts`, `src/lib/audio.ts`): the demo's sample call lands as Kaveri Feast Co.'s column in Compare |
 | Changes to a verified listing (packages, prices, details, contact numbers) wait for a person in Ops before customers see them | — | Live, 29 Oct (`convex/marketplace/changes.ts`) |
 | Bring your price list: a vendor pastes or photographs the list they already send customers, and each package is drafted on their trade's sheet for them to check and save | Muse Spark Open (open weights, on Baseten) | Live, 29 Oct (`convex/marketplace/priceList.ts`) |
 | Photos of a vendor's work checked (real work or stock, another business's watermark, faces) and tagged for their trade; flags go to Ops, and checked photos sit beside the vendor's offers in Compare | Muse Glimmer 30B (open weights, our own Modal endpoint) | Live, 29 Oct (`convex/marketplace/photos.ts`) |
