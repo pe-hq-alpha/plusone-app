@@ -172,7 +172,7 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
 
   // ---- Catering: three replies, priced three different ways, lined up. -----------
   await researched(ctx, eventId, catering, "Caterer in Mylapore for a banana-leaf lunch, 120 guests, Jain and no onion-garlic", 4, now - 9 * DAY);
-  await ctx.db.patch(catering._id, { notes: "A fair rate for a banana-leaf lunch in Chennai is about ₹400 to ₹520 a plate." });
+  await ctx.db.patch(catering._id, { notes: "Chennai caterers mostly charge about ₹400 to ₹520 a plate for a banana-leaf lunch." });
   const annam = await add(catering, {
     name: "Annam Caterers", handle: "annam-caterers", city: "Mandaveli, Chennai", startingPrice: 380, priceUnit: "per_person",
     priceNotes: "A plate, minimum 150 plates", highlights: ["Traditional banana-leaf meals", "Jain and no onion-garlic on request", "Family functions in Mylapore for 30 years"],
@@ -186,7 +186,7 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
   const kaveri = await add(catering, {
     name: "Kaveri Feast Co.", handle: "kaveri-feast", city: "R.A. Puram, Chennai", startingPrice: 450, priceUnit: "per_person",
     priceNotes: "A plate, GST extra", highlights: ["Iyer-style menu", "Separate kitchen for Jain food", "Served at the table on banana leaf"],
-    summary: "A caterer known for traditional Iyer-style meals served at the table.", score: 90, rankReason: "Traditional meals at a fair rate, and Jain food from a separate kitchen.", isTopPick: true, rating: 4.8, reviewCount: 96,
+    summary: "A caterer known for traditional Iyer-style meals served at the table.", score: 90, rankReason: "Traditional meals in the middle of the city's range, and Jain food from a separate kitchen.", isTopPick: true, rating: 4.8, reviewCount: 96,
   });
   await add(catering, {
     name: "Mylai Virundhu", handle: "mylai-virundhu", city: "Mylapore, Chennai", startingPrice: 600, priceUnit: "per_person",

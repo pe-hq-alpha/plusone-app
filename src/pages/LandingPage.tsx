@@ -174,7 +174,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="rs-track">
-            <h3 className="rs-track__head">For families, teams and event planners</h3>
+            <h3 className="rs-track__head">For families, teams and event managers</h3>
             <ol className="rs-line">
               {HOW_CUSTOMERS.map((h, i) => (
                 <li key={h.title} className="rs-line__stop">
@@ -213,7 +213,7 @@ export function LandingPage() {
             </article>
             <article className="rs-card">
               <h3 className="rs-card__title">Premium</h3>
-              <p className="rs-card__text">Everything in Basic, plus a planner from our team who plans it with you, pushes for a fair price and is there when the day needs them.</p>
+              <p className="rs-card__text">Everything in Basic, plus a planner from our team who plans it with you, negotiates with each vendor for you and is there when the day needs them.</p>
             </article>
           </div>
           <p className="rs-note">Basic is free to use until launch; Premium opens after launch. <Link to="/pricing">See everything in each plan</Link>.</p>

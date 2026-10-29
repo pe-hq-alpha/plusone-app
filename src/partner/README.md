@@ -53,8 +53,8 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 | What | Meta model | Status |
 |---|---|---|
 | The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live run next |
-| Voice sign-up: a vendor describes their business and packages aloud, in Tamil or English | Muse Voice Transcribe, Muse Spark | Building, by 1 Nov |
-| Portfolio photos tagged with the standard sheet's lines, so past work sits beside an offer's line | Muse Glimmer (open weights, on Modal) | Planned |
+| A vendor's phone call with a customer, transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Building, 29–30 Oct |
+| Photos of a vendor's work checked (real work or stock, another business's watermark, faces) and tagged for their trade; flags go to Ops, and checked photos sit beside the vendor's offers in Compare | Muse Glimmer 30B (open weights, our own Modal endpoint) | Live, 29 Oct (`convex/marketplace/photos.ts`) |
 
 ## Run and test
 

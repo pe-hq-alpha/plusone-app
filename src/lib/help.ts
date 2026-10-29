@@ -195,7 +195,7 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
       },
       {
         ask: "How do I get help from the team?",
-        answer: "Reply to any email from PlusOne, or use Share feedback at the foot of the page, and tell us about your event. The first families and teams get help as the team starts.",
+        answer: "Reply to any email from PlusOne, or use Share feedback at the foot of the page, and tell us about your event. The first families, teams and event managers get help as the team starts.",
       },
     ],
   },

@@ -34,7 +34,7 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
     highlights: [
       { t: "Your own planner", d: `Someone from the ${BRAND.name} team who knows your event and plans it with you.` },
       { t: "Vendors shortlisted for you", d: "The right options found, checked and lined up, so you only choose." },
-      { t: "Someone pushing for a fair price", d: "On your side with every vendor, so you don't pay more than you should." },
+      { t: "Someone negotiating for you", d: "On your side with every vendor, so you don't pay more than you should." },
       { t: "Kept moving, every week", d: "Your planner chases what's late and tells you what's next." },
       { t: "On call, and there on the day", d: "By phone any time, and in person when the day needs them." },
     ],
@@ -65,7 +65,7 @@ const ALL: { group: string; rows: Row[] }[] = [
       { feature: "Every quote on the same lines, from email, PDF or WhatsApp", basic: true, premium: true },
       { feature: "Missing charges flagged, and prices compared with similar vendors", basic: true, premium: true },
       { feature: "Vendors shortlisted and lined up by your planner", basic: false, premium: true },
-      { feature: "Someone pushing for a fair price with each vendor", basic: false, premium: true },
+      { feature: "Someone negotiating with each vendor for you", basic: false, premium: true },
     ],
   },
   {

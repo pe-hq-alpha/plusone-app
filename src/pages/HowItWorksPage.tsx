@@ -75,7 +75,7 @@ export function HowItWorksPage() {
         <section className="mt-14" aria-labelledby="customers-h">
           <p className="label">Planning an event</p>
           <h2 id="customers-h" className="display mt-1 text-[clamp(1.8rem,3vw,2.4rem)] leading-tight">
-            For families, teams <em>and event planners</em>
+            For families, teams <em>and event managers</em>
           </h2>
           <p className="mb-6 mt-2 max-w-[42rem] text-muted">You make every decision. {BRAND.name} does the searching, writing, reading and chasing in between, and tells you where things stand.</p>
           <Steps steps={CUSTOMERS} />
