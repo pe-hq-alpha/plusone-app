@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Link } from "react-router-dom";
+import type { FunctionReturnType } from "convex/server";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Icon } from "../components/ui/Icon";
@@ -8,6 +9,9 @@ import { EmptyState } from "../components/ui/EmptyState";
 import { onOpsHost } from "../lib/hosts";
 import { useAuthActions } from "../lib/session";
 import { errorText, priceText } from "./shared";
+import { ChangesLane } from "./ops/ChangesLane";
+import { PhotosLane } from "./ops/PhotosLane";
+import { waitText } from "./ops/time";
 
 /**
  * PlusOne Ops: the team checks every vendor before families hear from them. Each
@@ -46,208 +50,263 @@ function HomeOrLeave({ small = false }: { small?: boolean }) {
   );
 }
 
+const LANES = ["verify", "claims", "photos", "changes"] as const;
+type Lane = (typeof LANES)[number];
+
+const LANE_NAME: Record<Lane, string> = {
+  verify: "To verify",
+  claims: "Claims",
+  photos: "Photos to check",
+  changes: "Changes waiting",
+};
+
+function isLane(value: string | null): value is Lane {
+  return value === "verify" || value === "claims" || value === "photos" || value === "changes";
+}
+
+type QueueProfile = FunctionReturnType<typeof api.marketplace.ops.queue>["profiles"][number];
+type QueueClaim = FunctionReturnType<typeof api.marketplace.ops.queue>["claims"][number];
+
+export type LaneCounts = Record<Lane, number>;
+
+/** The four counts as tappable tiles: work waiting carries the marigold mark, zero is quiet. */
+export function OpsTiles({ counts, lane, onPick }: { counts: LaneCounts; lane: Lane; onPick: (lane: Lane) => void }) {
+  return (
+    <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4" role="group" aria-label="What is waiting">
+      {LANES.map((l) => {
+        const n = counts[l];
+        const here = l === lane;
+        return (
+          <button
+            key={l}
+            type="button"
+            onClick={() => onPick(l)}
+            aria-current={here || undefined}
+            className={`rounded-[18px] border px-4 py-3 text-left transition ${
+              n > 0 ? "border-highlight bg-highlight-soft" : "border-line bg-cream"
+            }${here ? " shadow-[inset_0_0_0_2px_var(--color-accent)]" : ""}`}
+          >
+            <span className={`display block text-3xl leading-none ${n > 0 ? "" : "text-muted"}`}>{n}</span>
+            <span className={`mt-1 block text-xs ${n > 0 ? "text-muted" : "text-quiet"}`}>{LANE_NAME[l]}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** One lane at a time, with the counts as tiles above it; the lane lives in the URL so a reload stays put. */
 function Queue() {
   const queue = useQuery(api.marketplace.ops.queue);
+  const photos = useQuery(api.marketplace.photos.toCheck);
+  const changes = useQuery(api.marketplace.changes.waiting);
+  const [params, setParams] = useSearchParams();
   const [open, setOpen] = useState<Id<"vendorProfiles"> | null>(null);
+  const [openClaim, setOpenClaim] = useState<Id<"vendorClaims"> | null>(null);
+
+  if (queue === undefined || photos === undefined || changes === undefined) {
+    return (
+      <main id="main" className="page px-5 py-10 md:px-8">
+        <p className="text-sm text-muted">Loading…</p>
+      </main>
+    );
+  }
+
+  const counts: LaneCounts = {
+    verify: queue.profiles.length,
+    claims: queue.claims.length,
+    photos: photos.length,
+    changes: changes.length,
+  };
+  // Without a lane in the URL, start where there is work, else with the vendors.
+  const wanted = params.get("lane");
+  const lane: Lane = isLane(wanted) ? wanted : (LANES.find((l) => counts[l] > 0) ?? "verify");
+  const pick = (next: Lane) => {
+    setOpen(null);
+    setOpenClaim(null);
+    setParams({ lane: next }, { preventScrollReset: true });
+  };
+
   return (
     <main id="main" className="page px-5 py-10 md:px-8">
       <HomeOrLeave small />
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Ops</em></h1>
       <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, claims on listings we added, flagged photos, and changes to verified listings.</p>
 
-      {queue === undefined ? (
-        <p className="mt-6 text-sm text-muted">Loading…</p>
-      ) : (
-        <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
-          <div className="grid content-start gap-6">
-            <section aria-labelledby="verify-h">
-              <h2 id="verify-h" className="label">To verify ({queue.profiles.length})</h2>
-              {queue.profiles.length === 0 ? (
-                <p className="text-sm text-muted">Nothing waiting.</p>
-              ) : (
-                <ul className="card divide-y divide-line">
-                  {queue.profiles.map((p) => (
-                    <li key={p._id}>
-                      <button
-                        type="button"
-                        onClick={() => setOpen(p._id)}
-                        aria-current={open === p._id}
-                        className={`w-full px-4 py-3 text-left transition hover:bg-accent-soft ${open === p._id ? "bg-accent-soft" : ""}`}
-                      >
-                        <span className="block font-medium">{p.name}</span>
-                        <span className="block text-sm text-muted">{p.categories.join(", ")} · {p.city}</span>
-                        {p.statusReason && <span className="mt-1 block text-xs text-warn">{p.statusReason}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-            <Claims claims={queue.claims} />
-            <PhotosToCheck />
-            <ChangesWaiting />
-          </div>
-          {open ? <Review profileId={open} onDone={() => setOpen(null)} /> : <EmptyState compact icon="check" title="Choose a vendor to check" />}
-        </div>
-      )}
+      <OpsTiles counts={counts} lane={lane} onPick={pick} />
+
+      <div className="mt-6">
+        {lane === "verify" && <VerifyLane profiles={queue.profiles} open={open} onOpen={setOpen} />}
+        {lane === "claims" && <ClaimsLane claims={queue.claims} open={openClaim} onOpen={setOpenClaim} />}
+        {lane === "photos" && <PhotosLane photos={photos} />}
+        {lane === "changes" && <ChangesLane changes={changes} />}
+      </div>
     </main>
   );
 }
 
-/**
- * Photos of vendors' work the check flagged (stock, another studio's watermark, not event
- * work, unsafe) or couldn't check, from any listing, verified ones included. Customers see
- * a flagged photo only once a person approves it here.
- */
-function PhotosToCheck() {
-  const photos = useQuery(api.marketplace.photos.toCheck);
-  const review = useMutation(api.marketplace.photos.review);
-  const [error, setError] = useState<string | null>(null);
-  if (photos === undefined) return null;
-  const decide = (photoId: Id<"vendorPhotos">, decision: "approved" | "removed") => {
-    setError(null);
-    void review({ photoId, decision }).catch((e) => setError(errorText(e, "That decision didn't save.")));
-  };
+/** Back to the row of cards, from beside a review. */
+function BackToList({ onBack }: { onBack: () => void }) {
   return (
-    <section aria-labelledby="photos-check-h">
-      <h2 id="photos-check-h" className="label">Photos to check ({photos.length})</h2>
-      {photos.length === 0 ? (
-        <p className="text-sm text-muted">Nothing waiting.</p>
-      ) : (
-        <ul className="card divide-y divide-line">
-          {photos.map((p) => (
-            <li key={p._id} className="grid min-w-0 gap-3 px-4 py-3 text-sm sm:grid-cols-[6rem_1fr]">
-              {p.url ? (
-                <a href={p.url} target="_blank" rel="noreferrer" className="block">
-                  <img src={p.url} alt={p.shows ?? `Work photo from ${p.profileName}`} className="aspect-square w-full rounded object-cover" />
-                </a>
-              ) : (
-                <div className="aspect-square w-full rounded bg-cream" aria-hidden />
-              )}
-              <div className="min-w-0">
-                <p className="font-medium">
-                  {p.profileName}
-                  {p.sample && <span className="chip-quiet ml-2">Sample vendor</span>}
-                </p>
-                {p.status === "failed" && <p className="text-muted">Couldn&apos;t be checked</p>}
-                {p.provider && <p className="text-xs text-quiet">Checked by Muse {p.provider === "glimmer" ? "Glimmer" : "Spark"}</p>}
-                {p.shows && <p className="mt-1">{p.shows}</p>}
-                {p.tags.length > 0 && <p className="mt-1 text-xs text-muted">{p.tags.map((t) => t.label).join(" · ")}</p>}
-                {p.flags.map((f) => (
-                  <p key={f.key} className="mt-1 break-words text-warn">{f.text}</p>
-                ))}
-                {p.doubt && <p className="mt-1 break-words text-muted">Not sure: {p.doubt}</p>}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button type="button" className="btn-primary btn-sm" onClick={() => decide(p._id, "approved")}>Approve</button>
-                  <button type="button" className="btn-quiet btn-sm" onClick={() => decide(p._id, "removed")}>Remove</button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
-    </section>
+    <button type="button" className="btn-quiet btn-sm mb-4 gap-1.5 bg-cream" onClick={onBack}>
+      <Icon name="arrow" size={15} className="rotate-180" />
+      Back to the list
+    </button>
   );
 }
 
-/**
- * Changes to verified listings, before and after: a price, a package, details or contact
- * numbers. Customers see a change only once a person here approves it.
- */
-function ChangesWaiting() {
-  const changes = useQuery(api.marketplace.changes.waiting);
-  const decide = useMutation(api.marketplace.changes.decide);
-  const [error, setError] = useState<string | null>(null);
-  if (changes === undefined) return null;
-  const what = (kind: string) => (kind === "details" ? "New details" : kind === "offering_remove" ? "Remove a package" : "A package");
+/** Vendors waiting to be checked: compact cards, and the chosen one beside them on a wide screen. */
+function VerifyLane({
+  profiles,
+  open,
+  onOpen,
+}: {
+  profiles: QueueProfile[];
+  open: Id<"vendorProfiles"> | null;
+  onOpen: (id: Id<"vendorProfiles"> | null) => void;
+}) {
+  if (profiles.length === 0) {
+    return <EmptyState icon="check" title="Nothing waiting" body="New vendors appear here when they sign up." />;
+  }
   return (
-    <section aria-labelledby="changes-h">
-      <h2 id="changes-h" className="label">Changes waiting ({changes.length})</h2>
-      {changes.length === 0 ? (
-        <p className="text-sm text-muted">Nothing waiting.</p>
-      ) : (
-        <ul className="card divide-y divide-line">
-          {changes.map((c) => (
-            <li key={c._id} className="min-w-0 px-4 py-3 text-sm">
-              <p className="font-medium">
-                {c.profileName} · {what(c.kind)}
-              </p>
-              {c.before && (
-                <p className="mt-1 whitespace-pre-line break-words text-muted">
-                  <span className="text-quiet">Now: </span>
-                  {c.before}
-                </p>
-              )}
-              {c.after && (
-                <p className="mt-1 whitespace-pre-line break-words">
-                  <span className="text-quiet">After: </span>
-                  {c.after}
-                </p>
-              )}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="btn-primary btn-sm"
-                  onClick={() => void decide({ changeId: c._id, decision: "approved" }).catch((e) => setError(errorText(e, "That didn't save.")))}
-                >
-                  Approve
-                </button>
-                <button
-                  type="button"
-                  className="btn-quiet btn-sm"
-                  onClick={() => void decide({ changeId: c._id, decision: "rejected" }).catch((e) => setError(errorText(e, "That didn't save.")))}
-                >
-                  Reject
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
-    </section>
+    <div className="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <ul className={`grid min-w-0 content-start gap-3 ${open ? "hidden lg:grid" : ""}`} aria-label="Vendors to verify">
+        {profiles.map((p) => (
+          <li
+            key={p._id}
+            className={`card-quiet overflow-hidden ${open === p._id ? "shadow-[inset_0_0_0_2px_var(--color-accent)]" : ""}`}
+          >
+            <button
+              type="button"
+              onClick={() => onOpen(p._id)}
+              aria-current={open === p._id || undefined}
+              className={`w-full px-4 py-3 text-left transition hover:bg-accent-soft ${open === p._id ? "bg-accent-soft" : ""}`}
+            >
+              <span className="block font-medium">{p.name}</span>
+              <span className="block text-sm text-muted">{p.categories.join(", ")} · {p.city}</span>
+              <span className="mt-0.5 block text-xs text-quiet">{waitText(p.statusAt)}</span>
+              {p.statusReason && <span className="mt-1 block text-xs text-warn">{p.statusReason}</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className={`min-w-0 ${open ? "" : "hidden lg:block"}`}>
+        {open ? (
+          <>
+            <BackToList onBack={() => onOpen(null)} />
+            <Review profileId={open} onDone={() => onOpen(null)} />
+          </>
+        ) : (
+          <EmptyState compact icon="check" title="Choose a vendor to check" />
+        )}
+      </div>
+    </div>
   );
 }
 
-type QueueClaim = {
-  _id: Id<"vendorClaims">;
-  profileName: string;
-  website?: string;
-  claimantEmail?: string;
-  note?: string;
-};
+/** Claims on listings PlusOne added: who says it is theirs, and the decision beside each. */
+function ClaimsLane({
+  claims,
+  open,
+  onOpen,
+}: {
+  claims: QueueClaim[];
+  open: Id<"vendorClaims"> | null;
+  onOpen: (id: Id<"vendorClaims"> | null) => void;
+}) {
+  if (claims.length === 0) {
+    return <EmptyState icon="people" title="Nothing waiting" body="Claims on listings we added appear here." />;
+  }
+  const current = claims.find((c) => c._id === open) ?? null;
+  return (
+    <div className="grid items-start gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
+      <ul className={`grid min-w-0 content-start gap-3 ${current ? "hidden lg:grid" : ""}`} aria-label="Claims">
+        {claims.map((c) => (
+          <li
+            key={c._id}
+            className={`card-quiet overflow-hidden ${current?._id === c._id ? "shadow-[inset_0_0_0_2px_var(--color-accent)]" : ""}`}
+          >
+            <button
+              type="button"
+              onClick={() => onOpen(c._id)}
+              aria-current={current?._id === c._id || undefined}
+              className={`w-full px-4 py-3 text-left transition hover:bg-accent-soft ${current?._id === c._id ? "bg-accent-soft" : ""}`}
+            >
+              <span className="block font-medium">{c.profileName}</span>
+              <span className="block break-words text-sm text-muted">
+                {c.claimantEmail ?? "No email"} wants it
+                {c.website ? <> · <a className="underline" href={c.website} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>{c.website.replace(/^https:\/\//, "")}</a></> : null}
+              </span>
+              <span className="mt-0.5 block text-xs text-quiet">{waitText(c.createdAt)}</span>
+              {c.note && <span className="mt-1 block text-xs text-muted">&ldquo;{c.note}&rdquo;</span>}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div className={`min-w-0 ${current ? "" : "hidden lg:block"}`}>
+        {current ? (
+          <>
+            <BackToList onBack={() => onOpen(null)} />
+            <ClaimReview claim={current} />
+          </>
+        ) : (
+          <EmptyState compact icon="people" title="Choose a claim to check" />
+        )}
+      </div>
+    </div>
+  );
+}
 
-function Claims({ claims }: { claims: QueueClaim[] }) {
+function ClaimReview({ claim }: { claim: QueueClaim }) {
   const decide = useMutation(api.marketplace.ops.decideClaim);
   const [error, setError] = useState<string | null>(null);
   return (
-    <section aria-labelledby="claims-h">
-      <h2 id="claims-h" className="label">Claims ({claims.length})</h2>
-      {claims.length === 0 ? (
-        <p className="text-sm text-muted">Nothing waiting.</p>
-      ) : (
-        <ul className="grid gap-3">
-          {claims.map((c) => (
-            <li key={c._id} className="card-quiet p-4 text-sm">
-              <p className="font-medium">{c.profileName}</p>
-              <p className="text-muted">
-                {c.claimantEmail ?? "No email"} wants it{c.website ? <> · <a className="underline" href={c.website} target="_blank" rel="noreferrer">{c.website.replace(/^https:\/\//, "")}</a></> : null}
-              </p>
-              {c.note && <p className="mt-1">"{c.note}"</p>}
-              <div className="mt-3 flex gap-2">
-                <button type="button" className="btn-primary btn-sm" onClick={() => void decide({ claimId: c._id, approve: true }).catch((e) => setError(errorText(e, "That didn't save.")))}>
-                  It's theirs
-                </button>
-                <button type="button" className="btn-quiet btn-sm" onClick={() => void decide({ claimId: c._id, approve: false }).catch((e) => setError(errorText(e, "That didn't save.")))}>
-                  Turn down
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+    <section className="card min-w-0 p-6 md:p-7" aria-labelledby="claim-h">
+      <p className="label mb-1">Claimed listing</p>
+      <h2 id="claim-h" className="display text-2xl">{claim.profileName}</h2>
+      <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[9rem_1fr]">
+        <dt className="text-muted">Claimed by</dt>
+        <dd className="break-words">{claim.claimantEmail ?? "No email"}</dd>
+        {claim.website && (
+          <>
+            <dt className="text-muted">Website</dt>
+            <dd className="min-w-0">
+              <a className="break-words underline" href={claim.website} target="_blank" rel="noreferrer">
+                {claim.website}
+              </a>
+            </dd>
+          </>
+        )}
+        <dt className="text-muted">Waiting</dt>
+        <dd>{waitText(claim.createdAt)}</dd>
+        {claim.note && (
+          <>
+            <dt className="text-muted">Note</dt>
+            <dd className="break-words">&ldquo;{claim.note}&rdquo;</dd>
+          </>
+        )}
+      </dl>
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={() => void decide({ claimId: claim._id, approve: true }).catch((e) => setError(errorText(e, "That didn't save.")))}
+        >
+          It&apos;s theirs
+        </button>
+        <button
+          type="button"
+          className="btn-quiet"
+          onClick={() => void decide({ claimId: claim._id, approve: false }).catch((e) => setError(errorText(e, "That didn't save.")))}
+        >
+          Turn down
+        </button>
+      </div>
+      {error && (
+        <p role="alert" className="mt-3 text-sm text-bad">
+          {error}
+        </p>
       )}
-      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
     </section>
   );
 }
@@ -306,18 +365,24 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
   };
 
   return (
-    <section className="card p-6 md:p-7" aria-labelledby="review-h">
+    <section className="card min-w-0 p-6 md:p-7" aria-labelledby="review-h">
       <p className="label mb-1">{profile.source === "plusone_added" ? "Claimed listing" : "New sign-up"}</p>
       <h2 id="review-h" className="display text-2xl">{profile.name}</h2>
-      <dl className="mt-3 grid gap-x-6 gap-y-1 text-sm sm:grid-cols-[8rem_1fr]">
+      <dl className="mt-4 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[9rem_1fr]">
         <dt className="text-muted">Offers</dt>
         <dd>{profile.categories.join(", ")}</dd>
         <dt className="text-muted">City</dt>
-        <dd>{profile.city}{profile.serviceArea?.length ? ` (${profile.serviceArea.join(", ")})` : ""}</dd>
+        <dd>{profile.city}</dd>
+        {profile.serviceArea?.length ? (
+          <>
+            <dt className="text-muted">Area</dt>
+            <dd>{profile.serviceArea.join(", ")}</dd>
+          </>
+        ) : null}
         {profile.website && (
           <>
             <dt className="text-muted">Website</dt>
-            <dd><a className="underline" href={profile.website} target="_blank" rel="noreferrer">{profile.website}</a></dd>
+            <dd className="min-w-0"><a className="break-words underline" href={profile.website} target="_blank" rel="noreferrer">{profile.website}</a></dd>
           </>
         )}
         {(profile.phone || profile.whatsapp) && (
@@ -334,19 +399,22 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         {profile.about && (
           <>
             <dt className="text-muted">About</dt>
-            <dd>{profile.about}</dd>
+            <dd className="break-words">{profile.about}</dd>
           </>
         )}
       </dl>
 
       {offerings.length > 0 && (
         <>
-          <h3 className="label mt-5">Their prices</h3>
-          <ul className="grid gap-1 text-sm">
+          <h3 className="label mt-8">Their prices</h3>
+          <ul className="mt-2 grid gap-2 text-sm">
             {offerings.map((o) => (
-              <li key={o._id}>
-                {o.title}: {priceText(o)}
-                {o.includes.length ? <span className="text-muted"> · includes {o.includes.join(", ")}</span> : null}
+              <li key={o._id} className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4">
+                <span className="font-medium">{o.title}</span>
+                <span className="min-w-0">
+                  {priceText(o)}
+                  {o.includes.length ? <span className="text-muted"> · includes {o.includes.join(", ")}</span> : null}
+                </span>
               </li>
             ))}
           </ul>
@@ -357,7 +425,7 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
 
       <VendorPhotos profileId={profileId} />
 
-      <fieldset className="mt-6">
+      <fieldset className="mt-8">
         <legend className="label">Checks</legend>
         <ul className="grid gap-2">
           {CHECKS.map((label) => (
@@ -371,7 +439,7 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </ul>
       </fieldset>
 
-      <fieldset className="mt-5">
+      <fieldset className="mt-8">
         <legend className="label">Evidence</legend>
         <div className="grid gap-2">
           {evidence.map((e, i) => (
@@ -387,35 +455,38 @@ function Review({ profileId, onDone }: { profileId: Id<"vendorProfiles">; onDone
         </div>
       </fieldset>
 
-      <div className="mt-5">
-        <label className="label" htmlFor="r-notes">Notes (the vendor sees these if turned down or paused)</label>
-        <textarea id="r-notes" className="input min-h-20" value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button type="button" className="btn-primary" disabled={saving} onClick={() => decide("verified")}>Verify</button>
-        <button type="button" className="btn-quiet" disabled={saving} onClick={() => decide("rejected")}>Turn down</button>
-        <button type="button" className="btn-quiet" disabled={saving} onClick={() => decide("suspended")}>Pause</button>
-      </div>
-      {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
-
       {reviews.length > 0 && (
-        <>
-          <h3 className="label mt-7">Earlier decisions</h3>
-          <ul className="grid gap-2 text-sm">
+        <details className="card-quiet mt-8 px-5 py-4">
+          <summary className="cursor-pointer text-sm font-medium">Earlier decisions ({reviews.length})</summary>
+          <ul className="mt-3 grid gap-2 text-sm">
             {reviews.map((r) => (
-              <li key={r._id} className="card-quiet px-4 py-3">
+              <li key={r._id} className="min-w-0 border-t border-line pt-2 first:border-t-0 first:pt-0">
                 <span className="font-medium capitalize">{r.outcome}</span>
                 <span className="text-muted"> · {new Date(r.at).toLocaleDateString("en-IN")} · {r.checks.filter((c) => c.passed).length} of {r.checks.length} checks</span>
                 {r.evidence.map((e) => (
-                  <a key={e.url} className="ml-2 underline" href={e.url} target="_blank" rel="noreferrer">{e.label}</a>
+                  <a key={e.url} className="ml-2 text-xs underline" href={e.url} target="_blank" rel="noreferrer">{e.label}</a>
                 ))}
-                {r.notes && <p className="mt-1 text-muted">{r.notes}</p>}
+                {r.notes && <p className="mt-1 break-words text-muted">{r.notes}</p>}
               </li>
             ))}
           </ul>
-        </>
+        </details>
       )}
+
+      <div className="sticky bottom-0 -mx-6 mt-8 rounded-b-[18px] border-t border-line bg-cream/95 px-6 py-4 backdrop-blur md:-mx-7 md:px-7">
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="min-w-0">
+            <label className="label" htmlFor="r-notes">Notes (the vendor sees these if turned down or paused)</label>
+            <textarea id="r-notes" className="input min-h-10" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn-primary" disabled={saving} onClick={() => decide("verified")}>Verify</button>
+            <button type="button" className="btn-quiet" disabled={saving} onClick={() => decide("rejected")}>Turn down</button>
+            <button type="button" className="btn-quiet" disabled={saving} onClick={() => decide("suspended")}>Pause</button>
+          </div>
+        </div>
+        {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+      </div>
     </section>
   );
 }
@@ -426,7 +497,7 @@ function VendorPhotos({ profileId }: { profileId: Id<"vendorProfiles"> }) {
   const review = useMutation(api.marketplace.photos.review);
   const [error, setError] = useState<string | null>(null);
 
-  if (photos === undefined) return <p className="mt-6 text-sm text-muted">Loading…</p>;
+  if (photos === undefined) return <p className="mt-8 text-sm text-muted">Loading…</p>;
   if (photos.length === 0) return null;
 
   const decide = (photoId: Id<"vendorPhotos">, decision: "approved" | "removed") => {
@@ -435,7 +506,7 @@ function VendorPhotos({ profileId }: { profileId: Id<"vendorProfiles"> }) {
   };
 
   return (
-    <div className="card-quiet mt-6 p-4">
+    <div className="card-quiet mt-8 p-5">
       <h3 className="label">Photos</h3>
       <ul className="mt-3 grid gap-4">
         {photos.map((p) => (
@@ -496,14 +567,14 @@ function VendorCheck({ profileId, onUseSources }: { profileId: Id<"vendorProfile
       .finally(() => setStarting(false));
   };
 
-  if (latest === undefined) return <p className="mt-6 text-sm text-muted">Loading…</p>;
+  if (latest === undefined) return <p className="mt-8 text-sm text-muted">Loading…</p>;
 
   // A run is cut off after ten minutes; one still marked running by then won't finish.
   const stuck = latest?.status === "running" && Date.now() - latest.startedAt > 10 * 60_000;
 
   if (latest === null || latest.status === "failed" || stuck) {
     return (
-      <div className="card-quiet mt-6 p-4">
+      <div className="card-quiet mt-8 p-5">
         <h3 className="label">Check this listing</h3>
         <p className="mt-1 text-sm text-muted">Searches the web and reads their own pages, then lists what it found. It flags; you decide.</p>
         {(latest?.error || stuck) && (
@@ -521,7 +592,7 @@ function VendorCheck({ profileId, onUseSources }: { profileId: Id<"vendorProfile
 
   if (latest.status === "running") {
     return (
-      <div className="card-quiet mt-6 p-4" role="status">
+      <div className="card-quiet mt-8 p-5" role="status">
         <h3 className="label">Check this listing</h3>
         <p className="mt-1 text-sm text-muted">Checking… this takes a minute or two.</p>
       </div>
@@ -531,7 +602,7 @@ function VendorCheck({ profileId, onUseSources }: { profileId: Id<"vendorProfile
   const report = latest.report;
   if (!report) {
     return (
-      <div className="card-quiet mt-6 p-4">
+      <div className="card-quiet mt-8 p-5">
         <h3 className="label">Check this listing</h3>
         <p className="mt-1 text-sm text-muted">Searches the web and reads their own pages, then lists what it found. It flags; you decide.</p>
         <button type="button" className="btn-quiet btn-sm mt-3" disabled={starting} onClick={begin}>
@@ -545,24 +616,24 @@ function VendorCheck({ profileId, onUseSources }: { profileId: Id<"vendorProfile
   const when = latest.finishedAt ?? latest.startedAt;
 
   return (
-    <div className="card-quiet mt-6 p-4">
+    <div className="card-quiet mt-8 p-5">
       <h3 className="label">What was found</h3>
       <p className="mt-2 text-sm">{report.summary}</p>
       <ul className="mt-3 grid gap-3">
         {report.checks.map((c) => (
-          <li key={c.key} className="text-sm">
+          <li key={c.key} className="min-w-0 border-t border-line pt-3 text-sm first:border-t-0 first:pt-0">
             <p className="flex flex-wrap items-center gap-2">
               <span className="font-medium">{c.label}</span>
               <span className={c.finding === "supports" ? "chip-ok" : c.finding === "concern" ? "chip-warn" : "chip-quiet"}>
-                {c.finding === "supports" ? "Supports" : c.finding === "concern" ? "Concern" : "Not found"}
+                {c.finding === "supports" ? "Backed" : c.finding === "concern" ? "Concern" : "Not found"}
               </span>
             </p>
-            <p className="mt-1 text-muted">{c.note}</p>
+            <p className="mt-1 break-words text-muted">{c.note}</p>
             {c.sources.length > 0 && (
               <ul className="mt-1 grid gap-1">
                 {c.sources.map((s) => (
-                  <li key={s.url}>
-                    <a className="underline" href={s.url} target="_blank" rel="noreferrer">{s.title.trim() || s.url}</a>
+                  <li key={s.url} className="min-w-0">
+                    <a className="break-words text-xs underline" href={s.url} target="_blank" rel="noreferrer">{s.title.trim() || s.url}</a>
                   </li>
                 ))}
               </ul>
