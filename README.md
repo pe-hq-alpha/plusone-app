@@ -20,18 +20,29 @@
 
 <table align="center">
 <tr>
-<td align="center" width="168"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"><br><b>Meta Muse Spark</b><br><sub>Reads every quote, reply and PDF into the same lines; writes the plans and emails.</sub></td>
-<td align="center" width="168"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"><br><b>Muse Glimmer</b><br><sub>Open weights on our own Modal GPU: checks and tags photos of vendors' work.</sub></td>
-<td align="center" width="168"><img src="assets/logos/convex.svg" width="44" height="44" alt="Convex"><br><b>Convex</b><br><sub>Database, functions, workflows, scheduling and webhooks in one.</sub></td>
-<td align="center" width="168"><img src="assets/logos/claude.svg" width="44" height="44" alt="Claude"><br><b>Claude</b><br><sub>The fallback for any call Meta can't answer, so nothing stalls.</sub></td>
-<td align="center" width="168"><img src="assets/logos/firecrawl.png" width="44" height="44" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites, down to their pricing pages.</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Spark</b><br><sub>Reads quotes, writes plans</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Voice Transcribe</b><br><sub>Briefs and calls</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Wonder</b><br><sub>Vendor checks</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>SAM 3.1</b><br><sub>The venue view</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Glimmer</b><br><sub>Photo checks</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Spark Open</b><br><sub>Price lists</sub></td>
+<td align="center" width="84"><img src="assets/logos/meta.svg" width="30" height="30" alt="Meta"><br><b>Muse Code</b><br><sub>Pair programmer</sub></td>
+<td align="center" width="84"><img src="assets/logos/modal.svg" width="30" height="30" alt="Modal"><br><b>Modal</b><br><sub>Glimmer's GPU</sub></td>
+<td align="center" width="84"><img src="assets/logos/baseten.png" width="30" height="30" alt="Baseten"><br><b>Baseten</b><br><sub>Hosts Spark Open</sub></td>
+<td align="center" width="84"><img src="assets/logos/convex.svg" width="30" height="30" alt="Convex"><br><b>Convex</b><br><sub>The backend</sub></td>
+<td align="center" width="84"><img src="assets/logos/claude.svg" width="30" height="30" alt="Claude"><br><b>Claude</b><br><sub>The fallback</sub></td>
 </tr>
 <tr>
-<td align="center" width="168"><img src="assets/logos/agentmail.png" width="44" height="44" alt="AgentMail"><br><b>AgentMail</b><br><sub>Every event gets its own inbox to write to vendors from.</sub></td>
-<td align="center" width="168"><img src="assets/logos/clerk.svg" width="44" height="44" alt="Clerk"><br><b>Clerk</b><br><sub>One account for customers, vendors and staff, with a door for each.</sub></td>
-<td align="center" width="168"><img src="assets/logos/resend.svg" width="44" height="44" alt="Resend"><br><b>Resend</b><br><sub>The app's own email: the weekly update and account mail.</sub></td>
-<td align="center" width="168"><img src="assets/logos/posthog.svg" width="44" height="44" alt="PostHog"><br><b>PostHog</b><br><sub>Usage counts, never what people write, only with consent.</sub></td>
-<td align="center" width="168"><img src="assets/logos/cloudflare.svg" width="44" height="44" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Serves the site fast from India and everywhere else.</sub></td>
+<td align="center" width="84"><img src="assets/logos/react.svg" width="30" height="30" alt="React"><br><b>React</b><br><sub>Every screen</sub></td>
+<td align="center" width="84"><img src="assets/logos/vite.svg" width="30" height="30" alt="Vite"><br><b>Vite</b><br><sub>The build</sub></td>
+<td align="center" width="84"><img src="assets/logos/tailwind.svg" width="30" height="30" alt="Tailwind CSS"><br><b>Tailwind</b><br><sub>The styling</sub></td>
+<td align="center" width="84"><img src="assets/logos/vitest.svg" width="30" height="30" alt="Vitest"><br><b>Vitest</b><br><sub>The tests</sub></td>
+<td align="center" width="84"><img src="assets/logos/firecrawl.png" width="30" height="30" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Vendors' sites</sub></td>
+<td align="center" width="84"><img src="assets/logos/agentmail.png" width="30" height="30" alt="AgentMail"><br><b>AgentMail</b><br><sub>Event inboxes</sub></td>
+<td align="center" width="84"><img src="assets/logos/clerk.svg" width="30" height="30" alt="Clerk"><br><b>Clerk</b><br><sub>Sign-in</sub></td>
+<td align="center" width="84"><img src="assets/logos/resend.svg" width="30" height="30" alt="Resend"><br><b>Resend</b><br><sub>App email</sub></td>
+<td align="center" width="84"><img src="assets/logos/cloudflare.svg" width="30" height="30" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Hosting</sub></td>
+<td align="center" width="84"><img src="assets/logos/posthog.svg" width="30" height="30" alt="PostHog"><br><b>PostHog</b><br><sub>Usage, with consent</sub></td>
 </tr>
 </table>
 
