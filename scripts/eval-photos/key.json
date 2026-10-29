@@ -1,0 +1,509 @@
+[
+ {
+  "name": "sample-work-1.jpg",
+  "trade": "catering",
+  "profileName": "Kalyana Saapadu Co.",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "banana-leaf-service",
+   "buffet",
+   "serving-staff"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-2.jpg",
+  "trade": "catering",
+  "profileName": "Komalam Caterers",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "buffet"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-3.jpg",
+  "trade": "catering",
+  "profileName": "Kalyana Saapadu Co.",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "dessert-counter",
+   "buffet"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-4.jpg",
+  "trade": "catering",
+  "profileName": "Komalam Caterers",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-5.jpg",
+  "trade": "decor",
+  "profileName": "Jasmine Arch Decorators",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-6.jpg",
+  "trade": "decor",
+  "profileName": "Jasmine Arch Decorators",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "entrance-arch",
+   "kolam-or-rangoli",
+   "fresh-flowers"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-7.jpg",
+  "trade": "photography",
+  "profileName": "Thinnai Photography",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "family-portrait"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-8.jpg",
+  "trade": "photography",
+  "profileName": "Thinnai Photography",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "candid"
+  ],
+  "source": "generated for the app's samples"
+ },
+ {
+  "name": "sample-work-9.jpg",
+  "trade": "catering",
+  "profileName": "Pongal Pot Caterers",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "banana-leaf-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-10.jpg",
+  "trade": "catering",
+  "profileName": "Annapoorani Leaf Caterers",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-11.jpg",
+  "trade": "catering",
+  "profileName": "Neivedhyam Kitchen",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "banana-leaf-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-12.jpg",
+  "trade": "catering",
+  "profileName": "Sambar & Co. Caterers",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-13.jpg",
+  "trade": "catering",
+  "profileName": "Thalaivazhai Caterers",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-14.jpg",
+  "trade": "catering",
+  "profileName": "Paruppu Payasam Kitchen",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-15.jpg",
+  "trade": "catering",
+  "profileName": "Kumudham Feast",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-16.jpg",
+  "trade": "catering",
+  "profileName": "Vettrilai Caterers",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "plated-service"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-17.jpg",
+  "trade": "decor",
+  "profileName": "Sevvanthi Stage Decor",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-18.jpg",
+  "trade": "decor",
+  "profileName": "Kolam Corner Decor",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "artificial-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-19.jpg",
+  "trade": "decor",
+  "profileName": "Poo Kadai Events",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-20.jpg",
+  "trade": "decor",
+  "profileName": "Kuthuvilakku Decor",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-21.jpg",
+  "trade": "decor",
+  "profileName": "Rangoli Room Events",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-22.jpg",
+  "trade": "decor",
+  "profileName": "Marigold Mandapam Designs",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-23.jpg",
+  "trade": "decor",
+  "profileName": "Thamarai Petal Studio",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "fresh-flowers",
+   "lighting"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-24.jpg",
+  "trade": "photography",
+  "profileName": "Veranda Frames",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-25.jpg",
+  "trade": "decor",
+  "profileName": "Gopuram Lens Co.",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-26.jpg",
+  "trade": "decor",
+  "profileName": "Vilakku Light Studio",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "artificial-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-27.jpg",
+  "trade": "decor",
+  "profileName": "Muthu Moments",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "artificial-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-28.jpg",
+  "trade": "decor",
+  "profileName": "Marina Light Photography",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "fresh-flowers"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-29.jpg",
+  "trade": "photography",
+  "profileName": "Pattu Pavadai Pictures",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "group-on-stage"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "sample-work-30.jpg",
+  "trade": "decor",
+  "profileName": "Rangam Studios",
+  "realWork": true,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "lighting"
+  ],
+  "source": "Unsplash, free licence"
+ },
+ {
+  "name": "trap-watermark.jpg",
+  "trade": "decor",
+  "profileName": "Sevvanthi Stage Decor",
+  "realWork": false,
+  "stock": true,
+  "watermark": true,
+  "faces": false,
+  "unsafe": false,
+  "tags": [
+   "stage-backdrop",
+   "fresh-flowers"
+  ],
+  "source": "generated; a stock-style watermark across it"
+ },
+ {
+  "name": "trap-other-brand.jpg",
+  "trade": "catering",
+  "profileName": "Sri Lakshmi Caterers",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "buffet",
+   "serving-staff"
+  ],
+  "source": "generated; a banner names another business (Royal Feast Caterers Bangalore), which the prompt forbids but the schema has no field for"
+ },
+ {
+  "name": "trap-face.jpg",
+  "trade": "cake",
+  "profileName": "Cake Walk Chennai",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": false,
+  "tags": [
+   "fresh-cream-finish"
+  ],
+  "source": "generated; a woman's face clear and sharp"
+ },
+ {
+  "name": "trap-unsafe.jpg",
+  "trade": "venue",
+  "profileName": "Marina Banquets",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": true,
+  "unsafe": true,
+  "tags": [],
+  "source": "generated; a brawl, broken glass, spilled liquor"
+ },
+ {
+  "name": "trap-blurry.jpg",
+  "trade": "photography",
+  "profileName": "Veranda Frames",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [],
+  "source": "generated; a motion-blurred, unusable photo"
+ },
+ {
+  "name": "trap-wrong-trade.jpg",
+  "trade": "decor",
+  "profileName": "Poo Kadai Events",
+  "realWork": false,
+  "stock": false,
+  "watermark": false,
+  "faces": false,
+  "unsafe": false,
+  "tags": [],
+  "source": "generated; an office desk, nothing to do with events"
+ }
+]
