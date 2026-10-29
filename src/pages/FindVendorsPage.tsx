@@ -111,7 +111,16 @@ export function FindVendorsPage() {
 function ListingCard({ card, category }: { card: Card; category: string }) {
   const start = card.startingPrice;
   return (
-    <Link to={`/vendors/${card._id}`} className="block rounded-[14px] border border-line bg-cream px-4 py-3.5 hover:border-accent">
+    <Link to={`/vendors/${card._id}`} className="block overflow-hidden rounded-[14px] border border-line bg-cream hover:border-accent">
+      {/* A picture on every card: their own checked work, or a quiet panel for the trade until they add some. */}
+      {card.photos[0] ? (
+        <img src={card.photos[0].url} alt={card.photos[0].shows ?? `Work by ${card.name}`} className="aspect-[16/9] w-full object-cover" loading="lazy" />
+      ) : (
+        <div className="grid aspect-[16/9] w-full place-items-center bg-accent-soft" aria-hidden="true">
+          <span className="display text-xl text-accent">{category}</span>
+        </div>
+      )}
+      <div className="px-4 pb-3.5 pt-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-medium text-ink">{card.name}</p>
@@ -133,6 +142,7 @@ function ListingCard({ card, category }: { card: Card; category: string }) {
       <p className="mt-1 text-[11px] text-quiet">
         {card.completedEvents} {card.completedEvents === 1 ? "event" : "events"} through {BRAND.name}
       </p>
+      </div>
     </Link>
   );
 }

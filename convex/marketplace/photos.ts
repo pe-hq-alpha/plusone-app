@@ -475,6 +475,29 @@ const SAMPLE_WORK: { vendor: string; key: string }[] = [
   { vendor: "Jasmine Arch Decorators", key: "sample-work-6" },
   { vendor: "Thinnai Photography", key: "sample-work-7" },
   { vendor: "Thinnai Photography", key: "sample-work-8" },
+  // Free-licence photos from Unsplash, one for every other sample vendor (scripts/sample-photos.json).
+  { vendor: "Pongal Pot Caterers", key: "sample-work-9" },
+  { vendor: "Annapoorani Leaf Caterers", key: "sample-work-10" },
+  { vendor: "Neivedhyam Kitchen", key: "sample-work-11" },
+  { vendor: "Sambar & Co. Caterers", key: "sample-work-12" },
+  { vendor: "Thalaivazhai Caterers", key: "sample-work-13" },
+  { vendor: "Paruppu Payasam Kitchen", key: "sample-work-14" },
+  { vendor: "Kumudham Feast", key: "sample-work-15" },
+  { vendor: "Vettrilai Caterers", key: "sample-work-16" },
+  { vendor: "Sevvanthi Stage Decor", key: "sample-work-17" },
+  { vendor: "Kolam Corner Decor", key: "sample-work-18" },
+  { vendor: "Poo Kadai Events", key: "sample-work-19" },
+  { vendor: "Kuthuvilakku Decor", key: "sample-work-20" },
+  { vendor: "Rangoli Room Events", key: "sample-work-21" },
+  { vendor: "Marigold Mandapam Designs", key: "sample-work-22" },
+  { vendor: "Thamarai Petal Studio", key: "sample-work-23" },
+  { vendor: "Veranda Frames", key: "sample-work-24" },
+  { vendor: "Gopuram Lens Co.", key: "sample-work-25" },
+  { vendor: "Vilakku Light Studio", key: "sample-work-26" },
+  { vendor: "Muthu Moments", key: "sample-work-27" },
+  { vendor: "Marina Light Photography", key: "sample-work-28" },
+  { vendor: "Pattu Pavadai Pictures", key: "sample-work-29" },
+  { vendor: "Rangam Studios", key: "sample-work-30" },
 ];
 const SAMPLE_WORK_BASE = "https://plusoneevents.site/photos";
 
@@ -559,3 +582,29 @@ export const sampleReport = internalQuery({
     return out;
   },
 });
+
+/**
+ * Approve the sample vendors' flagged photos on behalf of a founder (`npx convex run
+ * marketplace/photos:approveSamples '{"email":"…"}'`, by hand). They are our own labelled
+ * samples, free-licence pictures the check rightly calls stock; a real vendor's photo is
+ * never touched here.
+ */
+export const approveSamples = internalMutation({
+  args: { email: v.string() },
+  returns: v.object({ approved: v.number() }),
+  handler: async (ctx, args) => {
+    const staff = await ctx.db.query("users").withIndex("email", (q) => q.eq("email", args.email)).first();
+    if (!staff?.staffRole) throw new Error("Only a PlusOne team account can approve photos.");
+    let approved = 0;
+    const photos = await ctx.db.query("vendorPhotos").take(500);
+    for (const photo of photos) {
+      if (!photo.sampleKey || photo.review || photo.status !== "checked") continue;
+      const profile = await ctx.db.get(photo.profileId);
+      if (!profile?.sample || profile.ownerUserId) continue;
+      await ctx.db.patch(photo._id, { review: { decision: "approved", reviewedBy: staff._id, reviewedAt: Date.now() } });
+      approved++;
+    }
+    return { approved };
+  },
+});
+

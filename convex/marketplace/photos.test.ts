@@ -413,12 +413,12 @@ describe("photos customers see", () => {
     const t = setup();
     await t.mutation(internal.marketplace.samples.ensureVendors, {});
 
-    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 8, skipped: 0 });
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 30, skipped: 0 });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
-    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 0, skipped: 8 });
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 0, skipped: 30 });
 
-    const photos = await t.run((ctx) => ctx.db.query("vendorPhotos").take(20));
-    expect(photos).toHaveLength(8);
+    const photos = await t.run((ctx) => ctx.db.query("vendorPhotos").take(40));
+    expect(photos).toHaveLength(30);
     expect(photos.every((p) => p.status === "checked" && p.addedBy === undefined && p.sampleKey?.startsWith("sample-work-"))).toBe(true);
   });
 });
