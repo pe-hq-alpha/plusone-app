@@ -20,7 +20,7 @@
 - **Credits spent:** about $0.04 of $150 in our own measured runs: $0.0053 for the first production call (27 Oct) and $0.033 for the recorded demo run (28 Oct), plus one voice note on production (under $0.01; a note is capped at 2 minutes). Correction: this field said "none on 28 Oct" before that run. Every call is recorded in `modelCalls`, to be reconciled with Meta Billing. Partner credits, apart from the Meta key: about $0.003 of Baseten's $100 (one Spark Open check, 29 Oct); about $0.30 of Modal's $100 for Glimmer (one cold start of about 217 s of H200 and one 5.5 s check, 29 Oct)
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-10-29T13:30:00+05:30
+- **Last updated:** 2026-10-29T11:20:00+05:30
 
 ## Evidence
 
