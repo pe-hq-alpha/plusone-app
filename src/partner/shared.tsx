@@ -1,10 +1,18 @@
+import { ConvexError } from "convex/values";
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
 import { describeOffer, sheetFor } from "../../convex/lib/standardSheet";
 import { money } from "../lib/format";
 
-/** A server refusal in the words it was written in, without Convex's wrapping. */
-export const errorText = (e: unknown, fallback: string) =>
-  e instanceof Error ? e.message.replace(/^.*ConvexError: /, "").split("\n")[0] : fallback;
+/**
+ * A server refusal in the words it was written in. On production Convex hides an error's
+ * message ("Server Error") and sends a ConvexError's words as its data, so the data comes
+ * first; anything unexpected gets the fallback rather than Convex's wrapping.
+ */
+export const errorText = (e: unknown, fallback: string) => {
+  if (e instanceof ConvexError && typeof e.data === "string") return e.data;
+  const said = e instanceof Error ? e.message.replace(/^.*ConvexError: /, "").split("\n")[0] : "";
+  return said && !/Server Error|\[CONVEX /.test(said) ? said : fallback;
+};
 
 /** "Sat 12 Dec 2026" from "2026-12-12". */
 export function dayText(iso: string): string {
