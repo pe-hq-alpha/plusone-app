@@ -215,10 +215,10 @@ export const save = internalMutation({
   },
 });
 
-/** Run SAM 3.1 on the photo with these objects and write its cost row against the event. */
+/** Run SAM 3.1 on the photo with these objects and write its cost row, against the event when there is one. */
 async function cutOut(
   ctx: { runMutation: Parameters<typeof generateObject>[0]["ctx"]["runMutation"] },
-  view: { eventId: Id<"events">; url: string; width: number; height: number },
+  view: { eventId?: Id<"events">; url: string; width: number; height: number },
   objects: SamObject[],
 ) {
   const started = Date.now();
@@ -231,10 +231,40 @@ async function cutOut(
     outputTokens: 0,
     costUsd: SAM_USD_PER_IMAGE,
     fellBack: false,
-    eventId: view.eventId,
+    ...(view.eventId ? { eventId: view.eventId } : {}),
     durationMs: Date.now() - started,
   });
   return partsFrom(segments);
+}
+
+/**
+ * Muse Spark boxes the stage and the wall behind it on a 0–1000 grid, and SAM 3.1 cuts out
+ * whatever was boxed. Shared by the venue view and its evaluation, so both run one path.
+ */
+export async function findParts(
+  ctx: Parameters<typeof generateObject>[0]["ctx"],
+  view: { eventId?: Id<"events">; url: string; width: number; height: number },
+) {
+  const { object } = await generateObject({
+    ctx,
+    feature: "findStage",
+    ...(view.eventId ? { eventId: view.eventId } : {}),
+    model: MODEL_FAST,
+    effort: "low",
+    system: FIND_STAGE_INSTRUCTIONS,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "file", data: new URL(view.url), mediaType: "image/jpeg" },
+          { type: "text", text: "Find the stage and the backdrop in this hall." },
+        ],
+      },
+    ],
+    schema: stageFinding,
+  });
+  const objects = objectsFor(object, view.width, view.height);
+  return objects.length > 0 ? await cutOut(ctx, view, objects) : {};
 }
 
 /** Find the stage and the wall behind it: Muse Spark boxes them, SAM 3.1 cuts them out. */
@@ -251,26 +281,7 @@ export const find = internalAction({
       return null;
     }
     try {
-      const { object } = await generateObject({
-        ctx,
-        feature: "findStage",
-        eventId: view.eventId,
-        model: MODEL_FAST,
-        effort: "low",
-        system: FIND_STAGE_INSTRUCTIONS,
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "file", data: new URL(view.url), mediaType: "image/jpeg" },
-              { type: "text", text: "Find the stage and the backdrop in this hall." },
-            ],
-          },
-        ],
-        schema: stageFinding,
-      });
-      const objects = objectsFor(object, view.width, view.height);
-      const parts = objects.length > 0 ? await cutOut(ctx, view, objects) : {};
+      const parts = await findParts(ctx, view);
       const found = Object.keys(parts).length > 0;
       await ctx.runMutation(internal.venueView.save, {
         viewId: args.viewId,

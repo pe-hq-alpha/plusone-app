@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
 import { readVendorReply } from "./claude";
+import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
 import { type QuoteScore, scoreQuote, totals } from "./lib/evalScore";
 import { missingCharges as flagMissing, sheetFor } from "./lib/standardSheet";
@@ -57,5 +58,28 @@ export const missingCharges = internalAction({
       });
     }
     return { ranAt: new Date().toISOString(), seconds: Math.round((Date.now() - started) / 1000), totals: totals(scores), scores };
+  },
+});
+
+/**
+ * The venue view on a set of hall photos (`npx convex run evals:venueStage '{"photos": [...]}'`
+ * on production): for each, the parts Muse Spark and SAM 3.1 found, with their boxes and
+ * outlines, for a person to judge by eye against the photo.
+ */
+export const venueStage = internalAction({
+  args: { photos: v.array(v.object({ name: v.string(), url: v.string(), width: v.number(), height: v.number() })) },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<unknown> => {
+    const out = [];
+    for (const photo of args.photos) {
+      const started = Date.now();
+      try {
+        const parts = await findParts(ctx, photo);
+        out.push({ name: photo.name, ms: Date.now() - started, parts });
+      } catch (error) {
+        out.push({ name: photo.name, ms: Date.now() - started, error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+    return out;
   },
 });
