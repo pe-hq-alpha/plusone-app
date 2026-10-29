@@ -7,6 +7,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { readyToUpload } from "../lib/pictures";
 import { drawVenue, LOOKS, type DrawParts } from "../lib/venueLooks";
+import { HoodHint } from "../components/HoodHint";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Part = "backdrop" | "stage";
@@ -197,6 +198,7 @@ export function VenuePage() {
             A sketch on your own hall, to compare decorators against. Their work will look different.
             {view.sample && " The sample hall is our own photo, not a real venue."}
           </p>
+          {hasParts && <HoodHint demo={event.demo === true} />}
 
           <div className="flex flex-wrap gap-2">
             {canEdit && photoButton(view.sample ? "Use a photo of your hall" : "Use another photo")}

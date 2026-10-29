@@ -17,6 +17,7 @@ import { BRAND } from "../lib/brand";
 import { PartWord, PeopleWord } from "../lib/words";
 import { Backdrop } from "./ui/Backdrop";
 import { UnderTheHood } from "./UnderTheHood";
+import { hoodSeen, markHoodSeen, onOpenHood } from "../lib/hood";
 
 /** The sample events, by kind, for the demo banner's links. */
 const SAMPLES = [
@@ -88,7 +89,17 @@ export function EventLayout() {
   const { eventId } = useParams<{ eventId: string }>();
   const data = useQuery(api.events.get, eventId ? { eventId: eventId as Id<"events"> } : "skip");
   const [walking, setWalking] = useState(false);
-  const [hood, setHood] = useState(false);
+  const [hood, setHoodOpen] = useState(false);
+  const [hoodNew, setHoodNew] = useState(() => !hoodSeen());
+  const setHood = (open: boolean) => {
+    setHoodOpen(open);
+    if (open) {
+      markHoodSeen();
+      setHoodNew(false);
+    }
+  };
+  // A page can point a judge at the panel ("See the Meta models behind this").
+  useEffect(() => onOpenHood(() => setHood(true)), []);
   const [feedback, setFeedback] = useState(false);
   const [params, setParams] = useSearchParams();
   const { pathname } = useLocation();
@@ -187,8 +198,12 @@ export function EventLayout() {
             <button type="button" onClick={() => setWalking(true)} title="A quick tour of the whole plan" aria-label="Show me around" className="shell-tool">
               <Icon name="star" size={17} />
             </button>
-            <button type="button" onClick={() => setHood(true)} title="Under the hood: which model ran each step" aria-label="Under the hood" className="shell-tool">
+            <button type="button" onClick={() => setHood(true)} title="Under the hood: which model ran each step" aria-label="Under the hood" className="shell-tool relative">
               <Cpu size={17} strokeWidth={1.5} aria-hidden="true" />
+              {/* On the demo, a dot until it has been opened once, so a judge finds it. */}
+              {data?.event.demo && hoodNew && (
+                <span aria-hidden="true" className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-accent" />
+              )}
             </button>
             <Link to="help" title="Help" aria-label="Help" className="shell-tool">
               <LifeBuoy size={17} strokeWidth={1.5} aria-hidden="true" />
@@ -222,6 +237,13 @@ export function EventLayout() {
           <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 text-sm md:px-6">
             <p className="min-w-0 text-muted">
               <span className="font-medium text-ink">A sample plan.</span> Click anything; the vendors are made up, so emails to them are simulated.{" "}
+              <span>
+                Judging?{" "}
+                <button type="button" onClick={() => setHood(true)} className="text-accent underline-offset-4 hover:underline">
+                  Under the hood
+                </button>
+                , the chip icon at the top, shows the Meta model behind every step.{" "}
+              </span>
               <span className="hidden lg:inline">
                 Or open{" "}
                 {SAMPLES.filter((x) => x.type !== event.eventType).map((x, i) => (

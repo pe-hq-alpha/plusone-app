@@ -14,6 +14,7 @@ import { BRAND } from "../lib/brand";
 import { partnerHref } from "../lib/hosts";
 import { ContactLinks } from "../components/ContactLinks";
 import { vendorHello } from "../lib/contact";
+import { HoodHint } from "../components/HoodHint";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Board = NonNullable<FunctionReturnType<typeof api.dashboard.board>>;
@@ -535,6 +536,7 @@ function LineByLine({
         )}
       </div>
       <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
+      <HoodHint demo={contact?.demo === true} className="mt-1" />
       <div className="relative mt-3 overflow-x-auto">
         <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
           <caption className="sr-only">Each quote and offer against the same lines</caption>

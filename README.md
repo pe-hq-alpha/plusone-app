@@ -103,7 +103,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 | **PlusOne Partner:** vendors register, price packages on the standard sheet and answer a customer's brief | Muse Spark (wording), Muse Glimmer (photos) | Live, 28 Oct: its own sign-in, joining or claiming a listing, prices and offers on the standard sheet in each trade's own units with what's in the price, offers landing in the customer's Compare, their wording tidied before customers see it ("rs.500/-" becomes "₹500", never a changed number, the vendor chooses), photos of their work checked and tagged on Muse Glimmer (29 Oct), and a vendors' demo of its own, separate from the customers', on its own address, partner.plusoneevents.site |
 | **PlusOne Ops:** a verification agent gathers evidence about a vendor, with links; a person decides | Muse Wonder | Review queue with its checklist, evidence and decisions live 28 Oct; the Muse Wonder check built into it 28 Oct ("Check this vendor", `convex/marketplace/checks.ts`), in production since 28 Oct; its first live run is next |
 | **Photos of a vendor's work, checked:** real work or stock, another business's watermark, faces, and tags from a fixed list for the trade; flags go to Ops | Muse Glimmer 30B (open weights, our own Modal endpoint), Muse Spark as fallback | Live in production, 29 Oct |
-| WhatsApp and calling vendors from the app | | Building, by 1 Nov |
+| **WhatsApp and Call for every vendor**, since vendors in India are reached on WhatsApp and by phone: WhatsApp opens with the first message written for the event ("Hello Kaveri Feast Co., I'm planning Amma's 60th on 30 Jan in Chennai…") | | Live, 29 Oct (`src/lib/contact.ts`, `src/components/ContactLinks.tsx`); in the demo the vendors are made up, so the buttons say what would happen |
 
 Before the hackathon, PlusOne already planned an event from a conversation, found vendors, wrote to them from the event's inbox and put their quotes in one unit, on Claude. [Repository](#repository) gives the exact line between the two.
 
@@ -352,7 +352,7 @@ Planning works end to end: the planning conversation, the plan, Today, vendor se
 
 ## Next steps
 
-- **Finish the hackathon build:** the items marked "Building" in [For the judges](#for-the-judges), by 1 November.
+- **Finish the hackathon build:** the items marked "Building" in [For the judges](#for-the-judges), by 30 October.
 - **Real customers and vendors:** families, teams, event managers and vendors on the events that repeat most (birthdays, engagements, housewarmings); real quotations collected and hidden charges mapped; then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
 - **PlusOne Premium:** a real person from the PlusOne team beside the app, in real time and on call, opening after launch.
 - **Booking and execution:** milestones, advances, vendor confirmations, change requests and a final reconciliation, booked through PlusOne with a disclosed fee.
