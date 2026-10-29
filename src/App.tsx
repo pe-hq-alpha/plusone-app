@@ -35,6 +35,7 @@ const SharedPlanPage = page(() => import("./pages/SharedPlanPage"), "SharedPlanP
 const HelpPage = page(() => import("./pages/HelpPage"), "HelpPage");
 const VendorsPage = page(() => import("./pages/VendorsPage"), "VendorsPage");
 const DecisionsPage = page(() => import("./pages/DecisionsPage"), "DecisionsPage");
+const VenuePage = page(() => import("./pages/VenuePage"), "VenuePage");
 const InboxPage = page(() => import("./pages/InboxPage"), "InboxPage");
 const GuestsPage = page(() => import("./pages/GuestsPage"), "GuestsPage");
 const AssistantPage = page(() => import("./pages/AssistantPage"), "AssistantPage");
@@ -112,6 +113,7 @@ export default function App() {
                     <Route path="gifts" element={<GiftsPage />} />
                     <Route path="help" element={<HelpPage />} />
                     <Route path="decisions" element={<DecisionsPage />} />
+                    <Route path="venue" element={<VenuePage />} />
                     <Route path="vendors" element={<VendorsPage />} />
                     <Route path="vendors/:slotId" element={<VendorsPage />} />
                     <Route path="inbox" element={<InboxPage />} />

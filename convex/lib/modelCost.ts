@@ -63,6 +63,9 @@ export function glimmerCostUsd(seconds: number): number {
   return (billed * GLIMMER_GPU_USD_PER_HOUR) / 3600;
 }
 
+/** SAM 3.1 on the Model API: $2.50 per 1,000 images (https://dev.meta.ai/docs/pricing-rate-limits, re-read 27 Oct). */
+export const SAM_USD_PER_IMAGE = 0.0025;
+
 /** The `modelCalls` row for a finished call. */
 export function callRecord(
   feature: string,

@@ -247,6 +247,11 @@ function NeedBoard({ need, currency, city, demo, canEdit, eventId, compareOnly =
           <p className="mt-0.5 text-xs text-quiet">
             {need.sessionNames.length > 0 ? need.sessionNames.join(" · ") : "the whole event"} · {money(need.budget, currency)} planned
           </p>
+          {!compareOnly && need.category === "Decor & Florals" && (
+            <Link to={`/e/${eventId}/venue`} className="mt-1.5 inline-block text-xs font-medium text-accent underline-offset-2 hover:underline">
+              See it on your venue
+            </Link>
+          )}
         </div>
         <div className="text-right">
         <p className="text-sm text-muted">

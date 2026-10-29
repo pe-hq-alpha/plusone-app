@@ -1,4 +1,4 @@
-import { decodeMaskToRLE, formats, recordsOfKind, type RLEObject } from "@meta-sam/parser";
+import { decodeMaskToRLE, decodeMaskToSVGPath, formats, recordsOfKind, type RLEObject } from "@meta-sam/parser";
 import { MALFORMED, MetaError, RETRYABLE, retryAfterMs } from "./meta";
 
 /**
@@ -51,6 +51,8 @@ export type SamSegment = {
   /** Absent when the API sent no score; absence never counts as zero. */
   confidence: number | undefined;
   mask: RLEObject;
+  /** The mask's outline as an SVG path in the image's pixels, for a page to clip a drawing to. */
+  path: string;
 };
 
 /** A coordinate in displayed pixels; preview taps must be scaled up to the image first. */
@@ -218,6 +220,7 @@ export function parseSamOutput(text: string, image: SamImage, minConfidence: num
       size: { w, h },
       confidence,
       mask: decodeMaskToRLE(mask.mask),
+      path: decodeMaskToSVGPath(mask.mask),
     });
   }
   return segments;

@@ -359,6 +359,46 @@ export const vendorCheckFields = {
 };
 
 /** What the photo check found: plain booleans, one sentence on what it shows, and up to 5 tags by key. */
+/** A part of the hall SAM cut out: its box in the image's pixels, the mask as COCO RLE, and SAM's score. */
+export const venuePartMask = v.object({
+  box: v.object({ x1: v.number(), y1: v.number(), x2: v.number(), y2: v.number() }),
+  rle: v.object({ size: v.array(v.number()), counts: v.string() }),
+  /** The outline as an SVG path in the image's pixels, which the page clips its drawing to. */
+  path: v.string(),
+  confidence: v.optional(v.number()),
+});
+
+export const venueParts = v.object({ backdrop: v.optional(venuePartMask), stage: v.optional(venuePartMask) });
+
+/**
+ * "See it on your venue" for one event: the hall photo (the family's own upload, or the
+ * sample hall), and the stage and backdrop SAM 3.1 cut out of it. One per event; a new
+ * photo replaces the last.
+ */
+export const venueViewFields = {
+  eventId: v.id("events"),
+  /** The family's own photo; absent for the sample hall. */
+  storageId: v.optional(v.id("_storage")),
+  /** "sample-hall", or the photo's sha256: what the mask cache is keyed on. */
+  imageKey: v.string(),
+  width: v.number(),
+  height: v.number(),
+  status: v.union(v.literal("finding"), v.literal("ready"), v.literal("none"), v.literal("failed")),
+  parts: venueParts,
+  /** Found by Muse Spark and SAM, or picked by a tap. */
+  source: v.optional(v.union(v.literal("found"), v.literal("tapped"))),
+  updatedAt: v.number(),
+};
+
+/** SAM 3.1's masks for an image and a prompt, so the same hall and tap are never paid for twice. */
+export const segmentCacheFields = {
+  imageKey: v.string(),
+  /** "find", or a tap on a 2% grid: "tap:backdrop:25:30". */
+  promptKey: v.string(),
+  parts: venueParts,
+  at: v.number(),
+};
+
 export const vendorPhotoCheck = v.object({
   realWork: v.boolean(),
   stock: v.boolean(),
@@ -886,6 +926,8 @@ export default defineSchema({
   vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
 
   vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]),
+  venueViews: defineTable(venueViewFields).index("by_eventId", ["eventId"]),
+  segmentCache: defineTable(segmentCacheFields).index("by_imageKey_and_promptKey", ["imageKey", "promptKey"]),
 
   priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),
 

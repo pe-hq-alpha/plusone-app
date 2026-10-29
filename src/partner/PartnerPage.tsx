@@ -14,6 +14,7 @@ import { useDemoEventId } from "../components/LeaveDemo";
 import { CustomerCompare } from "../pages/DecisionsPage";
 import { partnerHref } from "../lib/hosts";
 import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
+import { readyToUpload } from "../lib/pictures";
 
 /**
  * PlusOne Partner, for vendors: join or claim your listing, answer customers' briefs on
@@ -430,31 +431,6 @@ type MinePhoto = {
   review: "approved" | "removed" | null;
 };
 
-/** The longest side a work photo is sent at: plenty to judge the work, and well under the 5 MB the server takes. */
-const PHOTO_EDGE = 2048;
-
-/**
- * A phone photo shrunk to PHOTO_EDGE as a JPEG before it goes up, since a camera's own
- * file is often over 5 MB. A photo the browser can't redraw goes up as it is, and the
- * server decides.
- */
-async function shrinkPhoto(file: File): Promise<Blob> {
-  try {
-    const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, PHOTO_EDGE / Math.max(bitmap.width, bitmap.height));
-    if (scale === 1 && file.size <= 1_500_000 && file.type === "image/jpeg") return file;
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    bitmap.close();
-    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
-    return blob ?? file;
-  } catch {
-    return file;
-  }
-}
-
 /** Photos of the vendor's past work, checked before customers see them. */
 function Photos() {
   const photos = useQuery(api.marketplace.photos.mine);
@@ -473,7 +449,8 @@ function Photos() {
     setError(null);
     void (async () => {
       for (const file of files) {
-        const photo = await shrinkPhoto(file);
+        // Phone photos are often over the 5 MB the server takes; 2,048 px is plenty to judge the work.
+        const photo = await readyToUpload(file, 2048);
         const url = await generateUploadUrl({});
         const res = await fetch(url, { method: "POST", headers: { "Content-Type": photo.type || file.type }, body: photo });
         if (!res.ok) throw new Error(`Upload failed (${res.status})`);

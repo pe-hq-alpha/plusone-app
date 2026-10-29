@@ -21,6 +21,7 @@ vi.mock("@meta-sam/parser", () => ({
     size: [mask.height, mask.width],
     counts: `rle:${mask.width}x${mask.height}`,
   }),
+  decodeMaskToSVGPath: (mask: { width: number; height: number }) => `M0 0h${mask.width}v${mask.height}h-${mask.width}z`,
 }));
 
 const env = { MODEL_API_KEY: "LLM_1_test" };
@@ -118,6 +119,7 @@ describe("a SAM reply", () => {
           size: { w: 640, h: 480 },
           confidence: 0.9,
           mask: { size: [4, 8], counts: "rle:8x4" },
+          path: "M0 0h8v4h-8z",
         },
       ]);
     } finally {

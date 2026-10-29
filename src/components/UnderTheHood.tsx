@@ -24,6 +24,8 @@ const STEP: Record<string, string> = {
   checkContract: "Checked a contract",
   guestImport: "Read a guest list",
   suggestPalette: "Suggested palettes from your pictures",
+  findStage: "Found the stage in your hall photo",
+  venueCutOut: "Cut out the stage and the wall behind it",
 };
 
 /** A model id as people would say it. */
@@ -33,6 +35,7 @@ function modelName(model: string, provider: "meta" | "claude" | "spark_open" | "
   const spark = model.match(/^muse-spark-(\d+(?:\.\d+)?)/);
   if (spark) return `Meta Muse Spark ${spark[1]}`;
   if (model.startsWith("muse-wonder")) return "Meta Muse Wonder";
+  if (model === "sam-3.1") return "Meta SAM 3.1";
   if (provider === "meta") return `Meta ${model}`;
   return "Claude (backup)";
 }
