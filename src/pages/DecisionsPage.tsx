@@ -15,6 +15,7 @@ import { partnerHref } from "../lib/hosts";
 import { ContactLinks } from "../components/ContactLinks";
 import { vendorHello } from "../lib/contact";
 import { HoodHint } from "../components/HoodHint";
+import { PriceRange } from "../components/PriceRange";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 type Board = NonNullable<FunctionReturnType<typeof api.dashboard.board>>;
@@ -322,6 +323,17 @@ function NeedBoard({
       </div>
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
+
+      {need.market && columns.some((c) => c.perUnit !== null) && (
+        <div className="border-b border-line">
+          <PriceRange
+            band={need.market}
+            city={city}
+            unitWord={unitWord}
+            points={columns.flatMap((c) => (c.perUnit !== null ? [{ id: c.id, name: c.name, price: c.perUnit }] : []))}
+          />
+        </div>
+      )}
 
       {need.sheet && columns.length > 0 && (
         <LineByLine
