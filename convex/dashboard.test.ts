@@ -142,7 +142,7 @@ describe("missing charges on the decision board", () => {
     ]);
     const photos = board.needs.find((n) => n.category === "Photographer")!;
     expect(photos.sheet?.quantities.find((q) => q.key === "delivery")).toEqual({ key: "delivery", label: "Delivered in", unit: "weeks", better: "less" });
-    expect(photos.offers[0]).toMatchObject({ name: "Thinnai Photography", priceUnit: "for_event", quantities: { hours: 3, photographers: 1, photos: 150, delivery: 1 } });
+    expect(photos.offers[0]).toMatchObject({ name: "Thinnai Photography", level: "Top", completedEvents: 10, priceUnit: "for_event", quantities: { hours: 3, photographers: 1, photos: 150, delivery: 1 } });
   });
 
   test("an offer from before there were ways of charging reads as the main one, with nothing stated", async () => {

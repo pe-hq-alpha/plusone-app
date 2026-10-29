@@ -41,6 +41,8 @@ export const listingCard = v.object({
   sample: v.boolean(),
   /** Photos of their work customers may see: checked clean, or approved in Ops. */
   photos: v.array(customerPhoto),
+  /** Events done through PlusOne, which set the level: a track record, not a rating bought. */
+  completedEvents: v.number(),
 });
 
 export const bandResult = v.union(
@@ -100,6 +102,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     whatsapp: profile.whatsapp,
     sample: profile.sample === true,
     photos: await photosForCustomers(ctx, profile),
+    completedEvents: profile.completedEvents,
   };
 }
 

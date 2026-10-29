@@ -31,7 +31,7 @@ type SheetQuantity = NonNullable<Need["sheet"]>["quantities"][number];
  * an emailed quote is a later step.
  */
 type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> &
-  Partial<Pick<Offer, "priceUnit" | "quantities" | "photos" | "phone" | "whatsapp">> & {
+  Partial<Pick<Offer, "priceUnit" | "quantities" | "photos" | "phone" | "whatsapp" | "level" | "completedEvents">> & {
     id: string;
     name: string;
     from: "web" | "verified" | "sample";
@@ -590,6 +590,7 @@ function LineByLine({
                 ))}
               </tr>
             )}
+            <TrackRecord columns={columns} />
             <PastWork columns={columns} />
             <WhatsInIt sheet={sheet} columns={columns} />
             {sheet.lines.map((line) => (
@@ -618,6 +619,36 @@ function LineByLine({
         </table>
       </div>
     </div>
+  );
+}
+
+/**
+ * A Partner vendor's track record beside their price: the level PlusOne gives from events
+ * done through it (never bought), so a family can weigh a little more for a proven vendor.
+ * A vendor found on the web has none yet.
+ */
+function TrackRecord({ columns }: { columns: Column[] }) {
+  if (!columns.some((c) => c.level)) return null;
+  return (
+    <tr>
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted" title="Set by events done through PlusOne: New, then Trusted, then Top. It can't be bought.">
+        Track record
+      </th>
+      {columns.map((c) => (
+        <td key={c.id} className="px-3 py-2 text-right align-top">
+          {c.level ? (
+            <>
+              <span className={c.level === "New" ? "chip-quiet" : "chip-ok"}>{c.level}</span>
+              <span className="mt-0.5 block text-[11px] text-muted">
+                {c.completedEvents ?? 0} {c.completedEvents === 1 ? "event" : "events"} through {BRAND.name}
+              </span>
+            </>
+          ) : (
+            <span className="text-[11px] text-quiet">Not on {BRAND.name} yet</span>
+          )}
+        </td>
+      ))}
+    </tr>
   );
 }
 

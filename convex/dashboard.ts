@@ -8,7 +8,7 @@ import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
 import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
 import { tierFor } from "./lib/marketplace";
-import { badge, bandRow, tier } from "./marketplace/listings";
+import { badge, bandRow, level, tier } from "./marketplace/listings";
 import { offersForEvent } from "./marketplace/offers";
 import { customerPhoto } from "./marketplace/photos";
 
@@ -52,6 +52,9 @@ const offerRow = v.object({
   quantities: v.record(v.string(), v.number()),
   /** Photos of the vendor's past work customers may see. */
   photos: v.array(customerPhoto),
+  /** Their track record on PlusOne: level (New, Trusted, Top) and events done through it. */
+  level: v.optional(level),
+  completedEvents: v.optional(v.number()),
   /** How to reach them: WhatsApp and a call, as the vendor gave them on Partner. */
   phone: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
@@ -432,6 +435,8 @@ export const board = query({
             ...(sheet ? { priceUnit: priceUnitOf(sheet, o.priceUnit).key } : o.priceUnit ? { priceUnit: o.priceUnit } : {}),
             quantities: o.quantities ?? {},
             photos: o.vendor.photos,
+            level: o.vendor.level,
+            completedEvents: o.vendor.completedEvents,
             ...(o.vendor.phone ? { phone: o.vendor.phone } : {}),
             ...(o.vendor.whatsapp ? { whatsapp: o.vendor.whatsapp } : {}),
           };
