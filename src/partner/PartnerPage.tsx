@@ -1,10 +1,11 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
+import type { FunctionReturnType } from "convex/server";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
-import { describeOffer, priceUnitOf, quantitiesFor, quantityValue, sheetFor, timesFor, type Sheet } from "../../convex/lib/standardSheet";
+import { describeOffer, priceUnitOf, quantitiesFor, quantityText, quantityValue, sheetFor, timesFor, type Sheet } from "../../convex/lib/standardSheet";
 import { VENDOR_CATEGORIES } from "../../convex/lib/vendorNeeds";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -894,6 +895,116 @@ function SentOffers() {
 
 // ---------------------------------------------------------------- prices
 
+type PackageDraft = FunctionReturnType<typeof api.marketplace.priceList.read>["packages"][number];
+
+/**
+ * "Bring your price list": paste the list you already hand out, or add a photo of it, and
+ * each package comes back drafted on your trade's sheet. Nothing saves until you check a
+ * draft in the form below and press Add.
+ */
+function PriceListImport({ category, sheet, onUse }: { category: string; sheet: Sheet; onUse: (d: PackageDraft) => void }) {
+  const read = useAction(api.marketplace.priceList.read);
+  const uploadUrl = useMutation(api.marketplace.photos.generateUploadUrl);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ packages: PackageDraft[]; fromPhoto: boolean } | null>(null);
+
+  const run = (args: { text?: string; storageId?: Id<"_storage"> }) => {
+    setBusy(true);
+    setError(null);
+    setResult(null);
+    void read({ category, ...args })
+      .then(setResult)
+      .catch((err) => setError(errorText(err, "We couldn't read that list. Try again, or add your prices below.")))
+      .finally(() => setBusy(false));
+  };
+
+  const photo = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    void (async () => {
+      const blob = await readyToUpload(file, 2400);
+      const url = await uploadUrl({});
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": blob.type || file.type }, body: blob });
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+      const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+      run({ storageId });
+    })().catch((err) => {
+      setError(errorText(err, "That photo didn't go through. Try again."));
+      setBusy(false);
+    });
+  };
+
+  const unitLabel = (key: string) => sheet.units.find((u) => u.key === key)?.label ?? "";
+  const quantityLine = (d: PackageDraft) =>
+    sheet.quantities
+      .filter((q) => d.quantities[q.key] !== undefined)
+      .map((q) => quantityText(q, d.quantities[q.key]))
+      .join(" · ");
+
+  return (
+    <div className="card mt-4 p-5 md:p-6">
+      <h3 className="font-medium">Bring your price list</h3>
+      <p className="mt-1 text-sm text-muted">
+        Paste the price list you already send customers, or add a photo of it. We set out each package the way your trade is
+        compared, for you to check and add.
+      </p>
+      <label className="sr-only" htmlFor="pl-text">Your price list</label>
+      <textarea
+        id="pl-text"
+        className="input mt-3 min-h-[6rem]"
+        placeholder={"South Indian lunch on banana leaf, 12 items, Rs.380 per plate. GST extra.\nBuffet with live dosa counter, Rs.450 per head."}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        maxLength={6000}
+      />
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button type="button" className="btn-primary btn-sm" disabled={busy || !text.trim()} onClick={() => run({ text })}>
+          {busy ? "Reading your list…" : "Read my price list"}
+        </button>
+        <label className={`btn-quiet btn-sm cursor-pointer bg-cream ${busy ? "pointer-events-none opacity-60" : ""}`}>
+          Add a photo of it
+          <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={photo} disabled={busy} />
+        </label>
+      </div>
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+      {result && result.packages.length === 0 && (
+        <p className="mt-3 text-sm text-muted">We couldn't find a priced package in that. Add your prices in the form below.</p>
+      )}
+      {result && result.packages.length > 0 && (
+        <div className="mt-4">
+          <p className="text-sm text-muted">
+            {result.packages.length === 1 ? "One package" : `${result.packages.length} packages`} from your list.
+            {result.fromPhoto ? " Check each price against your photo before you add it." : ""}
+          </p>
+          <ul className="mt-2 divide-y divide-line">
+            {result.packages.map((d, i) => (
+              <li key={i} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                <div className="min-w-0">
+                  <p className="font-medium">{d.title}</p>
+                  <p className="text-sm text-muted">
+                    {money(d.price, "INR")} {unitLabel(d.priceUnit)}
+                    {d.taxIncluded === true ? " · GST included" : d.taxIncluded === false ? " · GST extra" : ""}
+                  </p>
+                  {quantityLine(d) && <p className="text-sm text-muted">{quantityLine(d)}</p>}
+                  {d.includes.length > 0 && <p className="mt-0.5 text-sm">Includes {d.includes.join(", ")}</p>}
+                </div>
+                <button type="button" className="btn-quiet btn-sm" onClick={() => onUse(d)}>
+                  Use this
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[] }) {
   const save = useMutation(api.marketplace.partner.saveOffering);
   const remove = useMutation(api.marketplace.partner.removeOffering);
@@ -982,6 +1093,22 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
             </li>
           ))}
         </ul>
+      )}
+      {sheet && (
+        <PriceListImport
+          category={category}
+          sheet={sheet}
+          onUse={(d) => {
+            setTitle(d.title);
+            setUnitKey(d.priceUnit);
+            setTyped(Object.fromEntries(Object.entries(d.quantities).map(([k, n]) => [k, String(n)])));
+            setPrice(String(d.price));
+            setIncludes(d.includes.join("\n"));
+            setGst(d.taxIncluded === null ? "" : d.taxIncluded ? "in" : "extra");
+            setPreview(null);
+            document.getElementById("pr-title")?.focus();
+          }}
+        />
       )}
       <form className="card mt-4 grid gap-4 p-5 md:grid-cols-2 md:p-6" onSubmit={add}>
         <div>

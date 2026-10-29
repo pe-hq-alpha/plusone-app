@@ -94,6 +94,10 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   venueSam: { kind: "fixed window", rate: 60, period: DAY },
   venueSamDemo: { kind: "fixed window", rate: 15, period: DAY },
   venueSamAll: { kind: "fixed window", rate: 2000, period: DAY },
+  // Muse Spark Open on a vendor's price list: a few thousand tokens each, on Baseten's credit.
+  priceListRead: { kind: "fixed window", rate: 20, period: DAY },
+  priceListReadDemo: { kind: "fixed window", rate: 5, period: DAY },
+  priceListReadAll: { kind: "fixed window", rate: 500, period: DAY },
 
   // New demos opened, across everyone.
   demoStarts: { kind: "fixed window", rate: 2000, period: DAY },
