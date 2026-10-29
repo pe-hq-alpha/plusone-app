@@ -53,7 +53,7 @@ function Queue() {
     <main id="main" className="page px-5 py-10 md:px-8">
       <HomeOrLeave small />
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Ops</em></h1>
-      <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, claims on listings we added, and changes to verified listings.</p>
+      <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, claims on listings we added, flagged photos, and changes to verified listings.</p>
 
       {queue === undefined ? (
         <p className="mt-6 text-sm text-muted">Loading…</p>
@@ -84,12 +84,70 @@ function Queue() {
               )}
             </section>
             <Claims claims={queue.claims} />
+            <PhotosToCheck />
             <ChangesWaiting />
           </div>
           {open ? <Review profileId={open} onDone={() => setOpen(null)} /> : <EmptyState compact icon="check" title="Choose a vendor to check" />}
         </div>
       )}
     </main>
+  );
+}
+
+/**
+ * Photos of vendors' work the check flagged (stock, another studio's watermark, not event
+ * work, unsafe) or couldn't check, from any listing, verified ones included. Customers see
+ * a flagged photo only once a person approves it here.
+ */
+function PhotosToCheck() {
+  const photos = useQuery(api.marketplace.photos.toCheck);
+  const review = useMutation(api.marketplace.photos.review);
+  const [error, setError] = useState<string | null>(null);
+  if (photos === undefined) return null;
+  const decide = (photoId: Id<"vendorPhotos">, decision: "approved" | "removed") => {
+    setError(null);
+    void review({ photoId, decision }).catch((e) => setError(errorText(e, "That decision didn't save.")));
+  };
+  return (
+    <section aria-labelledby="photos-check-h">
+      <h2 id="photos-check-h" className="label">Photos to check ({photos.length})</h2>
+      {photos.length === 0 ? (
+        <p className="text-sm text-muted">Nothing waiting.</p>
+      ) : (
+        <ul className="card divide-y divide-line">
+          {photos.map((p) => (
+            <li key={p._id} className="grid min-w-0 gap-3 px-4 py-3 text-sm sm:grid-cols-[6rem_1fr]">
+              {p.url ? (
+                <a href={p.url} target="_blank" rel="noreferrer" className="block">
+                  <img src={p.url} alt={p.shows ?? `Work photo from ${p.profileName}`} className="aspect-square w-full rounded object-cover" />
+                </a>
+              ) : (
+                <div className="aspect-square w-full rounded bg-cream" aria-hidden />
+              )}
+              <div className="min-w-0">
+                <p className="font-medium">
+                  {p.profileName}
+                  {p.sample && <span className="chip-quiet ml-2">Sample vendor</span>}
+                </p>
+                {p.status === "failed" && <p className="text-muted">Couldn&apos;t be checked</p>}
+                {p.provider && <p className="text-xs text-quiet">Checked by Muse {p.provider === "glimmer" ? "Glimmer" : "Spark"}</p>}
+                {p.shows && <p className="mt-1">{p.shows}</p>}
+                {p.tags.length > 0 && <p className="mt-1 text-xs text-muted">{p.tags.map((t) => t.label).join(" · ")}</p>}
+                {p.flags.map((f) => (
+                  <p key={f.key} className="mt-1 break-words text-warn">{f.text}</p>
+                ))}
+                {p.doubt && <p className="mt-1 break-words text-muted">Not sure: {p.doubt}</p>}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button type="button" className="btn-primary btn-sm" onClick={() => decide(p._id, "approved")}>Approve</button>
+                  <button type="button" className="btn-quiet btn-sm" onClick={() => decide(p._id, "removed")}>Remove</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+    </section>
   );
 }
 

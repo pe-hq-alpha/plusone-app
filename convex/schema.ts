@@ -962,7 +962,7 @@ export default defineSchema({
 
   vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
 
-  vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]),
+  vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]).index("by_status", ["status"]),
   listingChanges: defineTable(listingChangeFields).index("by_status", ["status"]).index("by_profileId_and_status", ["profileId", "status"]),
   venueViews: defineTable(venueViewFields).index("by_eventId", ["eventId"]),
   segmentCache: defineTable(segmentCacheFields).index("by_imageKey_and_promptKey", ["imageKey", "promptKey"]),

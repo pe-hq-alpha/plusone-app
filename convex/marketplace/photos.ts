@@ -233,6 +233,47 @@ export const forOps = query({
   },
 });
 
+/**
+ * Every photo a person still has to decide on, across all listings: checked with a flag
+ * worse than faces, or failed, and not yet approved or removed. Verified listings never
+ * reach the verification queue, so their photos are found here.
+ */
+export const toCheck = query({
+  args: {},
+  returns: v.array(v.object({ ...opsPhotoView.fields, profileId: v.id("vendorProfiles"), profileName: v.string(), sample: v.boolean() })),
+  handler: async (ctx) => {
+    await requireStaff(ctx);
+    const out = [];
+    for (const status of ["checked", "failed"] as const) {
+      const photos = await ctx.db.query("vendorPhotos").withIndex("by_status", (q) => q.eq("status", status)).take(200);
+      for (const photo of photos) {
+        if (photo.review) continue;
+        const flags = photo.check ? photoFlags(photo.check) : [];
+        if (status === "checked" && flags.every((f) => f.key === "faces")) continue;
+        const profile = await ctx.db.get(photo.profileId);
+        if (!profile) continue;
+        const labelOf = new Map(tagsFor(profile.categories).map((t) => [t.key, t.label] as const));
+        out.push({
+          _id: photo._id,
+          url: await ctx.storage.getUrl(photo.storageId),
+          status: photo.status,
+          tags: (photo.check?.tags ?? []).map((key) => ({ key, label: labelOf.get(key) ?? key })),
+          flags,
+          review: null,
+          ...(photo.check?.shows ? { shows: photo.check.shows } : {}),
+          ...(photo.check?.doubt ? { doubt: photo.check.doubt } : {}),
+          ...(photo.check?.provider ? { provider: photo.check.provider } : {}),
+          profileId: profile._id,
+          profileName: profile.name,
+          sample: profile.sample === true,
+        });
+        if (out.length >= 60) return out;
+      }
+    }
+    return out;
+  },
+});
+
 /** Approve a photo or remove it from what customers see. Removing keeps the file. */
 export const review = mutation({
   args: { photoId: v.id("vendorPhotos"), decision },

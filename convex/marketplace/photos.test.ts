@@ -348,6 +348,23 @@ describe("photos customers see", () => {
     expect(await t.run((ctx) => photosForCustomers(ctx, profile!))).toEqual([]);
   });
 
+  test("Ops sees every flagged photo still undecided, from verified listings too, and nobody else does", async () => {
+    const t = setup();
+    const { userId: vendor, profileId } = await seedVendor(t);
+    const stock = await checkedPhoto(t, profileId, { stock: true });
+    await checkedPhoto(t, profileId, { faces: true });
+    await checkedPhoto(t, profileId, { stock: true }, "removed");
+    const ops = await t.run((ctx) => ctx.db.insert("users", { email: "ops@plusone.test", staffRole: "admin" }));
+
+    const waiting = await as(t, ops).query(api.marketplace.photos.toCheck, {});
+    expect(waiting.map((p) => p._id)).toEqual([stock]);
+    expect(waiting[0]).toMatchObject({ profileName: "Anjali Catering", flags: [{ key: "stock" }] });
+
+    await as(t, ops).mutation(api.marketplace.photos.review, { photoId: stock, decision: "approved" });
+    expect(await as(t, ops).query(api.marketplace.photos.toCheck, {})).toEqual([]);
+    await expect(as(t, vendor).query(api.marketplace.photos.toCheck, {})).rejects.toThrow(/PlusOne team/);
+  });
+
   test("the sample vendors get their photos once, each sent for the same check", async () => {
     vi.useFakeTimers();
     glimmerAnswers(["banana-leaf-service"]);
