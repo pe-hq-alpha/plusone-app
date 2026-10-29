@@ -15,7 +15,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-588_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-593_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -128,7 +128,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 
 ## Meta's models in PlusOne
 
-<img src="assets/meta-models.jpg" width="100%" alt="Meta's models in PlusOne: Muse Spark 1.3 live in production for all reading and writing; Muse Voice Transcribe live in production; SAM 3.1, Muse Wonder and Muse Glimmer being built during the hackathon; Muse Spark Open after it; retries and a Claude fallback built in">
+<img src="assets/meta-models.jpg" width="100%" alt="Meta's models in PlusOne: Muse Spark 1.3 live in production for all reading and writing; Muse Voice Transcribe live in production; SAM 3.1, Muse Wonder and Muse Glimmer being built during the hackathon; Muse Spark Open connected on Baseten; retries and a Claude fallback built in">
 
 | Model | Where it works in PlusOne | Status |
 |---|---|---|
@@ -136,8 +136,8 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 | **Muse Voice Transcribe** | The voice brief: a family or an event manager speaks the plan in Tamil, English or both, in the planning chat or the Today box; next, a vendor talks through what they offer | Live in production since 28 Oct 2026 |
 | **SAM 3.1** | Cuts the stage, florals and lights out of inspiration photos for the decorators' brief, and finds the stage in a venue photo to dress it | Adapter built and tested (`convex/lib/sam.ts`: one concept or up to 16 tapped objects, masks read with `@meta-sam/parser`); the venue view is next |
 | **Muse Wonder** | The verification agent in PlusOne Ops: checks a vendor's profile against their own site and public pages, with links; a person decides | Built into Ops, 28 Oct (`convex/lib/wonder.ts`, `convex/marketplace/checks.ts`): web search and page reads, six findings, a source kept only if the run saw it; first live run next |
-| **Muse Spark Open** (open weights) | Batch jobs such as seeding the vendor directory from public listings | After the hackathon |
-| **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Tags a Partner vendor's portfolio photos with the standard sheet's lines (stage backdrop, entrance arch, live counters), so past work sits beside an offer's line; flags likely stock photos for Ops | Planned, by 31 Oct |
+| **Muse Spark Open** (open weights, on Baseten) | Batch jobs over quotes and listings: first, turning pooled quotes into the standard sheet's units for the city's price range; then seeding the vendor directory from public listings | Connected and tested live, 29 Oct (`convex/lib/sparkOpen.ts`): a photographer's shorthand quote read into the right numbers in 2.8 s; a call Baseten can't answer goes to Muse Spark. Its first feature is next |
+| **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Tags a Partner vendor's portfolio photos with the standard sheet's lines (stage backdrop, entrance arch, live counters), so past work sits beside an offer's line; flags likely stock photos for Ops | Endpoint being set up on Modal, 29 Oct; the photo checks are being built |
 | **Muse Code** (Meta's coding agent) | Builds bounded pieces of PlusOne from a written brief, which are then reviewed and tested before they are committed; so far the SAM 3.1 adapter, the voice brief (its audio encoder, the Voice Transcribe adapter and the brief in the app) and the Muse Wonder vendor check. Every session is logged in [`devlog.md`](devlog.md#muse-code) | In use since 27 Oct 2026 |
 
 **See it at work:** in any event, the **Under the hood** button in the top bar lists every step PlusOne ran for that event, with the Meta model that did it, how long it took and what it cost. In the demo it opens on a recorded run: Muse Spark reading the three caterers' replies into the lines Compare shows. Ask "We're now 140 people" on Today and watch a new step appear.
@@ -231,7 +231,7 @@ PlusOne Ops, at `/ops`, is the PlusOne team's side. A queue holds vendors and li
 | Muse Spark reading the demo's quotes | The three caterers' replies read on `muse-spark-1.3` in production, each right first time: Annam ₹66,150 in three lines (150 plates at ₹380, ₹6,000 service, ₹3,150 GST), priced for 150; Saapadu ₹62,000 all in for 120 with the ₹480 extra plate kept apart; Kaveri ₹54,000 plus ₹2,500 for vessels and staff, GST extra. 7.1–14.4 s each, 4,329 tokens in and 6,570 out, $0.033 in all, no fallback | 28 Oct 2026 | `npx convex run claude:readDemoQuotes`; the rows are Under the hood's recorded run |
 | Muse Voice Transcribe in production | A note spoken into the live app's Today box came back as text in the box, first try; the recording was deleted after reading | 28 Oct 2026 | By hand on app.plusoneevents.site, in the founder's own voice |
 | Muse Spark's reasoning | At `reasoning_effort: low` a one-line reply used 194 reasoning tokens; capped at 400 output tokens, reasoning took 398 and the answer came back empty. Every call site allows 16,000 | 27 Oct 2026 | Two direct Chat Completions calls |
-| Tests | 588 passed in 55 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, the cost record, the voice brief's limits and clean-up, the vendor check's tool loop, source rules, limits and cost on failure, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 28 Oct 2026 | `npm test` |
+| Tests | 593 passed in 55 files, including the quote comparison, the standard sheet and its missing-charge rules (pinned on the guest demo's quotes), the marketplace's listings, briefs, offers and price ranges, the Meta provider switch and its fallback, Muse Spark Open on Baseten and its move to Muse Spark, the cost record, the voice brief's limits and clean-up, the vendor check's tool loop, source rules, limits and cost on failure, the planning conversation's rules, the board's geometry, the co-pilot's route and a contrast check of every text colour in the light and dark themes | 29 Oct 2026 | `npm test` |
 | Typecheck, app and backend | Clean | 28 Oct 2026 | `npm run typecheck` |
 | The three sample events | Each opened from `/demo` for a new visitor (the birthday, `?sample=housewarming`, `?sample=office`); eleven screens captured with 0 page errors; at phone width (390 px) the page is exactly as wide as the screen, with no sideways scroll | 25 Oct 2026 | Headless Chrome (playwright-core) against the dev server and the dev backend; these are the screenshots in this README |
 | Vendor search terms, old against new | Vendors' own websites among results kept: 9 of 27 with the new short terms against 5 of 26 with the old single sentence, for about half the credits | 20 Oct 2026 | A one-off before/after run of three briefs against Firecrawl |
@@ -309,6 +309,7 @@ Every push to `main` runs typecheck and tests in CI. A staging workflow (`.githu
 | `MODEL_API_KEY` | Meta Model API key. Without it, `MODEL_PROVIDER=meta` falls back to Claude |
 | `META_MODEL_SMART`, `META_MODEL_FAST` | Optional. Override `muse-spark-1.3` per tier (Contributor ids are refused) |
 | `META_BASE_URL` | Optional. The Model API address, `https://api.meta.ai/v1` by default |
+| `BASETEN_API_KEY` | Optional. Baseten key for Muse Spark Open; without it, calls that ask for Spark Open run on Muse Spark |
 | `FIRECRAWL_API_KEY` | Vendor search |
 | `AGENTMAIL_API_KEY`, `AGENTMAIL_WEBHOOK_SECRET`, `AGENTMAIL_INBOX_DOMAIN` | The event inboxes and their incoming mail |
 | `AGENTMAIL_FALLBACK_INBOX_ID` | Optional. An inbox to use when an event can't get its own |
