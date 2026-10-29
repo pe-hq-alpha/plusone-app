@@ -25,6 +25,8 @@ const STEP: Record<string, string> = {
   guestImport: "Read a guest list",
   suggestPalette: "Suggested palettes from your pictures",
   findStage: "Found the stage in your hall photo",
+  vendorPhotoCheck: "Checked a vendor's photo of past work",
+  sparkOpenQuote: "Read a quote on Meta's open-weights model",
   venueCutOut: "Cut out the stage and the wall behind it",
 };
 
@@ -39,6 +41,10 @@ function modelName(model: string, provider: "meta" | "claude" | "spark_open" | "
   if (provider === "meta") return `Meta ${model}`;
   return "Claude (backup)";
 }
+
+/** What a call used: tokens, or for SAM, the one image it segments. */
+const used = (model: string, input: number, output: number) =>
+  model.startsWith("sam-") ? "1 image" : `${input.toLocaleString()} in · ${output.toLocaleString()} out`;
 
 const seconds = (ms?: number) => (ms === undefined ? "" : `${(ms / 1000).toFixed(1)} s`);
 const dollars = (usd?: number) => (usd === undefined ? "" : usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(3)}`);
@@ -85,7 +91,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
             <p className="text-sm text-muted">Loading…</p>
           ) : calls.length === 0 ? (
             <p className="text-sm text-muted">
-              {recorded?.length ? "Nothing from this visit yet. " : "Nothing yet. "}
+              {recorded?.length ? "Nothing from this visit yet; the recorded runs below show each model at work. " : "Nothing yet. "}
               Ask {BRAND.name} something on Today, such as &ldquo;We&rsquo;re now 140 people&rdquo;, and the step shows up here.
             </p>
           ) : (
@@ -97,9 +103,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
                     <span className={c.provider === "claude" ? "chip-quiet" : "chip-pending"}>{modelName(c.model, c.provider)}</span>
                     {c.fellBack && <span className="chip-warn">Meta was busy; the backup answered</span>}
                     <span className="tabular-nums">{seconds(c.durationMs)}</span>
-                    <span className="tabular-nums">
-                      {c.inputTokens.toLocaleString()} in · {c.outputTokens.toLocaleString()} out
-                    </span>
+                    <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens)}</span>
                     <span className="tabular-nums">{dollars(c.costUsd)}</span>
                     <span className="ml-auto tabular-nums text-quiet">{clock(c.at)}</span>
                   </p>
@@ -108,31 +112,29 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
             </ol>
           )}
 
-          {recorded && recorded.length > 0 && (
-            <section className="mt-6" aria-labelledby="hood-recorded">
-              <h3 id="hood-recorded" className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">
-                Recorded {recorded[0].recordedOn}
+          {recorded?.map((run, r) => (
+            <section key={r} className="mt-6" aria-labelledby={`hood-recorded-${r}`}>
+              <h3 id={`hood-recorded-${r}`} className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">
+                Recorded {run.on}
               </h3>
-              <p className="mt-1 text-xs text-muted">
-                The real run that read this sample event&rsquo;s catering quotes into the lines Compare shows, kept so you can see it without waiting.
-              </p>
+              <p className="mt-1 text-xs text-muted">{run.about.replace(/ \(`[^`]+`\)| \(production, `[^`]+`\)/, "")}</p>
               <ol className="mt-2.5 grid gap-2.5">
-                {recorded.map((c, i) => (
+                {run.calls.map((c, i) => (
                   <li key={i} className="card-quiet px-3.5 py-3">
-                    <p className="text-sm">{STEP[c.feature] ?? c.feature}: {c.note}</p>
+                    <p className="text-sm">
+                      {STEP[c.feature] ?? c.feature}: {c.note}
+                    </p>
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                       <span className="chip-pending">{modelName(c.model, c.provider)}</span>
                       <span className="tabular-nums">{seconds(c.durationMs)}</span>
-                      <span className="tabular-nums">
-                        {c.inputTokens.toLocaleString()} in · {c.outputTokens.toLocaleString()} out
-                      </span>
+                      <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens)}</span>
                       <span className="tabular-nums">{dollars(c.costUsd)}</span>
                     </p>
                   </li>
                 ))}
               </ol>
             </section>
-          )}
+          ))}
         </div>
 
         {calls && calls.length > 0 && (

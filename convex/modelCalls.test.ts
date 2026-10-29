@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { api, internal } from "./_generated/api";
 import { callRecord, costUsd } from "./lib/modelCost";
 import { generateText } from "./lib/models";
-import { RECORDED_RUN } from "./lib/recordedRun";
+import { RECORDED_RUNS } from "./lib/recordedRun";
 import { seedBirthday } from "./demoBirthday";
 import schema from "./schema";
 
@@ -160,9 +160,13 @@ describe("the demo's recorded run", () => {
     });
     const as = t.withIdentity({ subject: `${userId}|s` });
     const recorded = await as.query(api.modelCalls.recorded, { eventId: demoId });
-    expect(recorded.length).toBe(RECORDED_RUN.calls.length);
-    expect(recorded.map((r) => r.note)).toEqual(["Annam Caterers", "Saapadu Kitchen", "Kaveri Feast Co."]);
-    for (const row of recorded) expect(row).toMatchObject({ provider: "meta", recordedOn: RECORDED_RUN.on });
+    expect(recorded).toHaveLength(RECORDED_RUNS.length);
+    expect(recorded[0].calls.map((c) => c.note)).toEqual(["Annam Caterers", "Saapadu Kitchen", "Kaveri Feast Co."]);
+    // Every Meta model with a job in the demo has a real run to show: Spark, SAM, Glimmer and Spark Open.
+    expect(new Set(recorded.flatMap((r) => r.calls.map((c) => c.model)))).toEqual(
+      new Set(["muse-spark-1.3", "sam-3.1", "muse-glimmer-30b", "meta-models/muse-spark-open-1026"]),
+    );
+    for (const run of recorded) for (const c of run.calls) expect(c.costUsd).toBeGreaterThan(0);
     expect(await as.query(api.modelCalls.recorded, { eventId: realId })).toEqual([]);
   });
 });

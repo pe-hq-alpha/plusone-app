@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery, query } from "./_generated/server";
 import { requireMember } from "./lib/auth";
-import { RECORDED_RUN } from "./lib/recordedRun";
+import { RECORDED_RUNS } from "./lib/recordedRun";
 import { modelCallFields } from "./schema";
 
 /**
@@ -58,29 +58,34 @@ export const forEvent = query({
 });
 
 /**
- * On a sample event, the recorded Muse Spark run on its own catering quotes (`lib/recordedRun.ts`),
- * so the demo shows real steps before anyone types. Real events get nothing here.
+ * On a sample event, the recorded runs of Meta's models on its own material (`lib/recordedRun.ts`),
+ * so the demo shows each model at work before anyone does anything. Real events get nothing here.
  */
 export const recorded = query({
   args: { eventId: v.id("events") },
   returns: v.array(
     v.object({
-      feature: v.string(),
-      note: v.string(),
-      provider: v.literal("meta"),
-      model: v.string(),
-      inputTokens: v.number(),
-      outputTokens: v.number(),
-      costUsd: v.number(),
-      durationMs: v.number(),
-      recordedOn: v.string(),
+      on: v.string(),
+      about: v.string(),
+      calls: v.array(
+        v.object({
+          feature: v.string(),
+          note: v.string(),
+          provider: v.union(v.literal("meta"), v.literal("spark_open"), v.literal("glimmer")),
+          model: v.string(),
+          inputTokens: v.number(),
+          outputTokens: v.number(),
+          costUsd: v.number(),
+          durationMs: v.number(),
+        }),
+      ),
     }),
   ),
   handler: async (ctx, args) => {
     await requireMember(ctx, args.eventId, "viewer");
     const event = await ctx.db.get(args.eventId);
     if (event?.demo !== true) return [];
-    return RECORDED_RUN.calls.map((c) => ({ ...c, provider: "meta" as const, recordedOn: RECORDED_RUN.on }));
+    return RECORDED_RUNS;
   },
 });
 
