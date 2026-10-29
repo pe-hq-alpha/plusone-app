@@ -240,7 +240,7 @@ describe("a vendor's prices", () => {
     await expect(as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Catering", title: "Free", unit: "per_person", price: 0, includes: [] })).rejects.toThrow(
       /price/,
     );
-    await expect(as(t, stranger).mutation(api.marketplace.partner.removeOffering, { offeringId })).rejects.toThrow(/Set up your business/);
+    await expect(as(t, stranger).mutation(api.marketplace.partner.removeOffering, { offeringId: offeringId! })).rejects.toThrow(/Set up your business/);
   });
 
   test("a photographer prices the way photographers do, with what the price includes", async () => {

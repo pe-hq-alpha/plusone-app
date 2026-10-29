@@ -53,7 +53,7 @@ function Queue() {
     <main id="main" className="page px-5 py-10 md:px-8">
       <HomeOrLeave small />
       <h1 className="mt-4 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Ops</em></h1>
-      <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, and claims on listings we added.</p>
+      <p className="mt-1 text-sm text-muted">Vendors waiting to be checked, claims on listings we added, and changes to verified listings.</p>
 
       {queue === undefined ? (
         <p className="mt-6 text-sm text-muted">Loading…</p>
@@ -84,11 +84,71 @@ function Queue() {
               )}
             </section>
             <Claims claims={queue.claims} />
+            <ChangesWaiting />
           </div>
           {open ? <Review profileId={open} onDone={() => setOpen(null)} /> : <EmptyState compact icon="check" title="Choose a vendor to check" />}
         </div>
       )}
     </main>
+  );
+}
+
+/**
+ * Changes to verified listings, before and after: a price, a package, details or contact
+ * numbers. Customers see a change only once a person here approves it.
+ */
+function ChangesWaiting() {
+  const changes = useQuery(api.marketplace.changes.waiting);
+  const decide = useMutation(api.marketplace.changes.decide);
+  const [error, setError] = useState<string | null>(null);
+  if (changes === undefined) return null;
+  const what = (kind: string) => (kind === "details" ? "New details" : kind === "offering_remove" ? "Remove a package" : "A package");
+  return (
+    <section aria-labelledby="changes-h">
+      <h2 id="changes-h" className="label">Changes waiting ({changes.length})</h2>
+      {changes.length === 0 ? (
+        <p className="text-sm text-muted">Nothing waiting.</p>
+      ) : (
+        <ul className="card divide-y divide-line">
+          {changes.map((c) => (
+            <li key={c._id} className="min-w-0 px-4 py-3 text-sm">
+              <p className="font-medium">
+                {c.profileName} · {what(c.kind)}
+              </p>
+              {c.before && (
+                <p className="mt-1 whitespace-pre-line break-words text-muted">
+                  <span className="text-quiet">Now: </span>
+                  {c.before}
+                </p>
+              )}
+              {c.after && (
+                <p className="mt-1 whitespace-pre-line break-words">
+                  <span className="text-quiet">After: </span>
+                  {c.after}
+                </p>
+              )}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-primary btn-sm"
+                  onClick={() => void decide({ changeId: c._id, decision: "approved" }).catch((e) => setError(errorText(e, "That didn't save.")))}
+                >
+                  Approve
+                </button>
+                <button
+                  type="button"
+                  className="btn-quiet btn-sm"
+                  onClick={() => void decide({ changeId: c._id, decision: "rejected" }).catch((e) => setError(errorText(e, "That didn't save.")))}
+                >
+                  Reject
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+    </section>
   );
 }
 

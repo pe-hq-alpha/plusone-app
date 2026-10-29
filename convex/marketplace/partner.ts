@@ -10,6 +10,7 @@ import { rateLimiter } from "../rateLimits";
 import { offeringUnit, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
 import { requireVendor } from "./vendors";
+import { needsReview, proposeDetails, proposeOffering, proposeRemoval } from "./changes";
 
 /**
  * PlusOne Partner, for vendors: sign up or claim the listing PlusOne added from your
@@ -329,6 +330,12 @@ export const update = mutation({
       if (taken && taken._id !== profile._id) throw new ConvexError("Another listing already has that website. Write to us if it's yours.");
     }
     const recheck = !isTrial(profile) && profile.status === "verified" && (fields.name !== profile.name || fields.website !== profile.website);
+    if (!recheck && needsReview(profile)) {
+      // A verified listing's details change for customers once a person approves them.
+      const { name: _name, website: _website, ...details } = fields;
+      await proposeDetails(ctx, profile, userId, details);
+      return null;
+    }
     await ctx.db.patch(profile._id, {
       ...fields,
       ...(recheck ? { status: "pending" as const, statusReason: "New name or website, waiting for a fresh check", statusAt: Date.now() } : {}),
@@ -358,7 +365,8 @@ export const saveOffering = mutation({
     minQty: v.optional(v.number()),
     maxQty: v.optional(v.number()),
   },
-  returns: v.id("vendorOfferings"),
+  /** The saved package, or null when a verified listing's change is waiting for a person. */
+  returns: v.union(v.id("vendorOfferings"), v.null()),
   handler: async (ctx, args) => {
     const { userId, profile } = await requireVendor(ctx);
     await editAllowance(ctx, userId);
@@ -389,6 +397,14 @@ export const saveOffering = mutation({
     if (args.offeringId) {
       const offering = await ctx.db.get(args.offeringId);
       if (!offering || offering.profileId !== profile._id) throw new ConvexError("That offering isn't yours to change.");
+    }
+    if (needsReview(profile)) {
+      await proposeOffering(ctx, profile, userId, fields, args.offeringId);
+      return null;
+    }
+    if (args.offeringId) {
+      const offering = await ctx.db.get(args.offeringId);
+      if (!offering) throw new ConvexError("That offering isn't yours to change.");
       await ctx.db.replace(offering._id, fields);
       return offering._id;
     }
@@ -400,9 +416,13 @@ export const removeOffering = mutation({
   args: { offeringId: v.id("vendorOfferings") },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const { profile } = await requireVendor(ctx);
+    const { userId, profile } = await requireVendor(ctx);
     const offering = await ctx.db.get(args.offeringId);
     if (!offering || offering.profileId !== profile._id) throw new ConvexError("That offering isn't yours to remove.");
+    if (needsReview(profile)) {
+      await proposeRemoval(ctx, profile, userId, offering._id);
+      return null;
+    }
     await ctx.db.delete(offering._id);
     return null;
   },

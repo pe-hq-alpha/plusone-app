@@ -48,11 +48,41 @@ export function PartnerPage() {
         </p>
       )}
       {mine.profile ? (
-        <Dashboard profile={mine.profile} offerings={mine.offerings} badges={mine.badges} tier={mine.tier} level={mine.level} />
+        <>
+          {mine.profile.status === "verified" && <WaitingChanges />}
+          <Dashboard profile={mine.profile} offerings={mine.offerings} badges={mine.badges} tier={mine.tier} level={mine.level} />
+        </>
       ) : (
         <Join claims={mine.claims} />
       )}
     </main>
+  );
+}
+
+/**
+ * A verified listing's edits wait for the PlusOne team: what is waiting, before and after,
+ * so the vendor knows why customers still see the old price or details.
+ */
+function WaitingChanges() {
+  const waiting = useQuery(api.marketplace.changes.mine);
+  if (!waiting?.length) return null;
+  const what = (kind: string) => (kind === "details" ? "New details" : kind === "offering_remove" ? "Remove a package" : "A package");
+  return (
+    <section className="card-quiet mt-4 px-5 py-4" aria-labelledby="waiting-h">
+      <h2 id="waiting-h" className="text-sm font-medium">
+        Waiting for our team ({waiting.length})
+      </h2>
+      <p className="mt-0.5 text-xs text-muted">Customers see these once they&apos;re approved, usually within a day.</p>
+      <ul className="mt-2 grid gap-2 text-sm">
+        {waiting.map((c) => (
+          <li key={c._id} className="min-w-0">
+            <span className="font-medium">{what(c.kind)}</span>
+            {c.after && <span className="block whitespace-pre-line break-words text-muted">{c.after}</span>}
+            {c.kind === "offering_remove" && c.before && <span className="block break-words text-muted">{c.before}</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -1021,6 +1051,7 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
   const [error, setError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
   const [preview, setPreview] = useState<TidyResult[] | null>(null);
+  const [sent, setSent] = useState(false);
   const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
 
   const saveWith = (nextTitle: string, nextIncludes: string[]) => {
@@ -1035,13 +1066,15 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
       includes: nextIncludes,
       ...(gst ? { taxIncluded: gst === "in" } : {}),
     })
-      .then(() => {
+      .then((saved) => {
         setTitle("");
         setPrice("");
         setTyped({});
         setIncludes("");
         setGst("");
         setPreview(null);
+        // A verified listing's new price waits for the team; customers keep the approved one.
+        setSent(saved === null);
       })
       .catch((err) => setError(errorText(err, "That price didn't save. Try again.")));
   };
@@ -1109,6 +1142,11 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
             document.getElementById("pr-title")?.focus();
           }}
         />
+      )}
+      {sent && (
+        <p role="status" className="card-quiet mt-4 px-5 py-3 text-sm">
+          Sent to our team to check. Customers see it once it&apos;s approved, usually within a day.
+        </p>
       )}
       <form className="card mt-4 grid gap-4 p-5 md:grid-cols-2 md:p-6" onSubmit={add}>
         <div>

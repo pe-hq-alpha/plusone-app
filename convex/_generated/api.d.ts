@@ -99,6 +99,7 @@ import type * as lib_wonder from "../lib/wonder.js";
 import type * as maintenance from "../maintenance.js";
 import type * as marketplace_bands from "../marketplace/bands.js";
 import type * as marketplace_briefs from "../marketplace/briefs.js";
+import type * as marketplace_changes from "../marketplace/changes.js";
 import type * as marketplace_checks from "../marketplace/checks.js";
 import type * as marketplace_listings from "../marketplace/listings.js";
 import type * as marketplace_offers from "../marketplace/offers.js";
@@ -234,6 +235,7 @@ declare const fullApi: ApiFromModules<{
   maintenance: typeof maintenance;
   "marketplace/bands": typeof marketplace_bands;
   "marketplace/briefs": typeof marketplace_briefs;
+  "marketplace/changes": typeof marketplace_changes;
   "marketplace/checks": typeof marketplace_checks;
   "marketplace/listings": typeof marketplace_listings;
   "marketplace/offers": typeof marketplace_offers;

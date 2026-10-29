@@ -291,6 +291,38 @@ export const vendorOfferingFields = {
   maxQty: v.optional(v.number()),
 };
 
+/** The details a vendor edits on a verified listing, apart from name and website (those send it back for a fresh check). */
+export const listingDetails = v.object({
+  categories: v.array(v.string()),
+  city: v.string(),
+  cityKey: v.string(),
+  email: v.optional(v.string()),
+  phone: v.optional(v.string()),
+  whatsapp: v.optional(v.string()),
+  serviceArea: v.optional(v.array(v.string())),
+  languages: v.optional(v.array(v.string())),
+  about: v.optional(v.string()),
+});
+
+/**
+ * A change to a verified listing, waiting for a person in Ops: a package added, changed
+ * or removed, or new details. Customers keep seeing the approved listing until it is
+ * approved; trial and sample listings never wait.
+ */
+export const listingChangeFields = {
+  profileId: v.id("vendorProfiles"),
+  kind: v.union(v.literal("offering"), v.literal("offering_remove"), v.literal("details")),
+  /** The package being changed or removed; absent for a new one. */
+  offeringId: v.optional(v.id("vendorOfferings")),
+  offering: v.optional(v.object(vendorOfferingFields)),
+  details: v.optional(listingDetails),
+  submittedBy: v.id("users"),
+  submittedAt: v.number(),
+  status: v.union(v.literal("waiting"), v.literal("approved"), v.literal("rejected")),
+  decidedBy: v.optional(v.id("users")),
+  decidedAt: v.optional(v.number()),
+};
+
 export const vendorClaimFields = {
   profileId: v.id("vendorProfiles"),
   userId: v.id("users"),
@@ -931,6 +963,7 @@ export default defineSchema({
   vendorChecks: defineTable(vendorCheckFields).index("by_profileId", ["profileId"]),
 
   vendorPhotos: defineTable(vendorPhotoFields).index("by_profileId", ["profileId"]),
+  listingChanges: defineTable(listingChangeFields).index("by_status", ["status"]).index("by_profileId_and_status", ["profileId", "status"]),
   venueViews: defineTable(venueViewFields).index("by_eventId", ["eventId"]),
   segmentCache: defineTable(segmentCacheFields).index("by_imageKey_and_promptKey", ["imageKey", "promptKey"]),
 
