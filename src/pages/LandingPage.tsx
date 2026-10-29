@@ -115,8 +115,9 @@ export function LandingPage() {
           </Link>
           <nav className="rs__links" aria-label="Main">
             <Link to="/how-it-works" className="rs__link rs__link--wide">How it works</Link>
+            <Link to="/vendors" className="rs__link rs__link--wide">Find vendors</Link>
             <Link to="/pricing" className="rs__link">Pricing</Link>
-            <Link to={partnerHref("/")} className="rs__link"><span className="rs__wide">For vendors</span><span className="rs__narrow">Vendors</span></Link>
+            <Link to={partnerHref("/")} className="rs__link"><span className="rs__wide">For vendors</span><span className="rs__narrow">Partner</span></Link>
             <Link to="/signin" className="rs__link rs__link--accent">Sign in</Link>
           </nav>
         </header>
@@ -133,8 +134,12 @@ export function LandingPage() {
             </p>
             <div className="rs__actions">
               <Link to="/signin?new=1" className="rs__pill rs__pill--solid">Plan an event</Link>
+              <Link to="/vendors" className="rs__pill rs__pill--outline">Find vendors</Link>
               <Link to="/demo" className="rs__pill rs__pill--outline">See the demo</Link>
             </div>
+            <p className="rs__vendors">
+              Just looking for a caterer, decorator or photographer? <Link to="/vendors">Find vendors and their prices</Link>, free.
+            </p>
             <p className="rs__vendors">
               Vendors: get found by people planning near you, with or without a website.{" "}
               <Link to={partnerHref("/")}>List your business &rarr;</Link>

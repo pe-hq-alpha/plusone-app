@@ -107,6 +107,7 @@ import type * as marketplace_bands from "../marketplace/bands.js";
 import type * as marketplace_briefs from "../marketplace/briefs.js";
 import type * as marketplace_changes from "../marketplace/changes.js";
 import type * as marketplace_checks from "../marketplace/checks.js";
+import type * as marketplace_directory from "../marketplace/directory.js";
 import type * as marketplace_listings from "../marketplace/listings.js";
 import type * as marketplace_offers from "../marketplace/offers.js";
 import type * as marketplace_ops from "../marketplace/ops.js";
@@ -251,6 +252,7 @@ declare const fullApi: ApiFromModules<{
   "marketplace/briefs": typeof marketplace_briefs;
   "marketplace/changes": typeof marketplace_changes;
   "marketplace/checks": typeof marketplace_checks;
+  "marketplace/directory": typeof marketplace_directory;
   "marketplace/listings": typeof marketplace_listings;
   "marketplace/offers": typeof marketplace_offers;
   "marketplace/ops": typeof marketplace_ops;

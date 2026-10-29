@@ -44,6 +44,8 @@ const SettingsPage = page(() => import("./pages/SettingsPage"), "SettingsPage");
 const JoinPage = page(() => import("./pages/JoinPage"), "JoinPage");
 const HowItWorksPage = page(() => import("./pages/HowItWorksPage"), "HowItWorksPage");
 const PricingPage = page(() => import("./pages/PricingPage"), "PricingPage");
+const FindVendorsPage = page(() => import("./pages/FindVendorsPage"), "FindVendorsPage");
+const VendorListingPage = page(() => import("./pages/FindVendorsPage"), "VendorListingPage");
 const GuestPage = page(() => import("./pages/GuestPage"), "GuestPage");
 const AccountPage = page(() => import("./pages/AccountPage"), "AccountPage");
 const PrivacyPage = page(() => import("./pages/PrivacyPage"), "PrivacyPage");
@@ -65,6 +67,8 @@ export default function App() {
       <Routes>
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/vendors" element={<FindVendorsPage />} />
+        <Route path="/vendors/:profileId" element={<VendorListingPage />} />
         <Route path="/join/:token" element={<JoinPage />} />
         <Route path="/s/:slug" element={<SitePage />} />
         <Route path="/r/:token" element={<RsvpPage />} />
@@ -176,7 +180,7 @@ function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children
 }
 
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy)\/?$|^\/(join|s|r|p)\//;
+const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy|vendors)\/?$|^\/(join|s|r|p|vendors)\//;
 
 /**
  * Partner's own page. A guest gets there only from the vendors' demo, which says so in

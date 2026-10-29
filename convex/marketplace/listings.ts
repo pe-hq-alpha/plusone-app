@@ -112,24 +112,26 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
  * vendor's own sign-up before a person has verified it, and sample vendors only when
  * `samples` is set, for a sample event.
  */
+export async function listedVendors(ctx: QueryCtx, category: string, city: string, samples = false) {
+  const key = cityKey(city);
+  const cards = [];
+  let scanned = 0;
+  for (const status of ["verified", "pending"] as const) {
+    const rows = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", key).eq("status", status));
+    for await (const profile of rows) {
+      if (cards.length >= MAX_CARDS || ++scanned > MAX_SCANNED) break;
+      if (!isListed(profile) || !profile.categories.includes(category)) continue;
+      if ((profile.sample && !samples) || isTrial(profile)) continue;
+      cards.push(await cardFor(ctx, profile, category));
+    }
+  }
+  return cards;
+}
+
 export const searchProfiles = internalQuery({
   args: { category: v.string(), city: v.string(), samples: v.optional(v.boolean()) },
   returns: v.array(listingCard),
-  handler: async (ctx, args) => {
-    const key = cityKey(args.city);
-    const cards = [];
-    let scanned = 0;
-    for (const status of ["verified", "pending"] as const) {
-      const rows = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", key).eq("status", status));
-      for await (const profile of rows) {
-        if (cards.length >= MAX_CARDS || ++scanned > MAX_SCANNED) break;
-        if (!isListed(profile) || !profile.categories.includes(args.category)) continue;
-        if ((profile.sample && !args.samples) || isTrial(profile)) continue;
-        cards.push(await cardFor(ctx, profile, args.category));
-      }
-    }
-    return cards;
-  },
+  handler: async (ctx, args) => await listedVendors(ctx, args.category, args.city, args.samples === true),
 });
 
 export const bandFor = internalQuery({

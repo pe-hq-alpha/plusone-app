@@ -90,6 +90,10 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   vendorPhotoAdd: { kind: "fixed window", rate: 30, period: DAY },
   vendorPhotoAddDemo: { kind: "fixed window", rate: 3, period: DAY },
   vendorPhotoAddAll: { kind: "fixed window", rate: 300, period: DAY },
+  // Find vendors on the open web, outside any event: each search reads a few pages through Firecrawl.
+  directoryWeb: { kind: "fixed window", rate: 10, period: DAY },
+  directoryWebDemo: { kind: "fixed window", rate: 3, period: DAY },
+  directoryWebAll: { kind: "fixed window", rate: 100, period: DAY },
   // Muse Glimmer's checks, across everyone: each can wake our H200 on Modal (about $0.28 a
   // cold start, plus idle time before it scales to zero). Past this, checks go to Muse Spark.
   glimmerAll: { kind: "fixed window", rate: 40, period: DAY },
