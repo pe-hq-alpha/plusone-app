@@ -128,7 +128,37 @@ describe("a vendor's work photo", () => {
         String(url).startsWith("https://glimmer.test")
           ? reply("I think this is a stage, but I'm not sure.", "inference-1")
           : reply(
-              JSON.stringify({ realWork: true, stock: false, watermark: false, faces: false, unsafe: false, shows: "A stage.", tags: ["buffet"] }),
+              JSON.stringify({ realWork: true, stock: false, watermark: false, faces: false, unsafe: false, shows: "A buffet laid out on a long table.", tags: ["buffet"] }),
+              "muse-spark-1.3",
+            ),
+      ),
+    );
+    const t = setup();
+    const { userId } = await seedVendor(t);
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const photo = await t.run((ctx) => ctx.db.get(photoId));
+    expect(photo?.status).toBe("checked");
+    expect(photo?.check?.provider).toBe("spark");
+  });
+
+  test("a placeholder for what the photo shows is not accepted from Glimmer", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const reply = (content: string, model: string) =>
+      Response.json({ model, choices: [{ finish_reason: "stop", message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 10 } });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: unknown) =>
+        String(url).startsWith("https://glimmer.test")
+          ? reply(JSON.stringify({ realWork: true, stock: false, watermark: false, faces: true, unsafe: false, shows: "...", tags: ["buffet"] }), "inference-1")
+          : reply(
+              JSON.stringify({ realWork: true, stock: false, watermark: false, faces: false, unsafe: false, shows: "A buffet laid out on a long table.", tags: ["buffet"] }),
               "muse-spark-1.3",
             ),
       ),

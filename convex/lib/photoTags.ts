@@ -113,5 +113,5 @@ export const PHOTO_INSTRUCTIONS =
   "Look at one photo a vendor added to show their past work. Say whether it is a real photo of event work " +
   "(not a screenshot, a poster, a stock image or a render), whether another business's name, logo or watermark is on it " +
   "(the vendor's own name is fine), whether people's faces are clearly visible, and whether it is unsafe to show " +
-  "(nudity, violence). Write one short plain sentence on what it shows, and up to 5 tags chosen only from the list given " +
+  "(nudity, violence). Write one short plain sentence on what it shows ('A banana-leaf lunch laid out for a large group'), never a placeholder, and up to 5 tags chosen only from the list given " +
   "with the photo. If unsure about anything, say so in doubt rather than guess. Never invent a tag.";

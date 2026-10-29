@@ -66,7 +66,8 @@ export const photoCheckSchema = z.object({
   watermark: z.boolean(),
   faces: z.boolean(),
   unsafe: z.boolean(),
-  shows: z.string().max(300),
+  // At least a short sentence: Glimmer once answered "..." (29 Oct). The JSON schema carries the minimum to the endpoint.
+  shows: z.string().min(10).max(300),
   tags: z.array(z.string()).max(5),
   doubt: z.string().max(500).optional(),
 });
