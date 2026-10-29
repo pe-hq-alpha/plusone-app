@@ -465,13 +465,14 @@ function Photos() {
   const [busy, setBusy] = useState(false);
 
   const pick = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    // Copied before the input is cleared: `files` is live, and clearing the input empties it.
+    const files = Array.from(e.target.files ?? []);
     e.target.value = "";
-    if (!files?.length || busy) return;
+    if (!files.length || busy) return;
     setBusy(true);
     setError(null);
     void (async () => {
-      for (const file of Array.from(files)) {
+      for (const file of files) {
         const photo = await shrinkPhoto(file);
         const url = await generateUploadUrl({});
         const res = await fetch(url, { method: "POST", headers: { "Content-Type": photo.type || file.type }, body: photo });
