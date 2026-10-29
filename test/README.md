@@ -5,7 +5,7 @@ Three layers, run in this order before every release and before submitting.
 ## 1. Automated tests (every push, in CI)
 
 ```bash
-npm test             # 685 tests in 70 files: the backend, the rules and the app's logic
+npm test             # 688 tests in 71 files: the backend, the rules and the app's logic
 npm run typecheck    # app and backend
 ```
 
