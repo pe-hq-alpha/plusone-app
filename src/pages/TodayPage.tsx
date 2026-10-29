@@ -107,7 +107,7 @@ export function TodayPage() {
         </section>
 
         <aside className="today__side">
-          <Tell eventId={eventId} />
+          <Tell eventId={eventId} demo={event.demo === true} />
           <section aria-labelledby="money-h" className="today__panel">
             <h2 id="money-h" className="text-sm font-medium text-ink">Budget</h2>
             <p className="mt-2 text-sm text-muted">
@@ -174,7 +174,7 @@ function RouteRow({ row }: { row: Row }) {
 const PROMPTS = ["What should we book next?", "We're now 140 people", "Find us a photographer", "Move lunch to 1 pm"];
 
 /** One line to tell the co-pilot anything; the conversation itself carries on in the Assistant. */
-function Tell({ eventId }: { eventId: Id<"events"> }) {
+function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean }) {
   const ask = useMutation(api.assistant.ask);
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -226,6 +226,8 @@ function Tell({ eventId }: { eventId: Id<"events"> }) {
           <VoiceButton
             eventId={eventId}
             disabled={busy}
+            // On the demo, a recorded brief in Tamil and English, for a visitor who can't or won't speak.
+            sampleUrl={demo ? "/sample-brief.mp3" : undefined}
             onText={(t) => {
               setText((prev) => (prev ? `${prev} ${t}` : t));
               inputRef.current?.focus();

@@ -3,12 +3,14 @@ import { useAction, useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { encodeWav } from "../../convex/lib/wav";
+import { toWav16k } from "../lib/audio";
 
 type Props = {
   eventId?: Id<"events">;
   onText: (text: string) => void;
   disabled?: boolean;
+  /** On the demo, a recorded brief anyone can play, for a visitor who can't or won't speak. */
+  sampleUrl?: string;
 };
 
 /**
@@ -16,7 +18,7 @@ type Props = {
  * speak, press again to stop, and the words appear in the box for them to
  * check and send. The recording is turned into text, then deleted.
  */
-export function VoiceButton({ eventId, onText, disabled }: Props) {
+export function VoiceButton({ eventId, onText, disabled, sampleUrl }: Props) {
   const uploadUrl = useMutation(api.voiceBrief.uploadUrl);
   const transcribe = useAction(api.voiceBrief.transcribe);
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -132,25 +134,15 @@ export function VoiceButton({ eventId, onText, disabled }: Props) {
     const blob = new Blob(chunks, { type: recorderRef.current?.mimeType || "audio/webm" });
     // The microphone can go as soon as the recording is in hand; decoding doesn't need it.
     stopTracks();
+    await hear(blob);
+  }
 
-    if (blob.size === 0) {
-      setError("We didn't hear anything. Try again, or type it.");
-      return;
-    }
-
+  /** A recording, from the microphone or the demo's sample, turned into words for the box. */
+  async function hear(blob: Blob) {
     setWorking(true);
     setError(null);
-    let ctx: AudioContext | null = null;
     try {
-      const arrayBuf = await blob.arrayBuffer();
-      ctx = new AudioContext();
-      const decoded = await ctx.decodeAudioData(arrayBuf.slice(0));
-      const channels: Float32Array[] = [];
-      for (let i = 0; i < decoded.numberOfChannels; i++) {
-        channels.push(decoded.getChannelData(i).slice(0));
-      }
-      const wav = encodeWav(channels, decoded.sampleRate, 16000);
-
+      const wav = await toWav16k(blob);
       const url = await uploadUrl({});
       const res = await fetch(url, { method: "POST", headers: { "Content-Type": "audio/wav" }, body: wav as unknown as BodyInit });
       if (!res.ok) throw new Error("upload failed");
@@ -174,14 +166,20 @@ export function VoiceButton({ eventId, onText, disabled }: Props) {
       else setError("We couldn't hear that. Try again, or type it.");
     } finally {
       setWorking(false);
-      if (ctx) {
-        try {
-          await ctx.close();
-        } catch {
-          // ignore
-        }
-      }
-      stopTracks();
+    }
+  }
+
+  /** The demo's recorded brief: played aloud, then heard exactly as a spoken one would be. */
+  async function playSample(url: string) {
+    if (disabled || recording || working) return;
+    setError(null);
+    try {
+      const blob = await (await fetch(url)).blob();
+      const audio = new Audio(URL.createObjectURL(blob));
+      void audio.play().catch(() => undefined);
+      await hear(blob);
+    } catch {
+      setError("The sample didn't play. Try speaking instead.");
     }
   }
 
@@ -206,6 +204,11 @@ export function VoiceButton({ eventId, onText, disabled }: Props) {
           <MicrophoneIcon recording={recording} />
           {recording ? "Stop" : "Speak"}
         </button>
+        {sampleUrl && !recording && (
+          <button type="button" className="btn-quiet btn-sm" disabled={Boolean(disabled) || working} onClick={() => void playSample(sampleUrl)}>
+            Play a sample
+          </button>
+        )}
         <span className="text-xs text-muted" aria-live="polite">
           {status}
         </span>
