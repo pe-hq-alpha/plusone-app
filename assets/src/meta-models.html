@@ -7,7 +7,7 @@
   /* DESIGN.md tokens, night theme: ink and marigold */
   :root { --ink: #11141c; --card: #181c26; --head: #f4f5f8; --muted: #b3b7c3; --rule: #3a4051; --marigold: #f4b53a; --live: #c4dfbc; --meta: #0467df; }
   * { box-sizing: border-box; margin: 0; }
-  html, body { width: 1600px; height: 868px; overflow: hidden; }
+  html, body { width: 1600px; height: 960px; overflow: hidden; }
   body { background: radial-gradient(1000px 600px at 80% 20%, #1a1f2c 0%, var(--ink) 70%);
          font-family: "Work Sans", system-ui, sans-serif; color: var(--head); padding: 64px 72px; }
   header { display: flex; align-items: center; gap: 22px; }
@@ -15,15 +15,15 @@
   h1 { font-family: "EB Garamond", Georgia, serif; font-weight: 400; font-size: 60px; line-height: 1; }
   h1 em { color: var(--marigold); }
   .sub { color: var(--muted); font-size: 22px; margin-top: 10px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 44px; }
-  .m { background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 26px 28px 28px; height: 300px; position: relative; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 44px; }
+  .m { background: var(--card); border: 2px solid var(--rule); border-radius: 18px; padding: 24px 24px 26px; height: 330px; position: relative; }
   .m.live { border-color: var(--marigold); box-shadow: 0 0 0 1px rgb(244 181 58 / 0.25), 0 30px 60px -30px rgb(0 0 0 / 0.7); }
-  .tag { display: inline-block; font-size: 15px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  .tag { display: inline-block; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
          padding: 6px 12px; border-radius: 999px; border: 2px solid var(--rule); color: var(--muted); }
   .live .tag { background: var(--live); border-color: var(--live); color: var(--ink); }
-  .name { font-family: "EB Garamond", Georgia, serif; font-size: 40px; line-height: 1.05; margin-top: 18px; }
-  .host { color: var(--marigold); font-size: 17px; font-weight: 500; margin-top: 6px; }
-  .what { color: var(--muted); font-size: 20px; line-height: 1.42; margin-top: 14px; }
+  .name { font-family: "EB Garamond", Georgia, serif; font-size: 36px; line-height: 1.05; margin-top: 18px; }
+  .host { color: var(--marigold); font-size: 16px; font-weight: 500; margin-top: 6px; }
+  .what { color: var(--muted); font-size: 18px; line-height: 1.42; margin-top: 14px; }
   .what b { color: var(--head); font-weight: 500; }
 </style>
 </head>
@@ -40,7 +40,7 @@
       <span class="tag">Live in production</span>
       <div class="name">Muse Spark 1.3</div>
       <div class="host">Meta Model API</div>
-      <div class="what"><b>Reads and writes everything:</b> the planning chat, search plans, vendor emails, quotes in replies and PDFs, RSVPs.</div>
+      <div class="what"><b>Reads and writes everything:</b> the planning chat, vendor emails, quotes from emails, PDFs and WhatsApp photos, RSVPs, vendors' wording.</div>
     </div>
     <div class="m live">
       <span class="tag">Live in production</span>
@@ -48,29 +48,41 @@
       <div class="host">Meta Model API</div>
       <div class="what"><b>The voice brief.</b> Families and event managers speak the plan in Tamil, English or both, and check the words before they send.</div>
     </div>
+    <div class="m live">
+      <span class="tag">In production, Ops</span>
+      <div class="name">Muse Wonder</div>
+      <div class="host">Meta Model API</div>
+      <div class="what"><b>The vendor check.</b> Searches the web and reads a vendor's own pages, then reports six findings with their sources. A person decides.</div>
+    </div>
+    <div class="m">
+      <span class="tag">Connected, tested live</span>
+      <div class="name">Muse Spark Open</div>
+      <div class="host">Open weights, on Baseten</div>
+      <div class="what"><b>The batch jobs.</b> Next: pooled, nameless quotes put in each trade's units for the city's price range.</div>
+    </div>
+    <div class="m">
+      <span class="tag">Hackathon build</span>
+      <div class="name">Muse Glimmer 30B</div>
+      <div class="host">Open weights, our own Modal GPU</div>
+      <div class="what"><b>Photo checks.</b> Tags each photo of a vendor's work (stage backdrop, live counter) and flags stock photos and other studios' watermarks for Ops.</div>
+    </div>
     <div class="m">
       <span class="tag">Hackathon build</span>
       <div class="name">SAM 3.1</div>
       <div class="host">Meta Model API</div>
-      <div class="what"><b>See it on your venue.</b> Cuts the stage, florals and lights out of inspiration photos, and finds the stage in a venue photo to dress it.</div>
+      <div class="what"><b>See it on your venue.</b> Finds the stage in a venue photo to dress it, and cuts decor out of inspiration photos.</div>
     </div>
     <div class="m">
-      <span class="tag">Hackathon build</span>
-      <div class="name">Muse Wonder</div>
-      <div class="host">Meta Model API</div>
-      <div class="what"><b>The verification agent.</b> Checks a vendor's profile against their own site and public pages, with links. A person decides.</div>
-    </div>
-    <div class="m">
-      <span class="tag">After the hackathon</span>
-      <div class="name">Muse Spark Open</div>
-      <div class="host">Open weights, on Baseten</div>
-      <div class="what"><b>The batch jobs.</b> Seeds the vendor directory from public listings and turns pooled, nameless quotes into market ranges.</div>
+      <span class="tag">Builds with us</span>
+      <div class="name">Muse Code</div>
+      <div class="host">Meta's coding agent</div>
+      <div class="what"><b>Seven pieces so far,</b> each from a written brief, then reviewed and tested: the SAM and voice adapters, the vendor check, the wording tidy.</div>
     </div>
     <div class="m">
       <span class="tag">Built in</span>
       <div class="name">Retries and a fallback</div>
       <div class="host">Claude Haiku and Sonnet</div>
-      <div class="what"><b>Nothing stalls.</b> Meta calls retry on rate limits and outages; a call Meta can't answer moves to Claude, and the switch is logged.</div>
+      <div class="what"><b>Nothing stalls.</b> Calls retry on rate limits and outages; Spark Open falls back to Muse Spark, Muse Spark to Claude, and each switch is logged.</div>
     </div>
   </div>
 </body>
