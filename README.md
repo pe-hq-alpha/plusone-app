@@ -88,7 +88,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 **Money, in one line.** Finding vendors is free. The planner is paid (Basic ₹1,000 a month after launch, Premium ₹2,500), vendors pay a small fee to be listed, and in the end a disclosed commission on each booking paid through PlusOne ([The business](#the-business)).
 
-**Measured, not claimed.** On 18 realistic Chennai quotes with a hand-marked key, PlusOne found [all 37 charges a planner would have to chase](#evaluation-missing-charges) at 90% precision; six quotes, each sent as an email, a PDF and a phone photo, were [read right all 18 times](#evaluation-reading-quotes-in-any-form), and Tamil and Tanglish quotes 7 of 8; on ten kinds of hall photo it [found and cut out the stage in nine](#evaluation-finding-the-stage); Muse Wonder [never confirmed a made-up vendor](#evaluation-checking-a-vendor) and backed three real ones with sources; and every model's live runs, with times and costs, are in [Real runs](#real-runs).
+**Measured, not claimed.** On 18 realistic Chennai quotes with a hand-marked key, PlusOne found [all 37 charges a planner would have to chase](#evaluation-missing-charges) at 90% precision, and on 20 held-out quotes in new shapes Muse Spark choosing each charge found 35 of 37 at 97%; six quotes, each sent as an email, a PDF and a phone photo, were [read right all 18 times](#evaluation-reading-quotes-in-any-form), and Tamil and Tanglish quotes 7 of 8; on ten kinds of hall photo it [found and cut out the stage in nine](#evaluation-finding-the-stage); Muse Wonder [never confirmed a made-up vendor](#evaluation-checking-a-vendor) and backed three real ones with sources; and every model's live runs, with times and costs, are in [Real runs](#real-runs).
 
 ### The theme: Build for Your World
 
@@ -162,6 +162,17 @@ Eighteen replies in the shapes Chennai vendors send (six caterers, four halls, f
 | 2, after three rule fixes (29 Oct, 61 s) | 37 | 37 | 0 | 4 | 90% | 100% | 14 of 18 |
 
 Run 1's misses showed three general misreadings, each now fixed and pinned by tests: "Plates and glasses ₹1,500" wasn't read as crockery, so other caterers' silence on it went unflagged; "GST 5% extra" was asked about though a rate is a figure (now priced on the quote's total); "price includes service" wasn't read as service staff. Run 2 is the better number but was measured on the same quotes the fixes came from, so treat it as optimistic. Its four remaining false alarms: two "GST 18% extra" where the reading dropped the rate, one "after that ₹8,000 per hour" not read as overtime, and one "No album, digital only" flagged as an album to ask about.
+
+**Held out, and four ways.** Because run 2's fixes came from the same quotes, a separate agent then wrote 20 new quotes, never seen while building, in shapes the rules were never tuned on: long WhatsApp messages, tables pasted as text, Tamil script and Tanglish, lakh and "k" amounts, synonyms ("conveyance", "EB charges", "service boys", "photo book") and negations ("no drone", "we don't supply water"), with 37 charges marked by hand (`convex/lib/evalHeldOut.ts`). Each set was run four ways on production on 29 Oct (`evals:compare`; raw results in `scripts/compare-run1/`), scored on the same charges:
+
+| System | Tuned set: found, precision, quotes exact | Held-out set: found, precision, quotes exact |
+|---|---|---|
+| The pipeline: Muse Spark reads the quote into lines, fixed rules match each line to a charge | 37 of 37, 93%, 15 of 18 | 35 of 37, 66–70% over 3 runs, 9–10 of 20 |
+| **Muse Spark names each charge's status itself**, from the sheet's fixed list as constrained output (priced, included, extra with an amount or rate, extra without a price, not offered, not mentioned); the same rules then compare it with the other quotes | 36 of 37, 100%, 17 of 18 | **35 of 37, 97%, 17 of 20** |
+| Muse Spark asked directly which charges to ask about | 36 of 37, 95%, 15 of 18 | 37 of 37, 95%, 18 of 20 |
+| The sheet's keywords on the raw text, no model | 28 of 37, 88%, 8 of 18 | 30 of 37, 62%, 5 of 20 |
+
+The held-out set shows what the tuned set hid: the fixed rules that match a line to a charge are where the false alarms come from (15–18 on new shapes), while Muse Spark choosing from the fixed list kept to one. Its answer is also structured (a status and an amount for every line on the sheet), so it can feed Compare the way the rules do, which asking directly can't. Moving Compare to it is the next step.
 
 ## Evaluation: reading quotes in any form
 

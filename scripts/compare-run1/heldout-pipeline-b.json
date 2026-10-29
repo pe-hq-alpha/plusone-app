@@ -1,0 +1,398 @@
+{
+  "scores": [
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "crockery",
+        "transport"
+      ],
+      "hits": [
+        "crockery",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Annapoorani Kitchens"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "water"
+      ],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [
+        "water"
+      ],
+      "vendor": "Sri Kamatchi Caterers"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "gst",
+        "transport",
+        "water"
+      ],
+      "extra": [],
+      "flagged": [
+        "crockery",
+        "gst",
+        "transport",
+        "water"
+      ],
+      "hits": [
+        "crockery",
+        "gst",
+        "transport",
+        "water"
+      ],
+      "missed": [],
+      "vendor": "Thanjai Virundhu Samayal"
+    },
+    {
+      "category": "Catering",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Mylai Feast Co."
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "gst",
+        "transport",
+        "water"
+      ],
+      "extra": [
+        "service_staff"
+      ],
+      "flagged": [
+        "gst",
+        "service_staff",
+        "transport"
+      ],
+      "hits": [
+        "gst",
+        "transport"
+      ],
+      "missed": [
+        "water"
+      ],
+      "vendor": "Velachery Vasantham Catering"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "service_staff"
+      ],
+      "extra": [
+        "crockery",
+        "gst",
+        "water"
+      ],
+      "flagged": [
+        "crockery",
+        "gst",
+        "service_staff",
+        "water"
+      ],
+      "hits": [
+        "service_staff"
+      ],
+      "missed": [],
+      "vendor": "Kovai Ruchi Outdoor Catering"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "electricity",
+        "overtime"
+      ],
+      "extra": [],
+      "flagged": [
+        "electricity",
+        "overtime"
+      ],
+      "hits": [
+        "electricity",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Lakshmi Narayana Mahal"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "gst"
+      ],
+      "extra": [
+        "ac"
+      ],
+      "flagged": [
+        "ac",
+        "gst"
+      ],
+      "hits": [
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Thiruvanmiyur Community Hall"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "overtime"
+      ],
+      "extra": [
+        "electricity",
+        "gst"
+      ],
+      "flagged": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Kalaivani Thirumana Mandapam"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "extra": [],
+      "flagged": [
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "The Ivory Pavilion Banquets"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "electricity",
+        "gst"
+      ],
+      "extra": [],
+      "flagged": [
+        "electricity",
+        "gst"
+      ],
+      "hits": [
+        "electricity",
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Palm Grove Lawns & Hall"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "lighting"
+      ],
+      "extra": [
+        "setup"
+      ],
+      "flagged": [
+        "lighting",
+        "setup"
+      ],
+      "hits": [
+        "lighting"
+      ],
+      "missed": [],
+      "vendor": "Malligai Poo Decorators"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "gst",
+        "setup",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "setup",
+        "transport"
+      ],
+      "hits": [
+        "gst",
+        "setup",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Nandhini Malar Alangaram"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [],
+      "extra": [
+        "gst",
+        "lighting"
+      ],
+      "flagged": [
+        "gst",
+        "lighting"
+      ],
+      "hits": [],
+      "missed": [],
+      "vendor": "Gold Thread Event Styling"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "hits": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Rangoli Florals Adyar"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "gst"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst"
+      ],
+      "hits": [
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Sundari Stage Works"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "gst"
+      ],
+      "extra": [
+        "album",
+        "drone"
+      ],
+      "flagged": [
+        "album",
+        "drone",
+        "gst"
+      ],
+      "hits": [
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Kaveri Frames Studio"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "album",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "extra": [],
+      "flagged": [
+        "album",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "hits": [
+        "album",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Shutterleaf Photography"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "gst",
+        "travel"
+      ],
+      "extra": [
+        "drone"
+      ],
+      "flagged": [
+        "drone",
+        "gst",
+        "travel"
+      ],
+      "hits": [
+        "gst",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Ilakkiya Studios"
+    },
+    {
+      "category": "Photographer",
+      "expected": [],
+      "extra": [
+        "overtime",
+        "travel"
+      ],
+      "flagged": [
+        "overtime",
+        "travel"
+      ],
+      "hits": [],
+      "missed": [],
+      "vendor": "Marina Light Pictures"
+    }
+  ],
+  "seconds": 50,
+  "set": "heldout",
+  "system": "pipeline",
+  "totals": {
+    "exactQuotes": 10,
+    "expected": 37,
+    "falseAlarms": 15,
+    "found": 35,
+    "missed": 2,
+    "precision": 0.7,
+    "quotes": 20,
+    "recall": 0.9459459459459459
+  }
+}

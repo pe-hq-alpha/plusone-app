@@ -1,0 +1,330 @@
+{
+  "scores": [
+    {
+      "category": "Catering",
+      "expected": [
+        "water"
+      ],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [
+        "water"
+      ],
+      "vendor": "Annapoorna Catering"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "extra": [],
+      "flagged": [
+        "crockery",
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "hits": [
+        "crockery",
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "missed": [],
+      "vendor": "Saravana Caterers"
+    },
+    {
+      "category": "Catering",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Mylai Kitchen"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery"
+      ],
+      "extra": [],
+      "flagged": [
+        "crockery"
+      ],
+      "hits": [
+        "crockery"
+      ],
+      "missed": [],
+      "vendor": "Krishna Bhavan Caterers"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "hits": [
+        "gst",
+        "service_staff",
+        "transport",
+        "water"
+      ],
+      "missed": [],
+      "vendor": "Sri Vaari Foods"
+    },
+    {
+      "category": "Catering",
+      "expected": [
+        "crockery",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "crockery",
+        "transport"
+      ],
+      "hits": [
+        "crockery",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Thali Express"
+    },
+    {
+      "category": "Venue",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Thamarai Hall"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "ac",
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "extra": [
+        "dining"
+      ],
+      "flagged": [
+        "ac",
+        "cleaning",
+        "dining",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "ac",
+        "cleaning",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Sri Kalyana Mandapam"
+    },
+    {
+      "category": "Venue",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Green Palace"
+    },
+    {
+      "category": "Venue",
+      "expected": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "extra": [
+        "dining"
+      ],
+      "flagged": [
+        "dining",
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "hits": [
+        "electricity",
+        "gst",
+        "overtime"
+      ],
+      "missed": [],
+      "vendor": "Lotus Hall"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Jasmine Arch Decor"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Rangoli Room"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "extra": [],
+      "flagged": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "hits": [
+        "gst",
+        "lighting",
+        "setup",
+        "transport"
+      ],
+      "missed": [],
+      "vendor": "Pushpa Decorators"
+    },
+    {
+      "category": "Decor & Florals",
+      "expected": [
+        "lighting",
+        "setup"
+      ],
+      "extra": [],
+      "flagged": [
+        "lighting",
+        "setup"
+      ],
+      "hits": [
+        "lighting",
+        "setup"
+      ],
+      "missed": [],
+      "vendor": "Malar Florists"
+    },
+    {
+      "category": "Photographer",
+      "expected": [],
+      "extra": [],
+      "flagged": [],
+      "hits": [],
+      "missed": [],
+      "vendor": "Thinnai Photography"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "extra": [],
+      "flagged": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "hits": [
+        "album",
+        "drone",
+        "gst",
+        "overtime",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Click Studio"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "drone",
+        "gst"
+      ],
+      "extra": [],
+      "flagged": [
+        "drone",
+        "gst"
+      ],
+      "hits": [
+        "drone",
+        "gst"
+      ],
+      "missed": [],
+      "vendor": "Muthu Moments"
+    },
+    {
+      "category": "Photographer",
+      "expected": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "extra": [],
+      "flagged": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "hits": [
+        "album",
+        "overtime",
+        "travel"
+      ],
+      "missed": [],
+      "vendor": "Vilakku Studio"
+    }
+  ],
+  "seconds": 18,
+  "set": "tuned",
+  "system": "direct",
+  "totals": {
+    "exactQuotes": 15,
+    "expected": 37,
+    "falseAlarms": 2,
+    "found": 36,
+    "missed": 1,
+    "precision": 0.9473684210526315,
+    "quotes": 18,
+    "recall": 0.972972972972973
+  }
+}
