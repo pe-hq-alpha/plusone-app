@@ -803,7 +803,7 @@ type ReplyReading = z.infer<typeof replySchema>;
  * Read a vendor reply, and its PDF or photo when there is one: quotes often live in the
  * attachment (a PDF by email, a photo of a price list on WhatsApp), not the message.
  */
-async function readVendorReply(ctx: ActionCtx, args: {
+export async function readVendorReply(ctx: ActionCtx, args: {
   event: Doc<"events">;
   slot: Doc<"vendorSlots"> | null;
   vendorName: string;
