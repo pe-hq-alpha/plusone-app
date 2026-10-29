@@ -14,7 +14,12 @@ import { gapsIn, missingCharges as flagMissing, sheetFor, type Answer } from "./
 import { HELD_OUT_GROUPS } from "./lib/evalHeldOut";
 import { keywordFlags } from "./lib/evalSystems";
 import { answersFrom, CHARGES_INSTRUCTIONS, chargesPrompt, chargesSchema } from "./lib/charges";
-import { generateObject, MODEL_FAST } from "./lib/models";
+import { extractJsonText, glimmerComplete } from "./lib/glimmer";
+import { costUsd, glimmerCostUsd } from "./lib/modelCost";
+import { generateObject, MODEL_FAST, parseAnswer } from "./lib/models";
+import { PHOTO_INSTRUCTIONS, tagsFor } from "./lib/photoTags";
+import { photoCheckSchema, photoPrompt } from "./marketplace/photos";
+import type { SystemAnswer } from "./lib/glimmerEval";
 import { z } from "zod";
 import type { EvalGroup } from "./lib/evalQuotes";
 import type { QuoteLine } from "./lib/validators";
@@ -295,6 +300,109 @@ export const compare = internalAction({
       group.quotes.forEach((q, i) => scores.push(scoreQuote(q.vendor, group.category, chargesOnly(q.expected), chargesOnly(flagged[i]))));
     }
     return { set: args.set, system: args.system, seconds: Math.round((Date.now() - started) / 1000), totals: totals(scores), scores };
+  },
+});
+
+const photoCheckAnswer = v.object({
+  realWork: v.boolean(),
+  stock: v.boolean(),
+  watermark: v.boolean(),
+  faces: v.boolean(),
+  unsafe: v.boolean(),
+  shows: v.string(),
+  tags: v.array(v.string()),
+  doubt: v.optional(v.string()),
+});
+
+const systemAnswer = v.union(
+  v.object({ ok: v.literal(true), answer: photoCheckAnswer, ms: v.number(), costUsd: v.number() }),
+  v.object({ ok: v.literal(false), error: v.string(), ms: v.number(), costUsd: v.number() }),
+);
+
+/**
+ * The Glimmer photo-check evaluation, one photo per call
+ * (`npx convex run evals:glimmerPhotos '{"name":"lunch.jpg","trade":"Catering","profileName":"...","dataBase64":"...","mediaType":"image/jpeg"}'`
+ * on production): the same photo, prompt and answer shape through Muse Glimmer and Muse
+ * Spark, with nothing written but the cost rows. Glimmer gets no Muse Spark fallback here:
+ * a Glimmer failure is a result, scored as a miss.
+ */
+export const glimmerPhotos = internalAction({
+  args: {
+    name: v.string(),
+    trade: v.string(),
+    profileName: v.string(),
+    dataBase64: v.string(),
+    mediaType: v.string(),
+    systems: v.optional(v.array(v.union(v.literal("glimmer"), v.literal("spark")))),
+  },
+  returns: v.object({ name: v.string(), glimmer: v.optional(systemAnswer), spark: v.optional(systemAnswer) }),
+  handler: async (ctx, args): Promise<{ name: string; glimmer?: SystemAnswer; spark?: SystemAnswer }> => {
+    const bytes = Uint8Array.from(atob(args.dataBase64), (ch) => ch.charCodeAt(0));
+    // The same prompt production checks photos with: the listing's name and the trade's tags.
+    const prompt = photoPrompt(args.profileName, tagsFor([args.trade]));
+    const want = new Set(args.systems ?? (["glimmer", "spark"] as const));
+    const out: { name: string; glimmer?: SystemAnswer; spark?: SystemAnswer } = { name: args.name };
+    if (want.has("glimmer")) {
+      const started = Date.now();
+      try {
+        const result = await glimmerComplete(
+          { images: [{ data: bytes, mediaType: args.mediaType }], prompt, schema: photoCheckSchema },
+          process.env,
+          fetch,
+        );
+        const ms = Math.round(result.ms);
+        const cost = glimmerCostUsd(ms / 1000);
+        // Usage is known, so the GPU's seconds join the cost record like production's do.
+        await ctx.runMutation(internal.modelCalls.record, {
+          feature: "evalPhotoCheck",
+          provider: "glimmer",
+          model: result.model,
+          inputTokens: result.usage.inputTokens,
+          outputTokens: result.usage.outputTokens,
+          costUsd: cost,
+          fellBack: false,
+          durationMs: ms,
+        });
+        out.glimmer = { ok: true, answer: parseAnswer(extractJsonText(result.text), photoCheckSchema), ms, costUsd: cost };
+      } catch (error) {
+        // No Muse Spark fallback: the failure is the result, scored as a miss.
+        const ms = Date.now() - started;
+        out.glimmer = {
+          ok: false,
+          error: error instanceof Error ? error.message : String(error),
+          ms,
+          costUsd: glimmerCostUsd(ms / 1000),
+        };
+      }
+    }
+    if (want.has("spark")) {
+      const started = Date.now();
+      try {
+        // Production's fallback call as it stands: Muse Spark on the same prompt and shape.
+        const { object, model, usage } = await generateObject({
+          ctx,
+          feature: "evalPhotoCheck",
+          model: MODEL_FAST,
+          effort: "low",
+          system: PHOTO_INSTRUCTIONS,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "file", data: bytes, mediaType: args.mediaType },
+                { type: "text", text: prompt },
+              ],
+            },
+          ],
+          schema: photoCheckSchema,
+        });
+        // The cost row above carries the same figure, written before the answer was parsed.
+        out.spark = { ok: true, answer: object, ms: Date.now() - started, costUsd: costUsd(model, usage) ?? 0 };
+      } catch (error) {
+        out.spark = { ok: false, error: error instanceof Error ? error.message : String(error), ms: Date.now() - started, costUsd: 0 };
+      }
+    }
+    return out;
   },
 });
 
