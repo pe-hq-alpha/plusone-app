@@ -1,0 +1,1867 @@
+{
+  "ranAt": "2026-10-29T14:45:52.625Z",
+  "seconds": 594,
+  "keys": [
+    {
+      "name": "sample-work-1.jpg",
+      "trade": "catering",
+      "profileName": "Kalyana Saapadu Co.",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "banana-leaf-service",
+        "buffet",
+        "serving-staff"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-2.jpg",
+      "trade": "catering",
+      "profileName": "Komalam Caterers",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "buffet"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-3.jpg",
+      "trade": "catering",
+      "profileName": "Kalyana Saapadu Co.",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "dessert-counter",
+        "buffet"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-4.jpg",
+      "trade": "catering",
+      "profileName": "Komalam Caterers",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-5.jpg",
+      "trade": "decor",
+      "profileName": "Jasmine Arch Decorators",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-6.jpg",
+      "trade": "decor",
+      "profileName": "Jasmine Arch Decorators",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "entrance-arch",
+        "kolam-or-rangoli",
+        "fresh-flowers"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-7.jpg",
+      "trade": "photography",
+      "profileName": "Thinnai Photography",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "family-portrait"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-8.jpg",
+      "trade": "photography",
+      "profileName": "Thinnai Photography",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "candid"
+      ],
+      "source": "generated for the app's samples"
+    },
+    {
+      "name": "sample-work-9.jpg",
+      "trade": "catering",
+      "profileName": "Pongal Pot Caterers",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "banana-leaf-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-10.jpg",
+      "trade": "catering",
+      "profileName": "Annapoorani Leaf Caterers",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-11.jpg",
+      "trade": "catering",
+      "profileName": "Neivedhyam Kitchen",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "banana-leaf-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-12.jpg",
+      "trade": "catering",
+      "profileName": "Sambar & Co. Caterers",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-13.jpg",
+      "trade": "catering",
+      "profileName": "Thalaivazhai Caterers",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-14.jpg",
+      "trade": "catering",
+      "profileName": "Paruppu Payasam Kitchen",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-15.jpg",
+      "trade": "catering",
+      "profileName": "Kumudham Feast",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-16.jpg",
+      "trade": "catering",
+      "profileName": "Vettrilai Caterers",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "plated-service"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-17.jpg",
+      "trade": "decor",
+      "profileName": "Sevvanthi Stage Decor",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-18.jpg",
+      "trade": "decor",
+      "profileName": "Kolam Corner Decor",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "artificial-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-19.jpg",
+      "trade": "decor",
+      "profileName": "Poo Kadai Events",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-20.jpg",
+      "trade": "decor",
+      "profileName": "Kuthuvilakku Decor",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-21.jpg",
+      "trade": "decor",
+      "profileName": "Rangoli Room Events",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-22.jpg",
+      "trade": "decor",
+      "profileName": "Marigold Mandapam Designs",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-23.jpg",
+      "trade": "decor",
+      "profileName": "Thamarai Petal Studio",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "fresh-flowers",
+        "lighting"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-24.jpg",
+      "trade": "photography",
+      "profileName": "Veranda Frames",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-25.jpg",
+      "trade": "decor",
+      "profileName": "Gopuram Lens Co.",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-26.jpg",
+      "trade": "decor",
+      "profileName": "Vilakku Light Studio",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "artificial-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-27.jpg",
+      "trade": "decor",
+      "profileName": "Muthu Moments",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "artificial-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-28.jpg",
+      "trade": "decor",
+      "profileName": "Marina Light Photography",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "fresh-flowers"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-29.jpg",
+      "trade": "photography",
+      "profileName": "Pattu Pavadai Pictures",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "group-on-stage"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "sample-work-30.jpg",
+      "trade": "decor",
+      "profileName": "Rangam Studios",
+      "realWork": true,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "lighting"
+      ],
+      "source": "Unsplash, free licence"
+    },
+    {
+      "name": "trap-watermark.jpg",
+      "trade": "decor",
+      "profileName": "Sevvanthi Stage Decor",
+      "realWork": false,
+      "stock": true,
+      "watermark": true,
+      "faces": false,
+      "unsafe": false,
+      "tags": [
+        "stage-backdrop",
+        "fresh-flowers"
+      ],
+      "source": "generated; a stock-style watermark across it"
+    },
+    {
+      "name": "trap-other-brand.jpg",
+      "trade": "catering",
+      "profileName": "Sri Lakshmi Caterers",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "buffet",
+        "serving-staff"
+      ],
+      "source": "generated; a banner names another business (Royal Feast Caterers Bangalore), which the prompt forbids but the schema has no field for"
+    },
+    {
+      "name": "trap-face.jpg",
+      "trade": "cake",
+      "profileName": "Cake Walk Chennai",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": false,
+      "tags": [
+        "fresh-cream-finish"
+      ],
+      "source": "generated; a woman's face clear and sharp"
+    },
+    {
+      "name": "trap-unsafe.jpg",
+      "trade": "venue",
+      "profileName": "Marina Banquets",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": true,
+      "unsafe": true,
+      "tags": [],
+      "source": "generated; a brawl, broken glass, spilled liquor"
+    },
+    {
+      "name": "trap-blurry.jpg",
+      "trade": "photography",
+      "profileName": "Veranda Frames",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [],
+      "source": "generated; a motion-blurred, unusable photo"
+    },
+    {
+      "name": "trap-wrong-trade.jpg",
+      "trade": "decor",
+      "profileName": "Poo Kadai Events",
+      "realWork": false,
+      "stock": false,
+      "watermark": false,
+      "faces": false,
+      "unsafe": false,
+      "tags": [],
+      "source": "generated; an office desk, nothing to do with events"
+    }
+  ],
+  "answers": [
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears AI generated with repetitive patterns and unnatural details, so whether it is a real photo of event work is uncertain.",
+          "faces": true,
+          "realWork": false,
+          "shows": "A long hall table laid with banana leaves piled with rice and bowls of curry being served to men in white shirts",
+          "stock": true,
+          "tags": [
+            "banana-leaf-service",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.007750000000000001,
+        "ms": 5745,
+        "ok": true
+      },
+      "name": "sample-work-1.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Rice mounds and distant figures look very uniform, so the image may be AI-generated rather than a real photo.",
+          "faces": true,
+          "realWork": false,
+          "shows": "Staff serving rice and curries on banana leaves along a long hall table",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.007538,
+        "ms": 6325,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears AI-generated/rendered rather than a genuine photo of past work; faces in the background are indistinct and cannot be confidently assessed, so realWork and faces are uncertain.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A buffet line with chafing dishes of rice and curry and stacks of white plates in a banquet hall",
+          "stock": true,
+          "tags": [
+            "buffet",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.009041666666666668,
+        "ms": 6496,
+        "ok": true
+      },
+      "name": "sample-work-2.jpg",
+      "spark": {
+        "answer": {
+          "faces": true,
+          "realWork": true,
+          "shows": "A buffet line with chafing dishes, trays of curry and rice, and stacks of plates",
+          "stock": false,
+          "tags": [
+            "buffet",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0054985,
+        "ms": 3182,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Unsure if this is a real photo of event work; the image appears to be an AI-generated render or stock-style image rather than an authentic past work photo.",
+          "faces": true,
+          "realWork": false,
+          "shows": "A buffet table with golden bowls of yellow dessert and trays of fried sweets with a staff member serving.",
+          "stock": true,
+          "tags": [
+            "buffet",
+            "dessert-counter",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.007750000000000001,
+        "ms": 5109,
+        "ok": true
+      },
+      "name": "sample-work-3.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "Brass bowls of payasam and trays of sweets on a decorated catering table with serving staff",
+          "stock": false,
+          "tags": [
+            "dessert-counter",
+            "serving-staff",
+            "buffet"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00617375,
+        "ms": 5249,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image looks like an AI render rather than a real photograph, so authenticity as past work is uncertain.",
+          "faces": true,
+          "realWork": false,
+          "shows": "A banquet hall with round tables set with plated food and guests dining",
+          "stock": true,
+          "tags": [
+            "plated-service",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 4000,
+        "ok": true
+      },
+      "name": "sample-work-4.jpg",
+      "spark": {
+        "answer": {
+          "faces": true,
+          "realWork": false,
+          "shows": "Guests seated at round tables with plated Indian food in a banquet hall",
+          "stock": true,
+          "tags": [
+            "plated-service",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0065015,
+        "ms": 4249,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears to have AI/render-like artifacts and looks like a generated stage setup rather than a verifiable real event photo; unsure if the floral garlands are fresh or artificial.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A small stage with two carved chairs flanked by tall candle stands in front of an orange and white flower garland backdrop.",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4103,
+        "ok": true
+      },
+      "name": "sample-work-5.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A small stage with two chairs, two tall lamps and orange and white garlands hung on a curtain",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006233,
+        "ms": 3727,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears to be a render or AI generated rather than a real event photo, and the person seated inside is small and not clearly identifiable.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A banana-leaf and marigold flower entrance arch over open double doors with a rangoli and coconuts on the floor and a decorated interior beyond.",
+          "stock": true,
+          "tags": [
+            "entrance-arch",
+            "fresh-flowers",
+            "kolam-or-rangoli"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.007750000000000001,
+        "ms": 5806,
+        "ok": true
+      },
+      "name": "sample-work-6.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "The lighting and leaf and flower detail look very smooth, so it may be AI generated and not a real site photo. The background figure is too distant to tell if a face is visible.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A doorway with a banana leaf and marigold arch, rangoli with coconuts and a brass pot",
+          "stock": false,
+          "tags": [
+            "entrance-arch",
+            "fresh-flowers",
+            "kolam-or-rangoli"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0052555,
+        "ms": 3482,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image shows signs of AI generation with unnatural details and distortion, so it is doubtful this is a real photo of event work.",
+          "faces": true,
+          "realWork": false,
+          "shows": "Seven people in colorful saris and a suit posing together in front of a floral 60 backdrop.",
+          "stock": false,
+          "tags": [
+            "family-portrait"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.009041666666666668,
+        "ms": 6037,
+        "ok": true
+      },
+      "name": "sample-work-7.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Skin texture and floral backdrop look very smooth so it could be AI-generated, cannot be certain from this view.",
+          "faces": true,
+          "realWork": false,
+          "shows": "A family of eight posing in sarees and a suit before a floral 60 backdrop",
+          "stock": false,
+          "tags": [
+            "family-portrait",
+            "group-on-stage"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006919,
+        "ms": 4593,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears AI generated or rendered rather than an authentic event photograph, so real work authenticity is uncertain.",
+          "faces": true,
+          "realWork": false,
+          "shows": "An older woman in a sari laughs while a young child in red eats a snack indoors with several adults watching in the background",
+          "stock": true,
+          "tags": [
+            "candid",
+            "family-portrait"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4727,
+        "ok": true
+      },
+      "name": "sample-work-8.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "The skin texture and lighting look overly smooth so it may be a stock image or generated render rather than a photo from a real booked event.",
+          "faces": true,
+          "realWork": false,
+          "shows": "An older woman in a saree laughing with a small child eating a snack at a family gathering",
+          "stock": true,
+          "tags": [
+            "candid",
+            "family-portrait"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0060775,
+        "ms": 4170,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain if this is from an event catering service or a personal meal.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A South Indian thali served on a banana leaf with rice, curry, papad, vegetable sides and a small bowl of dal",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4716,
+        "ok": true
+      },
+      "name": "sample-work-9.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A South Indian meal served on a banana leaf with rice, curries and papad",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0045395,
+        "ms": 1841,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A metal thali with multiple small bowls of curries and sides alongside a bowl of rice and a banana leaf with a fork",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3463,
+        "ok": true
+      },
+      "name": "sample-work-10.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A steel thali with small bowls of curry, vegetables and sides served with rice",
+          "stock": false,
+          "tags": [
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00502625,
+        "ms": 3457,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A banana-leaf spread with rice, coconut halves, bananas, turmeric, sugarcane and a cup of drink.",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3815,
+        "ok": true
+      },
+      "name": "sample-work-11.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A traditional meal on a banana leaf with rice, coconut, bananas and sweets",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00521225,
+        "ms": 3517,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A stainless steel thali with multiple small bowls of curries and sides beside a bowl of white rice on a table with a banana leaf and fork",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3410,
+        "ok": true
+      },
+      "name": "sample-work-12.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A steel thali with small bowls of dal, curries and vegetables served with rice",
+          "stock": false,
+          "tags": [
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00520475,
+        "ms": 2709,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A compartmentalized food tray with South Indian dishes and a cup of drink placed on a large green banana leaf",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3455,
+        "ok": true
+      },
+      "name": "sample-work-13.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A portioned South Indian meal tray with coffee placed on a banana leaf",
+          "stock": false,
+          "tags": [
+            "plated-service",
+            "banana-leaf-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0068165,
+        "ms": 5648,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "Idli, vada and chutney on a banana leaf with a dosa and a fritter on other plates on a table.",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3529,
+        "ok": true
+      },
+      "name": "sample-work-14.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "Idli, vada, dosa and chutney served on steel plates with banana leaf",
+          "stock": false,
+          "tags": [
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00450775,
+        "ms": 2758,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A South Indian thali with papad, appam and several curries served on a metal tray with a banana leaf",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3563,
+        "ok": true
+      },
+      "name": "sample-work-15.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A South Indian thali with appam, papad and curries on a steel tray",
+          "stock": false,
+          "tags": [
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00549225,
+        "ms": 3146,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A metal tray platter with appam, papad and several small bowls of curries and yogurt on a banana leaf",
+          "stock": false,
+          "tags": [
+            "banana-leaf-service",
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3215,
+        "ok": true
+      },
+      "name": "sample-work-16.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A steel thali with appam, papad and small bowls of curry and curd",
+          "stock": false,
+          "tags": [
+            "plated-service"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00486025,
+        "ms": 2642,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Flower freshness cannot be confirmed with certainty from the image; could be artificial.",
+          "faces": false,
+          "realWork": true,
+          "shows": "An elaborately decorated wedding stage with a floral arch, draped fabric and ornate seating on a raised platform",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4432,
+        "ok": true
+      },
+      "name": "sample-work-17.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unable to tell if the flowers are fresh or artificial, so neither flower tag was used",
+          "faces": false,
+          "realWork": true,
+          "shows": "A decorated indoor stage with red seating, draped curtains and floral arrangements",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0052435,
+        "ms": 3755,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A bright outdoor stage decorated with a large paper flower backdrop, a green sofa with orange cushions, and colorful poufs with umbrellas.",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "artificial-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3023,
+        "ok": true
+      },
+      "name": "sample-work-18.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A bright outdoor stage with a green sofa in front of a wall of large paper flowers",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "artificial-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005336,
+        "ms": 3059,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain if this is the vendor's actual past work or a generic stock image; no watermark or business name is visible to confirm.",
+          "faces": false,
+          "realWork": true,
+          "shows": "Yellow marigolds and red roses floating on water arranged in a heart shape",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3891,
+        "ok": true
+      },
+      "name": "sample-work-19.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "Yellow marigolds arranged around red roses in water",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0055455,
+        "ms": 5239,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "costUsd": 0.006458333333333333,
+        "error": "The model's answer did not match the expected shape: [\n  {\n    \"expected\": \"boolean\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"realWork\"\n    ],\n    \"message\": \"Invalid input: expected boolean, received undefined\"\n  },\n  {\n    \"expected\": \"boolean\",\n    \"code\": \"invalid_type\",\n    \"path\": [\n      \"stock\"\n    ],\n    \"message\": \"Invalid input: ex",
+        "ms": 4450,
+        "ok": false
+      },
+      "name": "sample-work-20.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A red fabric hanging lantern with bead tassels above marigold garlands and draped curtains",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00691925,
+        "ms": 3346,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain if this is from the vendor's past event work or a generic stock image of marigold garlands.",
+          "faces": false,
+          "realWork": true,
+          "shows": "Rows of yellow and orange marigold flower garlands hanging with green leaves above",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4120,
+        "ok": true
+      },
+      "name": "sample-work-21.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Close crop shows no event setting, so it is hard to tell if this is the vendor's own work or a generic flower image",
+          "faces": false,
+          "realWork": false,
+          "shows": "Rows of yellow and orange marigold garlands hanging together",
+          "stock": true,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006285,
+        "ms": 4399,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Unable to confirm with certainty whether the flowers are fresh or artificial from the photo alone.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A floral wedding stage with red velvet sofa and chairs set against draped curtains",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3073,
+        "ok": true
+      },
+      "name": "sample-work-22.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unsure whether the flowers are fresh or artificial, so no flower tag added.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A decorated stage with red seating, draped fabric and red and white flowers",
+          "stock": false,
+          "tags": [
+            "stage-backdrop"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00507475,
+        "ms": 3288,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain if flowers are fresh or artificial",
+          "faces": false,
+          "realWork": true,
+          "shows": "A floral arch backdrop with lit candle-style lights against white curtains",
+          "stock": false,
+          "tags": [
+            "entrance-arch",
+            "artificial-flowers",
+            "lighting",
+            "photo-corner"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3820,
+        "ok": true
+      },
+      "name": "sample-work-23.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unsure if the flowers are fresh or artificial so left those tags out",
+          "faces": false,
+          "realWork": true,
+          "shows": "A floral arch backdrop with tall lights against a white curtain",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "photo-corner",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00517425,
+        "ms": 3054,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A person holding a DSLR camera up to photograph a crowded night event.",
+          "stock": false,
+          "tags": [
+            "candid",
+            "outdoor-shoot"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0038750000000000004,
+        "ms": 2719,
+        "ok": true
+      },
+      "name": "sample-work-24.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": true,
+          "shows": "A person holding up a professional camera to photograph a crowded event at night",
+          "stock": false,
+          "tags": [
+            "candid",
+            "outdoor-shoot"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0068465,
+        "ms": 4297,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain if this is event decoration from past work or a shop display of garlands; no clear event context visible.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A hanging floral garland made of red roses and white chrysanthemums with white flower strands in the background",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3586,
+        "ok": true
+      },
+      "name": "sample-work-25.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unsure if this shows event decor or a shop display",
+          "faces": false,
+          "realWork": true,
+          "shows": "Red and white flower garlands hanging in a row",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00704975,
+        "ms": 4404,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Uncertain whether the flowers are fresh or artificial.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A red and yellow flower garland draped over a wooden entrance arch",
+          "stock": false,
+          "tags": [
+            "entrance-arch",
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0038750000000000004,
+        "ms": 2767,
+        "ok": true
+      },
+      "name": "sample-work-26.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Flowers look fresh but artificial cannot be ruled out from this photo alone.",
+          "faces": false,
+          "realWork": true,
+          "shows": "Red and yellow flowers arranged over a wooden doorway arch",
+          "stock": false,
+          "tags": [
+            "entrance-arch",
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00495475,
+        "ms": 3370,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A yellow floral-decorated tray held by hands with a bowl of creamy paste on top",
+          "stock": false,
+          "tags": [
+            "artificial-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3193,
+        "ok": true
+      },
+      "name": "sample-work-27.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "",
+          "faces": false,
+          "realWork": true,
+          "shows": "A yellow tray edged with fabric roses holding a bowl of pale paste",
+          "stock": false,
+          "tags": [
+            "artificial-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0050385,
+        "ms": 3603,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Unclear if this is event work; looks like a shrine purification basin and appears to be a stock/shrine photo rather than the vendor’s event setup.",
+          "faces": false,
+          "realWork": false,
+          "shows": "Colorful gerbera daisies and white and yellow flowers float in a shallow stone water basin",
+          "stock": true,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.009041666666666668,
+        "ms": 6120,
+        "ok": true
+      },
+      "name": "sample-work-28.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Background is blurred so event setting is unclear",
+          "faces": false,
+          "realWork": true,
+          "shows": "Colourful fresh flowers arranged in a line floating on shallow water",
+          "stock": false,
+          "tags": [
+            "fresh-flowers"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006577,
+        "ms": 5642,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Faces of the people at the mandap are small and partially obscured by distance and lighting, so clarity is uncertain.",
+          "faces": true,
+          "realWork": true,
+          "shows": "A wedding ceremony taking place under a floral mandap with candles lining the aisle in a grand ballroom",
+          "stock": false,
+          "tags": [
+            "candid"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4386,
+        "ok": true
+      },
+      "name": "sample-work-29.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Faces are small due to distance so marked as not clearly visible.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A decorated indoor stage with flowers and candles where a couple and family are seated",
+          "stock": false,
+          "tags": [
+            "group-on-stage"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00665475,
+        "ms": 5416,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Cannot confirm whether the flowers are fresh or artificial from the photo.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A red-carpeted wedding stage with a flower-covered backdrop, white curtains, a chandelier and four ornate chairs with low seating.",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "entrance-arch",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4240,
+        "ok": true
+      },
+      "name": "sample-work-30.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unable to tell if the flowers are fresh or artificial.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A red and white floral stage with drapes and low wooden seats",
+          "stock": false,
+          "tags": [
+            "stage-backdrop",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00454125,
+        "ms": 3204,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image is overlaid with repeated STOCKPHOTO PREVIEW watermarks, indicating it is a stock preview image rather than verifiable past work of Sevvanthi Stage Decor, so authenticity as vendor work is doubtful.",
+          "faces": false,
+          "realWork": false,
+          "shows": "An elaborately decorated wedding stage with floral garlands, hanging arrangements and a white sofa on a raised platform.",
+          "stock": true,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": true
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3496,
+        "ok": true
+      },
+      "name": "trap-watermark.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "Unsure if flowers are fresh or artificial from photo alone.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A large indoor stage with marigold garlands, golden pillars and a white sofa",
+          "stock": true,
+          "tags": [
+            "stage-backdrop",
+            "fresh-flowers",
+            "lighting"
+          ],
+          "unsafe": false,
+          "watermark": true
+        },
+        "costUsd": 0.00609825,
+        "ms": 3215,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The photo displays Royal Feast Caterers branding, not Sri Lakshmi Caterers, indicating it is not the vendor’s own past work.",
+          "faces": true,
+          "realWork": true,
+          "shows": "A buffet table with large metal serving dishes of rice and curry and two staff members standing behind a Royal Feast Caterers Bangalore banner",
+          "stock": false,
+          "tags": [
+            "buffet",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": true
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4073,
+        "ok": true
+      },
+      "name": "trap-other-brand.jpg",
+      "spark": {
+        "answer": {
+          "faces": true,
+          "realWork": true,
+          "shows": "A buffet line with biryani and curries in steel bowls with two staff standing behind",
+          "stock": false,
+          "tags": [
+            "buffet",
+            "serving-staff"
+          ],
+          "unsafe": false,
+          "watermark": true
+        },
+        "costUsd": 0.00443,
+        "ms": 2645,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "",
+          "faces": true,
+          "realWork": true,
+          "shows": "A woman in a green sari holding a white birthday cake with balloons and a Happy Birthday balloon behind her",
+          "stock": false,
+          "tags": [
+            "fresh-cream-finish"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3395,
+        "ok": true
+      },
+      "name": "trap-face.jpg",
+      "spark": {
+        "answer": {
+          "faces": true,
+          "realWork": true,
+          "shows": "A woman in a green saree holding a birthday cake in front of balloons",
+          "stock": false,
+          "tags": [
+            "fresh-cream-finish"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.0051585,
+        "ms": 2541,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "Unclear if this is promotional event work; the scene depicts a disturbance rather than a service showcase.",
+          "faces": true,
+          "realWork": false,
+          "shows": "A banquet hall floor littered with broken bottles and an overturned chair as men stand in a tense confrontation.",
+          "stock": false,
+          "tags": [
+            "hall-interior",
+            "dining-hall"
+          ],
+          "unsafe": true,
+          "watermark": false
+        },
+        "costUsd": 0.007750000000000001,
+        "ms": 5294,
+        "ok": true
+      },
+      "name": "trap-unsafe.jpg",
+      "spark": {
+        "answer": {
+          "faces": true,
+          "realWork": true,
+          "shows": "Men arguing in a hall with broken bottles and overturned furniture on the floor",
+          "stock": false,
+          "tags": [
+            "hall-interior",
+            "dining-hall"
+          ],
+          "unsafe": true,
+          "watermark": false
+        },
+        "costUsd": 0.004879,
+        "ms": 2952,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image is heavily motion blurred so details, location and exact event context are uncertain.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A blurry night crowd seen from behind with stage lights and a building in the background",
+          "stock": false,
+          "tags": [
+            "candid",
+            "outdoor-shoot"
+          ],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.005166666666666667,
+        "ms": 3644,
+        "ok": true
+      },
+      "name": "trap-blurry.jpg",
+      "spark": {
+        "answer": {
+          "doubt": "The image is heavily blurred so details and setting are unclear and tags cannot be assigned with confidence.",
+          "faces": false,
+          "realWork": true,
+          "shows": "A very blurred night view of a crowd near bright lights",
+          "stock": false,
+          "tags": [],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.00519225,
+        "ms": 3448,
+        "ok": true
+      }
+    },
+    {
+      "glimmer": {
+        "answer": {
+          "doubt": "The image appears to be a generic office stock setup rather than event work by Poo Kadai Events; it is unclear if it is a stock photo or a render, and it does not match event work.",
+          "faces": false,
+          "realWork": false,
+          "shows": "A laptop with a black screen and a black mug on a light wooden desk with an office chair and a potted plant nearby",
+          "stock": true,
+          "tags": [],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.006458333333333333,
+        "ms": 4037,
+        "ok": true
+      },
+      "name": "trap-wrong-trade.jpg",
+      "spark": {
+        "answer": {
+          "faces": false,
+          "realWork": false,
+          "shows": "A laptop and a black mug on a wooden office desk with a chair",
+          "stock": true,
+          "tags": [],
+          "unsafe": false,
+          "watermark": false
+        },
+        "costUsd": 0.004856,
+        "ms": 2310,
+        "ok": true
+      }
+    }
+  ]
+}
