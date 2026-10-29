@@ -1,14 +1,14 @@
 import { ConvexError, v } from "convex/values";
 import { z } from "zod";
 import { internal } from "../_generated/api";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { internalAction, internalMutation, internalQuery, mutation, query, type QueryCtx } from "../_generated/server";
 import { requireStaff } from "../lib/auth";
 import { extractJsonText, glimmerComplete } from "../lib/glimmer";
 import { MetaError } from "../lib/meta";
 import { glimmerCostUsd } from "../lib/modelCost";
 import { MODEL_FAST, generateObject, parseAnswer } from "../lib/models";
-import { keepKnownTags, photoFlags, PHOTO_INSTRUCTIONS, tagsFor, type PhotoTag } from "../lib/photoTags";
+import { keepKnownTags, photoFlags, PHOTO_INSTRUCTIONS, shownToCustomers, tagsFor, type PhotoTag } from "../lib/photoTags";
 import { rateLimiter } from "../rateLimits";
 import { vendorPhotoCheck } from "../schema";
 import { requireVendor } from "./vendors";
@@ -78,6 +78,34 @@ export function photoPrompt(profileName: string, allowed: PhotoTag[]): string {
     `The photo is from the past work of "${profileName}". Its own name on the photo is fine; another business's name is not.\n\n` +
     `Tag it with up to 5 of these, by key:\n${allowed.map((t) => `- ${t.key}: ${t.label}`).join("\n")}`
   );
+}
+
+/** A photo of a vendor's work as customers see it: the picture, its tags by label, and what it shows. */
+export const customerPhoto = v.object({ url: v.string(), tags: v.array(v.string()), shows: v.optional(v.string()) });
+
+/** At most this many photos travel with a vendor's card. */
+const CARD_PHOTOS = 6;
+
+/**
+ * The photos customers may see for a vendor, newest first: only those `shownToCustomers`
+ * allows (checked clean or approved in Ops, on a verified listing).
+ */
+export async function photosForCustomers(ctx: QueryCtx, profile: Doc<"vendorProfiles">) {
+  const labelOf = new Map(tagsFor(profile.categories).map((t) => [t.key, t.label] as const));
+  const photos = await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profile._id)).order("desc").take(30);
+  const out: { url: string; tags: string[]; shows?: string }[] = [];
+  for (const photo of photos) {
+    if (out.length >= CARD_PHOTOS) break;
+    if (!shownToCustomers({ status: photo.status, check: photo.check, review: photo.review?.decision }, profile.status)) continue;
+    const url = await ctx.storage.getUrl(photo.storageId);
+    if (!url) continue;
+    out.push({
+      url,
+      tags: (photo.check?.tags ?? []).map((key) => labelOf.get(key)).filter((label): label is string => Boolean(label)),
+      ...(photo.check?.shows ? { shows: photo.check.shows } : {}),
+    });
+  }
+  return out;
 }
 
 /** A one-off upload URL for a work photo. The caller must run a listing. */
@@ -368,5 +396,79 @@ export const run = internalAction({
       await ctx.runMutation(internal.marketplace.photos.failed, { photoId: args.photoId, error: FAILED_MESSAGE });
     }
     return null;
+  },
+});
+
+// ---------------------------------------------------------------- the sample vendors' photos
+
+/**
+ * Photos for the demo's sample vendors: our own generated pictures, on the public site,
+ * labelled as samples wherever the vendor is. Each goes through the same check as a real
+ * vendor's photo, so a photo Glimmer flags stays hidden until Ops approves it.
+ */
+const SAMPLE_WORK: { vendor: string; key: string }[] = [
+  { vendor: "Kalyana Saapadu Co.", key: "sample-work-1" },
+  { vendor: "Kalyana Saapadu Co.", key: "sample-work-3" },
+  { vendor: "Komalam Caterers", key: "sample-work-2" },
+  { vendor: "Komalam Caterers", key: "sample-work-4" },
+  { vendor: "Jasmine Arch Decorators", key: "sample-work-5" },
+  { vendor: "Jasmine Arch Decorators", key: "sample-work-6" },
+  { vendor: "Thinnai Photography", key: "sample-work-7" },
+  { vendor: "Thinnai Photography", key: "sample-work-8" },
+];
+const SAMPLE_WORK_BASE = "https://plusoneevents.site/photos";
+
+/** The sample vendor's listing, when it exists and doesn't have this photo yet. */
+export const sampleTarget = internalQuery({
+  args: { vendor: v.string(), key: v.string() },
+  returns: v.union(v.null(), v.id("vendorProfiles")),
+  handler: async (ctx, args) => {
+    const profiles = await ctx.db
+      .query("vendorProfiles")
+      .withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified"))
+      .take(500);
+    const profile = profiles.find((p) => p.sample === true && !p.ownerUserId && p.name === args.vendor);
+    if (!profile) return null;
+    const photos = await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profile._id)).take(MAX_PHOTOS + 1);
+    return photos.some((p) => p.sampleKey === args.key) ? null : profile._id;
+  },
+});
+
+export const addSample = internalMutation({
+  args: { profileId: v.id("vendorProfiles"), storageId: v.id("_storage"), key: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const photoId = await ctx.db.insert("vendorPhotos", {
+      profileId: args.profileId,
+      storageId: args.storageId,
+      sampleKey: args.key,
+      addedAt: Date.now(),
+      status: "checking",
+    });
+    await ctx.scheduler.runAfter(0, internal.marketplace.photos.run, { photoId });
+    return null;
+  },
+});
+
+/** Give the sample vendors their photos, once (`npx convex run marketplace/photos:seedSamples`). */
+export const seedSamples = internalAction({
+  args: {},
+  returns: v.object({ added: v.number(), skipped: v.number() }),
+  handler: async (ctx): Promise<{ added: number; skipped: number }> => {
+    let added = 0;
+    let skipped = 0;
+    for (const s of SAMPLE_WORK) {
+      const profileId = await ctx.runQuery(internal.marketplace.photos.sampleTarget, { vendor: s.vendor, key: s.key });
+      if (!profileId) {
+        skipped++;
+        continue;
+      }
+      const res = await fetch(`${SAMPLE_WORK_BASE}/${s.key}.jpg`);
+      if (!res.ok || !(res.headers.get("content-type") ?? "").startsWith("image/jpeg")) throw new Error(`Couldn't fetch ${s.key} (${res.status})`);
+      const storageId = await ctx.storage.store(new Blob([await res.arrayBuffer()], { type: "image/jpeg" }));
+      await ctx.runMutation(internal.marketplace.photos.addSample, { profileId, storageId, key: s.key });
+      added++;
+    }
+    return { added, skipped };
   },
 });

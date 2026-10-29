@@ -427,7 +427,10 @@ export const vendorPhotoReview = v.object({
 export const vendorPhotoFields = {
   profileId: v.id("vendorProfiles"),
   storageId: v.id("_storage"),
-  addedBy: v.id("users"),
+  /** Absent on a sample vendor's photos, which the demo adds. */
+  addedBy: v.optional(v.id("users")),
+  /** A sample vendor's photo: our own generated picture, named so the demo adds it once. */
+  sampleKey: v.optional(v.string()),
   addedAt: v.number(),
   status: v.union(v.literal("checking"), v.literal("checked"), v.literal("failed")),
   check: v.optional(vendorPhotoCheck),

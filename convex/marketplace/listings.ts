@@ -5,6 +5,7 @@ import { badgesFor, cityKey, inRangeUnit, isListed, isTrial, levelFor, MIN_BAND_
 import type { Basis } from "../lib/comparable";
 import { canonicalWebsite } from "../lib/text";
 import { offeringUnit } from "../schema";
+import { customerPhoto, photosForCustomers } from "./photos";
 
 /**
  * What PlusOne Events reads from PlusOne Partner (docs/marketplace-contract.md): listed
@@ -38,6 +39,8 @@ export const listingCard = v.object({
   whatsapp: v.optional(v.string()),
   /** A sample vendor, shown only on sample events and labelled as one. */
   sample: v.boolean(),
+  /** Photos of their work customers may see: checked clean, or approved in Ops. */
+  photos: v.array(customerPhoto),
 });
 
 export const bandResult = v.union(
@@ -96,6 +99,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     phone: profile.phone,
     whatsapp: profile.whatsapp,
     sample: profile.sample === true,
+    photos: await photosForCustomers(ctx, profile),
   };
 }
 

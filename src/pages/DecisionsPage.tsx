@@ -28,7 +28,7 @@ type SheetQuantity = NonNullable<Need["sheet"]>["quantities"][number];
  * an emailed quote is a later step.
  */
 type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings" | "missing"> &
-  Partial<Pick<Offer, "priceUnit" | "quantities">> & {
+  Partial<Pick<Offer, "priceUnit" | "quantities" | "photos">> & {
     id: string;
     name: string;
     from: "web" | "verified" | "sample";
@@ -529,6 +529,7 @@ function LineByLine({
                 ))}
               </tr>
             )}
+            <PastWork columns={columns} />
             <WhatsInIt sheet={sheet} columns={columns} />
             {sheet.lines.map((line) => (
               <tr key={line.key}>
@@ -556,6 +557,43 @@ function LineByLine({
         </table>
       </div>
     </div>
+  );
+}
+
+/**
+ * Photos of a Partner vendor's past work, beside their offer: only photos checked clean or
+ * approved by the PlusOne team reach here. Three show; each opens full size.
+ */
+function PastWork({ columns }: { columns: Column[] }) {
+  if (!columns.some((c) => c.photos?.length)) return null;
+  return (
+    <tr>
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left align-top font-normal text-muted">Past work</th>
+      {columns.map((c) => {
+        const photos = c.photos ?? [];
+        if (!photos.length) {
+          return (
+            <td key={c.id} className="px-3 py-2 text-right align-top text-quiet">
+              —
+            </td>
+          );
+        }
+        const tags = [...new Set(photos.flatMap((p) => p.tags))].slice(0, 3);
+        return (
+          <td key={c.id} className="px-3 py-2 text-right align-top">
+            <span className="inline-flex justify-end gap-1">
+              {photos.slice(0, 3).map((p) => (
+                <a key={p.url} href={p.url} target="_blank" rel="noreferrer" className="block shrink-0">
+                  <img src={p.url} alt={p.shows ?? `Past work by ${c.name}`} loading="lazy" className="h-12 w-12 rounded object-cover" />
+                </a>
+              ))}
+            </span>
+            {photos.length > 3 && <span className="block text-[11px] text-quiet">{photos.length - 3} more</span>}
+            {tags.length > 0 && <span className="mt-1 block text-[11px] leading-snug text-muted">{tags.join(" · ")}</span>}
+          </td>
+        );
+      })}
+    </tr>
   );
 }
 

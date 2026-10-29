@@ -10,6 +10,7 @@ import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, type Answer, 
 import { tierFor } from "./lib/marketplace";
 import { badge, bandRow, tier } from "./marketplace/listings";
 import { offersForEvent } from "./marketplace/offers";
+import { customerPhoto } from "./marketplace/photos";
 
 /**
  * Everything the couple needs to decide, in one read.
@@ -49,6 +50,8 @@ const offerRow = v.object({
   priceUnit: v.optional(v.string()),
   /** What the price includes, by the sheet's quantity keys: { hours: 8, photographers: 2 }. */
   quantities: v.record(v.string(), v.number()),
+  /** Photos of the vendor's past work customers may see. */
+  photos: v.array(customerPhoto),
 });
 
 const vendorRow = v.object({
@@ -422,6 +425,7 @@ export const board = query({
             tier: placeInBand(basis === "total" ? o.total : perUnit, o.currency, band),
             ...(sheet ? { priceUnit: priceUnitOf(sheet, o.priceUnit).key } : o.priceUnit ? { priceUnit: o.priceUnit } : {}),
             quantities: o.quantities ?? {},
+            photos: o.vendor.photos,
           };
         }),
       });

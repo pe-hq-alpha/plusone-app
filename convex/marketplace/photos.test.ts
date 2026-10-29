@@ -2,7 +2,7 @@
 import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { api } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import schema from "../schema";
 
@@ -294,5 +294,79 @@ describe("a vendor's work photo", () => {
     await expect(as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) })).rejects.toThrow(
       /as many photos as you can today/,
     );
+  });
+});
+
+describe("photos customers see", () => {
+  /** A photo already checked, with the given flags, and an optional Ops decision. */
+  async function checkedPhoto(t: T, profileId: Id<"vendorProfiles">, flags: { stock?: boolean; faces?: boolean }, review?: "approved" | "removed") {
+    return await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob([new Uint8Array([0xff, 0xd8, 0xff])], { type: "image/jpeg" }));
+      return await ctx.db.insert("vendorPhotos", {
+        profileId,
+        storageId,
+        addedAt: Date.now(),
+        status: "checked",
+        check: {
+          realWork: true,
+          stock: flags.stock ?? false,
+          watermark: false,
+          faces: flags.faces ?? false,
+          unsafe: false,
+          shows: "A banana-leaf lunch for a large group.",
+          tags: ["banana-leaf-service", "made-up"],
+          provider: "glimmer",
+          model: "inference-1",
+          checkedAt: Date.now(),
+        },
+        ...(review ? { review: { decision: review, reviewedBy: (await ctx.db.insert("users", { email: "ops@example.com" })) as Id<"users">, reviewedAt: Date.now() } } : {}),
+      });
+    });
+  }
+
+  test("only clean photos, or ones Ops approved, reach the vendor's card, with their tags by label", async () => {
+    const t = setup();
+    const { profileId } = await seedVendor(t);
+    await checkedPhoto(t, profileId, { faces: true });
+    await checkedPhoto(t, profileId, { stock: true });
+    await checkedPhoto(t, profileId, { stock: true }, "approved");
+    await checkedPhoto(t, profileId, {}, "removed");
+
+    const cards = await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai" });
+    expect(cards).toHaveLength(1);
+    expect(cards[0].photos).toHaveLength(2);
+    expect(cards[0].photos[0]).toMatchObject({ tags: ["Banana-leaf service"], shows: "A banana-leaf lunch for a large group." });
+  });
+
+  test("a listing that isn't verified shows no photos, however clean", async () => {
+    const t = setup();
+    const { profileId } = await seedVendor(t);
+    await checkedPhoto(t, profileId, {});
+    await t.run((ctx) => ctx.db.patch(profileId, { status: "suspended" }));
+    const profile = await t.run((ctx) => ctx.db.get(profileId));
+    const { photosForCustomers } = await import("./photos");
+    expect(await t.run((ctx) => photosForCustomers(ctx, profile!))).toEqual([]);
+  });
+
+  test("the sample vendors get their photos once, each sent for the same check", async () => {
+    vi.useFakeTimers();
+    glimmerAnswers(["banana-leaf-service"]);
+    const fetchFn = vi.mocked(fetch);
+    const glimmer = fetchFn.getMockImplementation()!;
+    fetchFn.mockImplementation(async (url, init) =>
+      String(url).startsWith("https://plusoneevents.site/photos/")
+        ? new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), { headers: { "content-type": "image/jpeg" } })
+        : glimmer(url, init),
+    );
+    const t = setup();
+    await t.mutation(internal.marketplace.samples.ensureVendors, {});
+
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 8, skipped: 0 });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 0, skipped: 8 });
+
+    const photos = await t.run((ctx) => ctx.db.query("vendorPhotos").take(20));
+    expect(photos).toHaveLength(8);
+    expect(photos.every((p) => p.status === "checked" && p.addedBy === undefined && p.sampleKey?.startsWith("sample-work-"))).toBe(true);
   });
 });
