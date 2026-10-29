@@ -76,7 +76,9 @@ export function backdropArea(parts: DrawParts): Box | null {
   const top = s.y1 - width * 0.5;
   const area = { x1: s.x1 + width * 0.06, x2: s.x2 - width * 0.06, y1: top, y2: s.y1 + (s.y2 - s.y1) * 0.15 };
   if (!wall) return area;
-  const clipped = { x1: Math.max(area.x1, wall.x1), x2: Math.min(area.x2, wall.x2), y1: Math.max(area.y1, wall.y1), y2: Math.min(area.y2, wall.y2) };
+  // Kept within the wall's sides and top, but always down to the stage: SAM's wall often
+  // stops short at a shadow above the stage, and a drape hangs to the floor of the stage.
+  const clipped = { x1: Math.max(area.x1, wall.x1), x2: Math.min(area.x2, wall.x2), y1: Math.max(area.y1, wall.y1), y2: area.y2 };
   return clipped.x2 - clipped.x1 > 10 && clipped.y2 - clipped.y1 > 10 ? clipped : area;
 }
 
@@ -205,12 +207,10 @@ export function drawVenue(
   ctx.scale(scale, scale);
   if (after) {
     const area = backdropArea(parts);
-    if (area) {
-      ctx.save();
-      if (parts.backdrop) clipTo(ctx, parts.backdrop, scale);
-      drawBackdrop(ctx, area, look);
-      ctx.restore();
-    }
+    // The drape is a clean panel within the wall's bounds, not clipped to SAM's wall mask,
+    // whose edge is ragged where light falls; the stage skirt keeps its mask, so chairs in
+    // front of the stage stay in front of it.
+    if (area) drawBackdrop(ctx, area, look);
     if (parts.stage) {
       ctx.save();
       clipTo(ctx, parts.stage, scale);
