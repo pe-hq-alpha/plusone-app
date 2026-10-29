@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { currentUserId, requireUserId } from "./lib/auth";
+import { claimUpload } from "./lib/uploads";
 
 const MAX_STATE_CHARS = 100_000;
 const MAX_PICTURES = 6;
@@ -48,6 +49,7 @@ export const save = mutation({
     const userId = await requireUserId(ctx);
     if (args.state.length > MAX_STATE_CHARS) throw new ConvexError("That's too much to save in one go.");
     if (args.pictures.length > MAX_PICTURES) throw new ConvexError(`Up to ${MAX_PICTURES} pictures, please.`);
+    for (const storageId of args.pictures) await claimUpload(ctx, storageId, userId);
     const fields = {
       name: args.name.trim().slice(0, 200) || "Our event",
       step: Math.max(0, Math.min(10, Math.floor(args.step))),

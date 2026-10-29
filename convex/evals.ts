@@ -10,7 +10,12 @@ import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
 import { ALL_READING_CASES, FORMATS, type ReadingScore, scoreReading } from "./lib/evalReading";
 import { type QuoteScore, scoreQuote, totals } from "./lib/evalScore";
-import { missingCharges as flagMissing, sheetFor } from "./lib/standardSheet";
+import { gapsIn, missingCharges as flagMissing, sheetFor, type Answer } from "./lib/standardSheet";
+import { HELD_OUT_GROUPS } from "./lib/evalHeldOut";
+import { answersFrom, CHARGE_STATUSES, keywordFlags } from "./lib/evalSystems";
+import { generateObject, MODEL_FAST } from "./lib/models";
+import { z } from "zod";
+import type { EvalGroup } from "./lib/evalQuotes";
 import type { QuoteLine } from "./lib/validators";
 
 type Read = { total: number; currency: string; includes: string[]; excludes: string[]; lines: QuoteLine[]; headcountAssumed?: number; taxIncluded?: boolean };
@@ -205,6 +210,98 @@ export const samConcept = internalAction({
       }
     }
     return out;
+  },
+});
+
+const groupsFor = (set: "tuned" | "heldout"): EvalGroup[] => (set === "tuned" ? EVAL_GROUPS : HELD_OUT_GROUPS);
+// "unit" (how many plates) is the pipeline's own check, not a charge; it is left out so every system is scored on the same charges.
+const chargesOnly = (keys: string[]) => keys.filter((k) => k !== "unit");
+
+const CHARGES_INSTRUCTIONS =
+  "You read one vendor's quote for an event and say, for each charge on the list, what the quote says about it. " +
+  "priced: it has its own amount inside the total. included: the quote says the price covers it. " +
+  "extra_with_amount_or_rate: it is outside the price, with an amount or a rate (\"GST 18% extra\" has a rate). " +
+  "extra_without_price: it is outside the price with no amount or rate (\"setup charges extra\", \"at actuals\"). " +
+  "not_offered: the quote says it isn't part of the service. not_mentioned: the quote says nothing about it. " +
+  "Give the amount in rupees when there is one, otherwise null. Read Tamil, Tanglish, lakh and k amounts as written.";
+
+const DIRECT_INSTRUCTIONS =
+  "You help a family planning an event compare vendors' quotes. From the list, name every charge a careful planner " +
+  "would still have to ask this vendor about: ones the quote never mentions that are usually charged on top, ones other " +
+  "quotes for the same need charge for while this one is silent, and ones it calls extra without an amount or rate. " +
+  "A charge the quote prices, includes, gives a rate for or says isn't offered is settled.";
+
+/**
+ * The missing-charge evaluation by one system on one set (`npx convex run evals:compare
+ * '{"set":"heldout","system":"pipeline"}'` on production). Every system is scored on the
+ * sheet's charges against the same hand-marked keys.
+ */
+export const compare = internalAction({
+  args: {
+    set: v.union(v.literal("tuned"), v.literal("heldout")),
+    system: v.union(v.literal("pipeline"), v.literal("charges"), v.literal("direct"), v.literal("keywords")),
+  },
+  returns: v.any(),
+  handler: async (ctx, args): Promise<{ set: string; system: string; seconds: number; totals: ReturnType<typeof totals>; scores: QuoteScore[] }> => {
+    const started = Date.now();
+    const scores: QuoteScore[] = [];
+    for (const group of groupsFor(args.set)) {
+      const sheet = sheetFor(group.category);
+      if (!sheet) throw new Error(`No standard sheet for ${group.category}`);
+      const keys = sheet.lines.map((l) => l.key) as [string, ...string[]];
+      let flagged: string[][];
+      if (args.system === "keywords") {
+        flagged = group.quotes.map((q) => keywordFlags(q.text, sheet));
+      } else if (args.system === "pipeline") {
+        const read = await Promise.all(group.quotes.map((q) => readVendorReply(ctx, { event: EVENT, slot: null, vendorName: q.vendor, subject: "Re: your enquiry", body: q.text })));
+        const quotes = read.map((r) => ({
+          total: r.total ?? 0,
+          currency: r.currency ?? "INR",
+          includes: r.includes,
+          excludes: r.excludes,
+          lines: r.lines.map((l) => ({ item: l.item, kind: l.kind, unit: l.unit, quantity: l.quantity ?? undefined, unitPrice: l.unitPrice ?? undefined, amount: l.amount, optional: l.optional || undefined })),
+          headcountAssumed: r.headcountAssumed ?? undefined,
+          taxIncluded: r.taxIncluded ?? undefined,
+        }));
+        flagged = quotes.map((q, i) => flagMissing(q, sheet, quotes.filter((_, j) => j !== i)).map((m) => m.key));
+      } else if (args.system === "charges") {
+        const schema = z.object({ charges: z.array(z.object({ key: z.enum(keys), status: z.enum(CHARGE_STATUSES), amount: z.number().nullable() })) });
+        const answers: Answer[][] = await Promise.all(
+          group.quotes.map(async (q) => {
+            const { object } = await generateObject({
+              ctx,
+              feature: "evalCharges",
+              model: MODEL_FAST,
+              effort: "low",
+              system: CHARGES_INSTRUCTIONS,
+              prompt: `The charges for ${group.category}: ${keys.join(", ")}.\n\nThe quote from ${q.vendor}:\n${q.text}`,
+              schema,
+            });
+            return answersFrom(object.charges, sheet);
+          }),
+        );
+        flagged = answers.map((a, i) => gapsIn(a, sheet, answers.filter((_, j) => j !== i), "INR").map((m) => m.key));
+      } else {
+        const schema = z.object({ toAsk: z.array(z.enum(keys)) });
+        const all = group.quotes.map((q) => `${q.vendor}: ${q.text}`).join("\n\n");
+        flagged = await Promise.all(
+          group.quotes.map(async (q) => {
+            const { object } = await generateObject({
+              ctx,
+              feature: "evalDirect",
+              model: MODEL_FAST,
+              effort: "low",
+              system: DIRECT_INSTRUCTIONS,
+              prompt: `The charges for ${group.category}: ${keys.join(", ")}.\n\nAll the quotes for this need:\n${all}\n\nWhich charges should the planner still ask ${q.vendor} about?`,
+              schema,
+            });
+            return [...new Set(object.toAsk)];
+          }),
+        );
+      }
+      group.quotes.forEach((q, i) => scores.push(scoreQuote(q.vendor, group.category, chargesOnly(q.expected), chargesOnly(flagged[i]))));
+    }
+    return { set: args.set, system: args.system, seconds: Math.round((Date.now() - started) / 1000), totals: totals(scores), scores };
   },
 });
 

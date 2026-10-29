@@ -22,6 +22,7 @@ import {
   type Reply,
   type RsvpSource,
 } from "./lib/rsvp";
+import { claimUpload } from "./lib/uploads";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -570,8 +571,9 @@ export const startImport = mutation({
   },
   returns: v.id("guestImports"),
   handler: async (ctx, args) => {
-    await requireMember(ctx, args.eventId, "planner");
+    const { userId } = await requireMember(ctx, args.eventId, "planner");
     if (!args.storageId && !args.rawText?.trim()) throw new ConvexError("Paste a list or choose a file first.");
+    if (args.storageId) await claimUpload(ctx, args.storageId, userId);
     if (args.rawText && args.rawText.length > 200_000) throw new ConvexError("That's a very long list. Paste it in parts, or upload a file.");
     if (args.storageId) {
       const file = await ctx.db.system.get("_storage", args.storageId);

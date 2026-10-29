@@ -26,6 +26,7 @@ import { partWord } from "./lib/occasion";
 import { workflow } from "./workflows";
 import { HELP_WITH_KEYS } from "./lib/helpWith";
 import { track } from "./analytics";
+import { claimUpload } from "./lib/uploads";
 
 export const listMine = query({
   args: {},
@@ -298,6 +299,7 @@ export async function insertEvent(
       throw new ConvexError(`Up to ${MAX_INSPIRATION_IMAGES} inspiration pictures, please.`);
     }
     for (const id of images) {
+      await claimUpload(ctx, id, userId);
       const file = await ctx.db.system.get("_storage", id);
       if (!file?.contentType?.startsWith("image/")) throw new ConvexError("Inspiration uploads must be pictures.");
     }

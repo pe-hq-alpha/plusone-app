@@ -23,6 +23,7 @@ import { comeBack, rateLimiter } from "./rateLimits";
 import { spaceItemFields } from "./schema";
 import { BRAND } from "./lib/brand";
 import { anOccasion } from "./lib/occasion";
+import { claimUpload } from "./lib/uploads";
 
 /** A Space holds plenty for planning, and stays cheap to read and reorder whole. */
 const MAX_PER_SPACE = 150;
@@ -117,6 +118,7 @@ export const addPictures = mutation({
     const { userId, event } = await requireMember(ctx, args.eventId, "planner");
     if (args.storageIds.length === 0) return [];
     if (args.storageIds.length > 20) throw new ConvexError("Up to 20 pictures at a time, please.");
+    for (const storageId of args.storageIds) await claimUpload(ctx, storageId, userId);
     await spaceRows(ctx, args.eventId, args.sessionId, args.storageIds.length);
     if (event.demo && (await demoPictures(ctx, args.eventId)) + args.storageIds.length > MAX_DEMO_PICTURES) {
       throw new ConvexError("That's as many pictures as the demo holds. Plan your own event to keep going.");
