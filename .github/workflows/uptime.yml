@@ -1,0 +1,29 @@
+name: Uptime
+
+# Every 15 minutes through judging (to 10 Nov 2026): the home page, both demos and the
+# backend. A failed run emails the repository's owner, as any failed workflow does.
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check every address
+        run: |
+          if [ "$(date -u +%Y%m%d)" -gt 20261110 ]; then echo "Judging is over"; exit 0; fi
+          fail=0
+          for url in \
+            https://plusoneevents.site \
+            https://app.plusoneevents.site/demo \
+            https://partner.plusoneevents.site/demo \
+            https://trustworthy-ram-180.eu-west-1.convex.site/health; do
+            code=$(curl -s -o /tmp/body -w "%{http_code}" --retry 2 --retry-delay 10 --max-time 20 "$url")
+            echo "$code $url"
+            [ "$code" = "200" ] || fail=1
+          done
+          grep -q '"models":"meta"' /tmp/body || { echo "Model calls are not going to Meta"; fail=1; }
+          exit $fail
