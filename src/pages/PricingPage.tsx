@@ -64,6 +64,7 @@ const ALL: { group: string; rows: Row[] }[] = [
       { feature: "Inquiries and follow-ups from your event's own inbox", basic: true, premium: true },
       { feature: "Every quote on the same lines, from email, PDF or WhatsApp", basic: true, premium: true },
       { feature: "Missing charges flagged, and prices compared with similar vendors", basic: true, premium: true },
+      { feature: "See the decor on a photo of your own venue", basic: true, premium: true },
       { feature: "Vendors shortlisted and lined up by your planner", basic: false, premium: true },
       { feature: "Someone negotiating with each vendor for you", basic: false, premium: true },
     ],
@@ -84,7 +85,8 @@ const ALL: { group: string; rows: Row[] }[] = [
   {
     group: "Coming soon",
     rows: [
-      { feature: "See the decor on a photo of your own venue", basic: true, premium: true },
+      { feature: "Updates and vendor follow-ups on WhatsApp", basic: true, premium: true },
+      { feature: "Booking and paying vendors in stages, through PlusOne", basic: true, premium: true },
     ],
   },
 ];
