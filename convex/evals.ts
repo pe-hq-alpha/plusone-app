@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
 import { internalAction } from "./_generated/server";
-import { readVendorReply } from "./claude";
+import { readVendorReply } from "./modelTasks";
 import { findParts } from "./venueView";
 import { EVAL_GROUPS } from "./lib/evalQuotes";
 import { FORMATS, READING_CASES, type ReadingScore, scoreReading } from "./lib/evalReading";

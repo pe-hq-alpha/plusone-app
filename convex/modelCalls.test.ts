@@ -64,7 +64,7 @@ describe("the cost record", () => {
       JSON.stringify({ rsvp: "yes", attendingCount: 2, dietary: null, allergies: [], note: null, ceremonies: [], namedCeremonies: false }),
     );
     const t = convexTest(schema, modules);
-    const reading = await t.action(internal.claude.readRsvpReply, {
+    const reading = await t.action(internal.modelTasks.readRsvpReply, {
       guestName: "Asha",
       partySize: 2,
       subject: "Re: invitation",
@@ -138,7 +138,7 @@ describe("the demo's recorded run", () => {
       const userId = await ctx.db.insert("users", { email: "guest@example.com", name: "Guest" });
       return await seedBirthday(ctx, userId);
     });
-    const readings = await t.action(internal.claude.readDemoQuotes, { eventId });
+    const readings = await t.action(internal.modelTasks.readDemoQuotes, { eventId });
     expect(readings.map((r) => r.vendorName).sort()).toEqual(["Annam Caterers", "Kaveri Feast Co.", "Saapadu Kitchen"]);
     expect(fetchFn).toHaveBeenCalledTimes(3);
     expect(readings.map((r) => r.call?.feature)).toEqual(Array(3).fill("readVendorReply"));

@@ -168,7 +168,7 @@ export const createContractCheck = internalMutation({
       flags: [],
     });
     // Read it straight away; the couple forwarded it because they want an answer.
-    await ctx.scheduler.runAfter(0, internal.claude.checkContract, { contractCheckId });
+    await ctx.scheduler.runAfter(0, internal.modelTasks.checkContract, { contractCheckId });
     await trackForEvent(ctx, "contract.checked", args.eventId);
     return contractCheckId;
   },

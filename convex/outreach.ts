@@ -53,7 +53,7 @@ export const draft = mutation({
       if (!vendor || vendor.eventId !== slot.eventId) throw new ConvexError("That vendor isn't part of this event.");
     }
     await spend(ctx, "drafting", event, userId);
-    await ctx.scheduler.runAfter(0, internal.claude.draftInquiries, { slotId: args.slotId, vendorIds: args.vendorIds });
+    await ctx.scheduler.runAfter(0, internal.modelTasks.draftInquiries, { slotId: args.slotId, vendorIds: args.vendorIds });
     return null;
   },
 });

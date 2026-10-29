@@ -71,7 +71,7 @@ export const add = mutation({
           : [],
       receivedAt: now,
     });
-    await ctx.scheduler.runAfter(0, internal.claude.extractReply, { messageId });
+    await ctx.scheduler.runAfter(0, internal.modelTasks.extractReply, { messageId });
     return messageId;
   },
 });

@@ -876,7 +876,7 @@ export const readVendorReplySample = internalAction({
 /**
  * The guest demo's recorded run: read a sample event's quoted replies again, on whichever
  * provider the deployment uses, each call landing in the cost record against that event.
- * Run by hand on production (`npx convex run claude:readDemoQuotes`); its rows become
+ * Run by hand on production (`npx convex run modelTasks:readDemoQuotes`); its rows become
  * `lib/recordedRun.ts`. Refuses a real event.
  */
 export const readDemoQuotes = internalAction({

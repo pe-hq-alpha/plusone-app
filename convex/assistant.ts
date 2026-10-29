@@ -88,7 +88,7 @@ export const ask = mutation({
       content: "",
       status: "thinking",
     });
-    await ctx.scheduler.runAfter(0, internal.claude.answerQuestion, { eventId: args.eventId, replyId });
+    await ctx.scheduler.runAfter(0, internal.modelTasks.answerQuestion, { eventId: args.eventId, replyId });
     return replyId;
   },
 });

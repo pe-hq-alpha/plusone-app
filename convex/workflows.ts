@@ -21,7 +21,7 @@ export const workflow = new WorkflowManager(components.workflow, {
 export const onboardingWorkflow = workflow.define({
   args: { eventId: v.id("events") },
   handler: async (step, args): Promise<void> => {
-    await step.runAction(internal.claude.draftFirstPlan, { eventId: args.eventId }, { retry: false });
+    await step.runAction(internal.modelTasks.draftFirstPlan, { eventId: args.eventId }, { retry: false });
     await step.runAction(internal.agentmail.createInbox, { eventId: args.eventId });
     const event = await step.runQuery(internal.events.getInternal, { eventId: args.eventId });
     if (!event) return;
@@ -37,7 +37,7 @@ export const onboardingWorkflow = workflow.define({
     if (!markdown && !event.inspirationNotes && !event.inspirationImages?.length) return;
     try {
       await step.runAction(
-        internal.claude.summariseStyle,
+        internal.modelTasks.summariseStyle,
         { eventId: args.eventId, markdown, notes: event.inspirationNotes, images: event.inspirationImages },
         { retry: false },
       );
@@ -64,7 +64,7 @@ export const researchWorkflow = workflow.define({
     let found = 0;
     try {
       await step.runMutation(internal.research.setStep, { researchRunId: run._id, step: "Planning the search" });
-      const plan = await step.runAction(internal.claude.planSearch, {
+      const plan = await step.runAction(internal.modelTasks.planSearch, {
         eventId: run.eventId,
         slotId: run.slotId,
         query: run.query,
@@ -123,7 +123,7 @@ export const researchWorkflow = workflow.define({
           console.warn("review lookup failed", businessName, err instanceof Error ? err.message : err);
         }
 
-        const { cards } = await step.runAction(internal.claude.buildCards, {
+        const { cards } = await step.runAction(internal.modelTasks.buildCards, {
           eventId: run.eventId,
           slotId: run.slotId,
           pages: [
@@ -211,7 +211,7 @@ export const researchWorkflow = workflow.define({
 
       if (upserted > 0) {
         await step.runMutation(internal.research.setStep, { researchRunId: run._id, step: "Ranking what we found", foundCount: found });
-        await step.runAction(internal.claude.rankVendors, { slotId: run.slotId }, { retry: { maxAttempts: 2, initialBackoffMs: 1000, base: 2 } });
+        await step.runAction(internal.modelTasks.rankVendors, { slotId: run.slotId }, { retry: { maxAttempts: 2, initialBackoffMs: 1000, base: 2 } });
       }
       await step.runMutation(internal.research.finish, { researchRunId: run._id, status: "done", foundCount: found });
     } catch (err) {
@@ -235,7 +235,7 @@ const NEGOTIATE_ABOVE = 1.1;
 export const inboundWorkflow = workflow.define({
   args: { messageId: v.id("messages") },
   handler: async (step, args): Promise<void> => {
-    const verdict = await step.runAction(internal.claude.extractReply, { messageId: args.messageId });
+    const verdict = await step.runAction(internal.modelTasks.extractReply, { messageId: args.messageId });
     if (!verdict) return;
     const message = await step.runQuery(internal.messages.getInternal, { messageId: args.messageId });
     if (!message?.threadId) return;
@@ -253,7 +253,7 @@ export const inboundWorkflow = workflow.define({
       }
       try {
         const decision = await step.runAction(
-          internal.claude.decideVendorReply,
+          internal.modelTasks.decideVendorReply,
           {
             eventId: brief.eventId,
             slotTitle: brief.slotTitle,
@@ -287,7 +287,7 @@ export const inboundWorkflow = workflow.define({
     if (verdict.classification === "quote" && over && brief.negotiatedAt === null && brief.status !== "booked") {
       try {
         const bodyText = await step.runAction(
-          internal.claude.writeAgentEmail,
+          internal.modelTasks.writeAgentEmail,
           {
             eventId: brief.eventId,
             slotTitle: brief.slotTitle,
@@ -318,7 +318,7 @@ export const coupleAnswerWorkflow = workflow.define({
   handler: async (step, args): Promise<void> => {
     const brief = await step.runQuery(internal.agent.threadBrief, { threadId: args.threadId });
     if (!brief) return;
-    const bodyText = await step.runAction(internal.claude.writeVendorReply, {
+    const bodyText = await step.runAction(internal.modelTasks.writeVendorReply, {
       eventId: brief.eventId,
       slotTitle: brief.slotTitle,
       slotBudget: brief.slotBudget,
@@ -354,7 +354,7 @@ export const bookingWorkflow = workflow.define({
         const brief = await step.runQuery(internal.agent.threadBrief, { threadId: job.threadId });
         if (!brief) continue;
         const bodyText = await step.runAction(
-          internal.claude.writeAgentEmail,
+          internal.modelTasks.writeAgentEmail,
           {
             eventId: brief.eventId,
             slotTitle: brief.slotTitle,
@@ -390,7 +390,7 @@ export const followUpWorkflow = workflow.define({
     const { thread, vendor, event } = context;
     if (thread.status === "booked" || thread.status === "declined") return;
     if (!vendor.email) return;
-    const draft = await step.runAction(internal.claude.draftFollowUp, { threadId: args.threadId });
+    const draft = await step.runAction(internal.modelTasks.draftFollowUp, { threadId: args.threadId });
     const review = event.sendMode === "review";
     const messageId = await step.runMutation(internal.messages.createOutboundDraft, {
       eventId: thread.eventId,
@@ -424,7 +424,7 @@ export const followUpWorkflow = workflow.define({
 export const rsvpWorkflow = workflow.define({
   args: { messageId: v.id("messages") },
   handler: async (step, args): Promise<void> => {
-    const parsed = await step.runAction(internal.claude.parseRsvp, { messageId: args.messageId });
+    const parsed = await step.runAction(internal.modelTasks.parseRsvp, { messageId: args.messageId });
     // A reply that only mentions an allergy still has to be recorded, without touching their answer.
     const answered = parsed.rsvp !== "pending" || parsed.ceremonies.some((c) => c.coming !== null);
     if (!answered && !parsed.dietary && parsed.allergies.length === 0) return;
