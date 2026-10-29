@@ -272,7 +272,7 @@ function SlotPanel({
         </section>
       )}
 
-      {slot.status !== "booked" && <AskVerified eventId={event._id} slotId={slot._id} canEdit={canEdit} />}
+      {slot.status !== "booked" && <AskVerified eventId={event._id} slotId={slot._id} category={slot.category} city={event.city} canEdit={canEdit} />}
 
       <section aria-labelledby="found-h">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -651,8 +651,12 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
  * lines every quote is read into. The family's name, contact details and budget stay private;
  * offers land in Compare beside the quotes.
  */
-function AskVerified({ eventId, slotId, canEdit }: { eventId: Id<"events">; slotId: Id<"vendorSlots">; canEdit: boolean }) {
+function AskVerified({ eventId, slotId, category, city, canEdit }: { eventId: Id<"events">; slotId: Id<"vendorSlots">; category: string; city: string; canEdit: boolean }) {
   const brief = useQuery(api.marketplace.briefs.forSlot, { eventId, slotId });
+  // The verified vendors a request goes to, by name, so the family sees who they're asking.
+  // Sample vendors only stand in on the open directory; a real plan lists real ones.
+  const listed = useQuery(api.marketplace.directory.search, { category, city });
+  const vendors = listed && !listed.samplesOnly ? listed.vendors : [];
   const ask = useMutation(api.marketplace.briefs.ask);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -700,6 +704,29 @@ function AskVerified({ eventId, slotId, canEdit }: { eventId: Id<"events">; slot
             {busy ? "Asking…" : brief ? "Ask again" : "Ask verified vendors"}
           </button>
         )
+      )}
+      {vendors.length > 0 && (
+        <ul className="grid w-full gap-2 sm:grid-cols-2" aria-label={`Verified ${category.toLowerCase()} vendors in ${city}`}>
+          {vendors.slice(0, 6).map((v) => (
+            <li key={v._id}>
+              <Link to={`/vendors/${v._id}`} className="flex items-center gap-3 rounded-[12px] border border-line bg-cream px-3 py-2 hover:border-accent">
+                {v.photos[0] ? (
+                  <img src={v.photos[0].url} alt="" className="h-11 w-11 shrink-0 rounded-[8px] object-cover" loading="lazy" />
+                ) : (
+                  <span className="h-11 w-11 shrink-0 rounded-[8px] bg-accent-soft" aria-hidden="true" />
+                )}
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium text-ink">{v.name}</span>
+                  <span className="block truncate text-xs text-muted">
+                    {v.badges.includes("verified") ? "Verified" : "Listed"}
+                    {v.startingPrice && <> · from {money(v.startingPrice.price, v.startingPrice.currency)}</>}
+                    {v.tier && <> · {v.tier}</>}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   );
