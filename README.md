@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-760_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-761_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -141,7 +141,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan every event across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote and offer on the same lines. It is live and free until launch, with a no-sign-up demo. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne, kept there by a guarantee only those bookings will get (PlusOne Assured, planned) | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow: Muse Spark reads every quote, PDF and photo; Muse Voice Transcribe hears a brief, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the host's own hall photo; Muse Wonder gathers a vendor's evidence for Ops; the open-weights Muse Glimmer (our own GPU) checks vendors' photos and Muse Spark Open (Baseten) reads their price lists. Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 760 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 761 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent. Retries, a fallback, rate limits and uptime checks through judging. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -185,6 +185,8 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 | **Muse Code** (Meta's coding agent) | Our pair programmer for building PlusOne | In use since 27 Oct 2026 |
 
 **See it at work:** in any event, the **Under the hood** button in the top bar lists every step PlusOne ran for that event, with the Meta model that did it, how long it took and what it cost. In the demo it opens on recorded real runs of each model: Muse Spark reading the three caterers' replies, Muse Spark and SAM 3.1 finding the sample hall's stage, Muse Glimmer checking a vendor's photo, Muse Spark Open reading a quote, Muse Voice Transcribe hearing a vendor's call speaker by speaker, and Muse Wonder checking two vendors. Ask "We're now 140 people" on Today and watch a new step appear.
+
+<img src="assets/screens/under-the-hood.jpg" width="100%" alt="Under the hood open beside Today in the sample event: recorded real runs of Muse Spark 1.3 reading three caterers' replies (7 to 14 seconds, about a cent each) and Muse Spark with SAM 3.1 finding the stage in the sample hall, each with its time, tokens and cost">
 
 Every call goes through one wrapper, `convex/lib/models.ts`. `MODEL_PROVIDER=meta` with a Model API key sends it to Meta; calls retry on 429, 500 and 503, honouring `Retry-After`, and a call Meta can't answer moves to Claude, with the switch logged. The open-weights models have their own step down: a Muse Spark Open call Baseten can't answer goes to Muse Spark, and so does a photo check Muse Glimmer can't finish. A request Meta rejects as malformed is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and list-price cost, so spend is known per feature and per day.
 
@@ -306,6 +308,9 @@ On PlusOne Partner, for vendors, including the many with no website or listing. 
 3. **Answer customers' requests.** Each request is for the vendor's kind of service in their city: the occasion, date, guests and area, never the customer's name, contact or budget. The vendor answers every line of the same sheet, in the price, added in ₹ or extra, and sees the total the customer will see before sending.
 4. **Land in the customer's Compare.** The offer sits beside the customer's other quotes, line by line. It can be changed or withdrawn while the request is open, and a vendor's level grows with events done through PlusOne: New, Trusted after 3, Top after 10.
 
+<img src="assets/screens/price-list.jpg" width="100%" alt="Bring your price list on the vendors' demo: two lines pasted as a caterer writes them, read by Muse Spark Open into two packages on the catering sheet, ₹380 per plate GST extra with 12 dishes, 2 sweets, serving staff and banana leaf, and a ₹450 buffet with a live dosa counter, each ready to check and use">
+<sub>A caterer pastes the price list they already send; Muse Spark Open, Meta's open-weights model on Baseten, sets it out on the sheet in about 8 seconds, and every price is checked against the text before it is offered.</sub>
+
 | The vendor's page | Answering a customer's request |
 |---|---|
 | <img src="assets/screens/partner.jpg" alt="PlusOne Partner for a sample caterer: the business with its Verified, Transparent pricing, Standard and New badges, and Customers asking, with a catering request for a 60th birthday for 120 guests"> | <img src="assets/screens/partner-offer.jpg" alt="Answering the request on the standard sheet: ₹460 a plate for 120, GST extra, service staff, crockery and water in the price, transport added at ₹1,500, and the customer sees ₹56,700"> |
@@ -357,7 +362,7 @@ Each part, what it runs on and why, with file paths: [EVALUATIONS.md](EVALUATION
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 760 tests, no network, no keys
+npm test              # 761 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
