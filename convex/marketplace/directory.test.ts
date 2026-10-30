@@ -73,6 +73,19 @@ describe("find vendors", () => {
     expect(found.vendors.map((v) => v.sample)).toEqual([true]);
   });
 
+  test("a trade with only a few real vendors keeps its samples after them; a full one drops them", async () => {
+    const t = setup();
+    await caterer(t, "Sample Caterers", { sample: true });
+    await caterer(t, "Anjali Caterers");
+    const few = await t.query(api.marketplace.directory.search, { category: "Catering", city: "Chennai" });
+    expect(few.samplesOnly).toBe(false);
+    expect(few.vendors.map((v) => [v.name, v.sample])).toEqual([["Anjali Caterers", false], ["Sample Caterers", true]]);
+    for (const n of ["Bhavani", "Chitra", "Deepa", "Esther"]) await caterer(t, `${n} Caterers`);
+    const full = await t.query(api.marketplace.directory.search, { category: "Catering", city: "Chennai" });
+    expect(full.vendors.some((v) => v.sample)).toBe(false);
+    expect(full.vendors).toHaveLength(5);
+  });
+
   test("a vendor's own sign-up isn't shown until verified, and its page says so", async () => {
     const t = setup();
     const id = await caterer(t, "Waiting Caterers", { status: "pending" });

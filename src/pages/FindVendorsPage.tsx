@@ -156,10 +156,16 @@ export function FindVendorsPage() {
             </p>
           ) : (
             <>
-              {found.samplesOnly && (
+              {found.samplesOnly ? (
                 <p className="mt-2 text-sm text-muted">
                   These are sample vendors, made up to show how listings look. Real vendors join as {city} opens.
                 </p>
+              ) : (
+                found.vendors.some((v) => v.sample) && (
+                  <p className="mt-2 text-sm text-muted">
+                    Real vendors come first. Those marked Sample are made up, to show how listings look while {city} opens.
+                  </p>
+                )
               )}
               <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {shown.map(({ card, km }) => (

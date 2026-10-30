@@ -182,7 +182,8 @@ function SlotPanel({
   // Near the venue: the circle on the map, and whether the lists keep only who's inside it.
   // A vendor with no known area is never counted as inside.
   const listed = useQuery(api.marketplace.directory.search, { category: slot.category, city: event.city });
-  const verified = useMemo(() => (listed && (!listed.samplesOnly || event.demo === true) ? listed.vendors : []), [listed, event.demo]);
+  // Sample vendors stand in only on the guest demo; a real plan lists and asks real ones.
+  const verified = useMemo(() => (listed?.vendors ?? []).filter((v) => !v.sample || event.demo === true), [listed, event.demo]);
   const [radiusKm, setRadiusKm] = useState(5);
   const [insideOnly, setInsideOnly] = useState(false);
   const centre = venueSpot(event, hall);

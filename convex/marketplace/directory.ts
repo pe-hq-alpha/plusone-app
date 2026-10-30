@@ -30,6 +30,9 @@ export const trades = query({
   handler: async () => VENDOR_CATEGORIES,
 });
 
+/** Real vendors in a trade before its sample vendors step aside. */
+const FULL_TRADE = 5;
+
 export const search = query({
   args: { category: v.string(), city: v.string() },
   returns: v.object({ vendors: v.array(publicCard), samplesOnly: v.boolean() }),
@@ -37,9 +40,11 @@ export const search = query({
     const city = args.city.trim().slice(0, 60) || "Chennai";
     if (!VENDOR_CATEGORIES.includes(args.category)) return { vendors: [], samplesOnly: false };
     const real = await listedVendors(ctx, args.category, city);
-    if (real.length > 0) return { vendors: real.map(withoutContact), samplesOnly: false };
+    if (real.length >= FULL_TRADE) return { vendors: real.map(withoutContact), samplesOnly: false };
+    // Until a trade has a handful of real vendors, the samples stay beside them, each marked
+    // Sample, so a search and its map still show how the directory works. Real ones first.
     const samples = (await listedVendors(ctx, args.category, city, true)).filter((c) => c.sample);
-    return { vendors: samples.map(withoutContact), samplesOnly: samples.length > 0 };
+    return { vendors: [...real, ...samples].map(withoutContact), samplesOnly: real.length === 0 && samples.length > 0 };
   },
 });
 
