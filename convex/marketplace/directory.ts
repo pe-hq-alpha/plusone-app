@@ -60,10 +60,12 @@ const pkg = v.object({
 
 /** One listed vendor's page: their card, and every package on the sheet as customers read it. */
 export const vendor = query({
-  args: { profileId: v.id("vendorProfiles") },
+  // A string, not an id: a mistyped or old link reads as "not listed", never as an error page.
+  args: { profileId: v.string() },
   returns: v.union(v.null(), v.object({ card: publicCard, about: v.optional(v.string()), packages: v.array(pkg) })),
   handler: async (ctx, args) => {
-    const profile = await ctx.db.get(args.profileId);
+    const id = ctx.db.normalizeId("vendorProfiles", args.profileId);
+    const profile = id ? await ctx.db.get(id) : null;
     if (!profile || !isListed(profile) || isTrial(profile)) return null;
     const card = withoutContact(await cardFor(ctx, profile, profile.categories[0] ?? ""));
     const packages = (await offeringsOf(ctx, profile)).map((o) => ({

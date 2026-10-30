@@ -93,6 +93,11 @@ describe("find vendors", () => {
     expect(await t.query(api.marketplace.directory.vendor, { profileId: id })).toBeNull();
   });
 
+  test("a mistyped or old vendor link reads as not listed, not as an error", async () => {
+    const t = setup();
+    expect(await t.query(api.marketplace.directory.vendor, { profileId: "not-a-real-id" })).toBeNull();
+  });
+
   test("a listed vendor's page has every package on the sheet, and no phone", async () => {
     const t = setup();
     const id = await caterer(t, "Anjali Caterers");

@@ -234,7 +234,7 @@ export function EventLayout() {
 
       {event.demo && (
         <div className="no-print border-b border-line bg-wash">
-          <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 text-sm md:px-6">
+          <div className="demo-banner mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 text-sm md:px-6">
             <p className="min-w-0 text-muted">
               <span className="font-medium text-ink">A sample plan.</span> Click anything; the vendors are made up, so emails to them are simulated.{" "}
               <span>

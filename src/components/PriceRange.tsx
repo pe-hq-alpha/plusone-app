@@ -66,13 +66,15 @@ export function PriceRange({ band, points, unitWord, city }: { band: RangeBand; 
             const width = ((s.to - s.from) / span) * 100;
             // A name too long for its share of the bar is left to the tiers in the list below on a phone, never cut into the next one.
             return (
-              <div key={s.name} className={`grid min-w-0 place-items-center ${s.shade}`} style={{ width: `${width}%` }}>
-                <span className={`overflow-hidden whitespace-nowrap px-1 text-[11px] font-medium uppercase tracking-wide text-muted ${width < 18 ? "max-sm:hidden" : ""}`}>{s.name}</span>
+              // Standard's name sits at its left so the typical-price mark (inside it) never runs through it;
+              // the two darker parts take light lettering so they read in both themes.
+              <div key={s.name} className={`flex min-w-0 items-center ${s.name === "Standard" ? "justify-start pl-3" : "justify-center"} ${s.shade}`} style={{ width: `${width}%` }}>
+                <span className={`overflow-hidden whitespace-nowrap px-1 text-[11px] font-medium uppercase tracking-wide ${s.name === "Premium" || s.name === "Luxury" ? "text-paper" : "text-muted"} ${width < 18 ? "max-sm:hidden" : ""}`}>{s.name}</span>
               </div>
             );
           })}
         </div>
-        <div className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-accent" style={{ left: `${at(band.p50)}%` }} aria-hidden="true" />
+        <div className="absolute -inset-y-1 w-1 -translate-x-1/2 rounded-full bg-highlight" style={{ left: `${at(band.p50)}%` }} aria-hidden="true" />
       </div>
 
       <div className="relative mt-1 h-4 text-[11px] text-muted" aria-hidden="true">

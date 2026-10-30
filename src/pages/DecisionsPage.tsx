@@ -244,8 +244,6 @@ function NeedBoard({
   const cheapest = need.cheapest;
   // Compared in the need's own unit when two or more quotes can be: the lowest total is
   // often not the best value once service, transport and headcounts are counted.
-  const perUnits = live.map((v) => v.quote?.perUnit ?? null).filter((x): x is number => x !== null);
-  const bestPerUnit = need.spread && perUnits.length > 1 ? Math.min(...perUnits) : null;
   const unitWord = need.basisLabel.toLowerCase().replace(/^per /, "");
   // Where a price sits in the city's range: per plate or piece, or, for a need priced for
   // the whole event (decor, photography), the total itself, which is what its range is in.
@@ -255,6 +253,11 @@ function NeedBoard({
     ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, phone: v.phone, ...v.quote })),
     ...need.offers.map((o) => ({ id: o.offerId, from: o.sample ? ("sample" as const) : ("verified" as const), ...o })),
   ];
+  // Quotes and verified vendors' offers are weighed together: "best per plate" and the
+  // spread in the header count every price on the sheet, not only the emailed quotes.
+  const perUnits = columns.map((c) => c.perUnit).filter((x): x is number => x !== null);
+  const bestPerUnit = perUnits.length > 1 ? Math.min(...perUnits) : null;
+  const spreadAll = perUnits.length > 1 ? { low: Math.min(...perUnits), high: Math.max(...perUnits) } : need.spread;
 
   async function book(v: VendorRow, notify: boolean) {
     setBusy(v.vendorId);
@@ -299,10 +302,10 @@ function NeedBoard({
         </div>
         <div className="text-right">
         <p className="text-sm text-muted">
-          {need.spread ? (
+          {spreadAll ? (
             <>
-              {need.basisLabel}: <span className="text-ink">{money(need.spread.low, currency)}</span> – {money(need.spread.high, currency)}
-              <span className="text-quiet"> · for {need.units}, across these quotes</span>
+              {need.basisLabel}: <span className="text-ink">{money(spreadAll.low, currency)}</span> – {money(spreadAll.high, currency)}
+              <span className="text-quiet"> · for {need.units}, across {need.offers.length > 0 ? "these quotes and offers" : "these quotes"}</span>
             </>
           ) : need.cheapest !== null ? (
             <>

@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import type { Id } from "../../convex/_generated/dataModel";
 import { priceUnitOf, sheetFor } from "../../convex/lib/standardSheet";
 import { distanceKm, kmText, placeFor, readSearch, type Asked } from "../../convex/lib/places";
 import { RADII } from "../components/NearVenue";
@@ -440,7 +439,7 @@ function WebSearch({ category, city }: { category: string; city: string }) {
 /** One listed vendor: their packages on the standard sheet, as customers read them. */
 export function VendorListingPage() {
   const { profileId } = useParams();
-  const listing = useQuery(api.marketplace.directory.vendor, profileId ? { profileId: profileId as Id<"vendorProfiles"> } : "skip");
+  const listing = useQuery(api.marketplace.directory.vendor, profileId ? { profileId } : "skip");
   return (
     <div className="relative isolate min-h-screen">
       <Backdrop />

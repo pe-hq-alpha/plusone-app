@@ -281,5 +281,5 @@ a { text-underline-offset: 0.2em; }
 
 /* Under the hood open on a laptop: the plan moves over to make room for the panel (26rem). */
 @media (min-width: 768px) {
-  .hood-open #main { padding-right: 26rem; transition: padding-right 160ms ease-out; }
+  .hood-open #main, .hood-open .demo-banner { padding-right: 26rem; transition: padding-right 160ms ease-out; }
 }

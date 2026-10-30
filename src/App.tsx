@@ -63,6 +63,8 @@ export default function App() {
       <Splash />
       <UpdatePrompt />
       <Suspense fallback={<Waiting />}>
+      {/* The public pages too: a bad link or a failed query shows a message, never a blank page. */}
+      <ErrorBoundary>
       <HostGate>
       {onPartnerHost() ? <PartnerRoutes /> : onOpsHost() ? <OpsRoutes /> : (
       <Routes>
@@ -138,6 +140,7 @@ export default function App() {
       </Routes>
       )}
       </HostGate>
+      </ErrorBoundary>
       </Suspense>
     </>
   );
