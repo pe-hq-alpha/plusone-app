@@ -110,7 +110,7 @@ export function DecisionsPage() {
         }
       />
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Where things stand">
+      <section className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4" aria-label="Where things stand">
         <Kpi
           label="Asked"
           value={`${t.vendorsContacted}`}
@@ -191,12 +191,12 @@ function formatHours(h: number) {
 
 function Kpi({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "ok" | "bad" }) {
   return (
-    <div className="card px-5 py-4">
+    <div className="card min-w-0 px-3.5 py-3 sm:px-5 sm:py-4">
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">{label}</p>
-      <p className={`display mt-1 text-[1.9rem] leading-none ${tone === "bad" ? "text-bad" : tone === "ok" ? "text-ok" : ""}`}>
+      <p className={`display mt-1 text-[1.3rem] leading-none sm:text-[1.9rem] ${tone === "bad" ? "text-bad" : tone === "ok" ? "text-ok" : ""}`}>
         {value}
       </p>
-      <p className="mt-1.5 text-xs leading-relaxed text-muted">{note}</p>
+      <p className="mt-1.5 line-clamp-2 text-[11px] leading-snug text-muted sm:line-clamp-none sm:text-xs sm:leading-relaxed">{note}</p>
     </div>
   );
 }
