@@ -86,7 +86,7 @@ inputs = [
     ("mail", "Vendors' quotes", "email, PDF, WhatsApp photo"),
     ("phone", "A vendor's call", "recorded, two speakers"),
     ("list", "A price list", "typed or photographed"),
-    ("image", "The hall's photo", "the family's own venue"),
+    ("image", "The hall's photo", "the host's own venue"),
     ("camera", "Photos of work", "added by a vendor"),
 ]
 WRAP_IN = (350, 392)
@@ -199,7 +199,7 @@ out.append(text(1588, 420, "verified only", 11, MUTED, anchor="middle", family=S
 # Footer: the rest of the stack and a legend
 out.append(f'<line x1="40" y1="836" x2="1560" y2="836" stroke="{LINE}"/>')
 fx = 40
-for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "749 tests")]:
+for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("whatsapp.svg", "quote updates to the host"), ("openstreetmap.svg", "vendor map"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "760 tests")]:
     out.append(logo(name, fx, 852, 20))
     out.append(text(fx + 28, 867, label, 12.5, MUTED))
     fx += 40 + len(label) * 7.5
@@ -221,7 +221,7 @@ for n, (d, delay, color) in enumerate(flows):
         f'<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="{delay}s;f{n}a.begin" /></circle>'
     )
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model wrapper on Convex to the Meta model suited to each; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet">
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model wrapper on Convex to the Meta model suited to each; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet; a WhatsApp message tells the host when a quote lands">
 <style>.dash{{animation:run 1.2s linear infinite}}@keyframes run{{to{{stroke-dashoffset:-18}}}}@media (prefers-reduced-motion:reduce){{.dash{{animation:none}}}}</style>
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a6378"/></marker></defs>
 {"".join(out[:1])}
