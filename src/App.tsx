@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { goHome, goToApp, goToOps, goToPartner, hasOpsHost, hasPartnerHost, HOME_PATHS, ON_OPS_PATH, ON_PARTNER_PATH, onAppHost, onHomeHost, onOpsHost, onPartnerHost, OPS_PATHS, PARTNER_PATHS } from "./lib/hosts";
 import { LandingPage } from "./pages/LandingPage";
+import { PlanLinkPage } from "./pages/PlanLinkPage";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { EventLayout } from "./components/EventLayout";
 import { UpdatePrompt } from "./components/UpdatePrompt";
@@ -86,6 +87,7 @@ export default function App() {
                 <Routes>
                   <Route path="/signin" element={<SignInPage />} />
                   <Route path="/partner" element={<VendorSignInPage />} />
+                  <Route path="/e/*" element={<PlanLinkPage />} />
                   <Route path="*" element={<LandingPage />} />
                 </Routes>
               }
@@ -180,7 +182,7 @@ function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children
 }
 
 /** Pages on the app's address that work without signing in. */
-const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy|vendors)\/?$|^\/(join|s|r|p|vendors)\//;
+const APP_PUBLIC = /^\/(signin|partner|partner\/demo|ops|demo|guest|how-it-works|pricing|privacy|vendors)\/?$|^\/(join|s|r|p|vendors|e)\//;
 
 /**
  * Partner's own page. A guest gets there only from the vendors' demo, which says so in

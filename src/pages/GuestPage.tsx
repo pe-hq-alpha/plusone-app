@@ -4,6 +4,7 @@ import { useAuthActions } from "../lib/session";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
+import { DEMO_PAGES } from "./PlanLinkPage";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 
@@ -22,6 +23,9 @@ export function GuestPage() {
   const me = useQuery(api.users.me, isAuthenticated ? {} : "skip");
   const start = useMutation(api.demo.start);
   const kind = new URLSearchParams(window.location.search).get("sample")?.toLowerCase() ?? undefined;
+  // A shared demo link reopens the same page in a fresh copy ("?to=decisions").
+  const to = new URLSearchParams(window.location.search).get("to") ?? "";
+  const page = DEMO_PAGES.has(to) ? `/${to}` : "";
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   // Each step happens once per visit, whatever React does with re-renders.
@@ -53,11 +57,11 @@ export function GuestPage() {
       void start({ kind })
         .then((eventId) => {
           record(EVENTS.demoOpened);
-          navigate(`/e/${eventId}`, { replace: true });
+          navigate(`/e/${eventId}${page}`, { replace: true });
         })
         .catch(failed);
     }
-  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate, kind]);
+  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate, kind, page]);
 
   return (
     <main id="main" className="grid min-h-screen place-items-center px-5 text-center">
