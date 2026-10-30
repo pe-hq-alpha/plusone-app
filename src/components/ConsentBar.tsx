@@ -15,7 +15,8 @@ export function ConsentBar() {
     >
       {/* One line in a corner, above a phone's tab bar, so the page can be read and used before anyone chooses. */}
       <p className="min-w-0 flex-1 text-muted">
-        Count how {BRAND.name} is used, never what you write?{" "}
+        <span className="sm:hidden">Count app usage?</span>
+        <span className="max-sm:hidden">Count how {BRAND.name} is used, never what you write?</span>{" "}
         <Link to="/privacy#cookies" className="text-accent underline underline-offset-2">Cookies</Link>
       </p>
       <div className="flex shrink-0 gap-2">

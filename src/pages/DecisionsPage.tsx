@@ -285,7 +285,8 @@ function NeedBoard({
   }
 
   return (
-    <section className="card overflow-hidden" aria-labelledby={`need-${need.slotId}`} data-tour="decision">
+    // On a phone the vendor cards come before the wide line-by-line table, which needs swiping.
+    <section className="card overflow-hidden max-md:flex max-md:flex-col" aria-labelledby={`need-${need.slotId}`} data-tour="decision">
       <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1 border-b border-line px-6 py-4">
         <div className="min-w-0">
           <h2 id={`need-${need.slotId}`} className="display text-[1.3rem] leading-tight">
@@ -345,6 +346,7 @@ function NeedBoard({
       )}
 
       {need.sheet && columns.length > 0 && (
+        <div className="max-md:order-2 max-md:border-t max-md:border-line">
         <LineByLine
           sheet={need.sheet}
           columns={columns}
@@ -354,13 +356,14 @@ function NeedBoard({
           // A vendor looking at the customer's view gets no way to message the others.
           contact={compareOnly ? null : { demo, need: need.title, event: { name: eventName ?? "an event", date: eventDate, city } }}
         />
+        </div>
       )}
 
       {live.length > 0 && !compareOnly && (() => {
       // A column of dashes is empty space: dates show only once someone has said.
       const anyDates = live.some((v) => v.availableOnDates || v.availabilityNote);
       return (
-      <div className={`relative overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
+      <div className={`relative overflow-x-auto max-md:order-1${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
         {/* On a phone each vendor is a card, not a row of a table wider than the screen. */}
         <table className={`w-full text-sm max-md:block ${anyDates ? "md:min-w-[54rem]" : "md:min-w-[46rem]"}`}>
           <caption className="sr-only">Everyone asked about {need.title}</caption>
