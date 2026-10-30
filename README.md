@@ -80,7 +80,7 @@ It is built for the events families, teams and the event managers who plan for t
 
 Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), with no sign-up. Three sample events open there, all in rupees: Amma's 60th birthday (the default), a griha pravesam (`/demo?sample=housewarming`) and an office Diwali party with no alcohol (`/demo?sample=office`). Their vendors are made up, so nothing is really sent.
 
-PlusOne began as a wedding planner and placed second at Convex's All Gas hackathon in September 2026. For the Meta Global AI Developer Hackathon (Startup track), it moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
+**How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The response told us more than the placing: people liked it, and the families, planners and vendors we spoke to all pointed at the same gap, that there is no organised way to plan an event and know what you're paying for. So we set out to fill it. For the Meta Global AI Developer Hackathon (Startup track), PlusOne moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
 
 **Team:** Padmanabhan Rajendrakumar, Founder (representative), who builds the core product and its move to Meta's models, and Sharmila Raghu, Co-Founder, who leads PlusOne Partner and the design of every app.
 
@@ -151,7 +151,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 **Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website. Vendors we have spoken to in Chennai have said they will sign up on Partner.
 
-**Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned. India's weddings alone are about $130 billion a year, 87% of the industry unorganised. What's missing is one organised place to plan and buy it.
+**Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned. When PlusOne was a small wedding planner, placing second at Convex's All Gas hackathon, the response showed us the gap; vendors we've spoken to since have said they will join. India's weddings alone are about $130 billion a year, 87% of the industry unorganised. What's missing is one organised place to plan and buy it.
 
 **Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English, Tamil and both. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing. Six Meta models, two of them open weights on our own GPU and Baseten. [Meta's models](#metas-models-in-plusone)
 
