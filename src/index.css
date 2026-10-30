@@ -236,12 +236,12 @@ a { text-underline-offset: 0.2em; }
    theme its ink and paper swap, as on the home page, so the lines read as gold ink on ivory. */
 .backdrop {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: url("/plates/backdrop-1920.jpg") center bottom / cover no-repeat;
+  background: url("/plates/backdrop-1920.webp") center bottom / cover no-repeat;
   opacity: 0.7;
   -webkit-mask-image: radial-gradient(74% 72% at 50% 42%, transparent 56%, #000 98%);
   mask-image: radial-gradient(74% 72% at 50% 42%, transparent 56%, #000 98%);
 }
-:root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-1920.jpg"); mix-blend-mode: multiply; opacity: 0.85; }
+:root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-1920.webp"); mix-blend-mode: multiply; opacity: 0.85; }
 .backdrop--quiet {
   opacity: 0.22;
   /* Inside the app the drawing only frames the far edges; text and lists never sit on its lines. */
@@ -251,8 +251,8 @@ a { text-underline-offset: 0.2em; }
 .backdrop--contained { position: absolute; }
 :root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.16; }
 @media (min-width: 1600px) {
-  .backdrop { background-image: url("/plates/backdrop-3840.jpg"); }
-  :root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-3840.jpg"); }
+  .backdrop { background-image: url("/plates/backdrop-3840.webp"); }
+  :root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-3840.webp"); }
 }
 
 /* A photo panel (sign-in): always dark over the photo, whichever theme is on. */
