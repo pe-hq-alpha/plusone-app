@@ -61,6 +61,15 @@ function inSource(price: number, source: string[]): boolean {
   return source.some((n) => Number(n) === price || Number(n) === asLakh);
 }
 
+/** An included item as the list shows it under "Includes": "serving staff included" reads as "serving staff". */
+function includedItem(s: string): string {
+  return s
+    .trim()
+    .replace(/^(incl\.?|includ(es|ed|ing)|inclusive of)\s+/i, "")
+    .replace(/\s*[-–(,]?\s*(incl\.?|included|inclusive)\)?\.?$/i, "")
+    .trim();
+}
+
 /**
  * The packages to offer the vendor: only the sheet's ways of charging and quantities,
  * positive prices, and, when the list was typed, only prices found in it. A photo has
@@ -84,7 +93,7 @@ export function keepPackages(answer: PriceListAnswer, sheet: Sheet, typed: strin
       priceUnit: unit.key,
       price: Math.round(p.price),
       quantities,
-      includes: p.includes.map((s) => s.trim()).filter(Boolean),
+      includes: p.includes.map(includedItem).filter(Boolean),
       taxIncluded: p.taxIncluded,
     });
   }

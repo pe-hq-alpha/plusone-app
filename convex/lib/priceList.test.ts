@@ -25,6 +25,11 @@ describe("a vendor's price list turned into packages", () => {
     expect(kept).toEqual([{ title: "Banana-leaf lunch", priceUnit: "per_plate", price: 380, quantities: { dishes: 12 }, includes: ["Payasam", "Appalam"], taxIncluded: false }]);
   });
 
+  it("lists what's included without the word 'included' again", () => {
+    const kept = keepPackages({ packages: [pkg({ includes: ["serving staff included", "Incl. banana leaf", "transport inclusive", "Included", "Payasam"] })] }, catering, null);
+    expect(kept[0].includes).toEqual(["serving staff", "banana leaf", "transport", "Payasam"]);
+  });
+
   it("drops a price the list doesn't have, a way of charging the trade doesn't use, and a quantity it doesn't count", () => {
     const answer = { packages: [pkg({ price: 420 }), pkg({ priceUnit: "per_hour" }), pkg({ quantities: [{ key: "hours", value: 4 }, { key: "dishes", value: 12 }] })] };
     const kept = keepPackages(answer, catering, "Lunch Rs.380 per plate, 12 dishes");
