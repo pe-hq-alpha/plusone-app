@@ -70,12 +70,14 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
 
   const total = (calls ?? []).reduce((sum, c) => sum + (c.costUsd ?? 0), 0);
   return (
-    <div className="no-print fixed inset-0 z-50 flex justify-end bg-ink/25" onClick={onClose}>
+    // On a laptop it sits below the top bar and leaves the page usable, so a judge can open
+    // People or Compare and watch which model each step used; on a phone it covers the page.
+    <div className="no-print fixed inset-0 z-50 flex justify-end bg-ink/25 md:pointer-events-none md:top-14 md:bg-transparent" onClick={onClose}>
       <aside
         role="dialog"
         aria-modal="true"
         aria-labelledby="hood-title"
-        className="flex h-full w-full max-w-[26rem] flex-col border-l border-line bg-paper shadow-(--shadow-card)"
+        className="flex h-full w-full max-w-[26rem] flex-col border-l border-line bg-paper shadow-(--shadow-card) md:pointer-events-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
