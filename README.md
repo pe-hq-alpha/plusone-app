@@ -57,7 +57,7 @@ Planning an event means juggling: vendors on calls and WhatsApp, quotes in email
 1. **One app instead of many tools.** An all-in-one, AI-powered event planner: the plan and its budget, vendors found and written to, every reply read and chased, guests, RSVPs and the event page, for an event of any size.
 2. **Quotes you can compare, and vendors you can find.** Every quote and every vendor's offer lands on the same lines, so what's included, what's extra and what's missing is plain, along with where each price sits in the market. Vendors with no website or listing get a place to be found, and answer customers on those same lines.
 
-**In the demo, the cheapest rate is the dearest quote.** Three caterers answer the same 60th-birthday lunch for 120. Annam's ₹380 a plate is the lowest rate, but its 150-plate minimum makes it ₹66,150, or ₹551 a guest. Kaveri's ₹450 a plate, once its ₹2,500 for vessels and staff and the GST it left as "extra" (at catering's usual 5%) are added, is the cheapest at ₹59,325, though it never mentions water. Saapadu's ₹62,000 is all in. PlusOne puts all three on the same lines and says what each leaves out, so the family compares what they will actually pay.
+**What it saves.** In the demo's 60th-birthday lunch, the quote that looks cheapest is the dearest once its minimum order, service, transport and GST sit on the same lines, and choosing the one that really is cheaper saves the family about 10%. That is one vendor. An event hires many (the average wedding, 14), and their quotes hide charges the same way, so the saving runs across the whole package: if the same 10% holds, a ₹5 lakh event keeps about ₹50,000 and a ₹20 lakh wedding about ₹2 lakh. The point isn't a plate rate; it is seeing every vendor's full price on the same lines before anyone pays.
 
 People book events in a rush, with the details scattered across calls, chats and PDFs, and end up paying more than they had to. India's weddings alone are about $130 billion a year (Jefferies, 2024); 87% of the industry is unorganised and the average wedding hires 14 vendors (Kotak Mutual Fund, Nov 2025). Demand is never the question; what's missing is one organised place where every price can be seen and compared. The market, the money and the vision are in [The business](#the-business).
 
@@ -138,6 +138,30 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow: Muse Spark reads every quote, PDF and photo; Muse Voice Transcribe hears a brief, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the family's own hall photo; Muse Wonder gathers a vendor's evidence for Ops; the open-weights Muse Glimmer (our own GPU) checks vendors' photos and Muse Spark Open (Baseten) reads their price lists. Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
 | **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 746 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](#evaluation-missing-charges), [The tech, part by part](#the-tech-part-by-part) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent. Retries, a fallback, rate limits and an uptime check every 15 minutes through judging. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
+
+### Questions a judge will ask
+
+**Isn't this another vendor directory?** No. Directories list vendors and sell advertising; nobody can tell from them what a price includes. PlusOne plans the event, writes to the vendors, reads every reply into the same lines, flags what's missing and shows where each price sits, and in the end runs the booking and payment. The open directory is only the way in. [How it works](#how-it-works)
+
+**Event prices can't be standardised like a cleaning job. So what is standard?** The lines, not the price. Every quote for a trade is read into the same sheet (what the price covers, GST, transport, staff, extras), and prices are placed in a city's range by tier, Value to Luxury, the way a mid-range and a luxury brand each have their own. The customer chooses; PlusOne never picks the cheapest for them.
+
+**How does PlusOne make money?** A paid planner (Basic, then Premium with a person from the PlusOne team), a fee for vendors to be listed, and the end goal: a disclosed commission on every booking paid through PlusOne. Model cost is an estimated $1–2 for a whole event. [The business](#the-business)
+
+**Why wouldn't a customer and vendor just take the deal to WhatsApp?** Because the guarantee, the locked standard price, the staged payments and the vendor's track record only exist for bookings made through PlusOne, the way home-services apps keep theirs. [Why bookings stay](#the-business)
+
+**Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website. Vendors we have spoken to in Chennai have said they will sign up on Partner.
+
+**Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned. India's weddings alone are about $130 billion a year, 87% of the industry unorganised. What's missing is one organised place to plan and buy it.
+
+**Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English, Tamil and both. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing. Six Meta models, two of them open weights on our own GPU and Baseten. [Meta's models](#metas-models-in-plusone)
+
+**Can the AI be trusted with prices?** It is measured, not assumed: charges found on held-out quotes, quotes read across email, PDF and photo, vendors checked against made-up ones, photos checked against AI-generated ones, every run with its raw results in the repository. A person verifies every vendor. [Evaluations](#evaluation-missing-charges)
+
+**What was built during the hackathon?** The move to Meta's models, the standard sheet, Compare line by line, the market range, PlusOne Partner and Ops, voice, the venue view, the photo and vendor checks, the open directory and the map. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
+
+**What's real and what's a sample?** Everything you can click works and is live. The demo's event and its vendors are made up and marked Sample; the model runs shown under the hood are real, with their dates and costs.
+
+**Where does it go from here?** One city, then India, then other countries, on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the team running events end to end. [The vision](#the-business)
 
 ## Meta's models in PlusOne
 
