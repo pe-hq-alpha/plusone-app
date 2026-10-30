@@ -72,6 +72,9 @@ export function compare(q: QuoteLike, basis: Basis, units: number): Comparison {
   }
   if (q.headcountAssumed && units > 0 && basis === "per_person" && q.headcountAssumed !== units) {
     flags.push(`Priced for ${q.headcountAssumed}; you expect ${units}`);
+    // Priced for more than you need is often a minimum order. Until the vendor agrees to
+    // fewer, what they asked for is what you'd pay, so it is never scaled down to look cheaper.
+    if (q.headcountAssumed > units) atYourNumbers = Math.max(atYourNumbers, q.total);
   }
   if (q.taxIncluded === false) flags.push("GST extra");
   // "GST extra" already says it, so a separate "Leaves out GST" would repeat it.

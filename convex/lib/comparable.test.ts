@@ -77,3 +77,28 @@ describe("the unit a need is compared in", () => {
     expect(basisFor("Venue")).toBe("total");
   });
 });
+
+describe("a quote priced for more than you need", () => {
+  test("is never scaled down below what was asked, so a minimum order can't look cheapest", () => {
+    // Annam: 150 plates at ₹380 (a 150-plate minimum), service ₹6,000, GST ₹3,150, for 120 guests.
+    const annam = {
+      total: 66_150,
+      headcountAssumed: 150,
+      lines: [
+        { item: "Lunch", kind: "core" as const, unit: "per_person" as const, quantity: 150, unitPrice: 380, amount: 57_000 },
+        { item: "Service charge", kind: "fee" as const, unit: "total" as const, amount: 6_000 },
+        { item: "GST", kind: "tax" as const, unit: "total" as const, amount: 3_150 },
+      ],
+    };
+    const c = compare(annam, "per_person", 120);
+    expect(c.atYourNumbers).toBe(66_150);
+    expect(c.perUnit).toBe(551);
+    expect(c.flags).toContain("Priced for 150; you expect 120");
+  });
+
+  test("a quote for fewer than you need still scales up to your number", () => {
+    const c = compare({ total: 50_000, headcountAssumed: 100 }, "per_person", 120);
+    expect(c.atYourNumbers).toBe(60_000);
+    expect(c.perUnit).toBe(500);
+  });
+});
