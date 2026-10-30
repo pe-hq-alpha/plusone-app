@@ -358,9 +358,10 @@ function NeedBoard({
       const anyDates = live.some((v) => v.availableOnDates || v.availabilityNote);
       return (
       <div className={`relative overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
-        <table className={`w-full text-sm ${anyDates ? "min-w-[54rem]" : "min-w-[46rem]"}`}>
+        {/* On a phone each vendor is a card, not a row of a table wider than the screen. */}
+        <table className={`w-full text-sm max-md:block ${anyDates ? "md:min-w-[54rem]" : "md:min-w-[46rem]"}`}>
           <caption className="sr-only">Everyone asked about {need.title}</caption>
-          <thead>
+          <thead className="max-md:hidden">
             <tr className="border-b border-line text-left text-[11px] uppercase tracking-[0.08em] text-quiet">
               <th scope="col" className="py-2.5 pl-6 pr-4 font-semibold">Vendor</th>
               <th scope="col" className="px-4 py-2.5 font-semibold">Where it stands</th>
@@ -370,13 +371,16 @@ function NeedBoard({
               <th scope="col" className="py-2.5 pl-4 pr-6" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-line max-md:block">
             {live.map((v) => {
               const isCheapest = v.quote !== null && cheapest !== null && v.quote.total === cheapest && live.length > 1 && bestPerUnit === null;
               const isBestValue = v.quote !== null && bestPerUnit !== null && v.quote.perUnit === bestPerUnit;
               return (
-                <tr key={v.vendorId} className={v.state === "declined" ? "opacity-55" : undefined}>
-                  <th scope="row" className="py-3.5 pl-6 pr-4 text-left font-normal align-top">
+                <tr
+                  key={v.vendorId}
+                  className={`max-md:grid max-md:grid-cols-[minmax(0,1fr)_auto] max-md:gap-x-3 max-md:px-5 max-md:py-4 ${v.state === "declined" ? "opacity-55" : ""}`}
+                >
+                  <th scope="row" className="py-3.5 pl-6 pr-4 text-left font-normal align-top max-md:p-0">
                     <span className="flex flex-wrap items-baseline gap-x-2">
                       <span className="font-medium">{v.name}</span>
                       {v.isTopPick && <span className="text-[11px] text-accent" title={`${BRAND.name}'s estimate from reviews, price and fit`}>top pick, {BRAND.name}&rsquo;s estimate</span>}
@@ -391,7 +395,7 @@ function NeedBoard({
                     )}
                   </th>
 
-                  <td className="px-4 py-3.5 align-top">
+                  <td className="px-4 py-3.5 align-top max-md:p-0 max-md:text-right">
                     <span className={STATE[v.state].cls}>
                       {v.state === "declined" && v.theyDeclined ? "They passed" : STATE[v.state].label}
                     </span>
@@ -406,7 +410,7 @@ function NeedBoard({
                     </span>
                   </td>
 
-                  {anyDates && <td className="px-4 py-3.5 align-top">
+                  {anyDates && <td className="px-4 py-3.5 align-top max-md:col-span-2 max-md:p-0 max-md:pt-2">
                     {v.availableOnDates === "yes" ? (
                       <span className="inline-flex items-center gap-1 text-ok">
                         <Icon name="check" size={14} /> Yes
@@ -421,7 +425,7 @@ function NeedBoard({
                     {v.availabilityNote && <span className="mt-0.5 block max-w-[16rem] text-xs text-quiet">{v.availabilityNote}</span>}
                   </td>}
 
-                  <td className="px-4 py-3.5 text-right align-top">
+                  <td className="px-4 py-3.5 text-right align-top max-md:col-span-2 max-md:p-0 max-md:pt-3 max-md:text-left">
                     {v.quote ? (
                       <>
                         <span className={`block font-medium ${isCheapest ? "text-ok" : ""}`}>
@@ -456,7 +460,7 @@ function NeedBoard({
                     )}
                   </td>
 
-                  <td className="px-4 py-3.5 align-top">
+                  <td className="px-4 py-3.5 align-top max-md:col-span-2 max-md:p-0 max-md:pt-2">
                     {v.quote && v.quote.includes.length > 0 ? (
                       <ul className="max-w-[18rem] text-xs leading-relaxed text-muted">
                         {v.quote.includes.slice(0, 3).map((inc, i) => <li key={i}>{inc}</li>)}
@@ -480,7 +484,7 @@ function NeedBoard({
                     )}
                   </td>
 
-                  <td className="py-3.5 pl-4 pr-6 align-top text-right">
+                  <td className="py-3.5 pl-4 pr-6 align-top text-right max-md:col-span-2 max-md:flex max-md:items-center max-md:gap-2 max-md:p-0 max-md:pt-3">
                     {/* "Where it stands" already says Booked; this is how you reach them. */}
                     {v.threadId && (
                       <Link to={`/e/${eventId}/inbox/${v.threadId}`} className="btn-quiet btn-sm gap-1.5 whitespace-nowrap">
@@ -489,7 +493,7 @@ function NeedBoard({
                       </Link>
                     )}
                     {canEdit && v.state !== "declined" && (
-                      <span className="mt-1.5 inline-flex flex-col items-end gap-1.5">
+                      <span className="mt-1.5 inline-flex flex-col items-end gap-1.5 max-md:mt-0 max-md:flex-row max-md:items-center max-md:gap-3">
                         {v.state === "booked" ? null : (
                           <BookButton
                             vendorName={v.name}
