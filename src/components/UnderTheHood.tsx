@@ -27,6 +27,7 @@ const STEP: Record<string, string> = {
   suggestPalette: "Suggested palettes from your pictures",
   findStage: "Found the stage in your hall photo",
   vendorCall: "Heard a call with a vendor, speaker by speaker",
+  voiceBrief: "Heard what you said, in Tamil, English or both",
   vendorPhotoCheck: "Checked a vendor's photo of past work",
   vendorSearchRead: "Read a vendor search in your own words",
   vendorCheck: "Checked a vendor's public evidence for our team",
@@ -42,13 +43,18 @@ function modelName(model: string, provider: "meta" | "claude" | "spark_open" | "
   if (spark) return `Meta Muse Spark ${spark[1]}`;
   if (model.startsWith("muse-wonder")) return "Meta Muse Wonder";
   if (model === "sam-3.1") return "Meta SAM 3.1";
+  if (model.startsWith("muse-voice-transcribe")) return "Meta Muse Voice Transcribe";
   if (provider === "meta") return `Meta ${model}`;
   return "Claude (backup)";
 }
 
-/** What a call used: tokens, or for SAM, the one image it segments. */
-const used = (model: string, input: number, output: number) =>
-  model.startsWith("sam-") ? "1 image" : `${input.toLocaleString()} in · ${output.toLocaleString()} out`;
+/** What a call used: tokens; for SAM, the one image it segments; for a voice, its seconds of audio, from the price ($0.18 an hour). */
+const used = (model: string, input: number, output: number, costUsd = 0) =>
+  model.startsWith("sam-")
+    ? "1 image"
+    : model.startsWith("muse-voice")
+      ? `${Math.round((costUsd / 0.18) * 3600)} s of audio`
+      : `${input.toLocaleString()} in · ${output.toLocaleString()} out`;
 
 const seconds = (ms?: number) => (ms === undefined ? "" : `${(ms / 1000).toFixed(1)} s`);
 const dollars = (usd?: number) => (usd === undefined ? "" : usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(3)}`);
@@ -109,7 +115,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
                     <span className={c.provider === "claude" ? "chip-quiet" : "chip-pending"}>{modelName(c.model, c.provider)}</span>
                     {c.fellBack && <span className="chip-warn">Meta was busy; the backup answered</span>}
                     <span className="tabular-nums">{seconds(c.durationMs)}</span>
-                    <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens)}</span>
+                    <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens, c.costUsd ?? 0)}</span>
                     <span className="tabular-nums">{dollars(c.costUsd)}</span>
                     <span className="ml-auto tabular-nums text-quiet">{clock(c.at)}</span>
                   </p>
@@ -133,7 +139,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                       <span className="chip-pending">{modelName(c.model, c.provider)}</span>
                       <span className="tabular-nums">{seconds(c.durationMs)}</span>
-                      <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens)}</span>
+                      <span className="tabular-nums">{used(c.model, c.inputTokens, c.outputTokens, c.costUsd ?? 0)}</span>
                       <span className="tabular-nums">{dollars(c.costUsd)}</span>
                     </p>
                   </li>

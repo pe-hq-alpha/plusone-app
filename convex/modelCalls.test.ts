@@ -164,7 +164,7 @@ describe("the demo's recorded run", () => {
     expect(recorded[0].calls.map((c) => c.note)).toEqual(["Annam Caterers", "Saapadu Kitchen", "Kaveri Feast Co."]);
     // Every Meta model with a job in the demo has a real run to show: Spark, SAM, Glimmer and Spark Open.
     expect(new Set(recorded.flatMap((r) => r.calls.map((c) => c.model)))).toEqual(
-      new Set(["muse-spark-1.3", "sam-3.1", "muse-glimmer-30b", "meta-models/muse-spark-open-1026", "muse-wonder-1.0"]),
+      new Set(["muse-spark-1.3", "sam-3.1", "muse-glimmer-30b", "meta-models/muse-spark-open-1026", "muse-wonder-1.0", "muse-voice-transcribe-1.0"]),
     );
     for (const run of recorded) for (const c of run.calls) expect(c.costUsd).toBeGreaterThan(0);
     expect(await as.query(api.modelCalls.recorded, { eventId: realId })).toEqual([]);

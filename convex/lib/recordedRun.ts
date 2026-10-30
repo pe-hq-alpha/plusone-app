@@ -38,6 +38,13 @@ export const RECORDED_RUNS: RecordedRun[] = [
   },
   {
     on: "29 Oct 2026",
+    about: "The real run behind this sample event's recorded call with the caterer: Muse Voice Transcribe heard 47 seconds of customer and caterer, English with a \"Vanakkam\", split the two speakers and caught every figure, which Muse Spark then read into Kaveri Feast Co.'s column in Compare (production).",
+    calls: [
+      { feature: "vendorCall", note: "the sample call with Kaveri Feast Co., 47 s", provider: "meta", model: "muse-voice-transcribe-1.0", inputTokens: 0, outputTokens: 0, costUsd: 0.00235, durationMs: 10_900 },
+    ],
+  },
+  {
+    on: "29 Oct 2026",
     about: "A real check of a caterer's photo of past work on Muse Glimmer, Meta's open-weights model, on our own GPU: it tagged plated service and serving staff (production).",
     calls: [
       { feature: "vendorPhotoCheck", note: "a caterer's kitchen photo", provider: "glimmer", model: "muse-glimmer-30b", inputTokens: 1_360, outputTokens: 731, costUsd: 0.00775, durationMs: 5_598 },
