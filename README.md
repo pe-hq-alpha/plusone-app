@@ -90,7 +90,7 @@ PlusOne began as a wedding planner and placed second at Convex's All Gas hackath
 
 ## For the judges
 
-**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th with no sign-up. Start on **Today**. Follow **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers (made up, and marked as samples) sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them. Then try the vendors' side, a demo of its own: [PlusOne Partner's demo](https://app.plusoneevents.site/partner/demo) opens as a sample caterer with a customer's catering request to answer on the same sheet, and once the offer is sent, shows it the way the customer sees it, line by line beside their quotes. Press **Under the hood** in the top bar to see each step's Meta model, time and cost, and type "We're now 140 people" in the box on Today to watch one run.
+**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th with no sign-up. Start on **Today**. Follow **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers (made up, and marked as samples) sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them. Then try the vendors' side, a demo of its own: [PlusOne Partner's demo](https://app.plusoneevents.site/partner/demo) opens as a sample caterer with a customer's catering request to answer on the same sheet, and once the offer is sent, shows it the way the customer sees it, line by line beside their quotes. Press **Under the hood** in the top bar to see each step's Meta model, time and cost, and type "We're now 140 people" in the box on Today to watch one run. Last, open [Find vendors](https://app.plusoneevents.site/vendors) and search "caterers near Mylapore under 450": the vendors sit on a map in a circle around the area, as they do around the venue on every need in a plan.
 
 **In a few words.** *Basic* is the planner app, free until launch. *Premium* adds a person from the PlusOne team. *PlusOne Partner* is the vendors' side and *Ops* the team's. The *standard sheet* is the set of lines every quote for a kind of vendor is read into (the unit, what's included, GST, transport, service, extras). *Today*, *Plan*, *Vendors* and *People* are the app's four lanes. *Under the hood* lists every model call with its time and cost. *Value*, *Standard*, *Premium* and *Luxury* say where a price sits among the city's listed prices for the same unit (the lowest quarter, the middle half, up to the 90th percentile, above it), and the *typical price* is the middle one; none of them says a price is fair or unfair. *Verified* means a person in Ops checked the vendor; *Sample* marks a made-up vendor or event, there only to show how PlusOne works.
 
@@ -422,7 +422,18 @@ Rate limits on searches, emails, invites, sign-ups, planning conversations, impo
 
 ## Run it yourself
 
-You need Node 20 or later, a Convex account and a Clerk application with a JWT template named `convex` (claims `aud: convex`, `name`, `email`, `email_verified`).
+**Check the build in two minutes, with no accounts and no keys.** The tests fake every model and service, so they run offline:
+
+```bash
+git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
+npm ci
+npm test              # 734 tests, no network, no keys
+npm run typecheck     # the app and the backend
+```
+
+The evaluations' raw results are in `scripts/*-run*.json` beside the scripts that made them, so every number in [Evaluations](#evaluation-missing-charges) can be checked without calling a model.
+
+**To run the whole app**, you need Node 20 or later, a Convex account and a Clerk application with a JWT template named `convex` (claims `aud: convex`, `name`, `email`, `email_verified`).
 
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
