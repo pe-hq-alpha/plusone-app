@@ -38,6 +38,7 @@
 <td align="center" width="96"><img src="assets/logos/resend.svg" width="30" height="30" alt="Resend"><br><b>Resend</b><br><sub>Sends the app's own emails</sub></td>
 <td align="center" width="96"><img src="assets/logos/cloudflare.svg" width="30" height="30" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Hosts the website and app</sub></td>
 <td align="center" width="96"><img src="assets/logos/posthog.svg" width="30" height="30" alt="PostHog"><br><b>PostHog</b><br><sub>Usage numbers, only with consent</sub></td>
+<td align="center" width="96"><img src="assets/logos/whatsapp.svg" width="30" height="30" alt="WhatsApp"><br><b>WhatsApp</b><br><sub>Quote updates to hosts, on Meta's Cloud API</sub></td>
 </tr>
 </table>
 
