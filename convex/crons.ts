@@ -9,6 +9,9 @@ crons.hourly("vendor follow-ups", { minuteUTC: 7 }, internal.followups.tick, {})
 // Clear out old demos, old inbound-email records and searches that died mid-run.
 crons.interval("housekeeping", { hours: 1 }, internal.housekeeping.sweep, {});
 
+// The live site watched from outside GitHub: the home page, both demos and /health (production only).
+crons.interval("uptime check", { minutes: 5 }, internal.uptime.check, {});
+
 // Fridays, morning in the Americas and evening in India.
 crons.cron("weekly update", "0 14 * * 5", internal.digest.weekly, {});
 

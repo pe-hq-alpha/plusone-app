@@ -1118,6 +1118,14 @@ export default defineSchema({
   /** Model spend for PlusOne Admin and the field notes. */
   modelCalls: defineTable(modelCallFields).index("by_provider", ["provider"]).index("by_eventId", ["eventId"]),
 
+  /** The uptime check every five minutes (convex/uptime.ts): kept a week, read by /uptime. */
+  uptimeChecks: defineTable({
+    at: v.number(),
+    ok: v.boolean(),
+    ms: v.number(),
+    problems: v.array(v.object({ url: v.string(), problem: v.string() })),
+  }).index("by_at", ["at"]),
+
   visits: defineTable({
     at: v.number(),
     ip: v.string(),

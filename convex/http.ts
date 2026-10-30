@@ -186,6 +186,19 @@ http.route({
   }),
 });
 
+// The last day of uptime checks (convex/uptime.ts), as counts and yes-or-no facts.
+http.route({
+  path: "/uptime",
+  method: "GET",
+  handler: httpAction(async (ctx) => {
+    const day = await ctx.runQuery(internal.uptime.summary, { since: Date.now() - 24 * 60 * 60 * 1000 });
+    return new Response(JSON.stringify({ everyMinutes: 5, lastDay: day }), {
+      status: 200,
+      headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "*" },
+    });
+  }),
+});
+
 registerStaticRoutes(http, components.staticHosting);
 
 export default http;
