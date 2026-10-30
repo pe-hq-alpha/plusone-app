@@ -105,6 +105,7 @@ import type * as lib_vocab from "../lib/vocab.js";
 import type * as lib_voice from "../lib/voice.js";
 import type * as lib_voiceWords from "../lib/voiceWords.js";
 import type * as lib_wav from "../lib/wav.js";
+import type * as lib_whatsapp from "../lib/whatsapp.js";
 import type * as lib_wizard from "../lib/wizard.js";
 import type * as lib_wonder from "../lib/wonder.js";
 import type * as maintenance from "../maintenance.js";
@@ -150,6 +151,7 @@ import type * as venueView from "../venueView.js";
 import type * as visits from "../visits.js";
 import type * as voiceBrief from "../voiceBrief.js";
 import type * as webCache from "../webCache.js";
+import type * as whatsapp from "../whatsapp.js";
 import type * as workflows from "../workflows.js";
 
 import type {
@@ -256,6 +258,7 @@ declare const fullApi: ApiFromModules<{
   "lib/voice": typeof lib_voice;
   "lib/voiceWords": typeof lib_voiceWords;
   "lib/wav": typeof lib_wav;
+  "lib/whatsapp": typeof lib_whatsapp;
   "lib/wizard": typeof lib_wizard;
   "lib/wonder": typeof lib_wonder;
   maintenance: typeof maintenance;
@@ -301,6 +304,7 @@ declare const fullApi: ApiFromModules<{
   visits: typeof visits;
   voiceBrief: typeof voiceBrief;
   webCache: typeof webCache;
+  whatsapp: typeof whatsapp;
   workflows: typeof workflows;
 }>;
 

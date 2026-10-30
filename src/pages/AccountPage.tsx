@@ -97,6 +97,8 @@ export function AccountPage() {
         </button>
       </section>
 
+      {!isGuest && <WhatsAppUpdates />}
+
       <section className="card mt-5 p-6 md:p-7" aria-labelledby="privacy-h">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="min-w-0 max-w-[36rem]">
@@ -160,5 +162,72 @@ export function AccountPage() {
         {deleteError && <p role="alert" className="mt-3 text-sm text-bad">{deleteError}</p>}
       </section>
     </main>
+  );
+}
+
+/**
+ * Vendor updates on WhatsApp: asked for here, with the number and a plain promise of what
+ * will be sent. Off by a press here or by replying STOP on WhatsApp.
+ */
+function WhatsAppUpdates() {
+  const mine = useQuery(api.whatsapp.mine);
+  const optIn = useMutation(api.whatsapp.optIn);
+  const optOut = useMutation(api.whatsapp.optOut);
+  const [number, setNumber] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (mine === undefined) return null;
+
+  const run = async (work: () => Promise<unknown>) => {
+    setBusy(true);
+    setError(null);
+    try {
+      await work();
+      setNumber("");
+      setAgree(false);
+    } catch (e) {
+      const data = (e as { data?: unknown }).data;
+      setError(typeof data === "string" ? data : "That didn't save. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className="card mt-5 p-6 md:p-7" aria-labelledby="whatsapp-h">
+      <h2 id="whatsapp-h" className="display text-xl">Vendor updates on WhatsApp</h2>
+      <p className="mt-1 max-w-[36rem] text-sm leading-relaxed text-muted">
+        When a vendor sends a quote for one of your events, {BRAND.name} messages you on WhatsApp with a link to compare it. Only
+        that: no marketing. Reply STOP on WhatsApp, or turn it off here, any time.
+      </p>
+      {mine.number ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <span className="chip-ok">On for {mine.number}</span>
+          <button type="button" className="btn-quiet btn-sm" disabled={busy} onClick={() => void run(() => optOut({}))}>
+            Turn off
+          </button>
+        </div>
+      ) : (
+        <form
+          className="mt-4 grid max-w-[36rem] gap-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (agree && number.trim()) void run(() => optIn({ number }));
+          }}
+        >
+          <input className="input" inputMode="tel" aria-label="Your WhatsApp number" placeholder="+91 98400 12345" value={number} onChange={(e) => setNumber(e.target.value)} />
+          <label className="flex items-start gap-2 text-sm text-muted">
+            <input type="checkbox" className="mt-1" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+            Send me vendor updates for my events on WhatsApp, from {BRAND.name}, through Meta&rsquo;s WhatsApp.
+          </label>
+          <button className="btn-primary w-fit" disabled={busy || !agree || !number.trim()}>
+            {busy ? "Saving…" : "Turn on"}
+          </button>
+        </form>
+      )}
+      {!mine.available && <p className="mt-2 text-xs text-quiet">Updates start going out once {BRAND.name}&rsquo;s WhatsApp number is live.</p>}
+      {error && <p role="alert" className="mt-2 text-xs text-bad">{error}</p>}
+    </section>
   );
 }

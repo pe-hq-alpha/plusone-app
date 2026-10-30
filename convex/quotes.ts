@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, internalQuery, mutation, query, type MutationCtx } from "./_generated/server";
 import { logActivity, requireMember } from "./lib/auth";
@@ -274,6 +275,8 @@ export const upsertFromMessage = internalMutation({
       refs: { slotId: slot._id, vendorId: vendor._id, threadId: thread._id },
     });
     await trackForEvent(ctx, "quote.received", thread.eventId, { fromAttachment: Boolean(args.fromAttachment), held: Boolean(held) });
+    // The host hears about it on WhatsApp too, if they asked to (a sample event never sends).
+    if (!event.demo) await ctx.scheduler.runAfter(0, internal.whatsapp.notifyQuote, { eventId: thread.eventId, vendorName: vendor.name, needTitle: slot.title });
     return quoteId;
   },
 });

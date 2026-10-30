@@ -7,6 +7,7 @@ import { verifySvix } from "./lib/svix";
 import { extractEmail } from "./lib/text";
 import { checkDigestUnsubscribe } from "./appEmails";
 import { parseVisit, sameSecret } from "./lib/visits";
+import { stopsIn, validSignature } from "./lib/whatsapp";
 import type { Id } from "./_generated/dataModel";
 
 const http = httpRouter();
@@ -103,6 +104,44 @@ const unsubscribe = httpAction(async (ctx, request) => {
     { status: valid ? 200 : 400, headers: { "content-type": "text/html; charset=utf-8" } },
   );
 });
+/**
+ * Meta's WhatsApp webhook. GET is Meta checking the address once, with our verify token;
+ * POST is a message or a delivery status, signed with the app secret. A "STOP" reply turns
+ * that number's updates off. Anything unsigned is refused.
+ */
+http.route({
+  path: "/whatsapp/webhook",
+  method: "GET",
+  handler: httpAction(async (_ctx, request) => {
+    const url = new URL(request.url);
+    const token = process.env.WHATSAPP_VERIFY_TOKEN;
+    if (token && url.searchParams.get("hub.mode") === "subscribe" && url.searchParams.get("hub.verify_token") === token) {
+      return new Response(url.searchParams.get("hub.challenge") ?? "", { status: 200 });
+    }
+    return new Response("forbidden", { status: 403 });
+  }),
+});
+
+http.route({
+  path: "/whatsapp/webhook",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const secret = process.env.WHATSAPP_APP_SECRET;
+    if (!secret) return new Response("not configured", { status: 503 });
+    const raw = await request.text();
+    if (!(await validSignature(raw, request.headers.get("x-hub-signature-256"), secret))) return new Response("bad signature", { status: 401 });
+    let payload: unknown = null;
+    try {
+      payload = JSON.parse(raw);
+    } catch {
+      return new Response("ok", { status: 200 });
+    }
+    const stops = stopsIn(payload);
+    if (stops.length) await ctx.runMutation(internal.whatsapp.stopNumbers, { numbers: stops });
+    return new Response("ok", { status: 200 });
+  }),
+});
+
 http.route({ path: "/email/unsubscribe", method: "GET", handler: unsubscribe });
 http.route({ path: "/email/unsubscribe", method: "POST", handler: unsubscribe });
 

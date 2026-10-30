@@ -911,9 +911,13 @@ export default defineSchema({
     termsVersion: v.optional(v.string()),
     /** PlusOne's own team: reviewers verify vendors in Ops; admins also see spend. Set by hand (marketplace/ops setStaffRole). */
     staffRole: v.optional(v.union(v.literal("admin"), v.literal("reviewer"))),
+    /** Updates on WhatsApp: the number (+E.164) they asked for them on, and when. Cleared by "STOP" or in Account. */
+    whatsappNumber: v.optional(v.string()),
+    whatsappOptInAt: v.optional(v.number()),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
+    .index("by_whatsappNumber", ["whatsappNumber"])
     .index("by_clerkId", ["clerkId"]),
 
   events: defineTable(eventFields).index("by_inboxId", ["inboxId"]).index("by_demo", ["demo"]),

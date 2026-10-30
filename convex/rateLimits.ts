@@ -98,6 +98,8 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   // app; each person gets a few, and every answer is kept so the same words never go twice.
   placeLookup: { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   placeLookupAll: { kind: "fixed window", rate: 1000, period: DAY },
+  // WhatsApp updates: each is a paid message from Meta, so a runaway loop stops here.
+  whatsappAll: { kind: "fixed window", rate: 500, period: DAY },
   // Muse Spark reading a vendor search it couldn't read by itself ("something for amma's lunch").
   directoryRead: { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
   directoryReadAll: { kind: "fixed window", rate: 500, period: DAY },
