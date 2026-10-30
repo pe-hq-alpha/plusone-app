@@ -315,7 +315,7 @@ For families, teams and event managers.
 </tr>
 </table>
 
-4. **Find vendors two ways.** PlusOne searches the open web, reads vendors' own sites down to their pricing pages and ranks what it finds with a reason for each, every price linked to its page. Or press **Ask verified vendors** on a need, and vendors on PlusOne Partner answer it.
+4. **Find vendors two ways.** PlusOne searches the open web, reads vendors' own sites down to their pricing pages and ranks what it finds with a reason for each, every price linked to its page. Or, on a need, see PlusOne's verified vendors for that trade and city by name, with their photo and starting price, and press **Ask verified vendors** so they answer it on PlusOne Partner.
 5. **Write from the event's own inbox.** PlusOne sends the inquiries from the event's address, follows up with vendors who go quiet (up to three times) and answers simple questions. Anything that is the host's to decide comes back as one clear question.
 
 | Vendors found on the open web | The event's inbox |
