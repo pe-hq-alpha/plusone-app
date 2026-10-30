@@ -89,7 +89,8 @@ export function PrivacyPage() {
           <p className="mt-2 text-muted">
             {BRAND.name} runs on Convex, which stores your plan, and Cloudflare, which serves the site. Clerk handles sign-in.
             Meta reads vendor and guest replies and writes emails, with Anthropic as a backup. Firecrawl reads vendors&rsquo; own
-            web pages. AgentMail
+            web pages. OpenStreetMap draws the vendor map, and finds a venue on it when you type a name that isn&rsquo;t a
+            Chennai area. AgentMail
             sends and receives your event&rsquo;s email. Resend sends the weekly update email. PostHog counts which screens and
             buttons are used, only if you allow it, and never records your screen. Each sees only what it needs for that
             job, and none of them is given your data to sell. None of them trains on it, with one exception: while we use

@@ -94,6 +94,13 @@ export const rateLimiter = new RateLimiter(components.rateLimiter, {
   directoryWeb: { kind: "fixed window", rate: 10, period: DAY },
   directoryWebDemo: { kind: "fixed window", rate: 3, period: DAY },
   directoryWebAll: { kind: "fixed window", rate: 100, period: DAY },
+  // OpenStreetMap's address lookup asks for no more than one request a second across an
+  // app; each person gets a few, and every answer is kept so the same words never go twice.
+  placeLookup: { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  placeLookupAll: { kind: "fixed window", rate: 1000, period: DAY },
+  // Muse Spark reading a vendor search it couldn't read by itself ("something for amma's lunch").
+  directoryRead: { kind: "token bucket", rate: 30, period: HOUR, capacity: 10 },
+  directoryReadAll: { kind: "fixed window", rate: 500, period: DAY },
   // Muse Glimmer's checks, across everyone: each can wake our H200 on Modal (about $0.28 a
   // cold start, plus idle time before it scales to zero). Past this, checks go to Muse Spark.
   glimmerAll: { kind: "fixed window", rate: 40, period: DAY },

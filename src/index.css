@@ -260,3 +260,21 @@ a { text-underline-offset: 0.2em; }
 .photo-panel .po-lockup__mark { color: #f4f5f8; }
 .photo-panel .po-lockup__mark em, .photo-panel .po-lockup__events { color: #f4b53a; }
 .photo-scrim { background: linear-gradient(to top, rgb(17 20 28 / 0.88) 0%, rgb(17 20 28 / 0.35) 45%, rgb(17 20 28 / 0.55) 100%); }
+
+/* The vendor map (components/VendorMap): numbered pins in the accent, the venue in marigold. */
+.vendor-map { height: 22rem; border-radius: 14px; border: 1px solid var(--color-line); overflow: hidden; z-index: 0; background: var(--color-cream); }
+.vendor-map .leaflet-tooltip { font: inherit; font-size: 12px; color: var(--color-ink); background: var(--color-paper); border-color: var(--color-line); box-shadow: 0 2px 10px rgb(0 0 0 / 0.15); }
+.vendor-map .leaflet-tooltip-top::before { border-top-color: var(--color-paper); }
+.vendor-map .leaflet-control-attribution { font-size: 10px; background: color-mix(in srgb, var(--color-paper) 80%, transparent); color: var(--color-quiet); }
+.vendor-map .leaflet-control-attribution a { color: var(--color-muted); }
+.vendor-map .leaflet-bar a { background: var(--color-paper); color: var(--color-ink); border-color: var(--color-line); }
+.map-pin { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--color-accent); color: var(--color-on-accent); border: 2px solid var(--color-paper); box-shadow: 0 1px 4px rgb(0 0 0 / 0.3); cursor: pointer; transition: transform 120ms ease; }
+.map-pin--out { opacity: 0.45; }
+.map-pin--on { transform: scale(1.25); background: var(--color-highlight); color: var(--color-on-highlight); opacity: 1; }
+/* The venue: a diamond in the page's ink with a marigold ring, so it never reads as one more vendor. */
+.map-venue { display: block; width: 18px; height: 18px; margin: 3px; transform: rotate(45deg); border-radius: 3px; background: var(--color-ink); border: 3px solid var(--color-highlight); box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-highlight) 30%, transparent), 0 1px 4px rgb(0 0 0 / 0.3); }
+.vendor-map .map-venue-label { font-weight: 600; padding: 2px 8px; }
+/* OpenStreetMap draws only light tiles; in the dark theme they're inverted and quietened to sit in the page. */
+:root[data-theme="dark"] .vendor-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.35); }
+:root:not([data-theme="dark"]) .vendor-map .leaflet-tile-pane { filter: saturate(0.55); }
+.map-circle { fill: var(--color-highlight); fill-opacity: 0.08; stroke: var(--color-highlight); stroke-width: 2; stroke-dasharray: 6 5; }

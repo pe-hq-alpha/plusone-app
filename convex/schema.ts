@@ -37,6 +37,14 @@ import {
  * validators for `returns` without duplicating the shapes.
  */
 
+/** A point on the map and how sure it is (lib/places Place). */
+export const placeValidator = v.object({
+  lat: v.number(),
+  lng: v.number(),
+  label: v.string(),
+  precision: v.union(v.literal("address"), v.literal("area"), v.literal("city")),
+});
+
 export const eventFields = {
   name: v.string(),
   host: v.string(),
@@ -46,6 +54,8 @@ export const eventFields = {
   city: v.string(),
   /** Optional neighbourhood / district inside the city, e.g. "Bandra West", "Park Slope". */
   area: v.optional(v.string()),
+  /** Where the venue is, set on the map or found from its name; the area's middle stands in until then. */
+  venuePlace: v.optional(placeValidator),
   country: v.optional(v.string()),
   currency: v.string(),
   totalBudget: v.number(),
@@ -984,6 +994,8 @@ export default defineSchema({
   uploadClaims: defineTable({ storageId: v.id("_storage"), userId: v.id("users"), claimedAt: v.number() }).index("by_storageId", ["storageId"]),
   listingChanges: defineTable(listingChangeFields).index("by_status", ["status"]).index("by_profileId_and_status", ["profileId", "status"]),
   venueViews: defineTable(venueViewFields).index("by_eventId", ["eventId"]),
+  /** Address lookups already made, found or not, so the same words never go out twice. */
+  placeLookups: defineTable({ query: v.string(), place: v.optional(placeValidator), at: v.number() }).index("by_query", ["query"]),
   segmentCache: defineTable(segmentCacheFields).index("by_imageKey_and_promptKey", ["imageKey", "promptKey"]),
 
   priceBands: defineTable(priceBandFields).index("by_category_and_unit_and_city_and_sample", ["category", "unit", "city", "sample"]),

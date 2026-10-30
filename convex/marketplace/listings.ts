@@ -4,7 +4,8 @@ import { internalQuery, type QueryCtx } from "../_generated/server";
 import { badgesFor, cityKey, inRangeUnit, isListed, isTrial, levelFor, MIN_BAND_COUNT, startingOffering, tierFor, type Band } from "../lib/marketplace";
 import type { Basis } from "../lib/comparable";
 import { canonicalWebsite } from "../lib/text";
-import { offeringUnit } from "../schema";
+import { placeFor } from "../lib/places";
+import { offeringUnit, placeValidator } from "../schema";
 import { customerPhoto, photosForCustomers } from "./photos";
 
 /**
@@ -43,6 +44,8 @@ export const listingCard = v.object({
   photos: v.array(customerPhoto),
   /** Events done through PlusOne, which set the level: a track record, not a rating bought. */
   completedEvents: v.number(),
+  /** Where they work from, for the map: the area they name, or only their city. */
+  place: v.optional(placeValidator),
 });
 
 export const bandResult = v.union(
@@ -103,6 +106,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     sample: profile.sample === true,
     photos: await photosForCustomers(ctx, profile),
     completedEvents: profile.completedEvents,
+    place: placeFor(profile.serviceArea?.join(", "), profile.city) ?? undefined,
   };
 }
 

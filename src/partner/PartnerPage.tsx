@@ -202,6 +202,7 @@ type ProfileFields = {
   email?: string;
   phone?: string;
   whatsapp?: string;
+  serviceArea?: string[];
   languages?: string[];
   about?: string;
 };
@@ -253,6 +254,7 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
   const tidyAction = useAction(api.marketplace.tidy.tidy);
   const [f, setF] = useState<ProfileFields>(initial ?? { name: "", categories: [], city: "Chennai" });
   const [languages, setLanguages] = useState((initial?.languages ?? []).join(", "));
+  const [areas, setAreas] = useState((initial?.serviceArea ?? []).join(", "));
   const [state, setState] = useState<"idle" | "saving" | "listed">("idle");
   const [checking, setChecking] = useState(false);
   const [preview, setPreview] = useState<TidyResult[] | null>(null);
@@ -266,7 +268,8 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
   const saveWith = (about: string | undefined) => {
     setState("saving");
     setError(null);
-    const args = { ...f, about, languages: languages.split(",").map((s) => s.trim()).filter(Boolean) };
+    const list = (text: string) => text.split(",").map((s) => s.trim()).filter(Boolean);
+    const args = { ...f, about, serviceArea: list(areas), languages: list(languages) };
     const done = initial
       ? update(args).then(() => {
           setState("idle");
@@ -346,6 +349,11 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
         <div>
           <label className="label" htmlFor="p-wa">WhatsApp</label>
           <input id="p-wa" className="input" value={f.whatsapp ?? ""} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="Same as phone, or another" />
+        </div>
+        <div className="md:col-span-2">
+          <label className="label" htmlFor="p-area">The area you work from</label>
+          <input id="p-area" className="input" value={areas} onChange={(e) => { setAreas(e.target.value); setPreview(null); }} placeholder="Mylapore" />
+          <p className="mt-1 text-[11px] text-muted">Customers see how far you are from their venue on the map. The area is enough; your street address isn&rsquo;t shown.</p>
         </div>
         <div className="md:col-span-2">
           <label className="label" htmlFor="p-lang">Languages you speak with customers</label>

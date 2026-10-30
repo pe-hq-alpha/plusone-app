@@ -1,7 +1,7 @@
 import { anOccasion } from "../../convex/lib/occasion";
 import { defaultSearchText, partOfNeed } from "../../convex/lib/searchTerms";
 import { missingCharges, sheetFor } from "../../convex/lib/standardSheet";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
@@ -13,6 +13,8 @@ import { SUGGESTED_CATEGORIES } from "../../convex/lib/templates";
 import { Icon } from "../components/ui/Icon";
 import { RenameTitle } from "../components/ui/RenameTitle";
 import { VendorCard } from "../components/VendorCard";
+import { awayKm, NearVenue, venueSpot, type Nearby } from "../components/NearVenue";
+import { kmText, placeFor, type Place } from "../../convex/lib/places";
 import { ConfirmOutreach } from "../components/ConfirmOutreach";
 import { BRAND } from "../lib/brand";
 import { vendorHello } from "../lib/contact";
@@ -173,16 +175,40 @@ function SlotPanel({
   // Filters: price against this need's budget, city, whether a
   // venue holds the guests, rating, and the order to show them in.
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  // Near the venue: the circle on the map, and whether the lists keep only who's inside it.
+  // A vendor with no known area is never counted as inside.
+  const listed = useQuery(api.marketplace.directory.search, { category: slot.category, city: event.city });
+  const verified = useMemo(() => (listed && (!listed.samplesOnly || event.demo === true) ? listed.vendors : []), [listed, event.demo]);
+  const [radiusKm, setRadiusKm] = useState(5);
+  const [insideOnly, setInsideOnly] = useState(false);
+  const centre = venueSpot(event);
+  const nearOnly = insideOnly && centre !== null && centre.precision !== "city";
+  const near = useCallback(
+    (place: Place | null) => {
+      if (!nearOnly) return true;
+      const km = awayKm(centre, place);
+      return km !== null && km <= radiusKm;
+    },
+    [nearOnly, centre, radiusKm],
+  );
+  const webPlace = useCallback((v: { serviceArea?: string; city?: string }) => placeFor(v.serviceArea, v.city ?? event.city), [event.city]);
+  const nearby: Nearby[] = useMemo(
+    () => [
+      ...verified.map((v) => ({ id: v._id, name: v.name, kind: "verified" as const, place: v.place ?? null })),
+      ...(vendors ?? []).map((v) => ({ id: v._id, name: v.name, kind: "web" as const, place: webPlace(v) })),
+    ],
+    [verified, vendors, webPlace],
+  );
   const cities = useMemo(() => [...new Set((vendors ?? []).map((v) => v.city?.split(",")[0].trim()).filter((c): c is string => Boolean(c)))].sort(), [vendors]);
   const inView = useMemo(
     () => sortVendors(
-      (vendors ?? []).filter((v) => (!onlyShortlisted || v.shortlisted) && passes(v, filters, slot.budget, guestCount)),
+      (vendors ?? []).filter((v) => (!onlyShortlisted || v.shortlisted) && passes(v, filters, slot.budget, guestCount) && near(webPlace(v))),
       filters.sort,
       guestCount,
     ),
-    [vendors, onlyShortlisted, filters, slot.budget, guestCount],
+    [vendors, onlyShortlisted, filters, slot.budget, guestCount, near, webPlace],
   );
-  const filtering = filters.price !== "any" || filters.city !== "" || filters.fits || filters.rating > 0;
+  const filtering = filters.price !== "any" || filters.city !== "" || filters.fits || filters.rating > 0 || nearOnly;
   const topPicks = useMemo(() => inView.filter((v) => v.isTopPick), [inView]);
   const others = useMemo(() => inView.filter((v) => !v.isTopPick), [inView]);
   const topPickable = useMemo(() => topPicks.filter((v) => !!v.email), [topPicks]);
@@ -272,7 +298,29 @@ function SlotPanel({
         </section>
       )}
 
-      {slot.status !== "booked" && <AskVerified eventId={event._id} slotId={slot._id} category={slot.category} city={event.city} canEdit={canEdit} />}
+      {slot.status !== "booked" && (
+        <NearVenue
+          event={event}
+          vendors={nearby}
+          radiusKm={radiusKm}
+          setRadiusKm={setRadiusKm}
+          insideOnly={insideOnly}
+          setInsideOnly={setInsideOnly}
+          canEdit={canEdit}
+        />
+      )}
+
+      {slot.status !== "booked" && (
+        <AskVerified
+          eventId={event._id}
+          slotId={slot._id}
+          category={slot.category}
+          city={event.city}
+          vendors={verified.filter((v) => near(v.place ?? null))}
+          away={(v) => awayKm(centre, v.place ?? null)}
+          canEdit={canEdit}
+        />
+      )}
 
       <section aria-labelledby="found-h">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -651,12 +699,31 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
  * lines every quote is read into. The family's name, contact details and budget stay private;
  * offers land in Compare beside the quotes.
  */
-function AskVerified({ eventId, slotId, category, city, canEdit }: { eventId: Id<"events">; slotId: Id<"vendorSlots">; category: string; city: string; canEdit: boolean }) {
+type Listed = FunctionReturnType<typeof api.marketplace.directory.search>["vendors"][number];
+
+/**
+ * The verified vendors a request goes to, by name, so the family sees who they're asking,
+ * with how far each is from the venue. Sample vendors stand in only on the guest demo; a
+ * real plan lists real ones.
+ */
+function AskVerified({
+  eventId,
+  slotId,
+  category,
+  city,
+  vendors,
+  away,
+  canEdit,
+}: {
+  eventId: Id<"events">;
+  slotId: Id<"vendorSlots">;
+  category: string;
+  city: string;
+  vendors: Listed[];
+  away: (v: Listed) => number | null;
+  canEdit: boolean;
+}) {
   const brief = useQuery(api.marketplace.briefs.forSlot, { eventId, slotId });
-  // The verified vendors a request goes to, by name, so the family sees who they're asking.
-  // Sample vendors only stand in on the open directory; a real plan lists real ones.
-  const listed = useQuery(api.marketplace.directory.search, { category, city });
-  const vendors = listed && !listed.samplesOnly ? listed.vendors : [];
   const ask = useMutation(api.marketplace.briefs.ask);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -721,6 +788,7 @@ function AskVerified({ eventId, slotId, category, city, canEdit }: { eventId: Id
                     {v.badges.includes("verified") ? "Verified" : "Listed"}
                     {v.startingPrice && <> · from {money(v.startingPrice.price, v.startingPrice.currency)}</>}
                     {v.tier && <> · {v.tier}</>}
+                    {away(v) !== null && <> · {kmText(away(v)!)}</>}
                   </span>
                 </span>
               </Link>
