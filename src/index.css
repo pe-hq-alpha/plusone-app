@@ -278,3 +278,8 @@ a { text-underline-offset: 0.2em; }
 :root[data-theme="dark"] .vendor-map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.35); }
 :root:not([data-theme="dark"]) .vendor-map .leaflet-tile-pane { filter: saturate(0.55); }
 .map-circle { fill: var(--color-highlight); fill-opacity: 0.08; stroke: var(--color-highlight); stroke-width: 2; stroke-dasharray: 6 5; }
+
+/* Under the hood open on a laptop: the plan moves over to make room for the panel (26rem). */
+@media (min-width: 768px) {
+  .hood-open #main { padding-right: 26rem; transition: padding-right 160ms ease-out; }
+}

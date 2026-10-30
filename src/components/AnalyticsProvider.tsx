@@ -16,7 +16,7 @@ export function scrubSecrets(url: string): string {
 
 /**
  * PostHog, switched on by VITE_POSTHOG_KEY and started only once the visitor presses
- * "Allow" on the consent bar; until then, and after "Essential only", nothing
+ * "Allow" on the consent bar; until then, and after "No thanks", nothing
  * is sent. Sent through /ingest on our own address so blockers don't drop it; Cloudflare
  * serves that (functions/ingest) without passing on the visitor's IP address, and in
  * local dev Vite does. Session recordings are off.
@@ -31,7 +31,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ANALYTICS_ENABLED) return;
     if (!allowed) {
-      // "Essential only" after allowing: stop at once.
+      // "No thanks" after allowing: stop at once.
       if (started) {
         try {
           posthog.opt_out_capturing();

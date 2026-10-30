@@ -129,7 +129,7 @@ export function PrivacyPage() {
             your choice about analytics.
           </p>
           <p className="mt-2 text-muted">
-            Analytics run only if you choose &ldquo;Allow analytics&rdquo;. With &ldquo;Essential only&rdquo;, nothing about
+            Analytics run only if you choose &ldquo;Allow&rdquo;. With &ldquo;No thanks&rdquo;, nothing about
             how you use the app is sent from your browser.
             {ANALYTICS_ENABLED && (
               <>

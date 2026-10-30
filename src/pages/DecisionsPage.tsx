@@ -563,6 +563,11 @@ function LineByLine({
       </div>
       <p className="mt-1 text-xs text-muted">The main price should cover: {sheet.covers.charAt(0).toLowerCase() + sheet.covers.slice(1)}.</p>
       <HoodHint demo={contact?.demo === true} className="mt-1" />
+      {columns.length > 1 && (
+        <p className="mt-3 text-xs text-muted md:hidden" aria-hidden="true">
+          Swipe the table sideways to see all {columns.length} side by side →
+        </p>
+      )}
       <div className="relative mt-3 overflow-x-auto">
         <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
           <caption className="sr-only">Each quote and offer against the same lines</caption>

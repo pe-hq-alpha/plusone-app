@@ -68,6 +68,11 @@ const clock = (at: number) => new Date(at).toLocaleTimeString([], { hour: "2-dig
 export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onClose: () => void }) {
   const calls = useQuery(api.modelCalls.forEvent, { eventId });
   const recorded = useQuery(api.modelCalls.recorded, { eventId });
+  // On a laptop the page makes room beside the panel, so nothing (the Today box above all) sits under it.
+  useEffect(() => {
+    document.documentElement.classList.add("hood-open");
+    return () => document.documentElement.classList.remove("hood-open");
+  }, []);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
