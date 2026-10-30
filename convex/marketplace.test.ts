@@ -246,7 +246,7 @@ describe("a vendor's prices", () => {
   test("a photographer prices the way photographers do, with what the price includes", async () => {
     const t = setup();
     const vendor = await user(t, "hello@thinnai.in");
-    await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Thinnai Photography", categories: ["Photographer", "Makeup & Hair"], city: "Chennai" });
+    await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Thinnai Photography", categories: ["Photographer", "Mehndi artist"], city: "Chennai" });
     const save = (more: object) =>
       as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Photographer", title: "Candid photos", unit: "per_person", price: 2_000, includes: ["Edited photos online"], ...more });
 
@@ -263,7 +263,7 @@ describe("a vendor's prices", () => {
     await expect(save({ priceUnit: "for_event", quantities: { plates: 100 } })).rejects.toThrow(/isn't something/);
     await expect(save({ priceUnit: "for_event", quantities: { hours: -1 } })).rejects.toThrow(/hours of coverage doesn't look right/);
     await expect(
-      as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Makeup & Hair", title: "Bridal look", unit: "per_person", priceUnit: "per_look", price: 8_000, includes: [] }),
+      as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Mehndi artist", title: "Bridal mehndi", unit: "per_person", priceUnit: "per_hand", price: 8_000, includes: [] }),
     ).rejects.toThrow(/one way only/);
   });
 });

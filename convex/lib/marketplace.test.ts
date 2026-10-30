@@ -195,7 +195,7 @@ describe("prices in each trade's own units", () => {
     expect(inRangeUnit({ category: "Catering", unit: "total" })).toBe(false);
     expect(inRangeUnit({ category: "Cake", unit: "total", priceUnit: "per_kg" })).toBe(false);
     expect(inRangeUnit({ category: "Cake", unit: "total", priceUnit: "for_cake" })).toBe(true);
-    expect(inRangeUnit({ category: "Makeup & Hair", unit: "per_person" })).toBe(true);
+    expect(inRangeUnit({ category: "Mehndi artist", unit: "per_person" })).toBe(true);
   });
 
   test("the starting price is the cheapest priced the way the range is, ahead of a cheaper rate per hour", () => {

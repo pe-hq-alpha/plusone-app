@@ -237,6 +237,7 @@ describe("how each trade charges, and what its price includes", () => {
       photography: "for the event",
       videography: "for the event",
       entertainment: "for the performance",
+      makeup_hair: "for the package",
       gifting: "per piece",
       officiant: "for the ceremony",
     });
@@ -407,3 +408,23 @@ test("a GST rate read by Muse Spark is priced on the quote's total, never shown 
   expect(readQuote(q, sheet).find((r) => r.key === "gst")).toMatchObject({ status: "extra", amount: 2_400 });
 });
 
+
+describe("makeup and hair", () => {
+  const makeup = sheetFor("Makeup & Hair")!;
+
+  test("a makeup artist prices a package, or each look, with the people and looks it covers", () => {
+    expect(makeup.unit).toBe("total");
+    expect(makeup.units.map((u) => u.label)).toEqual(["for the package", "per look"]);
+    expect(timesFor(priceUnitOf(makeup, "per_look"), { looks: 3 })).toBe(3);
+    expect(timesFor(priceUnitOf(makeup), {})).toBe(1);
+  });
+
+  test("the lines a makeup quote should state, a trial and an early start asked about", () => {
+    expect(makeup.lines.map((l) => l.key)).toEqual(["gst", "travel", "hair", "draping", "trial", "early", "products"]);
+    const line = (key: string) => makeup.lines.find((l) => l.key === key)!;
+    expect(line("trial").match.test("Trial session ₹2,000")).toBe(true);
+    expect(line("draping").match.test("saree draping included")).toBe(true);
+    expect(line("products").match.test("HD makeup")).toBe(true);
+    expect(line("early").usually).toBe("extra");
+  });
+});

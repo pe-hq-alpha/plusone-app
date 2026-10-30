@@ -233,6 +233,27 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       DAYS,
     ],
   },
+  makeup_hair: {
+    need: "makeup_hair",
+    unit: "total",
+    covers: "Makeup and hair for the looks agreed, done on the day",
+    lines: [
+      GST,
+      TRAVEL,
+      { key: "hair", label: "Hairstyling", kind: "fee", usually: "included", match: /\b(hair\s*(styling|do)?|hairstyl\w*|bun|braid\w*)\b/i },
+      { key: "draping", label: "Saree draping", kind: "fee", usually: "included", match: /\b(drap(e|ing)|saree|sari|dupatta)\b/i },
+      { key: "trial", label: "Trial session", kind: "extra", usually: "extra", match: /\btrials?\b/i },
+      { key: "early", label: "Early-morning start", kind: "extra", usually: "extra", match: /\b(early[- ]morning|before\s+\d|odd hours?|dawn)\b/i, ask: "Doesn't say what a start before 6 am costs" },
+      { key: "products", label: "HD or airbrush products", kind: "extra", usually: "extra", match: /\b(hd|airbrush|high[- ]definition|lashes|extensions?)\b/i },
+    ],
+    // A package is how most quote a function (the bride and a few family, so many looks); some price each look.
+    units: [priced("for_package", "for the package"), priced("per_look", "per look", ["looks"])],
+    quantities: [
+      { key: "looks", label: "Looks", presets: [1, 2, 3, 5], say: ["# look", "# looks"] },
+      { key: "people", label: "People done", presets: [1, 2, 4, 6] },
+      hours([2, 3, 4, 6], "Hours on site"),
+    ],
+  },
   entertainment: {
     need: "entertainment",
     unit: "total",

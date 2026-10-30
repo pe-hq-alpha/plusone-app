@@ -199,7 +199,7 @@ out.append(text(1588, 420, "verified only", 11, MUTED, anchor="middle", family=S
 # Footer: the rest of the stack and a legend
 out.append(f'<line x1="40" y1="836" x2="1560" y2="836" stroke="{LINE}"/>')
 fx = 40
-for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "744 tests")]:
+for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "746 tests")]:
     out.append(logo(name, fx, 852, 20))
     out.append(text(fx + 28, 867, label, 12.5, MUTED))
     fx += 40 + len(label) * 7.5
