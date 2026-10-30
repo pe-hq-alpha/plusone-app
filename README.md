@@ -261,8 +261,8 @@ For families, teams and event managers.
 
 <table>
 <tr>
-<td width="30%" valign="top"><img src="assets/screens/today-phone.jpg" alt="Today on a phone, with the four lanes as a bar along the bottom"></td>
-<td valign="top"><img src="assets/screens/plan.jpg" alt="The Plan lane: the event, its budget committed, a morning pooja and a birthday lunch, and the next to-dos"><br><sub>On a phone the four lanes move to a bar along the bottom. On a laptop, the Plan lane: the event, the money committed so far, its two functions and what to do next.</sub></td>
+<td width="30%" valign="top"><img src="assets/screens/today-phone.jpg" alt="Today on a phone: the box to tell PlusOne a change comes first, with the four lanes as a bar along the bottom"></td>
+<td valign="top"><img src="assets/screens/plan.jpg" alt="The Plan lane: the event, its budget committed, a morning pooja and a birthday lunch, and the next to-dos"><br><sub>On a phone, Today opens on the box to tell PlusOne a change, and the four lanes move to a bar along the bottom. On a laptop, the Plan lane: the event, the money committed so far, its two functions and what to do next.</sub></td>
 </tr>
 </table>
 
