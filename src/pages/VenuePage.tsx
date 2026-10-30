@@ -48,6 +48,17 @@ export function VenuePage() {
     img.src = view.url;
   }, [view?.url]);
 
+  // The guest demo opens on the sample hall, already dressed, rather than an empty box: its
+  // cut is cached, so this costs nothing and shows the step at once. Once per visit.
+  const startedSample = useRef(false);
+  useEffect(() => {
+    if (!event.demo || view !== null || !canEdit || startedSample.current) return;
+    startedSample.current = true;
+    run(() => useSample({ eventId }), "That didn't start. Try again.");
+    // run is rebuilt each render; the empty view arriving is the only trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event.demo, view, canEdit, eventId]);
+
   const look = LOOKS.find((l) => l.key === lookKey) ?? LOOKS[0];
   const parts: DrawParts = {
     ...(view?.parts.backdrop ? { backdrop: view.parts.backdrop } : {}),
