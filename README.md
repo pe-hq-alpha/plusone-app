@@ -335,10 +335,12 @@ For families, teams and event managers.
 |---|---|
 | <img src="assets/screens/vendors.jpg" alt="Find: a priest for the morning pooja, researched on the open web, with the best match ranked on reviews, price against the budget and fit"> | <img src="assets/screens/inbox.jpg" alt="The inbox: six vendor conversations with their status, and the first email to a nadaswaram group with a follow-up due"> |
 
+<img src="assets/screens/near-venue.jpg" width="100%" alt="Flowers and decoration for the sample 60th: Near your venue, with Thamarai Hall in Mylapore pinned as the booked hall, a 5 km circle on the map of Chennai, and the decorators numbered by distance beside it, verified ones and ones found on the web, from under 1 km to 1.4 km">
+
 6. **Every quote on the same lines.** An emailed reply, a PDF, a photo of a price list sent on WhatsApp or a pasted message is read into the standard sheet for that kind of vendor: the unit, what's included, GST, transport, service and the usual extras (`convex/lib/standardSheet.ts`, `convex/sharedQuotes.ts`).
 7. **Compare line by line.** Quotes and verified vendors' offers sit side by side in the same unit at the host's own headcount, with what each leaves unsaid flagged ("No water line, and one other charges ₹600") and where each sits in the city's price range: a bar from Value to Luxury with the typical price marked and every quote pinned on it, so the family chooses with the whole range in view, a "What's in it" block that shows what each price includes (hours, photographers, dishes), with the lower ones marked, each Partner vendor's track record (level and events done through PlusOne), and their checked photos of past work beside their offer (`src/pages/DecisionsPage.tsx`, `src/components/PriceRange.tsx`, `convex/lib/comparable.ts`).
 
-<img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering, line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
+<img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering: the Chennai range from Value to Luxury with the five quotes pinned on it by number, then line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
 
 8. **See it on your venue.** From the decorators' Compare, the hall's own photo (or the sample hall) has its stage and the wall behind it found by Muse Spark and cut out by SAM 3.1, then dressed in a look: marigold and mango leaf, jasmine and rose, pastel flowers or fairy lights. A tap re-picks a part. It is a sketch to judge decorators' quotes against, drawn by the app on SAM's masks, since Muse Image isn't available in India.
 
@@ -350,6 +352,8 @@ For families, teams and event managers.
 ### Finding vendors, free
 
 At [/vendors](https://app.plusoneevents.site/vendors), anyone can look for a caterer, decorator, photographer, hall or any other kind of vendor, with no sign-in and no plan, in their own words ("photographers near Adyar under 20k") and on a list or a map. Each listed vendor shows their packages on the standard sheet (the price, how it's charged, what's in it, GST), their checked photos of past work and their track record. A search of the open web finds vendors with their own sites who aren't on PlusOne yet, without writing to anyone. Until real vendors join as Chennai opens, the directory holds 26 sample vendors (caterers, decorators and photographers), made up and marked Sample on every card; their photos are free-licence stock pictures. To get quotes that compare, a family or event manager starts a plan; a Partner vendor's number is shared once a booking is made through PlusOne.
+
+<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and six caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
 
 ### Answering as a vendor
 
