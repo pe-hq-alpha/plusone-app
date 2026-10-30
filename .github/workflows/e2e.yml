@@ -1,0 +1,32 @@
+name: Demo path
+
+# The live demo walked end to end in a real browser, on a phone and a laptop
+# (scripts/e2e-live.mjs): after every push, every three hours through judging
+# (to 10 Nov 2026), and by hand. A failed run emails the repository's owner.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+jobs:
+  walk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Judging is over
+        id: over
+        run: if [ "$(date -u +%Y%m%d)" -gt 20261110 ]; then echo "done=1" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.over.outputs.done != '1'
+      - uses: actions/setup-node@v4
+        if: steps.over.outputs.done != '1'
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: steps.over.outputs.done != '1'
+      - name: Walk the demo on the live site
+        if: steps.over.outputs.done != '1'
+        run: node scripts/e2e-live.mjs
