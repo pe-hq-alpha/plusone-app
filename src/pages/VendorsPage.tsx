@@ -13,7 +13,7 @@ import { SUGGESTED_CATEGORIES } from "../../convex/lib/templates";
 import { Icon } from "../components/ui/Icon";
 import { RenameTitle } from "../components/ui/RenameTitle";
 import { VendorCard } from "../components/VendorCard";
-import { awayKm, NearVenue, venueSpot, type Nearby } from "../components/NearVenue";
+import { awayKm, NearVenue, venueSpot, type BookedHall, type Nearby } from "../components/NearVenue";
 import { kmText, placeFor, type Place } from "../../convex/lib/places";
 import { ConfirmOutreach } from "../components/ConfirmOutreach";
 import { BRAND } from "../lib/brand";
@@ -28,6 +28,8 @@ export function VendorsPage() {
   const { slotId } = useParams<{ slotId: string }>();
   const navigate = useNavigate();
   const slots = flattenSlots(useQuery(api.slots.list, { eventId }));
+  // A booked hall is where the event is: its area pins the venue on every need's map.
+  const hall = slots?.find((s) => s.category === "Venue" && s.bookedVendor)?.bookedVendor ?? null;
   const canEdit = role !== "viewer";
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export function VendorsPage() {
         {!slot ? (
           <p className="text-muted">Pick a slot to start.</p>
         ) : (
-          <SlotPanel key={slot._id} slot={slot} event={event} sessions={sessions} canEdit={canEdit} />
+          <SlotPanel key={slot._id} slot={slot} event={event} sessions={sessions} canEdit={canEdit} hall={hall} />
         )}
       </section>
     </div>
@@ -121,11 +123,13 @@ function SlotPanel({
   event,
   sessions,
   canEdit,
+  hall,
 }: {
   slot: Slot;
   event: EventData["event"];
   sessions: EventData["sessions"];
   canEdit: boolean;
+  hall: BookedHall;
 }) {
   const vendors = useQuery(api.vendors.listBySlot, { slotId: slot._id });
   const run = useQuery(api.research.latestForSlot, { slotId: slot._id });
@@ -181,7 +185,7 @@ function SlotPanel({
   const verified = useMemo(() => (listed && (!listed.samplesOnly || event.demo === true) ? listed.vendors : []), [listed, event.demo]);
   const [radiusKm, setRadiusKm] = useState(5);
   const [insideOnly, setInsideOnly] = useState(false);
-  const centre = venueSpot(event);
+  const centre = venueSpot(event, hall);
   const nearOnly = insideOnly && centre !== null && centre.precision !== "city";
   const near = useCallback(
     (place: Place | null) => {
@@ -191,7 +195,10 @@ function SlotPanel({
     },
     [nearOnly, centre, radiusKm],
   );
-  const webPlace = useCallback((v: { serviceArea?: string; city?: string }) => placeFor(v.serviceArea, v.city ?? event.city), [event.city]);
+  const webPlace = useCallback(
+    (v: { serviceArea?: string; city?: string }) => placeFor([v.serviceArea, v.city].filter(Boolean).join(", "), v.city ?? event.city),
+    [event.city],
+  );
   const nearby: Nearby[] = useMemo(
     () => [
       ...verified.map((v) => ({ id: v._id, name: v.name, kind: "verified" as const, place: v.place ?? null })),
@@ -301,6 +308,7 @@ function SlotPanel({
       {slot.status !== "booked" && (
         <NearVenue
           event={event}
+          hall={hall}
           vendors={nearby}
           radiusKm={radiusKm}
           setRadiusKm={setRadiusKm}

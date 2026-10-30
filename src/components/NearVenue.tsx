@@ -13,9 +13,19 @@ export const RADII = [2, 5, 10, 20] as const;
 /** A vendor that may be on the map: verified ones on PlusOne, and ones found on the open web. */
 export type Nearby = { id: string; name: string; kind: "verified" | "web"; place: Place | null; note?: string };
 
-/** The venue's point: the pin the family dropped, or the middle of the area they named. */
-export function venueSpot(event: { venuePlace?: Place; area?: string; city: string }): Place | null {
-  return event.venuePlace ?? placeFor(event.area, event.city);
+/** A booked hall, as the event's vendor list holds it. */
+export type BookedHall = { name: string; serviceArea?: string; city?: string } | null | undefined;
+
+/**
+ * The venue's point: the pin the family dropped, else the booked hall's area (named after
+ * the hall), else the middle of the area they named for the event.
+ */
+export function venueSpot(event: { venuePlace?: Place; area?: string; city: string }, hall?: BookedHall): Place | null {
+  if (event.venuePlace) return event.venuePlace;
+  // Web pages put the area in either field ("Luz, Mylapore, Chennai" as the city), so both are read.
+  const at = hall ? placeFor([hall.serviceArea, hall.city].filter(Boolean).join(", "), hall.city ?? event.city) : null;
+  if (at && at.precision !== "city") return { ...at, label: `${hall!.name}, ${at.label}` };
+  return placeFor(event.area, event.city);
 }
 
 /** How far a vendor is from the venue, or null when either point is only a city's middle. */
@@ -32,6 +42,7 @@ export function awayKm(centre: Place | null, place: Place | null): number | null
  */
 export function NearVenue({
   event,
+  hall,
   vendors,
   radiusKm,
   setRadiusKm,
@@ -40,6 +51,7 @@ export function NearVenue({
   canEdit,
 }: {
   event: { _id: Id<"events">; venuePlace?: Place; area?: string; city: string };
+  hall?: BookedHall;
   vendors: Nearby[];
   radiusKm: number;
   setRadiusKm: (km: number) => void;
@@ -47,7 +59,8 @@ export function NearVenue({
   setInsideOnly: (on: boolean) => void;
   canEdit: boolean;
 }) {
-  const centre = venueSpot(event);
+  const centre = venueSpot(event, hall);
+  const fromHall = !event.venuePlace && centre !== null && hall != null && centre.label.startsWith(hall.name);
   const setVenue = useMutation(api.places.setVenue);
   const find = useAction(api.places.find);
   const [placing, setPlacing] = useState(false);
@@ -112,7 +125,7 @@ export function NearVenue({
           <h3 id="near-h" className="text-lg">Near your venue</h3>
           <p className="mt-0.5 text-xs text-muted">
             {known
-              ? `${centre.label}${event.venuePlace ? "" : " (the area's middle)"} · ${inside} of ${rows.length} on the map within ${radiusKm} km`
+              ? `${centre.label}${event.venuePlace ? "" : fromHall ? " (the booked hall's area)" : " (the area's middle)"} · ${inside} of ${rows.length} on the map within ${radiusKm} km`
               : "Say where the venue is to see who's near it."}
           </p>
         </div>
