@@ -178,6 +178,39 @@ describe("a vendor's work photo", () => {
     expect(photo?.check?.provider).toBe("spark");
   });
 
+  test("Glimmer answering JSON that breaks the schema is checked on Muse Spark instead", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const reply = (content: string, model: string) =>
+      Response.json({ model, choices: [{ finish_reason: "stop", message: { content } }], usage: { prompt_tokens: 10, completion_tokens: 10 } });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: unknown) =>
+        String(url).startsWith("https://glimmer.test")
+          ? reply(JSON.stringify({ realWork: true, stock: false, watermark: false, faces: false, unsafe: false, tags: ["buffet"] }), "inference-1")
+          : reply(
+              JSON.stringify({ realWork: true, stock: false, watermark: false, faces: false, unsafe: false, shows: "A buffet laid out on a long table.", tags: ["buffet"] }),
+              "muse-spark-1.3",
+            ),
+      ),
+    );
+    const t = setup();
+    const { userId } = await seedVendor(t);
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const photo = await t.run((ctx) => ctx.db.get(photoId));
+    expect(photo?.status).toBe("checked");
+    expect(photo?.check).toMatchObject({ provider: "spark", tags: ["buffet"] });
+    // Glimmer's GPU time is costed although its answer was thrown away.
+    const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(calls.map((c) => [c.provider, c.fellBack])).toContainEqual(["glimmer", true]);
+  });
+
   test("past the day's GPU budget, a photo goes straight to Muse Spark", async () => {
     vi.useFakeTimers();
     const fetchFn = glimmerAnswers(["buffet"]);
@@ -194,6 +227,73 @@ describe("a vendor's work photo", () => {
 
     expect((await t.run((ctx) => ctx.db.get(photoId)))?.check).toMatchObject({ provider: "spark" });
     expect((fetchFn.mock.calls as unknown[][]).some(([u]) => String(u).startsWith("https://glimmer.test"))).toBe(false);
+  });
+
+  test("with the day's Glimmer budget spent, the photo goes straight to Spark and Glimmer keeps no cost row", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const fetchFn = vi.fn(async (url: unknown) =>
+      String(url).startsWith("https://glimmer.test")
+        ? Response.json({
+            model: "inference-1",
+            choices: [
+              {
+                finish_reason: "stop",
+                message: {
+                  content: JSON.stringify({
+                    realWork: true,
+                    stock: false,
+                    watermark: false,
+                    faces: false,
+                    unsafe: false,
+                    shows: "A banana-leaf lunch for two hundred guests.",
+                    tags: ["buffet"],
+                  }),
+                },
+              },
+            ],
+            usage: { prompt_tokens: 100, completion_tokens: 50 },
+          })
+        : Response.json({
+            model: "muse-spark-1.3",
+            choices: [
+              {
+                finish_reason: "stop",
+                message: {
+                  content: JSON.stringify({
+                    realWork: true,
+                    stock: false,
+                    watermark: false,
+                    faces: false,
+                    unsafe: false,
+                    shows: "A buffet laid out on a long table.",
+                    tags: ["buffet"],
+                  }),
+                },
+              },
+            ],
+            usage: { prompt_tokens: 10, completion_tokens: 10 },
+          }),
+    );
+    vi.stubGlobal("fetch", fetchFn);
+    const t = setup();
+    const { userId } = await seedVendor(t);
+    await t.run(async (ctx) => {
+      await rateLimiter.limit(ctx, "glimmerAll", { count: 40 });
+    });
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    expect((await t.run((ctx) => ctx.db.get(photoId)))?.check).toMatchObject({ provider: "spark", tags: ["buffet"] });
+    expect(fetchFn.mock.calls.filter(([u]) => String(u).startsWith("https://glimmer.test"))).toHaveLength(0);
+    // Only the Spark call answered, so it keeps the only cost row.
+    const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ feature: "vendorPhotoCheck" });
   });
 
   test("with the endpoint down it is checked on Muse Spark instead", async () => {
@@ -241,6 +341,122 @@ describe("a vendor's work photo", () => {
     const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({ feature: "vendorPhotoCheck" });
+  });
+
+  test("Glimmer failing fast hands the photo to Muse Spark, which is stored as Spark", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: unknown) =>
+        String(url).startsWith("https://glimmer.test")
+          ? new Response("bad", { status: 500 })
+          : Response.json({
+              model: "muse-spark-1.3",
+              choices: [
+                {
+                  finish_reason: "stop",
+                  message: {
+                    content: JSON.stringify({
+                      realWork: true,
+                      stock: false,
+                      watermark: false,
+                      faces: false,
+                      unsafe: false,
+                      shows: "A buffet laid out on a long table.",
+                      tags: ["buffet"],
+                    }),
+                  },
+                },
+              ],
+              usage: { prompt_tokens: 10, completion_tokens: 10 },
+            }),
+      ),
+    );
+    const t = setup();
+    const { userId } = await seedVendor(t);
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const photo = await t.run((ctx) => ctx.db.get(photoId));
+    expect(photo?.status).toBe("checked");
+    expect(photo?.check).toMatchObject({ provider: "spark", model: "muse-spark-1.3", tags: ["buffet"] });
+    const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ feature: "vendorPhotoCheck" });
+  });
+
+  test("Glimmer refusing the request as malformed fails the photo without ever asking Muse Spark", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const fetchFn = vi.fn(async (url: unknown) =>
+      String(url).startsWith("https://glimmer.test")
+        ? new Response("bad", { status: 400 })
+        : Response.json({
+            model: "muse-spark-1.3",
+            choices: [
+              {
+                finish_reason: "stop",
+                message: {
+                  content: JSON.stringify({
+                    realWork: true,
+                    stock: false,
+                    watermark: false,
+                    faces: false,
+                    unsafe: false,
+                    shows: "A buffet laid out on a long table.",
+                    tags: ["buffet"],
+                  }),
+                },
+              },
+            ],
+            usage: { prompt_tokens: 10, completion_tokens: 10 },
+          }),
+    );
+    vi.stubGlobal("fetch", fetchFn);
+    const t = setup();
+    const { userId } = await seedVendor(t);
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const photo = await t.run((ctx) => ctx.db.get(photoId));
+    expect(photo?.status).toBe("failed");
+    expect(photo?.failure).toBe("We couldn't check this photo. Try adding it again in a while.");
+    expect(fetchFn.mock.calls.every(([u]) => String(u).startsWith("https://glimmer.test"))).toBe(true);
+    expect(await t.run((ctx) => ctx.db.query("modelCalls").collect())).toHaveLength(0);
+  });
+
+  test("Glimmer and Muse Spark both failing leaves the photo failed with the plain message", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("GLIMMER_BASE_URL", "https://glimmer.test");
+    vi.stubEnv("MODAL_PROXY_TOKEN", "wk-abc.ws-xyz");
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: unknown) =>
+        String(url).startsWith("https://glimmer.test") ? new Response("bad", { status: 500 }) : new Response("bad", { status: 400 }),
+      ),
+    );
+    const t = setup();
+    const { userId } = await seedVendor(t);
+
+    const photoId = await as(t, userId).mutation(api.marketplace.photos.add, { storageId: await jpeg(t) });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const photo = await t.run((ctx) => ctx.db.get(photoId));
+    expect(photo?.status).toBe("failed");
+    expect(photo?.failure).toBe("We couldn't check this photo. Try adding it again in a while.");
+    // Neither call answered, so no cost row was kept.
+    expect(await t.run((ctx) => ctx.db.query("modelCalls").collect())).toHaveLength(0);
   });
 
   test("the 13th photo is refused", async () => {

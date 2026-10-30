@@ -160,6 +160,42 @@ describe("see it on your venue", () => {
     expect((await as(t, ownerId).query(api.venueView.get, { eventId }))?.status).toBe("failed");
   });
 
+  test("SAM failing for good leaves empty parts, costs only the Spark call, and the next try starts clean", async () => {
+    sparkFinds(STAGE_AND_WALL);
+    samSegment.mockRejectedValue(new MetaError("SAM returned 500", 500, true, true));
+    const t = setup();
+    const { ownerId, eventId } = await seed(t);
+    await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    const view = await as(t, ownerId).query(api.venueView.get, { eventId });
+    expect(view).toMatchObject({ status: "failed", parts: {} });
+    // Muse Spark answered and is costed; the SAM call that never answered keeps no cost row.
+    expect(await t.run((ctx) => ctx.db.query("modelCalls").collect())).toMatchObject([{ feature: "findStage" }]);
+    expect(await t.run((ctx) => ctx.db.query("segmentCache").collect())).toEqual([]);
+
+    samSegment.mockResolvedValue([segment("1", 0.9), segment("2", 0.8)]);
+    await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    expect((await as(t, ownerId).query(api.venueView.get, { eventId }))?.status).toBe("ready");
+  });
+
+  test("SAM answering with no objects leaves the view with nothing found and asks SAM only once", async () => {
+    sparkFinds(STAGE_AND_WALL);
+    samSegment.mockResolvedValue([]);
+    const t = setup();
+    const { ownerId, eventId } = await seed(t);
+    await as(t, ownerId).mutation(api.venueView.useSample, { eventId });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+
+    expect(await as(t, ownerId).query(api.venueView.get, { eventId })).toMatchObject({ status: "none", parts: {} });
+    expect(samSegment).toHaveBeenCalledOnce();
+    // The call answered, so it is costed; finding nothing is not kept for the next person.
+    const calls = await t.run((ctx) => ctx.db.query("modelCalls").collect());
+    expect(calls.map((c) => c.feature).sort()).toEqual(["findStage", "venueCutOut"]);
+    expect(await t.run((ctx) => ctx.db.query("segmentCache").collect())).toEqual([]);
+  });
+
   test("finding no stage is not kept, so the next person's try asks again", async () => {
     sparkFinds({ stage: null, backdrop: null });
     const t = setup();

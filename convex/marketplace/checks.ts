@@ -6,7 +6,7 @@ import { requireStaff } from "../lib/auth";
 import { wonderCostUsd } from "../lib/modelCost";
 import { verifyVendor, type Spent, type VendorFacts } from "../lib/wonder";
 import { rateLimiter } from "../rateLimits";
-import { vendorCheckFields, verificationReport } from "../schema";
+import { vendorCheckFields, vendorCheckStatus, verificationReport } from "../schema";
 
 /**
  * The vendor check for Ops: a reviewer presses a button, the check runs in the
@@ -43,6 +43,7 @@ export const load = internalQuery({
   args: { checkId: v.id("vendorChecks") },
   returns: v.object({
     checkId: v.id("vendorChecks"),
+    status: vendorCheckStatus,
     profile: v.object({
       name: v.string(),
       categories: v.array(v.string()),
@@ -72,6 +73,7 @@ export const load = internalQuery({
       .take(20);
     return {
       checkId: check._id,
+      status: check.status,
       profile: {
         name: profile.name,
         categories: profile.categories,
@@ -238,13 +240,15 @@ export const run = internalAction({
   returns: v.null(),
   handler: async (ctx, args): Promise<null> => {
     const started = Date.now();
-    let loaded: { profile: Parameters<typeof vendorFacts>[0]; offerings: Parameters<typeof vendorFacts>[1] };
+    let loaded: { status: string; profile: Parameters<typeof vendorFacts>[0]; offerings: Parameters<typeof vendorFacts>[1] };
     try {
       loaded = await ctx.runQuery(internal.marketplace.checks.load, { checkId: args.checkId });
     } catch {
       await ctx.runMutation(internal.marketplace.checks.fail, { checkId: args.checkId, error: FAILED_MESSAGE });
       return null;
     }
+    // A check that already finished keeps its report: running it again would pay Muse Wonder twice.
+    if (loaded.status !== "running") return null;
     const facts = vendorFacts(loaded.profile, loaded.offerings);
     // What the run has spent so far, so a check that fails part way still writes its cost.
     const progress: { spent?: Spent } = {};
