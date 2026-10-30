@@ -29,6 +29,7 @@
 <td align="center" width="96"><img src="assets/logos/firecrawl.png" width="30" height="30" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites</sub></td>
 <td align="center" width="96"><img src="assets/logos/agentmail.png" width="30" height="30" alt="AgentMail"><br><b>AgentMail</b><br><sub>Gives each event its own email inbox</sub></td>
 <td align="center" width="96"><img src="assets/logos/clerk.svg" width="30" height="30" alt="Clerk"><br><b>Clerk</b><br><sub>Sign-in for customers, vendors and our team</sub></td>
+<td align="center" width="96"><img src="assets/logos/openstreetmap.svg" width="30" height="30" alt="OpenStreetMap"><br><b>OpenStreetMap</b><br><sub>The vendor map near the venue, drawn with Leaflet</sub></td>
 </tr>
 <tr>
 <td align="center" width="96"><img src="assets/logos/react.svg" width="30" height="30" alt="React"><br><b>React</b><br><sub>The app's screens</sub></td>
