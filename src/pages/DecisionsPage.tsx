@@ -347,15 +347,18 @@ function NeedBoard({
         />
       )}
 
-      {live.length > 0 && !compareOnly && (
+      {live.length > 0 && !compareOnly && (() => {
+      // A column of dashes is empty space: dates show only once someone has said.
+      const anyDates = live.some((v) => v.availableOnDates || v.availabilityNote);
+      return (
       <div className={`relative overflow-x-auto${need.sheet && columns.length > 0 ? " border-t border-line" : ""}`}>
-        <table className="w-full min-w-[54rem] text-sm">
+        <table className={`w-full text-sm ${anyDates ? "min-w-[54rem]" : "min-w-[46rem]"}`}>
           <caption className="sr-only">Everyone asked about {need.title}</caption>
           <thead>
             <tr className="border-b border-line text-left text-[11px] uppercase tracking-[0.08em] text-quiet">
               <th scope="col" className="py-2.5 pl-6 pr-4 font-semibold">Vendor</th>
               <th scope="col" className="px-4 py-2.5 font-semibold">Where it stands</th>
-              <th scope="col" className="px-4 py-2.5 font-semibold">Free on your dates</th>
+              {anyDates && <th scope="col" className="px-4 py-2.5 font-semibold">Free on your dates</th>}
               <th scope="col" className="px-4 py-2.5 text-right font-semibold">Quote</th>
               <th scope="col" className="px-4 py-2.5 font-semibold">Includes</th>
               <th scope="col" className="py-2.5 pl-4 pr-6" />
@@ -368,7 +371,7 @@ function NeedBoard({
               return (
                 <tr key={v.vendorId} className={v.state === "declined" ? "opacity-55" : undefined}>
                   <th scope="row" className="py-3.5 pl-6 pr-4 text-left font-normal align-top">
-                    <span className="flex items-baseline gap-2">
+                    <span className="flex flex-wrap items-baseline gap-x-2">
                       <span className="font-medium">{v.name}</span>
                       {v.isTopPick && <span className="text-[11px] text-accent" title={`${BRAND.name}'s estimate from reviews, price and fit`}>top pick, {BRAND.name}&rsquo;s estimate</span>}
                       {v.shortlisted && <span className="text-[11px] text-accent" title="Shortlisted by you">♥ shortlisted</span>}
@@ -397,7 +400,7 @@ function NeedBoard({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3.5 align-top">
+                  {anyDates && <td className="px-4 py-3.5 align-top">
                     {v.availableOnDates === "yes" ? (
                       <span className="inline-flex items-center gap-1 text-ok">
                         <Icon name="check" size={14} /> Yes
@@ -410,7 +413,7 @@ function NeedBoard({
                       <span className="text-quiet">—</span>
                     )}
                     {v.availabilityNote && <span className="mt-0.5 block max-w-[16rem] text-xs text-quiet">{v.availabilityNote}</span>}
-                  </td>
+                  </td>}
 
                   <td className="px-4 py-3.5 text-right align-top">
                     {v.quote ? (
@@ -509,7 +512,8 @@ function NeedBoard({
           </tbody>
         </table>
       </div>
-      )}
+      );
+      })()}
 
     </section>
   );

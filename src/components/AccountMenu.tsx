@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { LifeBuoy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthActions } from "../lib/session";
 import { BRAND } from "../lib/brand";
@@ -19,7 +20,7 @@ const ROLE_LINE: Record<Role, string> = {
  * event, their account, and signing out. A plain disclosure rather than an ARIA menu:
  * the items are an ordinary link and button, reached with Tab.
  */
-export function AccountMenu({ role }: { role: Role }) {
+export function AccountMenu({ role, inEvent = false }: { role: Role; inEvent?: boolean }) {
   const { signOut } = useAuthActions();
   const { pathname } = useLocation();
   // Open only on the page it was opened on, so moving to another page closes it.
@@ -57,6 +58,7 @@ export function AccountMenu({ role }: { role: Role }) {
       }}
     >
       <UserChip
+        compact={inEvent}
         className="max-w-[8.5rem] hover:shadow-[inset_0_0_0_1px_var(--color-accent)] sm:max-w-[13rem]"
         button={{
           ref: button,
@@ -73,6 +75,19 @@ export function AccountMenu({ role }: { role: Role }) {
       >
         <p className="px-3 pb-2.5 pt-2 text-xs text-quiet">{ROLE_LINE[role]}</p>
         <div className="border-t border-line pt-1.5">
+          {/* On a phone the bar has no room for Help and the event's settings, so they live here. */}
+          {inEvent && (
+            <>
+              <Link to="help" className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent sm:hidden">
+                <LifeBuoy size={17} strokeWidth={1.5} className="text-muted" aria-hidden="true" />
+                Help
+              </Link>
+              <Link to="settings" className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent sm:hidden">
+                <Icon name="settings" size={17} className="text-muted" />
+                Event settings
+              </Link>
+            </>
+          )}
           {/* The ways out of an event: the rest of the app, the directory and the public site. */}
           <Link to="/" className="flex items-center gap-2.5 rounded-[10px] px-3 py-2 text-sm text-ink transition hover:bg-accent-soft hover:text-accent">
             <Icon name="calendar" size={17} className="text-muted" />

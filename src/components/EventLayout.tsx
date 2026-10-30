@@ -205,13 +205,13 @@ export function EventLayout() {
                 <span aria-hidden="true" className="absolute right-1 top-1 h-2 w-2 animate-pulse rounded-full bg-accent" />
               )}
             </button>
-            <Link to="help" title="Help" aria-label="Help" className="shell-tool">
+            <Link to="help" title="Help" aria-label="Help" className="shell-tool max-sm:!hidden">
               <LifeBuoy size={17} strokeWidth={1.5} aria-hidden="true" />
             </Link>
-            <Link to="settings" title="Settings" aria-label="Settings" data-tour="nav-settings" className="shell-tool">
+            <Link to="settings" title="Settings" aria-label="Settings" data-tour="nav-settings" className="shell-tool max-sm:!hidden">
               <Icon name="settings" size={17} />
             </Link>
-            <AccountMenu role={role} />
+            <AccountMenu role={role} inEvent />
           </div>
         </div>
 

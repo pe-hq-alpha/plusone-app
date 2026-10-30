@@ -79,12 +79,12 @@ export function PriceRange({ band, points, unitWord, city }: { band: RangeBand; 
         ))}
       </div>
 
-      <ol className="mt-3 grid max-w-3xl gap-x-8 gap-y-1 text-xs sm:grid-cols-2">
+      <ol className="mt-3 grid gap-x-10 gap-y-1 text-xs sm:grid-cols-2 lg:grid-cols-3">
         {pins.map((p) => (
           <li key={p.id} className="flex items-baseline gap-2">
             <span className="grid h-4 w-4 shrink-0 translate-y-0.5 place-items-center rounded-full bg-ink text-[11px] font-semibold text-paper">{p.n}</span>
             <span className="min-w-0 truncate text-ink">{p.name}</span>
-            <span className="ml-auto whitespace-nowrap text-muted">
+            <span className="whitespace-nowrap text-muted">
               {money(p.price, band.currency)}
               {p.tier && <> · {p.tier}</>}
             </span>
