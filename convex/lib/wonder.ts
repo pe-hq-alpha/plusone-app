@@ -175,6 +175,38 @@ export function wonderBody(facts: VendorFacts, env: Record<string, string | unde
   return { ...turnSettings(facts, env, MAX_SEARCHES), input: vendorText(facts) };
 }
 
+/** A link label that points at a source rather than naming it: a bare marker like L0, a number, or the word source. */
+function isMarkerLabel(label: string): boolean {
+  return /^(l\d+|\d+|sources?)?$/.test(label.trim().toLowerCase());
+}
+
+/**
+ * Citations the model hid in a note's words, as sources, with the markup taken
+ * back out: a marker link vanishes, a named link leaves its words, and a bare
+ * URL leaves nothing. A note with no links comes back as it was.
+ */
+export function citedLinks(note: string): { note: string; sources: Source[] } {
+  const sources: Source[] = [];
+  const withoutLinks = note.replace(/\[([^\]]*)\]\(\s*(https?:\/\/[^)\s]+)[^)]*\)/g, (_match, label: string, url: string) => {
+    const name = label.trim();
+    const link = url.trim();
+    // A marker says nothing, so the page's host stands in as its title.
+    sources.push({ title: isMarkerLabel(name) ? (hostOf(link) ?? link) : name, url: link });
+    return isMarkerLabel(name) ? "" : name;
+  });
+  const withoutUrls = withoutLinks.replace(/https?:\/\/[^\s<>"']+/g, (match) => {
+    // A sentence's full stop is not part of the address.
+    const url = match.replace(/[.,;:!?)\]}'"]+$/, "");
+    sources.push({ title: hostOf(url) ?? url, url });
+    // What is left of the match (the full stop above) stays for the tidy below.
+    return match.slice(url.length);
+  });
+  if (sources.length === 0) return { note, sources };
+  // Taking links out leaves doubled spaces and a space before a full stop.
+  const cleaned = withoutUrls.replace(/[ \t]{2,}/g, " ").replace(/[ \t]+([,.!?;:])/g, "$1").trim();
+  return { note: cleaned, sources };
+}
+
 function normalizeUrl(raw: string): string | null {
   try {
     const u = new URL(raw);
@@ -415,19 +447,29 @@ export async function verifyVendor(
 
   // Never trust a URL the model typed: a source stays only if this run saw it.
   const checks = inOrder(report).checks.map((check) => {
-    const sources = check.sources.filter((source) => {
+    // The model sometimes cites a page in the note's words instead of sources, so those links join first.
+    const cited = citedLinks(check.note);
+    const merged: Source[] = [];
+    const known = new Set<string>();
+    for (const source of [...check.sources, ...cited.sources]) {
+      const n = normalizeUrl(source.url);
+      if (n === null || known.has(n)) continue;
+      known.add(n);
+      merged.push(source);
+    }
+    const sources = merged.filter((source) => {
       const n = normalizeUrl(source.url);
       return n !== null && seen.has(n);
     });
     if (sources.length === 0 && check.finding === "supports") {
-      return { ...check, finding: "not_found" as const, sources, note: `No source from this run backed this, so it is marked not found. ${check.note}` };
+      return { ...check, finding: "not_found" as const, sources, note: `No source from this run backed this, so it is marked not found. ${cited.note}` };
     }
     // The vendor writes their own site, so it alone can't show they exist, can be reached or work where they say.
     const own = hostOf(facts.website);
     if (check.finding === "supports" && own && NEEDS_ANOTHER_SITE.has(check.key) && sources.every((source) => hostOf(source.url) === own)) {
-      return { ...check, finding: "not_found" as const, sources, note: `Only the vendor's own site backed this, so it is marked not found. ${check.note}` };
+      return { ...check, finding: "not_found" as const, sources, note: `Only the vendor's own site backed this, so it is marked not found. ${cited.note}` };
     }
-    return { ...check, sources };
+    return { ...check, sources, note: cited.note };
   });
 
   return { report: { checks, summary: report.summary }, model, inputTokens, outputTokens, searches, pagesRead, turns };

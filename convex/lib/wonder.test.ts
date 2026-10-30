@@ -339,6 +339,102 @@ describe("a wonder run", () => {
     expect(answers[6].output).toMatch(/all the pages it may/);
   });
 
+describe("inline citations in notes", () => {
+  function fakedRun(checks: unknown[], seenUrls: string[] = []) {
+    const turn = {
+      id: "resp_1",
+      output: [
+        { type: "web_search_call", id: "ws_1", status: "completed", results: seenUrls.map((url) => ({ type: "text_result", title: url, url, snippet: "..." })) },
+        messageOutput(JSON.stringify({ checks, summary: "Summary" })),
+      ],
+      usage: { input_tokens: 10, output_tokens: 20 },
+    };
+    const fetchFn = vi.fn(async () => responseJson(turn));
+    return verifyVendor(facts, { readPage: async () => "text", fetchFn: fetchFn as unknown as typeof fetch, env });
+  }
+
+  function oneCheck(key: string, finding: string, note: string, sources: { title: string; url: string }[] = []) {
+    return [{ key, label: key, finding, note, sources }];
+  }
+
+  it("keeps supports when the only citation is an inline link to a page this run read", async () => {
+    const url = "https://justdial.example/lakshmi-caterers";
+    const asks = { id: "resp_1", output: [functionCall("call_1", { url })], usage: { input_tokens: 10, output_tokens: 10 } };
+    const done = {
+      id: "resp_2",
+      output: [messageOutput(JSON.stringify({ checks: oneCheck("identity", "supports", `Listed on the caterer's page [L0](${url})`), summary: "Summary" }))],
+      usage: { input_tokens: 10, output_tokens: 10 },
+    };
+    const fetchFn = vi.fn().mockResolvedValueOnce(responseJson(asks)).mockResolvedValueOnce(responseJson(done));
+    const run = await verifyVendor(facts, { readPage: async () => "page text", fetchFn: fetchFn as unknown as typeof fetch, env });
+    const identity = run.report.checks.find((c) => c.key === "identity")!;
+    expect(identity.finding).toBe("supports");
+    expect(identity.sources).toEqual([{ title: "justdial.example", url }]);
+    expect(identity.note).toBe("Listed on the caterer's page");
+    expect(identity.note).not.toContain("[L0]");
+    expect(identity.note).not.toContain("http");
+  });
+
+  it("drops an inline citation to a page never read and marks supports not_found", async () => {
+    const run = await fakedRun(oneCheck("identity", "supports", "Listed here [L0](https://invented.example/unseen)"));
+    const identity = run.report.checks.find((c) => c.key === "identity")!;
+    expect(identity.finding).toBe("not_found");
+    expect(identity.sources).toEqual([]);
+    expect(identity.note).toMatch(/No source from this run backed this/);
+    expect(identity.note).toContain("Listed here");
+    expect(identity.note).not.toContain("[L0]");
+    expect(identity.note).not.toContain("invented.example");
+  });
+
+  it("merges explicit sources with inline links without duplicating", async () => {
+    const run = await fakedRun(
+      oneCheck("identity", "supports", "Seen on [L0](https://a.example/page) and listed", [
+        { title: "A", url: "https://a.example/page" },
+        { title: "B", url: "https://b.example/other" },
+      ]),
+      ["https://a.example/page", "https://b.example/other"],
+    );
+    const identity = run.report.checks.find((c) => c.key === "identity")!;
+    expect(identity.finding).toBe("supports");
+    expect(identity.sources).toHaveLength(2);
+    expect(identity.note).toBe("Seen on and listed");
+  });
+
+  it("keeps a labelled link's words in the note", async () => {
+    const url = "https://lakshmi.example/menu";
+    const run = await fakedRun(oneCheck("prices", "supports", `Prices match [the menu page](${url})`), [url]);
+    const prices = run.report.checks.find((c) => c.key === "prices")!;
+    expect(prices.finding).toBe("supports");
+    expect(prices.note).toBe("Prices match the menu page");
+    expect(prices.sources).toEqual([{ title: "the menu page", url }]);
+  });
+
+  it("takes a bare URL as a source and leaves it out of the note", async () => {
+    const run = await fakedRun(oneCheck("website", "supports", "Site matches https://lakshmi.example."), ["https://lakshmi.example"]);
+    const website = run.report.checks.find((c) => c.key === "website")!;
+    expect(website.finding).toBe("supports");
+    expect(website.note).toBe("Site matches.");
+    expect(website.sources).toEqual([{ title: "lakshmi.example", url: "https://lakshmi.example" }]);
+  });
+
+  it("leaves a note with no links unchanged", async () => {
+    const run = await fakedRun(oneCheck("website", "supports", "Site matches", [{ title: "Lakshmi", url: "https://lakshmi.example" }]), [
+      "https://lakshmi.example",
+    ]);
+    const website = run.report.checks.find((c) => c.key === "website")!;
+    expect(website.finding).toBe("supports");
+    expect(website.note).toBe("Site matches");
+  });
+
+  it("still applies the own-site rule when the only inline link is the vendor's own site", async () => {
+    const run = await fakedRun(oneCheck("identity", "supports", "Listed [L0](https://lakshmi.example)"), ["https://lakshmi.example"]);
+    const identity = run.report.checks.find((c) => c.key === "identity")!;
+    expect(identity.finding).toBe("not_found");
+    expect(identity.note).toMatch(/Only the vendor's own site/);
+    expect(identity.note).not.toContain("[L0]");
+  });
+});
+
   it("a page that couldn't be read backs nothing, and the report comes back in our six checks, in order", async () => {
     const asks = { id: "resp_1", output: [functionCall("call_1", { url: "https://down.example" })], usage: { input_tokens: 1, output_tokens: 1 } };
     const done = {
