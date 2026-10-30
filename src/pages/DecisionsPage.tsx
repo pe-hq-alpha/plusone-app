@@ -247,6 +247,9 @@ function NeedBoard({
   const perUnits = live.map((v) => v.quote?.perUnit ?? null).filter((x): x is number => x !== null);
   const bestPerUnit = need.spread && perUnits.length > 1 ? Math.min(...perUnits) : null;
   const unitWord = need.basisLabel.toLowerCase().replace(/^per /, "");
+  // Where a price sits in the city's range: per plate or piece, or, for a need priced for
+  // the whole event (decor, photography), the total itself, which is what its range is in.
+  const rangePrice = (c: Column) => c.perUnit ?? (unitWord === "all in" ? c.total : null);
   const quoted = live.filter((v): v is QuotedRow => v.quote !== null && v.state !== "declined");
   const columns: Column[] = [
     ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, phone: v.phone, ...v.quote })),
@@ -324,13 +327,16 @@ function NeedBoard({
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
 
-      {need.market && columns.some((c) => c.perUnit !== null) && (
+      {need.market && columns.some((c) => rangePrice(c) !== null) && (
         <div className="border-b border-line">
           <PriceRange
             band={need.market}
             city={city}
             unitWord={unitWord}
-            points={columns.flatMap((c) => (c.perUnit !== null ? [{ id: c.id, name: c.name, price: c.perUnit }] : []))}
+            points={columns.flatMap((c) => {
+              const price = rangePrice(c);
+              return price !== null ? [{ id: c.id, name: c.name, price }] : [];
+            })}
           />
         </div>
       )}
