@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-749_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-760_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -136,7 +136,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan every event across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote and offer on the same lines. It is live and free until launch, with a no-sign-up demo. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne, kept there by a guarantee only those bookings will get (PlusOne Assured, planned) | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow: Muse Spark reads every quote, PDF and photo; Muse Voice Transcribe hears a brief, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the host's own hall photo; Muse Wonder gathers a vendor's evidence for Ops; the open-weights Muse Glimmer (our own GPU) checks vendors' photos and Muse Spark Open (Baseten) reads their price lists. Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 749 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 760 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent. Retries, a fallback, rate limits and an uptime check every 15 minutes through judging. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -351,7 +351,7 @@ Each part, what it runs on and why, with file paths: [EVALUATIONS.md](EVALUATION
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 749 tests, no network, no keys
+npm test              # 760 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
