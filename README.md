@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-761_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-765_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -141,8 +141,8 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan every event across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote and offer on the same lines. It is live and free until launch, with a no-sign-up demo. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne, kept there by a guarantee only those bookings will get (PlusOne Assured, planned) | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow: Muse Spark reads every quote, PDF and photo; Muse Voice Transcribe hears a brief, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the host's own hall photo; Muse Wonder gathers a vendor's evidence for Ops; the open-weights Muse Glimmer (our own GPU) checks vendors' photos and Muse Spark Open (Baseten) reads their price lists. Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 761 tests, CI, an uptime check, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
-| **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent. Retries, a fallback, rate limits and uptime checks through judging. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 765 tests, CI that also builds the app, the live demo walked end to end in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with their raw results, including a held-out set written by a separate agent: Muse Spark choosing each charge found 35 of 37 at 97% precision on quotes it had never seen, the same in three runs; 18 of 18 quotes read across email, PDF and photo, and 7 of 8 in Tamil and Tanglish; the stage found in 9 of 10 halls; Muse Wonder never confirming a made-up vendor | [Architecture](#architecture), [Evaluations](EVALUATIONS.md#evaluation-missing-charges), [The tech, part by part](EVALUATIONS.md#the-tech-part-by-part) |
+| **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent. Retries, a fallback, rate limits, an uptime check every five minutes and the demo walked in a browser every three hours, through judging. A three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
 
@@ -362,7 +362,7 @@ Each part, what it runs on and why, with file paths: [EVALUATIONS.md](EVALUATION
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 761 tests, no network, no keys
+npm test              # 765 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
@@ -399,7 +399,7 @@ node scripts/agentmail-setup.mjs https://<deployment>.convex.site <pod-id>   # o
 
 The app can also be served by Convex itself: `npm run deploy`.
 
-Every push to `main` runs typecheck and tests in CI. A staging workflow (`.github/workflows/staging.yml`) deploys each green push to a separate backend and site once its deploy keys are set as repository secrets; production is deployed by hand. An uptime check (`.github/workflows/uptime.yml`) is scheduled every 15 minutes through judging (GitHub runs scheduled jobs less often than asked, every few hours in practice) against the home page, both demos and the backend's `/health`, and fails if model calls stop going to Meta.
+Every push to `main` runs typecheck, tests and a build in CI, and a second workflow (`.github/workflows/e2e.yml`, `scripts/e2e-live.mjs`) walks the live demo in a real browser on a phone and a laptop (the home page, Today, Compare, Vendors, Under the hood, Find vendors, a broken guest link and the vendors' demo), failing on any page error or sideways scroll; it also runs every three hours through judging. A staging workflow (`.github/workflows/staging.yml`) deploys each green push to a separate backend and site once its deploy keys are set as repository secrets; production is deployed by hand. The backend checks the live site itself every five minutes (`convex/uptime.ts`): the home page, both demos and `/health`, which also fails if model calls stop going to Meta; the last day is at [`/uptime`](https://trustworthy-ram-180.eu-west-1.convex.site/uptime), and the team gets an email when the site goes down and when it's back. GitHub's own check (`.github/workflows/uptime.yml`) watches the same addresses from outside, every few hours in practice.
 
 | Variable | For |
 |---|---|
