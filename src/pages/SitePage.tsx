@@ -9,6 +9,7 @@ import { usePrivatePage } from "../lib/privatePage";
 import { BRAND } from "../lib/brand";
 import { GiftList } from "../components/GiftList";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
+import { BadLink } from "../components/ui/BadLink";
 
 /**
  * The event's own page: one calm page for the people invited, built from
@@ -26,15 +27,7 @@ export function SitePage() {
 
   if (site === undefined) return <main className="grid min-h-screen place-items-center bg-paper text-sm text-muted">Loading…</main>;
   if (site === null) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-paper px-6 text-center">
-        <div>
-          <p className="display text-3xl">This page isn't open yet.</p>
-          <p className="mt-2 text-sm text-muted">Check the link with whoever sent it to you.</p>
-          <ThemeFooter className="mt-8" />
-        </div>
-      </main>
-    );
+    return <BadLink title="This page isn't open yet." body="Check the link with whoever sent it to you." />;
   }
   const sameDay = site.startDate === site.endDate;
 

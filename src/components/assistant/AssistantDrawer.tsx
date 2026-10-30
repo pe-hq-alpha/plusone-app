@@ -53,6 +53,25 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // On a phone the button steps aside while the page scrolls down, so it never sits on what's being read.
+  const [tucked, setTucked] = useState(false);
+  useEffect(() => {
+    let last = window.scrollY;
+    let idle: number | undefined;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setTucked(y > last && y > 80);
+      last = y;
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => setTucked(false), 900);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.clearTimeout(idle);
+    };
+  }, []);
+
   if (!here) return null;
 
   return (
@@ -61,11 +80,12 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
         <button
           type="button"
           data-tour="ask"
+          aria-label="Ask"
           onClick={() => setOpen(true)}
-          className={`no-print fixed bottom-[78px] right-4 z-40 ${onBoard ? "max-md:hidden" : ""} flex items-center gap-2 rounded-full bg-accent px-4 py-3 text-sm font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] transition hover:-translate-y-0.5 hover:bg-accent-deep md:bottom-7 md:right-7`}
+          className={`no-print fixed bottom-[78px] right-3 z-40 ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent p-3 text-sm font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep md:bottom-7 md:right-7 md:px-4`}
           style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
-          <Icon name="heart" size={17} /> Ask
+          <Icon name="heart" size={17} /> <span className="max-md:hidden">Ask</span>
         </button>
       )}
       {open && (

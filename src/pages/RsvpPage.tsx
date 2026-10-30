@@ -12,6 +12,7 @@ import { GiftList } from "../components/GiftList";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
+import { BadLink } from "../components/ui/BadLink";
 
 type Answer = { coming: boolean | null; count: number };
 
@@ -47,15 +48,7 @@ export function RsvpPage() {
 
   if (inv === undefined) return <main className="grid min-h-screen place-items-center bg-paper text-sm text-muted">Loading…</main>;
   if (inv === null) {
-    return (
-      <main className="grid min-h-screen place-items-center bg-paper px-6 text-center">
-        <div>
-          <p className="display text-3xl">This RSVP link isn't valid.</p>
-          <p className="mt-2 text-sm text-muted">Ask whoever invited you to send it again.</p>
-          <ThemeFooter className="mt-8" />
-        </div>
-      </main>
-    );
+    return <BadLink title="This RSVP link isn't valid." body="Ask whoever invited you to send it again." />;
   }
 
   const ready = inv.sessions.every((e) => answers[e._id]?.coming !== null && answers[e._id] !== undefined);
