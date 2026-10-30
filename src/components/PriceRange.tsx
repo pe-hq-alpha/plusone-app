@@ -93,7 +93,7 @@ export function PriceRange({ band, points, unitWord, city }: { band: RangeBand; 
       </ol>
       <p className="mt-2 text-xs text-muted">
         Typical price <span className="font-medium text-ink">{money(band.p50, band.currency)}</span>
-        {per}, marked in gold. The family chooses; PlusOne shows where each price sits.
+        {per}, marked in gold. You choose; PlusOne shows where each price sits.
       </p>
     </figure>
   );
