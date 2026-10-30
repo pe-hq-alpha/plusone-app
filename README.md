@@ -21,25 +21,27 @@
 
 <table align="center">
 <tr>
-<td align="center" width="200" rowspan="2"><a href="#metas-models-in-plusone"><img src="assets/logos/meta.svg" width="44" height="44" alt="Meta"></a><br><b><a href="#metas-models-in-plusone">Meta's models</a></b><br><sub>Muse Spark, Muse Voice Transcribe, Muse Wonder, SAM 3.1, and the open-weights Muse Glimmer and Muse Spark Open, with Muse Code as our pair programmer. <a href="#metas-models-in-plusone">What each one does</a></sub></td>
-<td align="center" width="96"><img src="assets/logos/modal.svg" width="30" height="30" alt="Modal"><br><b>Modal</b><br><sub>Runs Muse Glimmer on our own GPU</sub></td>
-<td align="center" width="96"><img src="assets/logos/baseten.png" width="30" height="30" alt="Baseten"><br><b>Baseten</b><br><sub>Runs Muse Spark Open</sub></td>
-<td align="center" width="96"><img src="assets/logos/convex.svg" width="30" height="30" alt="Convex"><br><b>Convex</b><br><sub>Database, server code and background jobs</sub></td>
-<td align="center" width="96"><img src="assets/logos/claude.svg" width="30" height="30" alt="Claude"><br><b>Claude</b><br><sub>Backup when a Meta model can't answer</sub></td>
-<td align="center" width="96"><img src="assets/logos/firecrawl.png" width="30" height="30" alt="Firecrawl"><br><b>Firecrawl</b><br><sub>Reads vendors' own websites</sub></td>
-<td align="center" width="96"><img src="assets/logos/agentmail.png" width="30" height="30" alt="AgentMail"><br><b>AgentMail</b><br><sub>Gives each event its own email inbox</sub></td>
-<td align="center" width="96"><img src="assets/logos/clerk.svg" width="30" height="30" alt="Clerk"><br><b>Clerk</b><br><sub>Sign-in for customers, vendors and our team</sub></td>
-<td align="center" width="96"><img src="assets/logos/openstreetmap.svg" width="30" height="30" alt="OpenStreetMap"><br><b>OpenStreetMap</b><br><sub>The vendor map near the venue, drawn with Leaflet</sub></td>
+<td align="center" colspan="8"><a href="#metas-models-in-plusone"><img src="assets/logos/meta.svg" width="40" height="40" alt="Meta"></a><br><b><a href="#metas-models-in-plusone">Meta's models</a></b><br><sub>Muse Spark, Muse Voice Transcribe, Muse Wonder, SAM 3.1, and the open-weights Muse Glimmer and Muse Spark Open, with Muse Code as our pair programmer. <a href="#metas-models-in-plusone">What each one does</a></sub></td>
 </tr>
 <tr>
-<td align="center" width="96"><img src="assets/logos/react.svg" width="30" height="30" alt="React"><br><b>React</b><br><sub>The app's screens</sub></td>
-<td align="center" width="96"><img src="assets/logos/vite.svg" width="30" height="30" alt="Vite"><br><b>Vite</b><br><sub>Builds the app</sub></td>
-<td align="center" width="96"><img src="assets/logos/tailwind.svg" width="30" height="30" alt="Tailwind CSS"><br><b>Tailwind</b><br><sub>The app's styling</sub></td>
-<td align="center" width="96"><img src="assets/logos/vitest.svg" width="30" height="30" alt="Vitest"><br><b>Vitest</b><br><sub>Runs the test suite</sub></td>
-<td align="center" width="96"><img src="assets/logos/resend.svg" width="30" height="30" alt="Resend"><br><b>Resend</b><br><sub>Sends the app's own emails</sub></td>
-<td align="center" width="96"><img src="assets/logos/cloudflare.svg" width="30" height="30" alt="Cloudflare"><br><b>Cloudflare</b><br><sub>Hosts the website and app</sub></td>
-<td align="center" width="96"><img src="assets/logos/posthog.svg" width="30" height="30" alt="PostHog"><br><b>PostHog</b><br><sub>Usage numbers, only with consent</sub></td>
-<td align="center" width="96"><img src="assets/logos/whatsapp.svg" width="30" height="30" alt="WhatsApp"><br><b>WhatsApp</b><br><sub>Quote updates to hosts, on Meta's Cloud API</sub></td>
+<td align="center" width="80"><img src="assets/logos/modal.svg" width="26" height="26" alt="Modal"><br><sub><b>Modal</b><br>Muse Glimmer's GPU</sub></td>
+<td align="center" width="80"><img src="assets/logos/baseten.png" width="26" height="26" alt="Baseten"><br><sub><b>Baseten</b><br>Muse Spark Open</sub></td>
+<td align="center" width="80"><img src="assets/logos/convex.svg" width="26" height="26" alt="Convex"><br><sub><b>Convex</b><br>Backend and jobs</sub></td>
+<td align="center" width="80"><img src="assets/logos/claude.svg" width="26" height="26" alt="Claude"><br><sub><b>Claude</b><br>Fallback only</sub></td>
+<td align="center" width="80"><img src="assets/logos/firecrawl.png" width="26" height="26" alt="Firecrawl"><br><sub><b>Firecrawl</b><br>Vendors' websites</sub></td>
+<td align="center" width="80"><img src="assets/logos/agentmail.png" width="26" height="26" alt="AgentMail"><br><sub><b>AgentMail</b><br>Event inboxes</sub></td>
+<td align="center" width="80"><img src="assets/logos/clerk.svg" width="26" height="26" alt="Clerk"><br><sub><b>Clerk</b><br>Sign-in</sub></td>
+<td align="center" width="80"><img src="assets/logos/openstreetmap.svg" width="26" height="26" alt="OpenStreetMap"><br><sub><b>OpenStreetMap</b><br>Vendor map</sub></td>
+</tr>
+<tr>
+<td align="center" width="80"><img src="assets/logos/react.svg" width="26" height="26" alt="React"><br><sub><b>React</b><br>Screens</sub></td>
+<td align="center" width="80"><img src="assets/logos/vite.svg" width="26" height="26" alt="Vite"><br><sub><b>Vite</b><br>Build</sub></td>
+<td align="center" width="80"><img src="assets/logos/tailwind.svg" width="26" height="26" alt="Tailwind CSS"><br><sub><b>Tailwind CSS</b><br>Styling</sub></td>
+<td align="center" width="80"><img src="assets/logos/vitest.svg" width="26" height="26" alt="Vitest"><br><sub><b>Vitest</b><br>Tests</sub></td>
+<td align="center" width="80"><img src="assets/logos/resend.svg" width="26" height="26" alt="Resend"><br><sub><b>Resend</b><br>App emails</sub></td>
+<td align="center" width="80"><img src="assets/logos/cloudflare.svg" width="26" height="26" alt="Cloudflare"><br><sub><b>Cloudflare</b><br>Hosting</sub></td>
+<td align="center" width="80"><img src="assets/logos/posthog.svg" width="26" height="26" alt="PostHog"><br><sub><b>PostHog</b><br>Usage, with consent</sub></td>
+<td align="center" width="80"><img src="assets/logos/whatsapp.svg" width="26" height="26" alt="WhatsApp"><br><sub><b>WhatsApp</b><br>Quote updates</sub></td>
 </tr>
 </table>
 
