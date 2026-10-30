@@ -161,7 +161,9 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 **What's real and what's a sample?** Everything you can click works and is live. The demo's event and its vendors are made up and marked Sample; the model runs shown under the hood are real, with their dates and costs.
 
-**Where does it go from here?** One city, then India, then other countries, on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the team running events end to end. [The vision](#the-business)
+**Where are you today?** Two founders, bootstrapped, with the product live and free to use until launch, so it gets into people's hands now: families and event managers plan on it, vendors list on Partner, and every vendor is vetted by the PlusOne team before customers see them.
+
+**Where does it go from here?** As the data grows and more vendors come on board, PlusOne partners with them, and in the coming years events move through PlusOne. One city, then India, then other countries, on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the team running events end to end. [The vision](#the-business)
 
 ## Meta's models in PlusOne
 
