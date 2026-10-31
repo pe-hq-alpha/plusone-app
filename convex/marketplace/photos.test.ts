@@ -638,3 +638,21 @@ describe("photos customers see", () => {
     expect(photos.every((p) => p.status === "checked" && p.addedBy === undefined && p.sampleKey?.startsWith("sample-work-"))).toBe(true);
   });
 });
+
+describe("businesses found on the open web", () => {
+  test("are listed for a real event, never for a sample one", async () => {
+    const t = setup();
+    await t.run(async (ctx) => {
+      const now = Date.now();
+      await ctx.db.insert("vendorProfiles", {
+        name: "A Real Caterer Found Online", categories: ["Catering"], city: "Chennai", cityKey: "chennai", source: "plusone_added",
+        status: "pending", statusAt: now, joinedAt: now, completedEvents: 0, leadCategory: "Catering",
+        foundVia: { urls: ["https://example.com"], at: now },
+      });
+    });
+    const real = await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai" });
+    expect(real.map((c) => [c.name, c.foundOnWeb])).toEqual([["A Real Caterer Found Online", true]]);
+    const sample = await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai", samples: true });
+    expect(sample).toHaveLength(0);
+  });
+});

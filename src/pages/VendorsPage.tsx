@@ -325,7 +325,7 @@ function SlotPanel({
           slotId={slot._id}
           category={slot.category}
           city={event.city}
-          vendors={verified.filter((v) => near(v.place ?? null))}
+          vendors={verified.filter((v) => !v.foundOnWeb && near(v.place ?? null))}
           away={(v) => awayKm(centre, v.place ?? null)}
           canEdit={canEdit}
         />
@@ -784,8 +784,8 @@ function AskVerified({
       {vendors.length > 0 && (
         <ul className="grid w-full gap-2 sm:grid-cols-2" aria-label={`Verified ${category.toLowerCase()} vendors in ${city}`}>
           {vendors.slice(0, 6).map((v) => (
-            <li key={v._id}>
-              <Link to={`/vendors/${v._id}`} className="flex items-center gap-3 rounded-[12px] border border-line bg-cream px-3 py-2 hover:border-accent">
+            <li key={v._id} className="min-w-0">
+              <Link to={`/vendors/${v._id}`} className="flex min-w-0 items-center gap-3 rounded-[12px] border border-line bg-cream px-3 py-2 hover:border-accent">
                 {v.photos[0] ? (
                   <img src={v.photos[0].url} alt="" className="h-11 w-11 shrink-0 rounded-[8px] object-cover" loading="lazy" />
                 ) : (

@@ -139,7 +139,8 @@ export async function listedVendors(ctx: QueryCtx, category: string, city: strin
       cards.push(await cardFor(ctx, profile, category));
     }
   }
-  if (cards.length < MAX_CARDS) {
+  // A sample event shows only its made-up vendors: never a real business found on the web.
+  if (cards.length < MAX_CARDS && !samples) {
     const found = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_leadCategory", (q) => q.eq("cityKey", key).eq("leadCategory", category));
     for await (const profile of found) {
       if (cards.length >= MAX_CARDS) break;
