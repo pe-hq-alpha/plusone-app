@@ -7,7 +7,7 @@ import { sheetFor } from "../lib/standardSheet";
 import { canonicalWebsite } from "../lib/text";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
-import { offeringUnit, placeValidator, vendorOfferingFields, vendorProfileFields } from "../schema";
+import { offeringUnit, packageCharge, placeValidator, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
 import { businessesOf, currentBusiness, letGoOf, requireVendor, roomForAnother } from "./vendors";
 import { needsReview, proposeDetails, proposeOffering, proposeRemoval } from "./changes";
@@ -405,6 +405,7 @@ export const saveOffering = mutation({
     includes: v.array(v.string()),
     excludes: v.optional(v.array(v.string())),
     taxIncluded: v.optional(v.boolean()),
+    charges: v.optional(v.array(packageCharge)),
     minQty: v.optional(v.number()),
     maxQty: v.optional(v.number()),
   },
@@ -423,6 +424,10 @@ export const saveOffering = mutation({
     // A published price is a rate: "per hour" needn't say for how many hours.
     const terms = sheet ? checkPriceTerms(sheet, args.priceUnit, args.quantities, false) : null;
     if (terms && "problem" in terms) throw new ConvexError(terms.problem);
+    const charges = cleanCharges(args.charges, sheet);
+    // GST said on its line is the package's GST; the older yes-or-no stands when the line isn't there.
+    const gst = charges?.find((c) => c.key === "gst");
+    const taxIncluded = gst ? gst.status === "included" || gst.status === "none" : args.taxIncluded;
     const fields = {
       profileId: profile._id,
       category: args.category,
@@ -433,7 +438,8 @@ export const saveOffering = mutation({
       currency: (text(args.currency, 3) ?? "INR").toUpperCase(),
       includes: cleanList(args.includes, MAX_INCLUDES, 120) ?? [],
       excludes: cleanList(args.excludes, MAX_INCLUDES, 120),
-      taxIncluded: args.taxIncluded,
+      taxIncluded,
+      ...(charges?.length ? { charges } : {}),
       minQty: qty(args.minQty),
       maxQty: qty(args.maxQty),
     };
@@ -454,6 +460,36 @@ export const saveOffering = mutation({
     return await ctx.db.insert("vendorOfferings", fields);
   },
 });
+
+const MAX_CHARGES = 16;
+
+/**
+ * A package's charges, cleaned: a sheet line by its key (once each), or one the vendor named,
+ * an amount only where it is added, and never more than the form can show.
+ */
+function cleanCharges(charges: ObjectType<{ c: typeof packageCharge }>["c"][] | undefined, sheet: ReturnType<typeof sheetFor>) {
+  if (!charges) return undefined;
+  const seen = new Set<string>();
+  const out: typeof charges = [];
+  for (const c of charges) {
+    const amount = c.status === "priced" && c.amount !== undefined && Number.isFinite(c.amount) && c.amount >= 0 && c.amount <= 1e8 ? Math.round(c.amount) : undefined;
+    if (c.status === "priced" && amount === undefined) throw new ConvexError("Give each added charge an amount, or mark it as charged at cost.");
+    const status = c.status;
+    if (c.key) {
+      if (c.key !== "gst" && !sheet?.lines.some((l) => l.key === c.key)) continue;
+      if (seen.has(c.key)) continue;
+      seen.add(c.key);
+      out.push({ key: c.key, status, ...(amount !== undefined ? { amount } : {}) });
+    } else {
+      const label = text(c.label, 60);
+      if (!label || seen.has(label.toLowerCase())) continue;
+      seen.add(label.toLowerCase());
+      out.push({ label, status, ...(amount !== undefined ? { amount } : {}) });
+    }
+    if (out.length >= MAX_CHARGES) break;
+  }
+  return out;
+}
 
 export const removeOffering = mutation({
   args: { offeringId: v.id("vendorOfferings") },

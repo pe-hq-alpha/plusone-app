@@ -7,6 +7,7 @@ import type { Id } from "./_generated/dataModel";
 import { wonderCostUsd } from "./lib/modelCost";
 import schema from "./schema";
 import { vendorFacts } from "./marketplace/checks";
+import { packageCharges, sheetFor } from "./lib/standardSheet";
 
 const modules = import.meta.glob("./**/*.ts");
 
@@ -275,6 +276,43 @@ describe("a vendor's prices", () => {
       /price/,
     );
     await expect(as(t, stranger).mutation(api.marketplace.partner.removeOffering, { offeringId: offeringId! })).rejects.toThrow(/Set up your business/);
+  });
+
+  test("a package states every charge, in the price or on top, and customers read them", async () => {
+    const t = setup();
+    const vendor = await user(t, "owner@anjalicaterers.in");
+    const { profileId } = await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Anjali Caterers", categories: ["Catering"], city: "Chennai" });
+    const save = (charges: object[]) =>
+      as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Catering", title: "Veg lunch", unit: "per_person", price: 380, includes: ["Banana leaf"], charges } as never);
+    const id = await save([
+      { key: "gst", status: "extra" },
+      { key: "transport", status: "priced", amount: 1500.4 },
+      { key: "service_staff", status: "included" },
+      { key: "water", status: "none" },
+      { key: "transport", status: "included" }, // a second answer for the same line is dropped
+      { key: "not_a_line", status: "included" }, // and a line the trade's sheet doesn't have
+      { label: "  Cleaning after the event ", status: "priced", amount: 1200 },
+      { label: "Generator", status: "extra" },
+    ]);
+    const saved = (await as(t, vendor).query(api.marketplace.partner.mine, {})).offerings.find((o) => o._id === id)!;
+    expect(saved.taxIncluded).toBe(false);
+    expect(saved.charges).toEqual([
+      { key: "gst", status: "extra" },
+      { key: "transport", status: "priced", amount: 1500 },
+      { key: "service_staff", status: "included" },
+      { key: "water", status: "none" },
+      { label: "Cleaning after the event", status: "priced", amount: 1200 },
+      { label: "Generator", status: "extra" },
+    ]);
+    // An added charge needs its amount.
+    await expect(save([{ key: "transport", status: "priced" }])).rejects.toThrow(/amount/);
+
+    const read = packageCharges(sheetFor("Catering"), saved.charges, "INR");
+    expect(read.inPrice).toEqual(["Service staff"]);
+    expect(read.onTop).toEqual(["GST", "Transport ₹1,500", "Cleaning after the event ₹1,200", "Generator, at cost"]);
+    expect(read.notProvided).toEqual(["Water"]);
+    expect(read.notSaid).toEqual(["Crockery and serving ware"]);
+    expect(profileId).toBeTruthy();
   });
 
   test("a photographer prices the way photographers do, with what the price includes", async () => {

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { priceUnitOf, sheetFor } from "../../convex/lib/standardSheet";
+import { packageCharges, priceUnitOf, sheetFor, type PackageCharge } from "../../convex/lib/standardSheet";
 import { distanceKm, kmText, placeFor, readSearch, type Asked } from "../../convex/lib/places";
 import { RADII } from "../components/NearVenue";
 import type { MapPin } from "../components/VendorMap";
@@ -484,6 +484,7 @@ export function VendorListingPage() {
                       {p.taxIncluded === true ? " · GST included" : p.taxIncluded === false ? " · GST extra" : " · GST not stated"}
                     </p>
                     {p.includes.length > 0 && <p className="mt-1.5 text-sm text-muted">Includes {p.includes.join(", ")}</p>}
+                    <PackageChargeLines category={p.category} currency={p.currency} charges={p.charges} />
                   </li>
                 ))}
               </ul>
@@ -513,5 +514,31 @@ export function VendorListingPage() {
         )}
       </main>
     </div>
+  );
+}
+
+/** A package's charges as the vendor stated them: in the price, on top, not provided, and what they haven't said. */
+function PackageChargeLines({ category, currency, charges }: { category: string; currency: string; charges?: PackageCharge[] }) {
+  const sheet = sheetFor(category);
+  const read = packageCharges(sheet, charges?.filter((c) => c.key !== "gst"), currency);
+  const notSaid = read.notSaid.filter((l) => l !== "GST");
+  const rows: [string, string[], string][] = [
+    ["Also in the price", read.inPrice, "text-muted"],
+    ["On top", read.onTop, "text-ink"],
+    ["Not provided", read.notProvided, "text-muted"],
+    ["Not said", notSaid, "text-warn"],
+  ];
+  if (!charges?.length && !notSaid.length) return null;
+  return (
+    <dl className="mt-1.5 grid gap-0.5 text-sm">
+      {rows
+        .filter(([, items]) => items.length)
+        .map(([label, items, tone]) => (
+          <div key={label} className="flex flex-wrap gap-x-1.5">
+            <dt className="text-quiet">{label}:</dt>
+            <dd className={tone}>{items.join(", ")}</dd>
+          </div>
+        ))}
+    </dl>
   );
 }

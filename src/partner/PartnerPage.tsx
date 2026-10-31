@@ -5,10 +5,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
-import { describeOffer, priceUnitOf, quantitiesFor, quantityText, quantityValue, sheetFor, timesFor, type Sheet } from "../../convex/lib/standardSheet";
+import { describeOffer, packageCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, sheetFor, timesFor, type PackageCharge, type Sheet } from "../../convex/lib/standardSheet";
 import { VENDOR_CATEGORIES } from "../../convex/lib/vendorNeeds";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
+import { Backdrop } from "../components/ui/Backdrop";
 import { money } from "../lib/format";
 import { useAuthActions } from "../lib/session";
 import { useDemoEventId } from "../components/LeaveDemo";
@@ -17,6 +18,7 @@ import { partnerHref } from "../lib/hosts";
 import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
 import { readyToUpload } from "../lib/pictures";
 import { placeFor, type Place } from "../../convex/lib/places";
+import "../styles/partner.css";
 
 const VendorMap = lazy(() => import("../components/VendorMap"));
 
@@ -34,7 +36,8 @@ export function PartnerPage() {
   if (mine === undefined || me === undefined) return <main id="main" className="page px-5 py-10 text-muted">Loading…</main>;
   if (me?.isGuest && !mine.profile) return <TryAsGuest onAccount={leave} />;
   return (
-    <main id="main" className="page px-5 py-10 md:px-8">
+    <main id="main" className="page isolate px-5 py-10 md:px-8">
+      <Backdrop quiet />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
         {me?.isGuest ? (
@@ -641,6 +644,19 @@ function RemoveBusiness({ profile }: { profile: Profile }) {
 type Profile = Doc<"vendorProfiles">;
 type Offering = Doc<"vendorOfferings">;
 
+type Tab = "requests" | "packages" | "photos" | "details";
+const TABS: [Tab, string][] = [
+  ["requests", "Requests"],
+  ["packages", "Packages"],
+  ["photos", "Photos"],
+  ["details", "Your details"],
+];
+
+/**
+ * The vendor's workspace: their business at the top, then one tab at a time (requests,
+ * packages, photos, details), so nothing means scrolling past everything else. The tab
+ * stays in the address, so a reload or a shared link opens where they were.
+ */
 function Dashboard({
   profile,
   offerings,
@@ -654,39 +670,78 @@ function Dashboard({
   tier?: string;
   level?: string;
 }) {
-  const [editing, setEditing] = useState(false);
-  // In the vendors' demo, the customer's request is the point, so it comes first, above the sample business.
+  // In the vendors' demo, the customer's request is the point, so it opens on Requests.
   const demo = useQuery(api.users.me)?.isGuest === true;
+  const briefs = useQuery(api.marketplace.briefs.open);
+  const fromHash = (): Tab | null => {
+    const h = typeof window === "undefined" ? "" : window.location.hash.slice(1);
+    return TABS.some(([t]) => t === h) ? (h as Tab) : null;
+  };
+  const [tab, setTabState] = useState<Tab>(() => fromHash() ?? (demo || offerings.length > 0 ? "requests" : "packages"));
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    try {
+      window.history.replaceState(null, "", `#${t}`);
+    } catch {
+      // An address that can't change still shows the tab.
+    }
+  };
+  const open = briefs?.filter((b) => !b.answered).length ?? 0;
+  const counts: Partial<Record<Tab, number>> = { requests: open, packages: offerings.length };
+
   return (
     <>
-      {demo && <Briefs verified={profile.status === "verified"} />}
-      {demo && <SentOffers />}
-      <section className={`card p-6 md:p-7 ${demo ? "mt-8" : "mt-5"}`}>
+      <section className="card mt-5 p-6 md:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="display text-2xl">{profile.name}</h2>
             <p className="text-sm text-muted">{profile.categories.join(", ")} · {profile.city}</p>
             <BadgeRow badges={badges} tier={tier} level={level} className="mt-3" />
           </div>
-          <button type="button" className="btn-quiet btn-sm bg-cream" onClick={() => setEditing(!editing)}>
-            <Icon name="pen" size={14} />
-            {editing ? "Close" : "Edit details"}
-          </button>
+          {tab !== "details" && (
+            <button type="button" className="btn-quiet btn-sm bg-cream" onClick={() => setTab("details")}>
+              <Icon name="pen" size={14} />
+              Edit details
+            </button>
+          )}
         </div>
         <StatusLine profile={profile} />
       </section>
 
-      {editing && (
-        <ProfileForm
-          initial={{ ...profile, languages: profile.languages ?? [] }}
-          onSaved={() => setEditing(false)}
-        />
-      )}
-      {editing && !demo && <RemoveBusiness profile={profile} />}
-      <Photos />
-      {!demo && <Briefs verified={profile.status === "verified"} />}
-      {!demo && <SentOffers />}
-      <Prices profile={profile} offerings={offerings} />
+      <div className="ptabs" role="tablist" aria-label="Your business">
+        {TABS.map(([t, label]) => (
+          <button
+            key={t}
+            id={`tab-${t}`}
+            type="button"
+            role="tab"
+            aria-selected={tab === t}
+            aria-controls={`panel-${t}`}
+            className="ptab"
+            onClick={() => setTab(t)}
+          >
+            {label}
+            {counts[t] ? <span className="ptab__count">{counts[t]}</span> : null}
+          </button>
+        ))}
+      </div>
+
+      <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === "requests" && (
+          <>
+            <Briefs verified={profile.status === "verified"} />
+            <SentOffers />
+          </>
+        )}
+        {tab === "packages" && <Prices profile={profile} offerings={offerings} />}
+        {tab === "photos" && <Photos />}
+        {tab === "details" && (
+          <>
+            <ProfileForm initial={{ ...profile, languages: profile.languages ?? [] }} onSaved={() => setTab("requests")} />
+            {!demo && <RemoveBusiness profile={profile} />}
+          </>
+        )}
+      </div>
     </>
   );
 }
@@ -828,7 +883,7 @@ function Briefs({ verified }: { verified: boolean }) {
   // can see their offer as the customer does. A real vendor never sees a customer's Compare.
   const demoEventId = useDemoEventId();
   return (
-    <section className="mt-8" aria-labelledby="briefs-h">
+    <section className="mt-6" aria-labelledby="briefs-h">
       <h2 id="briefs-h" className="display text-2xl">Customers <em>asking</em></h2>
       <p className="mt-1 text-sm text-muted">Each request is for your kind of service in your city. Answer once; change it any time while it's open.</p>
       <div className="mt-4 grid gap-4">
@@ -929,13 +984,13 @@ function ChargeDifferently({ sheet, unitKey, onChange }: { sheet: Sheet; unitKey
  * "For how many". `counted`: an offer's total is the price times the quantities its way of
  * charging counts, so those must be given; a published rate needn't say them.
  */
-function WhatsInThePrice({ sheet, unitKey, typed, onChange, counted, idPrefix }: { sheet: Sheet; unitKey: string; typed: Typed; onChange: (key: string, value: string) => void; counted: boolean; idPrefix: string }) {
+function WhatsInThePrice({ sheet, unitKey, typed, onChange, counted, idPrefix, titled = false }: { sheet: Sheet; unitKey: string; typed: Typed; onChange: (key: string, value: string) => void; counted: boolean; idPrefix: string; titled?: boolean }) {
   const unit = priceUnitOf(sheet, unitKey);
   const shown = quantitiesFor(sheet, unitKey).filter((q) => !q.fromBrief);
   if (!shown.length) return null;
   return (
     <fieldset>
-      <legend className="label">What's in this price</legend>
+      <legend className={titled ? "sr-only" : "label"}>What's in this price</legend>
       <ul className="grid gap-2">
         {shown.map((q) => {
           const value = typed[q.key] ?? "";
@@ -1292,111 +1347,118 @@ function PriceListImport({ category, sheet, onUse }: { category: string; sheet: 
   );
 }
 
+type ChargeAnswer = { status: PackageCharge["status"]; amount: string };
+type OwnCharge = ChargeAnswer & { id: number; label: string };
+
+/** Charges vendors often take that a trade's sheet doesn't name; a tap adds one to fill in. */
+const OTHER_CHARGES = ["Cleaning", "Generator", "Extra hour", "Parking", "Advance booking fee"];
+
+const CHARGE_CHOICES: [PackageCharge["status"], string][] = [
+  ["included", "In the price"],
+  ["priced", "Added"],
+  ["extra", "At cost"],
+  ["none", "Not provided"],
+];
+const GST_CHOICES: [PackageCharge["status"], string][] = [
+  ["included", "In the price"],
+  ["extra", "On top"],
+  ["none", "Not charged"],
+];
+
+/** One answer per charge, as a small row of choices. */
+function Seg({ label, value, choices, onChange }: { label: string; value?: PackageCharge["status"]; choices: [PackageCharge["status"], string][]; onChange: (s: PackageCharge["status"]) => void }) {
+  return (
+    <div className={`seg${choices.length === 4 ? " seg--4" : ""}`} role="group" aria-label={label}>
+      {choices.map(([s, text]) => (
+        <button key={s} type="button" className="seg__opt" aria-pressed={value === s} onClick={() => onChange(s)}>
+          {text}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/** A saved package, or one drafted from a price list, as the editor starts from. */
+type PackageStart = {
+  _id?: Id<"vendorOfferings">;
+  category: string;
+  title: string;
+  priceUnit?: string;
+  quantities?: Record<string, number>;
+  price: number;
+  includes: string[];
+  taxIncluded?: boolean | null;
+  charges?: PackageCharge[];
+};
+
+/**
+ * Your packages: each one in the trade's own terms, with what's in the price and every
+ * charge on top said, so a customer is never surprised. A package is added and edited where
+ * it sits; nothing jumps to another part of the page.
+ */
 function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[] }) {
-  const save = useMutation(api.marketplace.partner.saveOffering);
-  const remove = useMutation(api.marketplace.partner.removeOffering);
-  const tidyAction = useAction(api.marketplace.tidy.tidy);
-  const [category, setCategory] = useState(profile.categories[0] ?? "");
-  const sheet = sheetFor(category);
-  const [title, setTitle] = useState("");
-  const [unit, setUnit] = useState<Basis>(sheet?.unit ?? "total");
-  const [unitKey, setUnitKey] = useState(sheet?.units[0].key ?? "");
-  const [typed, setTyped] = useState<Typed>({});
-  const [price, setPrice] = useState("");
-  const [includes, setIncludes] = useState("");
-  const [gst, setGst] = useState<"" | "in" | "extra">("");
-  const [error, setError] = useState<string | null>(null);
-  const [checking, setChecking] = useState(false);
-  const [preview, setPreview] = useState<TidyResult[] | null>(null);
+  const [editing, setEditing] = useState<"new" | Id<"vendorOfferings"> | null>(offerings.length === 0 ? "new" : null);
+  const [start, setStart] = useState<PackageStart | null>(null);
+  const [importing, setImporting] = useState(false);
   const [sent, setSent] = useState(false);
-  const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
-
-  const saveWith = (nextTitle: string, nextIncludes: string[]) => {
-    setError(null);
-    void save({
-      category,
-      title: nextTitle,
-      // A category with a sheet is compared in the sheet's unit; the way of charging says the rest.
-      unit: sheet?.unit ?? unit,
-      ...(sheet ? { priceUnit: unitKey, quantities } : {}),
-      price: Number(price),
-      includes: nextIncludes,
-      ...(gst ? { taxIncluded: gst === "in" } : {}),
-    })
-      .then((saved) => {
-        setTitle("");
-        setPrice("");
-        setTyped({});
-        setIncludes("");
-        setGst("");
-        setPreview(null);
-        // A verified listing's new price waits for the team; customers keep the approved one.
-        setSent(saved === null);
-      })
-      .catch((err) => setError(errorText(err, "That price didn't save. Try again.")));
-  };
-
-  const add = (e: FormEvent) => {
-    e.preventDefault();
-    if (checking) return;
-    const lines = includes.split("\n").map((s) => s.trim()).filter(Boolean);
-    const fields = [{ key: "Name", text: title }, ...lines.map((line, i) => ({ key: `Includes ${i + 1}`, text: line }))];
-    if (!fields.some((f) => f.text.trim())) {
-      saveWith(title, lines);
-      return;
-    }
-    setChecking(true);
-    setError(null);
-    void tidyAction({ fields })
-      .then((results) => {
-        const clean = results.every((r) => !r.changed && r.contact.length === 0);
-        if (clean) {
-          saveWith(title, lines);
-        } else {
-          setPreview(results);
-        }
-      })
-      .catch(() => saveWith(title, lines))
-      .finally(() => setChecking(false));
+  const firstSheet = sheetFor(profile.categories[0] ?? "");
+  // Newest first, so a package just added sits where its form was.
+  const list = [...offerings].sort((a, b) => b._creationTime - a._creationTime);
+  const done = (waiting: boolean) => {
+    setEditing(null);
+    setStart(null);
+    setSent(waiting);
   };
 
   return (
-    <section className="mt-8" aria-labelledby="prices-h">
-      <h2 id="prices-h" className="display text-2xl">Your <em>prices</em></h2>
-      <p className="mt-1 max-w-[42rem] text-sm text-muted">
-        Published prices, each with what it includes. Every price itemised earns the Transparent pricing badge, and your
-        prices count towards your city's range (never with your name on them).
-      </p>
-      {offerings.length > 0 && (
-        <ul className="card mt-4 divide-y divide-line">
-          {offerings.map((o) => (
-            <li key={o._id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
-              <div className="min-w-0">
-                <p className="font-medium">{o.title}</p>
-                <p className="text-sm text-muted">
-                  {priceText(o)} · {o.category}
-                  {o.taxIncluded === true ? " · GST included" : o.taxIncluded === false ? " · GST extra" : ""}
-                </p>
-                {o.includes.length > 0 && <p className="mt-1 text-sm">Includes {o.includes.join(", ")}</p>}
-              </div>
-              <button type="button" className="btn-quiet btn-sm" onClick={() => void remove({ offeringId: o._id })}>Remove</button>
-            </li>
-          ))}
-        </ul>
-      )}
-      {sheet && (
+    <section className="mt-6" aria-labelledby="prices-h">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="max-w-[40rem]">
+          <h2 id="prices-h" className="display text-2xl">Your <em>packages</em></h2>
+          <p className="mt-1 text-sm text-muted">
+            What you offer, what&rsquo;s in the price and every charge on top, said once. Customers compare packages line by line,
+            so a charge left unsaid reads as a question.
+          </p>
+        </div>
+        {editing !== "new" && (
+          <div className="flex flex-wrap gap-2">
+            {firstSheet && (
+              <button type="button" className="btn-quiet btn-sm bg-cream" aria-expanded={importing} onClick={() => setImporting(!importing)}>
+                {importing ? "Close" : "Bring your price list"}
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn-primary btn-sm"
+              onClick={() => {
+                setStart(null);
+                setEditing("new");
+                setImporting(false);
+              }}
+            >
+              <Icon name="plus" size={14} />
+              Add a package
+            </button>
+          </div>
+        )}
+      </div>
+
+      {importing && firstSheet && (
         <PriceListImport
-          category={category}
-          sheet={sheet}
+          category={profile.categories[0]}
+          sheet={firstSheet}
           onUse={(d) => {
-            setTitle(d.title);
-            setUnitKey(d.priceUnit);
-            setTyped(Object.fromEntries(Object.entries(d.quantities).map(([k, n]) => [k, String(n)])));
-            setPrice(String(d.price));
-            setIncludes(d.includes.join("\n"));
-            setGst(d.taxIncluded === null ? "" : d.taxIncluded ? "in" : "extra");
-            setPreview(null);
-            document.getElementById("pr-title")?.focus();
+            setStart({
+              category: profile.categories[0],
+              title: d.title,
+              priceUnit: d.priceUnit,
+              quantities: d.quantities,
+              price: d.price,
+              includes: d.includes,
+              taxIncluded: d.taxIncluded,
+            });
+            setEditing("new");
+            setImporting(false);
           }}
         />
       )}
@@ -1405,124 +1467,436 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
           Sent to our team to check. Customers see it once it&apos;s approved, usually within a day.
         </p>
       )}
-      <form className="card mt-4 grid gap-4 p-5 md:grid-cols-2 md:p-6" onSubmit={add}>
-        <div>
-          <label className="label" htmlFor="pr-cat">Service</label>
-          <select
-            id="pr-cat"
-            className="input"
-            value={category}
-            onChange={(e) => {
-              const next = sheetFor(e.target.value);
-              setCategory(e.target.value);
-              setUnit(next?.unit ?? "total");
-              setUnitKey(next?.units[0].key ?? "");
-              setTyped({});
-            }}
-          >
-            {profile.categories.map((c) => <option key={c}>{c}</option>)}
-          </select>
+
+      {editing === "new" && (
+        <div className="mt-4">
+          <PackageEditor key={start ? `draft-${start.title}` : "new"} profile={profile} start={start} onDone={done} onCancel={offerings.length ? () => done(false) : undefined} />
         </div>
-        <div>
-          <label className="label" htmlFor="pr-title">Name</label>
-          <input
-            id="pr-title"
-            className="input"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setPreview(null);
-            }}
-            placeholder="South Indian lunch, banana leaf"
-            required
-          />
-        </div>
-        <div>
-          <label className="label" htmlFor="pr-price">{sheet ? priceUnitOf(sheet, unitKey).priceLabel : "Price"}</label>
-          {sheet ? (
-            <>
-              <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
-              <ChargeDifferently key={category} sheet={sheet} unitKey={unitKey} onChange={setUnitKey} />
-            </>
-          ) : (
-            <div className="flex gap-2">
-              <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
-              <select className="input w-40" value={unit} onChange={(e) => setUnit(e.target.value as Basis)} aria-label="Priced">
-                {(["per_person", "per_piece", "per_day", "total"] as const).map((u) => (
-                  <option key={u} value={u}>{basisLabel(u, category)}</option>
-                ))}
-              </select>
+      )}
+
+      {list.length > 0 && (
+        <ul className="card mt-4 overflow-hidden p-0">
+          {list.map((o) =>
+            editing === o._id ? (
+              <li key={o._id} className="p-3">
+                <PackageEditor profile={profile} start={o} onDone={done} onCancel={() => done(false)} />
+              </li>
+            ) : (
+              <PackageRow
+                key={o._id}
+                offering={o}
+                showCategory={profile.categories.length > 1}
+                onEdit={() => {
+                  setEditing(o._id);
+                  setImporting(false);
+                }}
+              />
+            ),
+          )}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** A saved package as the vendor reads it back: the price, what's in it, what's on top and what isn't said yet. */
+function PackageRow({ offering: o, showCategory, onEdit }: { offering: Offering; showCategory: boolean; onEdit: () => void }) {
+  const remove = useMutation(api.marketplace.partner.removeOffering);
+  const [asking, setAsking] = useState(false);
+  const read = readPackage(o);
+  return (
+    <li className="pkg">
+      <div className="pkg__head">
+        <p className="pkg__title">{o.title}</p>
+        <p className="pkg__price">{priceText(o)}</p>
+      </div>
+      {showCategory && <p className="mt-0.5 text-xs text-quiet">{o.category}</p>}
+      <dl className="pkg__facts">
+        {read.inPrice.length > 0 && (
+          <>
+            <dt>In the price</dt>
+            <dd>{read.inPrice.join(", ")}</dd>
+          </>
+        )}
+        <dt>On top</dt>
+        <dd>{read.onTop.length ? read.onTop.join(", ") : "Nothing"}</dd>
+        {read.notProvided.length > 0 && (
+          <>
+            <dt>Not provided</dt>
+            <dd>{read.notProvided.join(", ")}</dd>
+          </>
+        )}
+        {read.notSaid.length > 0 && (
+          <>
+            <dt className="is-unsaid">Not said yet</dt>
+            <dd className="is-unsaid">{read.notSaid.join(", ")}</dd>
+          </>
+        )}
+      </dl>
+      <div className="pkg__actions">
+        {asking ? (
+          <>
+            <button type="button" className="btn-quiet btn-sm text-bad" onClick={() => void remove({ offeringId: o._id }).finally(() => setAsking(false))}>
+              Yes, remove it
+            </button>
+            <button type="button" className="btn-quiet btn-sm" onClick={() => setAsking(false)}>
+              Keep it
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" className="btn-quiet btn-sm bg-cream" onClick={onEdit}>
+              <Icon name="pen" size={14} />
+              {read.notSaid.length ? "Edit, and say the rest" : "Edit"}
+            </button>
+            <button type="button" className="btn-quiet btn-sm" onClick={() => setAsking(true)}>
+              Remove
+            </button>
+          </>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/** A package's facts in four groups, from its includes, GST and charges. */
+function readPackage(o: { category: string; currency?: string; includes: string[]; taxIncluded?: boolean | null; charges?: PackageCharge[] }) {
+  const sheet = sheetFor(o.category);
+  // GST said the older way (a yes or no) reads as its line.
+  const charges = o.charges?.some((c) => c.key === "gst") || o.taxIncluded == null ? o.charges : [{ key: "gst", status: o.taxIncluded ? "included" : "extra" } as PackageCharge, ...(o.charges ?? [])];
+  const read = packageCharges(sheet, charges, o.currency ?? "INR");
+  const gstAsked = sheet?.lines.some((l) => l.key === "gst");
+  if (!gstAsked && !charges?.some((c) => c.key === "gst")) read.notSaid.unshift("GST");
+  return { ...read, inPrice: [...o.includes, ...read.inPrice] };
+}
+
+/**
+ * Adding or changing a package, in one place: the package and its price, what's in it,
+ * and every charge on top, with what customers will read kept beside it.
+ */
+function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile; start: PackageStart | null; onDone: (waiting: boolean) => void; onCancel?: () => void }) {
+  const save = useMutation(api.marketplace.partner.saveOffering);
+  const tidyAction = useAction(api.marketplace.tidy.tidy);
+  const [category, setCategory] = useState(start?.category ?? profile.categories[0] ?? "");
+  const sheet = sheetFor(category);
+  const [title, setTitle] = useState(start?.title ?? "");
+  const [unit, setUnit] = useState<Basis>(sheet?.unit ?? "total");
+  const [unitKey, setUnitKey] = useState(start?.priceUnit ?? sheet?.units[0].key ?? "");
+  const [typed, setTyped] = useState<Typed>(Object.fromEntries(Object.entries(start?.quantities ?? {}).map(([k, n]) => [k, String(n)])));
+  const [price, setPrice] = useState(start ? String(start.price) : "");
+  const [includes, setIncludes] = useState((start?.includes ?? []).join("\n"));
+  const fromStart = () => {
+    const out: Record<string, ChargeAnswer> = {};
+    for (const c of start?.charges ?? []) if (c.key) out[c.key] = { status: c.status, amount: c.amount !== undefined ? String(c.amount) : "" };
+    if (!out.gst && start?.taxIncluded != null) out.gst = { status: start.taxIncluded ? "included" : "extra", amount: "" };
+    return out;
+  };
+  const [answers, setAnswers] = useState<Record<string, ChargeAnswer>>(fromStart);
+  const [own, setOwn] = useState<OwnCharge[]>(() =>
+    (start?.charges ?? []).filter((c) => !c.key && c.label).map((c, i) => ({ id: i, label: c.label!, status: c.status, amount: c.amount !== undefined ? String(c.amount) : "" })),
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState<TidyResult[] | null>(null);
+  const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
+  const lines = [{ key: "gst", label: "GST" }, ...(sheet?.lines.filter((l) => l.key !== "gst") ?? [])];
+
+  const charges = (): PackageCharge[] => [
+    ...lines.flatMap((l) => {
+      const a = answers[l.key];
+      if (!a) return [];
+      return [{ key: l.key, status: a.status, ...(a.status === "priced" && a.amount.trim() ? { amount: Number(a.amount) } : {}) }];
+    }),
+    ...own
+      .filter((c) => c.label.trim())
+      .map((c) => ({ label: c.label.trim(), status: c.status, ...(c.status === "priced" && c.amount.trim() ? { amount: Number(c.amount) } : {}) })),
+  ];
+  const draft = { category, currency: "INR", includes: includes.split("\n").map((s) => s.trim()).filter(Boolean), charges: charges() };
+  const read = readPackage(draft);
+  const answeredAll = lines.every((l) => answers[l.key]);
+
+  const saveWith = (nextTitle: string, nextIncludes: string[]) => {
+    setError(null);
+    setSaving(true);
+    void save({
+      ...(start?._id ? { offeringId: start._id } : {}),
+      category,
+      title: nextTitle,
+      unit: sheet?.unit ?? unit,
+      ...(sheet ? { priceUnit: unitKey, quantities } : {}),
+      price: Number(price),
+      includes: nextIncludes,
+      charges: charges(),
+    })
+      .then((saved) => onDone(saved === null))
+      .catch((err) => setError(errorText(err, "That package didn't save. Try again.")))
+      .finally(() => setSaving(false));
+  };
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (checking || saving) return;
+    const priced = charges().find((c) => c.status === "priced" && c.amount === undefined);
+    if (priced) {
+      setError(`Say what ${priced.label ?? lines.find((l) => l.key === priced.key)?.label ?? "the added charge"} costs, or mark it At cost.`);
+      return;
+    }
+    const lines_ = draft.includes;
+    const fields = [{ key: "Name", text: title }, ...lines_.map((line, i) => ({ key: `Includes ${i + 1}`, text: line }))];
+    setChecking(true);
+    setError(null);
+    void tidyAction({ fields })
+      .then((results) => {
+        if (results.every((r) => !r.changed && r.contact.length === 0)) saveWith(title, lines_);
+        else setPreview(results);
+      })
+      .catch(() => saveWith(title, lines_))
+      .finally(() => setChecking(false));
+  };
+
+  const setAnswer = (key: string, patch: Partial<ChargeAnswer>) =>
+    setAnswers((prev) => ({ ...prev, [key]: { status: prev[key]?.status ?? "included", amount: prev[key]?.amount ?? "", ...patch } }));
+  const perLabel = sheet ? priceUnitOf(sheet, unitKey).label : unitWord(unit, category);
+  const others = OTHER_CHARGES.filter((s) => !own.some((c) => c.label.toLowerCase() === s.toLowerCase()) && !lines.some((l) => l.label.toLowerCase() === s.toLowerCase()));
+
+  return (
+    <form className="pked" onSubmit={submit} aria-label={start?._id ? `Change ${start.title}` : "A new package"}>
+      <div>
+        <section className="pked__part" aria-labelledby="pk-what">
+          <h3 id="pk-what" className="pked__h">{start?._id ? "Change this package" : "A new package"}</h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {profile.categories.length > 1 && (
+              <div>
+                <label className="label" htmlFor="pr-cat">Service</label>
+                <select
+                  id="pr-cat"
+                  className="input"
+                  value={category}
+                  onChange={(e) => {
+                    const next = sheetFor(e.target.value);
+                    setCategory(e.target.value);
+                    setUnit(next?.unit ?? "total");
+                    setUnitKey(next?.units[0].key ?? "");
+                    setTyped({});
+                    setAnswers((prev) => (prev.gst ? { gst: prev.gst } : {}));
+                  }}
+                >
+                  {profile.categories.map((c) => <option key={c}>{c}</option>)}
+                </select>
+              </div>
+            )}
+            <div className={profile.categories.length > 1 ? "" : "md:col-span-2"}>
+              <label className="label" htmlFor="pr-title">Name</label>
+              <input
+                id="pr-title"
+                className="input"
+                value={title}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  setPreview(null);
+                }}
+                placeholder={sheet?.need === "catering" ? "South Indian lunch, banana leaf" : "What customers would call it"}
+                required
+              />
+            </div>
+            {sheet && sheet.units.length > 1 && (
+              <div className="md:col-span-2">
+                <p className="label">How you charge</p>
+                <Seg
+                  label="How you charge"
+                  value={unitKey as PackageCharge["status"]}
+                  choices={sheet.units.map((u) => [u.key as PackageCharge["status"], capital(u.label)])}
+                  onChange={(k) => setUnitKey(k)}
+                />
+              </div>
+            )}
+            <div className="md:col-span-2">
+              <label className="label" htmlFor="pr-price">{sheet ? priceUnitOf(sheet, unitKey).priceLabel : "Price"}</label>
+              <div className="pked__price">
+                <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ""))} placeholder="₹" required />
+                {sheet ? (
+                  <span className="pked__per">{perLabel}</span>
+                ) : (
+                  <select className="input w-44" value={unit} onChange={(e) => setUnit(e.target.value as Basis)} aria-label="Priced">
+                    {(["per_person", "per_piece", "per_day", "total"] as const).map((u) => (
+                      <option key={u} value={u}>{basisLabel(u, category)}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="pked__part" aria-labelledby="pk-in">
+          <h3 id="pk-in" className="pked__h">What&rsquo;s in the price</h3>
+          {sheet && (
+            <div className="mt-3">
+              <WhatsInThePrice sheet={sheet} unitKey={unitKey} typed={typed} onChange={(key, value) => setTyped((prev) => ({ ...prev, [key]: value }))} counted={false} idPrefix="pr-q" titled />
             </div>
           )}
-        </div>
-        <div>
-          <label className="label" htmlFor="pr-gst">GST</label>
-          <select id="pr-gst" className="input" value={gst} onChange={(e) => setGst(e.target.value as typeof gst)}>
-            <option value="">Not said</option>
-            <option value="in">Included in the price</option>
-            <option value="extra">Extra, on top</option>
-          </select>
-        </div>
-        {sheet && (
-          <div className="md:col-span-2">
-            <WhatsInThePrice
-              sheet={sheet}
-              unitKey={unitKey}
-              typed={typed}
-              onChange={(key, value) => setTyped((prev) => ({ ...prev, [key]: value }))}
-              counted={false}
-              idPrefix="pr-q"
+          <div className="mt-3">
+            <label className="label" htmlFor="pr-inc">Anything else included, one per line</label>
+            <textarea
+              id="pr-inc"
+              className="input min-h-20"
+              value={includes}
+              onChange={(e) => {
+                setIncludes(e.target.value);
+                setPreview(null);
+              }}
+              placeholder={sheet?.covers ?? ""}
+            />
+          </div>
+        </section>
+
+        <section className="pked__part" aria-labelledby="pk-top">
+          <h3 id="pk-top" className="pked__h">Every other charge</h3>
+          <p className="pked__lede">
+            These are the charges customers are most often surprised by. Say for each whether it&rsquo;s in your price, added at a
+            fixed amount, charged at cost, or not something you provide.
+          </p>
+          <div className="mt-3">
+            {lines.map((l) => {
+              const a = answers[l.key];
+              const gst = l.key === "gst";
+              return (
+                <div key={l.key} className="charge">
+                  <span className="charge__name">{l.label}</span>
+                  <div className="charge__how">
+                    <Seg label={l.label} value={a?.status} choices={gst ? GST_CHOICES : CHARGE_CHOICES} onChange={(status) => setAnswer(l.key, { status })} />
+                    {a?.status === "priced" && (
+                      <span className="charge__amount">
+                        <input
+                          className="input"
+                          inputMode="numeric"
+                          aria-label={`${l.label}, amount in ₹`}
+                          value={a.amount}
+                          onChange={(e) => setAnswer(l.key, { amount: e.target.value.replace(/[^\d.]/g, "") })}
+                          placeholder="₹"
+                          autoFocus
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {own.map((c) => (
+              <div key={c.id} className="charge">
+                <span className="charge__own">
+                  <input
+                    className="input"
+                    aria-label="The charge's name"
+                    value={c.label}
+                    onChange={(e) => setOwn((prev) => prev.map((x) => (x.id === c.id ? { ...x, label: e.target.value } : x)))}
+                    placeholder="Name the charge"
+                  />
+                </span>
+                <div className="charge__how">
+                  <Seg
+                    label={c.label || "This charge"}
+                    value={c.status}
+                    choices={CHARGE_CHOICES.filter(([s]) => s !== "none")}
+                    onChange={(status) => setOwn((prev) => prev.map((x) => (x.id === c.id ? { ...x, status } : x)))}
+                  />
+                  {c.status === "priced" && (
+                    <span className="charge__amount">
+                      <input
+                        className="input"
+                        inputMode="numeric"
+                        aria-label={`${c.label || "This charge"}, amount in ₹`}
+                        value={c.amount}
+                        onChange={(e) => setOwn((prev) => prev.map((x) => (x.id === c.id ? { ...x, amount: e.target.value.replace(/[^\d.]/g, "") } : x)))}
+                        placeholder="₹"
+                      />
+                    </span>
+                  )}
+                  <button type="button" className="btn-quiet btn-sm" aria-label={`Remove ${c.label || "this charge"}`} onClick={() => setOwn((prev) => prev.filter((x) => x.id !== c.id))}>
+                    <Icon name="close" size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" className="btn-quiet btn-sm bg-cream" onClick={() => setOwn((prev) => [...prev, { id: Date.now(), label: "", status: "priced", amount: "" }])}>
+              <Icon name="plus" size={14} />
+              Add a charge
+            </button>
+            {others.slice(0, 4).map((s) => (
+              <button key={s} type="button" className="chip-quiet hover:text-accent" onClick={() => setOwn((prev) => [...prev, { id: Date.now(), label: s, status: "priced", amount: "" }])}>
+                + {s}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {preview && (
+          <div className="mt-6">
+            <TidyPanel
+              results={preview}
+              onUse={() => {
+                const nextTitle = preview.find((r) => r.key === "Name")?.after ?? title;
+                const nextLines = preview.filter((r) => r.key.startsWith("Includes")).map((r) => r.after);
+                setPreview(null);
+                saveWith(nextTitle, nextLines.length ? nextLines : draft.includes);
+              }}
+              onKeep={() => {
+                setPreview(null);
+                saveWith(title, draft.includes);
+              }}
             />
           </div>
         )}
-        <div className="md:col-span-2">
-          <label className="label" htmlFor="pr-inc">What it includes, one per line</label>
-          <textarea
-            id="pr-inc"
-            className="input min-h-20"
-            value={includes}
-            onChange={(e) => {
-              setIncludes(e.target.value);
-              setPreview(null);
-            }}
-            placeholder={sheet?.covers ?? ""}
-          />
-        </div>
-        {sheet && (
-          <div className="md:col-span-2">
-            <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={quantities} />
-          </div>
-        )}
-        {preview && (
-          <TidyPanel
-            results={preview}
-            onUse={() => {
-              const nextTitle = preview.find((r) => r.key === "Name")?.after ?? title;
-              const nextLines = preview.filter((r) => r.key.startsWith("Includes")).map((r) => r.after);
-              const lines = nextLines.length ? nextLines : includes.split("\n").map((s) => s.trim()).filter(Boolean);
-              setPreview(null);
-              saveWith(nextTitle, lines);
-            }}
-            onKeep={() => {
-              setPreview(null);
-              saveWith(title, includes.split("\n").map((s) => s.trim()).filter(Boolean));
-            }}
-          />
-        )}
-        <div className="md:col-span-2">
-          <button type="submit" className="btn-primary btn-sm" disabled={checking || !title.trim() || !price}>
-            {checking ? (
-              "Checking your wording…"
-            ) : (
-              <>
-                <Icon name="plus" size={14} />
-                Add price
-              </>
-            )}
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <button type="submit" className="btn-primary" disabled={checking || saving || !title.trim() || !(Number(price) > 0)}>
+            {checking ? "Checking your wording…" : saving ? "Saving…" : start?._id ? "Save changes" : "Save package"}
           </button>
-          {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+          {onCancel && (
+            <button type="button" className="btn-quiet" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          {error && <p role="alert" className="w-full text-sm text-bad">{error}</p>}
         </div>
-      </form>
-    </section>
+      </div>
+
+      <aside className="pked__aside" aria-label="What customers read">
+        <p className="label">What customers read</p>
+        <div className="pkread mt-2" aria-live="polite">
+          <p className="pkread__title">{title.trim() || "Your package"}</p>
+          <p className="pkread__price">
+            {Number(price) > 0 ? (sheet ? describeOffer(sheet, unitKey, Number(price), quantities, "INR") : `${money(Number(price), "INR")} ${unitWord(unit, category)}`) : "Add a price"}
+          </p>
+          {read.inPrice.length > 0 && (
+            <div className="pkread__group">
+              <h4>In the price</h4>
+              <ul>{read.inPrice.map((x) => <li key={x}>{x}</li>)}</ul>
+            </div>
+          )}
+          {read.onTop.length > 0 && (
+            <div className="pkread__group">
+              <h4>On top</h4>
+              <ul>{read.onTop.map((x) => <li key={x}>{x}</li>)}</ul>
+            </div>
+          )}
+          {read.notProvided.length > 0 && (
+            <div className="pkread__group">
+              <h4>Not provided</h4>
+              <ul>{read.notProvided.map((x) => <li key={x}>{x}</li>)}</ul>
+            </div>
+          )}
+          {answeredAll ? (
+            <p className="pkread__done">Every charge said. Nothing will surprise a customer.</p>
+          ) : (
+            <p className="pkread__todo">
+              Not said yet: {lines.filter((l) => !answers[l.key]).map((l) => l.label).join(", ")}. Customers see these as questions.
+            </p>
+          )}
+        </div>
+      </aside>
+    </form>
   );
 }

@@ -10,6 +10,7 @@ import { rateLimiter } from "../rateLimits";
 import { isListed, isTrial } from "../lib/marketplace";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { cardFor, listedVendors, listingCard, offeringsOf } from "./listings";
+import { packageCharge } from "../schema";
 
 /**
  * Find vendors: PlusOne's vendor directory, open to anyone, with no plan bought and no
@@ -54,8 +55,10 @@ const pkg = v.object({
   price: v.number(),
   currency: v.string(),
   priceUnit: v.optional(v.string()),
+  quantities: v.optional(v.record(v.string(), v.number())),
   includes: v.array(v.string()),
   taxIncluded: v.optional(v.boolean()),
+  charges: v.optional(v.array(packageCharge)),
 });
 
 /** One listed vendor's page: their card, and every package on the sheet as customers read it. */
@@ -74,8 +77,10 @@ export const vendor = query({
       price: o.price,
       currency: o.currency,
       ...(o.priceUnit ? { priceUnit: o.priceUnit } : {}),
+      ...(o.quantities ? { quantities: o.quantities } : {}),
       includes: o.includes,
       ...(o.taxIncluded !== undefined ? { taxIncluded: o.taxIncluded } : {}),
+      ...(o.charges ? { charges: o.charges } : {}),
     }));
     return { card, ...(profile.about ? { about: profile.about } : {}), packages };
   },

@@ -4,6 +4,7 @@ import { mutation, type MutationCtx, query, type QueryCtx } from "../_generated/
 import { requireStaff } from "../lib/auth";
 import { isTrial } from "../lib/marketplace";
 import { listingDetails, vendorOfferingFields } from "../schema";
+import { packageCharges, sheetFor } from "../lib/standardSheet";
 import { requireVendor } from "./vendors";
 
 /**
@@ -64,11 +65,17 @@ const changeView = v.object({
   submittedAt: v.number(),
 });
 
-function offeringText(o: Pick<OfferingFields, "title" | "price" | "currency" | "includes" | "taxIncluded"> & { priceUnit?: string }): string {
+function offeringText(o: Pick<OfferingFields, "title" | "price" | "currency" | "includes" | "taxIncluded" | "charges" | "category"> & { priceUnit?: string }): string {
   const gst = o.taxIncluded === true ? ", GST included" : o.taxIncluded === false ? ", GST extra" : "";
   const unit = o.priceUnit ? ` (${o.priceUnit.replace(/_/g, " ")})` : "";
   const includes = o.includes.length ? `. Includes ${o.includes.join(", ")}` : "";
-  return `${o.title}: ${o.currency} ${o.price.toLocaleString("en-IN")}${unit}${gst}${includes}`;
+  const c = packageCharges(sheetFor(o.category), o.charges, o.currency);
+  const charges = [
+    c.inPrice.length && `In the price: ${c.inPrice.join(", ")}`,
+    c.onTop.length && `On top: ${c.onTop.join(", ")}`,
+    c.notProvided.length && `Not provided: ${c.notProvided.join(", ")}`,
+  ].filter(Boolean);
+  return `${o.title}: ${o.currency} ${o.price.toLocaleString("en-IN")}${unit}${gst}${includes}${charges.length ? `. ${charges.join(". ")}` : ""}`;
 }
 
 function detailsText(d: Partial<Details>): string {

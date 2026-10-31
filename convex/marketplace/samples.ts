@@ -3,7 +3,7 @@ import type { Id } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
 import type { Basis } from "../lib/comparable";
 import { offerTotal, type OfferLine } from "../lib/marketplace";
-import { priceUnitOf, sheetFor, timesFor } from "../lib/standardSheet";
+import { priceUnitOf, sheetFor, timesFor, type PackageCharge } from "../lib/standardSheet";
 import { recomputeBands } from "./bands";
 import { openBrief } from "./briefs";
 
@@ -149,6 +149,50 @@ const SAMPLE_OFFERS: { vendor: string; category: string; price: number; priceUni
   },
 ];
 
+/**
+ * The charges a sample package states, worked out from what it includes, so the demo shows
+ * packages that say everything beside ones that leave a little unsaid (the cheapest caterer).
+ */
+export function sampleCharges(category: string, o: { price: number; includes: string[]; taxIncluded?: boolean }): PackageCharge[] {
+  const has = (word: string) => o.includes.some((i) => i.toLowerCase().includes(word));
+  const gst: PackageCharge = { key: "gst", status: o.taxIncluded ? "included" : "extra" };
+  if (category === "Catering") {
+    if (o.price < 280) return [gst, { key: "transport", status: "extra" }];
+    return [
+      gst,
+      has("serving staff") ? { key: "service_staff", status: "included" } : { key: "service_staff", status: "priced", amount: 1800 },
+      has("transport") ? { key: "transport", status: "included" } : { key: "transport", status: "priced", amount: o.price < 340 ? 1500 : 2500 },
+      has("banana leaf") ? { key: "crockery", status: "included" } : { key: "crockery", status: "extra" },
+      has("water") ? { key: "water", status: "included" } : { key: "water", status: "none" },
+    ];
+  }
+  if (category === "Decor & Florals") {
+    return [gst, { key: "transport", status: "priced", amount: 2000 }, { key: "setup", status: "included" }, { key: "lighting", status: "extra" }];
+  }
+  if (category === "Photographer") {
+    return [gst, { key: "travel", status: "included" }, { key: "overtime", status: "priced", amount: 3000 }, { key: "album", status: "priced", amount: 6500 }, { key: "drone", status: "none" }];
+  }
+  return [gst];
+}
+
+/** Gives the sample vendors' packages already in the database the charges new ones are made with. Run once by hand. */
+export const fillSampleCharges = internalMutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    let filled = 0;
+    for await (const p of ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified"))) {
+      if (!p.sample || p.ownerUserId) continue;
+      for (const o of await ctx.db.query("vendorOfferings").withIndex("by_profileId", (q) => q.eq("profileId", p._id)).take(20)) {
+        if (o.charges?.length && o.taxIncluded !== undefined) continue;
+        await ctx.db.patch(o._id, { charges: sampleCharges(o.category, o), taxIncluded: o.taxIncluded ?? false });
+        filled++;
+      }
+    }
+    return filled;
+  },
+});
+
 /** Adds the sample vendors that aren't there yet, and works out the ranges again if any were. */
 export async function ensureSampleVendors(ctx: MutationCtx): Promise<Map<string, Id<"vendorProfiles">>> {
   const ids = new Map<string, Id<"vendorProfiles">>();
@@ -174,7 +218,7 @@ export async function ensureSampleVendors(ctx: MutationCtx): Promise<Map<string,
       completedEvents: s.completedEvents,
       sample: true,
     });
-    await ctx.db.insert("vendorOfferings", { profileId, category: s.category, currency: "INR", ...s.offering });
+    await ctx.db.insert("vendorOfferings", { profileId, category: s.category, currency: "INR", ...s.offering, taxIncluded: s.offering.taxIncluded ?? false, charges: sampleCharges(s.category, s.offering) });
     ids.set(s.name, profileId);
     added++;
   }

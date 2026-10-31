@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-772_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-773_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -125,6 +125,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **WhatsApp and Call for every vendor**, with the first message written for the event | | Live, 29 Oct |
 | **Quote updates on WhatsApp** for hosts who opt in, with STOP to end them; 11 tests | Meta's WhatsApp Cloud API | Built 30 Oct; connected to Meta's test number while the message waits for Meta's approval |
 | **Vendors pin where they work from their Google Maps link**; **one login runs several businesses**, each verified on its own | | Live, 31 Oct |
+| **Every charge on a package:** Partner rebuilt as tabs (Requests, Packages, Photos, Details), packages added and edited in place, and each one says every charge, in the price, added, at cost or not provided, beside a live view of what customers read; customers see them on the vendor's page | | Live, 31 Oct |
 
 ### How each criterion is met
 
@@ -132,7 +133,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, about 10% of what was paid sat outside the quotes. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 772 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 773 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -253,7 +254,7 @@ One app, two sides working on the same lines: customers plan and compare, vendor
 
 <img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and six caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
 
-**Answering as a vendor.** On PlusOne Partner, a vendor sets up or claims their business, pins where they work by pasting their Google Maps link, and can run several businesses from one login. They price packages the way their trade charges, or bring the price list they already send; answer customers' requests on the same sheet, never seeing the customer's name or budget; and land beside the customer's other quotes. A person checks every business before customers see it.
+**Answering as a vendor.** On PlusOne Partner, a vendor sets up or claims their business, pins where they work by pasting their Google Maps link, and can run several businesses from one login. They price packages the way their trade charges, or bring the price list they already send, and say every charge on each one: GST, service staff, transport, crockery, water and any other they name, each in the price, added at a fixed amount, at cost or not provided, so customers see it before they ask; answer customers' requests on the same sheet, never seeing the customer's name or budget; and land beside the customer's other quotes. A person checks every business before customers see it.
 
 | The vendor's page | Answering a customer's request |
 |---|---|
@@ -281,7 +282,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 772 tests, no network, no keys
+npm test              # 773 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 

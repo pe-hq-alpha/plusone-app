@@ -285,6 +285,18 @@ const sheetPriceUnit = v.optional(v.string());
 /** What the price includes, by the sheet's quantity keys: { hours: 8, photographers: 2 }. */
 const sheetQuantities = v.optional(v.record(v.string(), v.number()));
 
+/**
+ * A charge a package states, so nothing arrives as a surprise: one of the trade's sheet lines
+ * (by key) or one the vendor names (by label). included: in the price. priced: added at
+ * `amount`. extra: charged on top at cost, amount unknown. none: not provided by this vendor.
+ */
+export const packageCharge = v.object({
+  key: v.optional(v.string()),
+  label: v.optional(v.string()),
+  status: v.union(v.literal("included"), v.literal("priced"), v.literal("extra"), v.literal("none")),
+  amount: v.optional(v.number()),
+});
+
 export const vendorOfferingFields = {
   profileId: v.id("vendorProfiles"),
   category: v.string(),
@@ -299,6 +311,8 @@ export const vendorOfferingFields = {
   excludes: v.optional(v.array(v.string())),
   /** Whether the price already includes GST; missing when the vendor hasn't said. */
   taxIncluded: v.optional(v.boolean()),
+  /** Every other charge, in the price or on top, as the vendor stated them. */
+  charges: v.optional(v.array(packageCharge)),
   minQty: v.optional(v.number()),
   maxQty: v.optional(v.number()),
 };

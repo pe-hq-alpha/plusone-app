@@ -544,3 +544,28 @@ function range(amounts: number[], currency: string): string {
   const high = Math.max(...amounts);
   return low === high ? formatMoney(low, currency) : `${formatMoney(low, currency)}–${formatMoney(high, currency)}`;
 }
+
+/** A charge a Partner package states (schema's packageCharge). */
+export type PackageCharge = { key?: string; label?: string; status: "included" | "priced" | "extra" | "none"; amount?: number };
+
+/** A package's charges as customers read them, in four groups; a sheet line the vendor never answered is "not said". */
+export function packageCharges(
+  sheet: Sheet | null | undefined,
+  charges: PackageCharge[] | undefined,
+  currency: string,
+): { inPrice: string[]; onTop: string[]; notProvided: string[]; notSaid: string[] } {
+  const out = { inPrice: [] as string[], onTop: [] as string[], notProvided: [] as string[], notSaid: [] as string[] };
+  const named = (c: PackageCharge) => (c.key ? sheet?.lines.find((l) => l.key === c.key)?.label : undefined) ?? c.label ?? "";
+  const said = new Set<string>();
+  for (const c of charges ?? []) {
+    const label = named(c);
+    if (!label) continue;
+    if (c.key) said.add(c.key);
+    if (c.status === "included") out.inPrice.push(label);
+    else if (c.status === "none") out.notProvided.push(label);
+    else if (c.status === "priced" && c.amount !== undefined) out.onTop.push(`${label} ${formatMoney(c.amount, currency)}`);
+    else out.onTop.push(c.key === "gst" ? "GST" : `${label}, at cost`);
+  }
+  for (const l of sheet?.lines ?? []) if (!said.has(l.key)) out.notSaid.push(l.label);
+  return out;
+}
