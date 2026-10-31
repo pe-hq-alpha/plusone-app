@@ -171,7 +171,7 @@ export function EventLayout() {
             <PlusOneLockup />
           </Link>
           <span className="hidden h-6 w-px shrink-0 bg-line sm:block" aria-hidden="true" />
-          <Link to="" className="min-w-0 flex-1 md:flex-none" title="Today">
+          <Link to="" className="min-w-0 flex-1 lg:flex-none" title="Today">
             <span className="display block truncate text-[1.08rem] leading-tight text-ink">{event.name}</span>
             <span className="hidden truncate text-[0.72rem] text-quiet sm:block">
               {longDate(event.startDate)} · {event.city}

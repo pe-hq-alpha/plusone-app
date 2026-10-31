@@ -68,6 +68,7 @@
 .dbp__what { min-width: 0; font-size: 0.92rem; color: var(--color-ink); text-decoration: none; }
 .dbp__what:hover { color: var(--color-accent); }
 .dbp__what small { display: block; margin-top: 1px; font-size: 0.78rem; line-height: 1.45; color: var(--color-quiet); }
+.dbp__what small.dbp__ask { color: var(--color-accent); }
 .dbp__state { font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-quiet); white-space: nowrap; }
 .dbp__need--booked .dbp__state { color: var(--color-done); }
 .dbp__need--compare .dbp__state { color: var(--color-accent); }
@@ -82,14 +83,17 @@
 
 .dbp__none { margin: 14px 0 0; font-size: 0.86rem; color: var(--color-quiet); }
 
-.dbp__foot { margin-top: 12px; }
+.dbp__foot { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
 .dbp__acts { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.dbp__foot .dbp__form { flex-basis: 100%; }
+.dbp__edit,
 .dbp__acts > * {
   padding: 0; border: 0; background: none; font: inherit; font-size: 0.78rem; color: var(--color-quiet); cursor: pointer;
   text-decoration: none; border-bottom: 1px dotted var(--color-rule);
 }
+.dbp__edit:hover, .dbp__edit[aria-expanded="true"],
 .dbp__acts > *:hover, .dbp__acts > [aria-expanded="true"] { color: var(--color-accent); border-bottom-color: currentColor; }
-.dbp__acts > *:focus-visible, .dbp__what:focus-visible, .dbp__open:focus-visible, .dbp__compare:focus-visible {
+.dbp__edit:focus-visible, .dbp__acts > *:focus-visible, .dbp__what:focus-visible, .dbp__open:focus-visible, .dbp__compare:focus-visible {
   outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 4px;
 }
 
@@ -118,5 +122,5 @@
 }
 
 @media print {
-  .dbp__acts, .dbp__form { display: none; }
+  .dbp__acts, .dbp__edit, .dbp__form { display: none; }
 }

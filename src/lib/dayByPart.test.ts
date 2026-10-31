@@ -141,6 +141,15 @@ describe("a need's state", () => {
     expect(needRow(slot({ _id: "m", status: "contacted" }), need("m", [vendor("Mangala Isai", "emailed")])).detail).toBe("Written to Mangala Isai");
   });
 
+  test("the line itself says only what matters: who is booked, or a question waiting on the host", () => {
+    expect(needRow(slot({ _id: "hall", status: "booked", bookedVendor: { name: "Raja Hall" } }), need("hall", [vendor("Raja Hall", "booked", 136500)])).note).toBe("Raja Hall");
+    const asked = needRow(slot({ _id: "food", status: "quoted" }), need("food", [vendor("Kaveri", "needs_attention", 66150), vendor("Annam", "quoted", 56500)]));
+    expect(asked.note).toBe("Kaveri has a question for you");
+    expect(needRow(slot({ _id: "f2", status: "quoted" }), need("f2", [vendor("Annam", "quoted", 56500)])).note).toBeUndefined();
+    expect(needRow(slot({ _id: "p", status: "contacted" }), need("p", [vendor("Nila Studio", "chased", undefined, [], 1)])).note).toBeUndefined();
+    expect(needRow(slot({ _id: "d", vendorsCount: 5 })).note).toBeUndefined();
+  });
+
   test("nothing sent yet reads Next", () => {
     expect(needRow(slot({ _id: "d", vendorsCount: 5 })).detail).toBe("5 vendors found, not written to yet");
     const gifts = needRow(slot({ _id: "g" }));

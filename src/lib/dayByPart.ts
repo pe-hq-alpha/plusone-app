@@ -101,8 +101,10 @@ export type NeedRow = {
   slotId: string;
   title: string;
   state: NeedState;
-  /** One line under the name: who, how many quotes, what is next. */
+  /** The full story of the need: who, how many quotes, what is next. Shown on hover, not on the line. */
   detail: string;
+  /** What the line itself says under the name, only when it matters: the booked vendor, or a question waiting on the host. */
+  note?: string;
   /** What it costs: the booked amount, or the range of quotes. Null when there is nothing yet. */
   price: { low: number; high: number } | null;
   /** The basis of the price, when it needs saying: "before GST". */
@@ -130,6 +132,7 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
       ...base,
       state: "booked",
       detail: slot.bookedVendor ? `${slot.bookedVendor.name}, booked` : "Booked",
+      note: slot.bookedVendor?.name,
       price: amount !== undefined ? { low: amount, high: amount } : null,
     };
   }
@@ -145,6 +148,7 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
       ...base,
       state: "compare",
       detail: [`${plural(count, "quote")} in${basis ? `, ${basis}` : ""}`, question].filter(Boolean).join(" · "),
+      note: question || undefined,
       price: low !== null ? { low, high: high ?? low } : null,
       priceNote: taxExtra ? `before ${taxExtra}` : undefined,
     };
@@ -164,7 +168,7 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
           : writtenTo.length === 1
             ? `Written to ${who}`
             : who;
-    return { ...base, state: "waiting", detail, price: null };
+    return { ...base, state: "waiting", detail, note: question || undefined, price: null };
   }
 
   return {

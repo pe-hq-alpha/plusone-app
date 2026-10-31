@@ -69,7 +69,7 @@ export function PlanPage() {
         )}
       </div>
 
-      <aside className="grid content-start gap-4 lg:sticky lg:top-6">
+      <aside className="grid content-start gap-4 md:grid-cols-3 lg:sticky lg:top-6 lg:grid-cols-1">
         <section className="card p-5" aria-labelledby="budget-h" data-tour="budget">
           <h2 id="budget-h" className="display text-lg">Budget</h2>
           <p className="display mt-1 text-[1.7rem] leading-tight text-ink">{money(stats.committedTotal, event.currency)}</p>
@@ -95,13 +95,6 @@ export function PlanPage() {
           {tally("next") > 0 && <p className="mt-3 text-xs text-quiet">{tally("next")} more not started.</p>}
           <Link to="../vendors" className="btn-quiet btn-sm mt-4">
             Find vendors <Icon name="arrow" size={15} />
-          </Link>
-        </section>
-        <section className="card p-5" aria-labelledby="yours-h">
-          <h2 id="yours-h" className="display text-lg">Over to you</h2>
-          <p className="mt-1.5 text-sm text-muted">What needs you next is on Today, under Where things stand.</p>
-          <Link to=".." relative="path" className="btn-quiet btn-sm mt-4">
-            Where things stand <Icon name="arrow" size={15} />
           </Link>
         </section>
         <section className="card p-5" aria-labelledby="guests-h">

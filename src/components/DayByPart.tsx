@@ -87,9 +87,7 @@ export function DayByPart({
       <p className="dbp__meta">
         <b>{longDate(event.startDate)}</b>
         {multiDay ? <> to <b>{longDate(event.endDate)}</b></> : null}
-        {place ? ` · ${place}` : ""}
-        {people > 0 ? <> · about <b>{people} people</b></> : null} · {sessions.length} {sessions.length === 1 ? "part" : "parts"} · {booked} of {slots.length}{" "}
-        {slots.length === 1 ? "vendor" : "vendors"} booked
+        {place ? ` · ${place}` : ""} · {booked} of {slots.length} booked
       </p>
 
       {days.map((day) => {
@@ -113,6 +111,8 @@ export function DayByPart({
                     lastDay={lastDay}
                     anchor={part._id === firstId}
                     eventType={event.eventType}
+                    showPlace={places.length > 1}
+                    eventPeople={people}
                   />
               ))}
             </ol>
@@ -135,6 +135,8 @@ function PartCard({
   lastDay,
   anchor,
   eventType,
+  showPlace,
+  eventPeople,
 }: {
   part: Part;
   rows: NeedRow[];
@@ -145,10 +147,16 @@ function PartCard({
   lastDay: number;
   anchor: boolean;
   eventType?: EventData["event"]["eventType"];
+  /** The day's parts are at more than one place, so each card says where it is. */
+  showPlace: boolean;
+  /** The event's headcount; a part says its own only when it differs. */
+  eventPeople: number;
 }) {
   const PartIcon = sessionIcon(part, eventType);
   const progress = partProgress(rows);
   const [panel, setPanel] = useState<Panel>(null);
+  // The three ways to change a part stay folded under one Edit, so a card reads as the part, not as its controls.
+  const [editing, setEditing] = useState(false);
   const chip = timeChip(part.startTime, part.endTime);
   const open = `../sessions/${part._id}`;
   const toggle = (p: Panel) => setPanel((now) => (now === p ? null : p));
@@ -168,8 +176,8 @@ function PartCard({
             <h3 id={`part-${part._id}`} className="dbp__name">{part.name}</h3>
             <p className="dbp__facts">
               {chip && <span className="dbp__time">{chip}</span>}
-              {part.location && <span>{part.location}</span>}
-              {part.guestCount > 0 && <span>About {part.guestCount} people</span>}
+              {showPlace && part.location && <span>{part.location}</span>}
+              {part.guestCount > 0 && part.guestCount !== eventPeople && <span>About {part.guestCount} people</span>}
               {part.budget > 0 && <span>{money(part.budget, currency)} set aside</span>}
             </p>
           </div>
@@ -190,7 +198,18 @@ function PartCard({
 
         {canEdit && (
           <div className="dbp__foot">
-            <div className="dbp__acts">
+            <button
+              type="button"
+              className="dbp__edit"
+              aria-expanded={editing}
+              onClick={() => {
+                setEditing((v) => !v);
+                setPanel(null);
+              }}
+            >
+              {editing ? "Done" : "Edit"}
+            </button>
+            {editing && <div className="dbp__acts">
               {actions ? (
                 <>
                   <button type="button" aria-expanded={panel === "time"} onClick={() => toggle("time")}>Change the time</button>
@@ -204,7 +223,7 @@ function PartCard({
                   <Link to={open}>Add a vendor</Link>
                 </>
               )}
-            </div>
+            </div>}
             {actions && panel === "time" && <TimeForm part={part} actions={actions} done={() => setPanel(null)} />}
             {actions && panel === "day" && <DayForm part={part} actions={actions} startDate={startDate} lastDay={lastDay} done={() => setPanel(null)} />}
             {actions && panel === "vendor" && <VendorForm part={part} actions={actions} currency={currency} done={() => setPanel(null)} />}
@@ -219,9 +238,9 @@ function NeedLine({ row, currency }: { row: NeedRow; currency: string }) {
   return (
     <li className={`dbp__need dbp__need--${row.state}`}>
       <span className="dbp__dot" aria-hidden="true" />
-      <Link to={`../vendors/${row.slotId}`} className="dbp__what">
+      <Link to={`../vendors/${row.slotId}`} className="dbp__what" title={row.detail}>
         {row.title}
-        <small>{row.detail}</small>
+        {row.note && <small className={row.note.endsWith("question for you") ? "dbp__ask" : undefined}>{row.note}</small>}
       </Link>
       {row.state === "compare" && row.quotes > 1 ? (
         <Link to={`../decisions#need-${row.slotId}`} className="dbp__compare">Compare</Link>
@@ -230,7 +249,6 @@ function NeedLine({ row, currency }: { row: NeedRow; currency: string }) {
       )}
       <span className="dbp__price">
         {priceText(row.price, currency)}
-        {row.priceNote && <small>{row.priceNote}</small>}
       </span>
     </li>
   );
