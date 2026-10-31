@@ -137,6 +137,8 @@ export function LandingPage() {
               <Link to="/vendors" className="rs__pill rs__pill--outline">Find vendors</Link>
               <Link to={partnerHref("/")} className="rs__pill rs__pill--outline">List your business</Link>
             </div>
+            {/* On a phone the example sits below the fold, so the demo is offered here too. */}
+            <Link to="/demo" className="rs__try">See the demo, no sign-up <span aria-hidden="true">&rarr;</span></Link>
           </div>
 
           <section className="rs__status" aria-labelledby="status-title">

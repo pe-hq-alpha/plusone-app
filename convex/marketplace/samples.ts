@@ -23,13 +23,16 @@ type SampleVendor = { name: string; area: string; category: string; about: strin
 
 const leaf = ["Banana leaf", "Water bottle", "Serving staff"];
 // Sweet, two curries, kootu, sambar, rasam, payasam and appalam: eight dishes, two of them sweet.
-const lunch = (price: number, extra: string[] = []): SampleOffering => ({
-  title: "Veg lunch on banana leaf",
+type Menu = { title: string; dishes: number; sweets: number; menu: string };
+const LEAF_LUNCH: Menu = { title: "Veg lunch on banana leaf", dishes: 8, sweets: 2, menu: "Sweet, two curries, kootu, sambar, rasam, payasam, appalam" };
+/** A caterer's plate: each sample caterer has its own menu, so the directory doesn't read as one caterer ten times. */
+const lunch = (price: number, extra: string[] = [], m: Menu = LEAF_LUNCH): SampleOffering => ({
+  title: m.title,
   unit: "per_person",
   priceUnit: "per_plate",
-  quantities: { dishes: 8, sweets: 2 },
+  quantities: { dishes: m.dishes, sweets: m.sweets },
   price,
-  includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", ...extra],
+  includes: [m.menu, ...extra],
 });
 const stage = (price: number, areas: number, includes: string[]): SampleOffering => ({
   title: "Stage and entrance flowers",
@@ -50,16 +53,16 @@ const shoot = (price: number, hours: number, crew: { photographers?: number; pho
 });
 
 export const SAMPLE_VENDORS: SampleVendor[] = [
-  { name: "Pongal Pot Caterers", area: "Kodambakkam", category: "Catering", about: "Home-style tiffin and meals for small functions.", completedEvents: 1, offering: lunch(260) },
+  { name: "Pongal Pot Caterers", area: "Kodambakkam", category: "Catering", about: "Home-style tiffin and meals for small functions.", completedEvents: 1, offering: lunch(260, [], { title: "Tiffin and mini meals", dishes: 6, sweets: 1, menu: "Pongal, vada, two chutneys, sambar, mini meals with curd rice" }) },
   { name: "Annapoorani Leaf Caterers", area: "T. Nagar", category: "Catering", about: "Banana-leaf lunches for poojas and birthdays.", completedEvents: 4, offering: lunch(290, leaf.slice(0, 1)) },
-  { name: "Neivedhyam Kitchen", area: "Mylapore", category: "Catering", about: "Traditional Tamil meals, no onion or garlic on request.", completedEvents: 12, offering: lunch(300, leaf) },
-  { name: "Sambar & Co. Caterers", area: "Velachery", category: "Catering", about: "South Indian meals and North Indian counters.", completedEvents: 3, offering: lunch(320, leaf.slice(0, 2)) },
-  { name: "Kalyana Saapadu Co.", area: "Mylapore", category: "Catering", about: "Full kalyana saapadu for 50 to 500.", completedEvents: 9, offering: lunch(340, leaf) },
-  { name: "Thalaivazhai Caterers", area: "Adyar", category: "Catering", about: "Leaf meals with a live dosa counter on request.", completedEvents: 5, offering: lunch(380, leaf) },
-  { name: "Paruppu Payasam Kitchen", area: "Mandaveli", category: "Catering", about: "Festive menus with two payasams.", completedEvents: 2, offering: lunch(420, [...leaf, "Transport in Chennai"]) },
-  { name: "Komalam Caterers", area: "Nungambakkam", category: "Catering", about: "Elaborate menus for milestone birthdays and engagements.", completedEvents: 14, offering: { ...lunch(450, [...leaf, "Transport in Chennai"]), taxIncluded: true } },
-  { name: "Kumudham Feast", area: "Anna Nagar", category: "Catering", about: "Premium leaf meals and sweet stalls.", completedEvents: 6, offering: lunch(520, [...leaf, "Transport in Chennai"]) },
-  { name: "Vettrilai Caterers", area: "Besant Nagar", category: "Catering", about: "Heritage recipes, served in silver-rimmed leaves.", completedEvents: 7, offering: { ...lunch(600, [...leaf, "Transport in Chennai"]), taxIncluded: true } },
+  { name: "Neivedhyam Kitchen", area: "Mylapore", category: "Catering", about: "Traditional Tamil meals, no onion or garlic on request.", completedEvents: 12, offering: lunch(300, leaf, { title: "Satvik meals, no onion or garlic", dishes: 10, sweets: 2, menu: "Sweet pongal, two kootus, poriyal, sambar, rasam, curd rice, appalam" }) },
+  { name: "Sambar & Co. Caterers", area: "Velachery", category: "Catering", about: "South Indian meals and North Indian counters.", completedEvents: 3, offering: lunch(320, leaf.slice(0, 2), { title: "South and North Indian lunch", dishes: 12, sweets: 2, menu: "Paneer curry, dal, rotis, sambar, rasam, two poriyals, curd rice" }) },
+  { name: "Kalyana Saapadu Co.", area: "Mylapore", category: "Catering", about: "Full kalyana saapadu for 50 to 500.", completedEvents: 9, offering: lunch(340, leaf, { title: "Kalyana saapadu, full leaf", dishes: 16, sweets: 3, menu: "Two payasams, vadai, three poriyals, kootu, sambar, mor kuzhambu, rasam, curd rice" }) },
+  { name: "Thalaivazhai Caterers", area: "Adyar", category: "Catering", about: "Leaf meals with a live dosa counter on request.", completedEvents: 5, offering: lunch(380, leaf, { title: "Leaf lunch with a live dosa counter", dishes: 12, sweets: 2, menu: "Live dosa counter, sambar, two chutneys, poriyal, kootu, rasam, curd rice, payasam" }) },
+  { name: "Paruppu Payasam Kitchen", area: "Mandaveli", category: "Catering", about: "Festive menus with two payasams.", completedEvents: 2, offering: lunch(420, [...leaf, "Transport in Chennai"], { title: "Festive lunch with two payasams", dishes: 12, sweets: 3, menu: "Paruppu and semiya payasam, vadai, two poriyals, sambar, rasam, curd rice" }) },
+  { name: "Komalam Caterers", area: "Nungambakkam", category: "Catering", about: "Elaborate menus for milestone birthdays and engagements.", completedEvents: 14, offering: { ...lunch(450, [...leaf, "Transport in Chennai"], { title: "Milestone-birthday feast", dishes: 16, sweets: 3, menu: "Welcome drink, three sweets, vadai, bajji, three poriyals, sambar, rasam, curd rice" }), taxIncluded: true } },
+  { name: "Kumudham Feast", area: "Anna Nagar", category: "Catering", about: "Premium leaf meals and sweet stalls.", completedEvents: 6, offering: lunch(520, [...leaf, "Transport in Chennai"], { title: "Premium leaf meal with a sweet stall", dishes: 18, sweets: 4, menu: "Sweet stall, live jalebi, three poriyals, two kootus, biryani, sambar, rasam, curd rice" }) },
+  { name: "Vettrilai Caterers", area: "Besant Nagar", category: "Catering", about: "Heritage recipes, served in silver-rimmed leaves.", completedEvents: 7, offering: { ...lunch(600, [...leaf, "Transport in Chennai"], { title: "Heritage Chettinad veg feast", dishes: 20, sweets: 3, menu: "Chettinad kuzhambu, paniyaram, three poriyals, kootu, sambar, rasam, curd rice, two payasams" }), taxIncluded: true } },
 
   { name: "Sevvanthi Stage Decor", area: "Saidapet", category: "Decor & Florals", about: "Marigold and chrysanthemum stages for home functions.", completedEvents: 3, offering: stage(11_000, 2, ["Marigold backdrop", "Entrance string"]) },
   { name: "Kolam Corner Decor", area: "West Mambalam", category: "Decor & Florals", about: "Rangoli, kolam and simple flower decor.", completedEvents: 2, offering: stage(14_500, 2, ["Flower backdrop", "Rangoli at the entrance"]) },
@@ -174,6 +177,31 @@ export function sampleCharges(category: string, o: { price: number; includes: st
   }
   return [gst];
 }
+
+/** Gives sample vendors already in the database the package they're made with now (title, menu and charges). Run once by hand. */
+export const refreshSamplePackages = internalMutation({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    let changed = 0;
+    for await (const p of ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified"))) {
+      if (!p.sample || p.ownerUserId) continue;
+      const s = SAMPLE_VENDORS.find((x) => x.name === p.name);
+      if (!s) continue;
+      for (const o of await ctx.db.query("vendorOfferings").withIndex("by_profileId", (q) => q.eq("profileId", p._id)).take(5)) {
+        await ctx.db.patch(o._id, {
+          title: s.offering.title,
+          quantities: s.offering.quantities,
+          includes: s.offering.includes,
+          taxIncluded: s.offering.taxIncluded ?? false,
+          charges: sampleCharges(s.category, s.offering),
+        });
+        changed++;
+      }
+    }
+    return changed;
+  },
+});
 
 /** Gives the sample vendors' packages already in the database the charges new ones are made with. Run once by hand. */
 export const fillSampleCharges = internalMutation({

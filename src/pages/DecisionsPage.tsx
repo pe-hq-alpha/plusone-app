@@ -574,16 +574,17 @@ function LineByLine({
           Swipe the table sideways to see all {columns.length} side by side →
         </p>
       )}
-      <div className="relative mt-3 overflow-x-auto">
+      {/* On a phone the table scrolls in its own frame, so the vendors' names stay above every line. */}
+      <div className="relative mt-3 overflow-x-auto max-md:max-h-[75vh] max-md:overflow-y-auto">
         <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
           <caption className="sr-only">Each quote and offer against the same lines</caption>
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
-              <th scope="col" className="sticky left-0 z-[1] bg-cream py-2 pr-4 font-normal">
+              <th scope="col" className="sticky left-0 z-[1] bg-cream py-2 pr-4 font-normal max-md:top-0 max-md:z-[3]">
                 <span className="sr-only">Line</span>
               </th>
               {columns.map((c) => (
-                <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink">
+                <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink max-md:sticky max-md:top-0 max-md:z-[2] max-md:bg-cream">
                   {c.name}
                   <span className={`block text-[11px] font-normal ${c.from === "web" ? "text-quiet" : "text-accent"}`}>
                     {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : "Quote by email"}

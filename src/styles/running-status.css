@@ -394,3 +394,13 @@
 /* The scroll-in reveal also moves these, so the lift waits until they have arrived. */
 .lp-motion .rs-reveal.rs-card:not(.is-in), .lp-motion .rs-reveal.rs-compare:not(.is-in), .lp-motion .rs-reveal.rs-photo:not(.is-in) { translate: 0 22px; }
 @media (prefers-reduced-motion: reduce) { .rs-card, .rs-compare, .rs-photo { transition: none; } }
+
+/* The demo link under the hero's buttons, for phones and tablets, where the example's own link is below the fold. */
+.rs__try { display: none; }
+@media (max-width: 1100px) {
+  .rs__try {
+    display: inline-flex; align-items: center; gap: 0.4em; margin-top: 14px;
+    font-size: 0.95rem; color: var(--color-accent); text-decoration: none;
+  }
+  .rs__try:hover { text-decoration: underline; text-underline-offset: 3px; }
+}
