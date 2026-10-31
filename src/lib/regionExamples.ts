@@ -40,7 +40,7 @@ const ELSEWHERE: RegionExamples = {
 };
 
 const CHENNAI: RegionExamples = {
-  hero: { event: "Aarav's 1st birthday", city: "Mumbai", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
+  hero: { event: "Aarav's 1st birthday", city: "Chennai", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
   search: "caterers in Chennai for a 60th birthday lunch, under ₹500 a plate",
   compare: {
     title: "Catering · housewarming lunch for 150",

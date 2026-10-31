@@ -27,18 +27,18 @@ const route = (plan: string): { state: StepState; text: string }[] => [
 
 /** How it works for the people planning, then for the vendors who answer them. */
 const HOW_CUSTOMERS = [
-  { title: "Talk it through", text: "Say what you're planning in your own words. It asks what it needs, checks it with you, then sets out the plan and the budget." },
-  { title: "Vendors found", text: "Searched on the open web, down to their own price pages, and verified vendors on PlusOne answering your request." },
-  { title: "Written to and chased", text: "From the event's own inbox, with follow-ups for anyone who goes quiet." },
-  { title: "Every quote on the same lines", text: "Emails, PDFs and WhatsApp photos of price lists, read at your numbers: what's included, what's extra, what's missing." },
-  { title: "You choose", text: "Compare line by line against the local range and book; the budget, guests and to-dos keep up." },
+  { title: "Talk it through", text: "Say what you're planning, in your own words. You get the plan and a budget." },
+  { title: "Vendors found", text: "Verified vendors on PlusOne answer your request, and more are found on the web with their prices." },
+  { title: "Written to and chased", text: "From your event's own inbox, with a follow-up when a vendor goes quiet." },
+  { title: "Every quote on the same lines", text: "Emails, PDFs and photos of price lists, read at your numbers: what's in, what's extra, what's missing." },
+  { title: "You choose", text: "Compare line by line against the local range, then book. The budget keeps up." },
 ];
 
 const HOW_VENDORS = [
-  { title: "Get listed", text: "Set up your business, or claim the listing we made from your public pages. No website needed." },
-  { title: "Price it clearly", text: "Each package with its price, what it's priced by and what it includes." },
-  { title: "Answer real requests", text: "Customers near you send the occasion, the date and the guests. Answer once, on the same sheet as every vendor." },
-  { title: "Be compared fairly", text: "Your offer sits line by line beside the others, so what you include counts, not just the total." },
+  { title: "Get listed", text: "Set up your business, or claim the listing made from your public pages. No website needed." },
+  { title: "Price it clearly", text: "Each package with its price and what it includes." },
+  { title: "Answer real requests", text: "People planning near you send the occasion, the date and the guests. Answer once, on the same sheet." },
+  { title: "Compared line by line", text: "Your offer sits beside the others, so what you include counts, not just the total." },
 ];
 
 /** Three celebrations fanned beside How it works' heading, Western and Indian. Generated images, not customers' events. */
@@ -57,8 +57,8 @@ const PHOTOS = [
 ];
 
 const KINDS = [
-  { group: "Family and friends", items: ["Birthdays and milestone birthdays", "Weddings and engagements", "Anniversaries", "Housewarmings", "Baby showers and naming ceremonies", "Religious and cultural celebrations"] },
-  { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community festivals"] },
+  { group: "Family and friends", items: ["Birthdays and milestones", "Weddings and engagements", "Anniversaries", "Housewarmings", "Baby showers and namings", "Religious celebrations"] },
+  { group: "Work and community", items: ["Office parties", "Team offsites", "Product launches", "Conferences", "College fests", "Community events"] },
 ];
 
 /** What rises into place as it scrolls into view, and the parent whose children step in one after another. */
@@ -135,15 +135,8 @@ export function LandingPage() {
             <div className="rs__actions">
               <Link to="/signin?new=1" className="rs__pill rs__pill--solid">Plan an event</Link>
               <Link to="/vendors" className="rs__pill rs__pill--outline">Find vendors</Link>
-              <Link to="/demo" className="rs__pill rs__pill--outline">See the demo</Link>
+              <Link to={partnerHref("/")} className="rs__pill rs__pill--outline">List your business</Link>
             </div>
-            <p className="rs__vendors">
-              Just looking for a caterer, decorator or photographer? <Link to="/vendors">Find vendors and their prices</Link>, free.
-            </p>
-            <p className="rs__vendors">
-              Vendors: get found by people planning near you, with or without a website.{" "}
-              <Link to={partnerHref("/")}>List your business &rarr;</Link>
-            </p>
           </div>
 
           <section className="rs__status" aria-labelledby="status-title">
@@ -163,6 +156,7 @@ export function LandingPage() {
                 </li>
               ))}
             </ol>
+            <Link to="/demo" className="rs__demo">See it in the demo, no sign-up <span aria-hidden="true">&rarr;</span></Link>
           </section>
         </main>
       </section>
@@ -279,9 +273,14 @@ export function LandingPage() {
 
       <section className="rs-close" aria-labelledby="close-title">
         <div className="rs-wrap rs-close__inner">
-          <h2 id="close-title" className="rs-h2">Tell us about the event. <em>We&rsquo;ll take it from there.</em></h2>
-          <p className="rs-lede">Say what you&rsquo;re planning in your own words. {BRAND.name} asks for anything it&rsquo;s missing, checks it all with you, then gets on with the legwork.</p>
-          <Link to="/signin?new=1" className="rs__pill rs__pill--solid rs-close__cta">Plan an event</Link>
+          <h2 id="close-title" className="rs-h2">Plan it, price it, <em>or get found.</em></h2>
+          <p className="rs-lede">Plan the whole event with {BRAND.name}, find vendors and see their prices, or list your business for people planning near you.</p>
+          <div className="rs-close__actions">
+            <Link to="/signin?new=1" className="rs__pill rs__pill--solid rs-close__cta">Plan an event</Link>
+            <Link to="/vendors" className="rs__pill rs__pill--outline rs-close__cta">Find vendors</Link>
+            <Link to={partnerHref("/")} className="rs__pill rs__pill--outline rs-close__cta">List your business</Link>
+          </div>
+          <Link to="/demo" className="rs-close__demo">Or see the demo, no sign-up <span aria-hidden="true">&rarr;</span></Link>
         </div>
       </section>
 
