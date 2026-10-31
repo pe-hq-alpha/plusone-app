@@ -55,7 +55,7 @@
 </div>
 
 
-> **We're building a standardised way to plan and buy events in India, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
+> **We're building a standardised way to plan events in India, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
 
 Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
 
@@ -64,7 +64,7 @@ Planning an event means juggling: vendors on calls and WhatsApp, quotes in email
 
 **What it saves.** In the demo's 60th-birthday lunch, the quote that looks cheapest is the dearest once its minimum order, service, transport and GST sit on the same lines; choosing the one that really is cheaper saves the host about 10%. An event hires many vendors (the average wedding, 14), so if the same 10% holds across the package, a ₹5 lakh event keeps about ₹50,000 and a ₹20 lakh wedding about ₹2 lakh. On the founders' own baby shower, ₹29,500, about 10% of what was quoted, came as charges outside the headline prices ([measured](#measured-results)).
 
-India's weddings alone are about $130 billion a year (Jefferies, 2024); 87% of the industry is unorganised and the average wedding hires 14 vendors (Kotak Mutual Fund, Nov 2025). Demand is never the question; what's missing is one organised place where every price can be seen and compared. The aim is to standardise how events are planned and bought, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
+India's weddings alone are about $130 billion a year (Jefferies, 2024); 87% of the industry is unorganised and the average wedding hires 14 vendors (Kotak Mutual Fund, Nov 2025). Demand is never the question; what's missing is one organised place where every price can be seen and compared. The aim is to standardise how events are planned, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
 
 <img src="assets/overview.svg" width="100%" alt="How PlusOne works: customers, families and event managers, describe their event in PlusOne; vendors get the same brief and send quotes back; PlusOne puts every quote on the same lines, flags missing charges and makes every price comparable, so the customer compares them line by line; the PlusOne team verifies every vendor">
 
@@ -146,7 +146,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **Why wouldn't a customer and vendor take the deal to WhatsApp?** The guarantee, the locked standard price, the staged payments and the vendor's track record only exist for bookings made through PlusOne, the way home-services apps keep theirs. [Why bookings stay](BUSINESS.md#why-bookings-stay-on-plusone)
 
-**Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned, and 87% of the industry is unorganised. What's missing is one organised place to plan and buy it.
+**Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned, and 87% of the industry is unorganised. What's missing is one organised place to plan it.
 
 **What was built during the hackathon?** A two-sided platform with Meta's models at its core: the standard sheet, Compare line by line, the market range, Partner and Ops, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, price lists read on open weights, and quote updates on WhatsApp. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
 

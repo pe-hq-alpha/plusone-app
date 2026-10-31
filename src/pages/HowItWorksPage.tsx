@@ -100,7 +100,7 @@ export function HowItWorksPage() {
 
         <section className="card mt-14 p-6 md:p-8" aria-labelledby="aim-h">
           <h2 id="aim-h" className="display text-[clamp(1.6rem,2.6vw,2.1rem)] leading-tight">
-            A standard way <em>to plan and buy events</em>
+            A standard way <em>to plan events</em>
           </h2>
           <p className="mt-3 max-w-[46rem] leading-relaxed text-muted">
             Every event, whatever its size, should get a clear budget, vendor options that can be compared, prices that say what they include, and a
