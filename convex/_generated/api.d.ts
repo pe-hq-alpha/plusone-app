@@ -53,6 +53,7 @@ import type * as lib_charges from "../lib/charges.js";
 import type * as lib_claude from "../lib/claude.js";
 import type * as lib_colours from "../lib/colours.js";
 import type * as lib_comparable from "../lib/comparable.js";
+import type * as lib_covers from "../lib/covers.js";
 import type * as lib_demoGifts from "../lib/demoGifts.js";
 import type * as lib_demoKit from "../lib/demoKit.js";
 import type * as lib_disposableEmail from "../lib/disposableEmail.js";
@@ -214,6 +215,7 @@ declare const fullApi: ApiFromModules<{
   "lib/claude": typeof lib_claude;
   "lib/colours": typeof lib_colours;
   "lib/comparable": typeof lib_comparable;
+  "lib/covers": typeof lib_covers;
   "lib/demoGifts": typeof lib_demoGifts;
   "lib/demoKit": typeof lib_demoKit;
   "lib/disposableEmail": typeof lib_disposableEmail;
