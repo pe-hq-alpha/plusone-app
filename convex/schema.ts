@@ -278,6 +278,12 @@ export const vendorProfileFields = {
   completedEvents: v.number(),
   /** A sample vendor for the guest demo, modelled on published prices: shown only on sample events, never to a real family. */
   sample: v.optional(v.boolean()),
+  /** A listing PlusOne added from public web listings: its trade, so Find vendors reaches it by index. */
+  leadCategory: v.optional(v.string()),
+  /** Its map listing and social pages, linked only, never read (lib/leads). */
+  links: v.optional(v.object({ maps: v.optional(v.string()), instagram: v.optional(v.string()), facebook: v.optional(v.string()) })),
+  /** The public pages its facts came from, and when they were found. */
+  foundVia: v.optional(v.object({ urls: v.array(v.string()), at: v.number() })),
 };
 
 /** A way of charging on the category's standard sheet ("per_hour"); missing on prices saved before there were ways, which read as Compare's unit. */
@@ -997,10 +1003,25 @@ export default defineSchema({
 
   vendorProfiles: defineTable(vendorProfileFields)
     .index("by_cityKey_and_status", ["cityKey", "status"])
+    .index("by_cityKey_and_leadCategory", ["cityKey", "leadCategory"])
     .index("by_status", ["status"])
     .index("by_website", ["website"])
     .index("by_ownerUserId", ["ownerUserId"]),
 
+  /** Businesses to look up on the open web (name, area and trade only), and what the lookup found (lib/leads, leads.ts). */
+  vendorLeads: defineTable({
+    name: v.string(),
+    area: v.optional(v.string()),
+    category: v.string(),
+    key: v.string(),
+    status: v.union(v.literal("queued"), v.literal("found"), v.literal("not_found"), v.literal("error")),
+    reason: v.optional(v.string()),
+    profileId: v.optional(v.id("vendorProfiles")),
+    checkedAt: v.optional(v.number()),
+  })
+    .index("by_key", ["key"])
+    .index("by_status", ["status"])
+    .index("by_category_and_status", ["category", "status"]),
   vendorOfferings: defineTable(vendorOfferingFields).index("by_profileId", ["profileId"]),
 
   vendorClaims: defineTable(vendorClaimFields)

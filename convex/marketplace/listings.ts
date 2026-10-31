@@ -46,6 +46,9 @@ export const listingCard = v.object({
   completedEvents: v.number(),
   /** Where they work from, for the map: the area they name, or only their city. */
   place: v.optional(placeValidator),
+  /** Found through public web listings, not yet verified: said beside the listing, with its map and social links. */
+  foundOnWeb: v.optional(v.boolean()),
+  links: v.optional(v.object({ maps: v.optional(v.string()), instagram: v.optional(v.string()), facebook: v.optional(v.string()) })),
 });
 
 export const bandResult = v.union(
@@ -107,6 +110,8 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     photos: await photosForCustomers(ctx, profile),
     completedEvents: profile.completedEvents,
     place: profile.place ?? placeFor(profile.serviceArea?.join(", "), profile.city) ?? undefined,
+    ...(profile.foundVia && !profile.ownerUserId ? { foundOnWeb: true } : {}),
+    ...(profile.links ? { links: profile.links } : {}),
   };
 }
 
@@ -124,8 +129,18 @@ export async function listedVendors(ctx: QueryCtx, category: string, city: strin
     const rows = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", key).eq("status", status));
     for await (const profile of rows) {
       if (cards.length >= MAX_CARDS || ++scanned > MAX_SCANNED) break;
+      // Listings found on the open web are reached by their own index below, so thousands of them never crowd out the rest.
+      if (profile.leadCategory && status === "pending") continue;
       if (!isListed(profile) || !profile.categories.includes(category)) continue;
       if ((profile.sample && !samples) || isTrial(profile)) continue;
+      cards.push(await cardFor(ctx, profile, category));
+    }
+  }
+  if (cards.length < MAX_CARDS) {
+    const found = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_leadCategory", (q) => q.eq("cityKey", key).eq("leadCategory", category));
+    for await (const profile of found) {
+      if (cards.length >= MAX_CARDS) break;
+      if (profile.status !== "pending" || !isListed(profile)) continue;
       cards.push(await cardFor(ctx, profile, category));
     }
   }

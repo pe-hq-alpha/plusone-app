@@ -7,6 +7,7 @@ import { distanceKm, kmText, placeFor, readSearch, type Asked } from "../../conv
 import { RADII } from "../components/NearVenue";
 import type { MapPin } from "../components/VendorMap";
 import { BRAND } from "../lib/brand";
+import { partnerHref } from "../lib/hosts";
 import { money } from "../lib/format";
 import { useAuthActions } from "../lib/session";
 import { Backdrop } from "../components/ui/Backdrop";
@@ -344,6 +345,7 @@ function ListingCard({ card, category, km }: { card: Card; category: string; km:
         </div>
         {card.sample && <span className="chip-quiet shrink-0">Sample</span>}
       </div>
+      {card.foundOnWeb && <p className="mt-1 text-[11px] text-quiet">Found through public web listings · not yet verified</p>}
       <div className="mt-2 flex flex-wrap gap-1.5">
         {card.badges.includes("verified") && <span className="chip-ok">Verified</span>}
         {card.badges.includes("transparent_pricing") && <span className="chip-ok">Transparent pricing</span>}
@@ -465,6 +467,7 @@ export function VendorListingPage() {
               </span>
             </div>
             {listing.about && <p className="mt-4 leading-relaxed text-ink">{listing.about}</p>}
+            {listing.card.foundOnWeb && <FoundOnWeb name={listing.card.name} website={listing.card.website} links={listing.card.links} />}
 
             <h2 className="mt-8 text-xl">Packages</h2>
             {listing.packages.length === 0 ? (
@@ -540,5 +543,42 @@ function PackageChargeLines({ category, currency, charges, includes }: { categor
           </div>
         ))}
     </dl>
+  );
+}
+
+/**
+ * A listing PlusOne added from public web listings: said plainly, with the business's own
+ * pages linked (photos stay on its map listing, never copied), and a way to claim or remove it.
+ */
+function FoundOnWeb({ name, website, links }: { name: string; website?: string; links?: { maps?: string; instagram?: string; facebook?: string } }) {
+  const out = [
+    website && { href: website, text: "Their website" },
+    links?.maps && { href: links.maps, text: "Photos and directions on Google Maps" },
+    links?.instagram && { href: links.instagram, text: "Instagram" },
+    links?.facebook && { href: links.facebook, text: "Facebook" },
+  ].filter(Boolean) as { href: string; text: string }[];
+  return (
+    <div className="card-quiet mt-5 px-4 py-3 text-sm">
+      <p className="text-muted">
+        Found through public web listings. {BRAND.name} hasn&rsquo;t verified {name} yet, and the details here are what the business
+        published about itself.
+      </p>
+      {out.length > 0 && (
+        <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+          {out.map((l) => (
+            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer nofollow" className="text-accent underline underline-offset-2">
+              {l.text}
+            </a>
+          ))}
+        </p>
+      )}
+      <p className="mt-2 text-xs text-quiet">
+        Is this your business? <a href={partnerHref("/")} className="text-accent underline underline-offset-2">Claim it on {BRAND.name} Partner</a>, or{" "}
+        <a href={`mailto:hello@plusoneevents.site?subject=${encodeURIComponent(`Remove the listing for ${name}`)}`} className="text-accent underline underline-offset-2">
+          ask us to remove it
+        </a>
+        .
+      </p>
+    </div>
   );
 }
