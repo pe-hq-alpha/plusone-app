@@ -14,7 +14,7 @@ import { PhotosLane } from "./ops/PhotosLane";
 import { waitText } from "./ops/time";
 
 /**
- * PlusOne Ops: the team checks every vendor before families hear from them. Each
+ * PlusOne Ops: the team checks every vendor before customers hear from them. Each
  * decision is kept with the checks made and the evidence behind it. Software can gather
  * evidence; a person decides.
  */

@@ -2,7 +2,7 @@
 
 [← Back to the README](README.md)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and compared their quotes (tag `pre-hackathon`). In the nine days it grew into a two-sided platform with six Meta models at its core: 307 commits, the code from about 41,000 lines to 65,000, the backend from 124 files to 219. Everything below was built during the event.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and compared their quotes (tag `pre-hackathon`). In the nine days it grew into a two-sided platform with six Meta models at its core: over 300 commits, the code from about 41,000 lines to 66,000, the backend from 124 files to 219. Everything below was built during the event.
 
 | What | Meta model | Status |
 |---|---|---|

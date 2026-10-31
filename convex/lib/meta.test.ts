@@ -172,9 +172,12 @@ describe("choosing and falling back", () => {
   });
 
   it("uses Meta only when asked for and its key is set", () => {
-    expect(chosenProvider({})).toBe("claude");
+    // Meta is the default: a key is all it needs; Claude only when asked for, or with no Meta key.
+    expect(chosenProvider({ MODEL_API_KEY: "LLM_1_x" })).toBe("meta");
     expect(chosenProvider({ MODEL_PROVIDER: "meta", MODEL_API_KEY: "LLM_1_x" })).toBe("meta");
+    expect(chosenProvider({ MODEL_PROVIDER: "claude", MODEL_API_KEY: "LLM_1_x" })).toBe("claude");
     expect(chosenProvider({ MODEL_PROVIDER: "meta" })).toBe("claude");
+    expect(chosenProvider({})).toBe("claude");
   });
 
   it("retries a rate limit, waiting as asked, then succeeds on Meta", async () => {

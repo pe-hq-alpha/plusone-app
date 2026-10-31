@@ -9,6 +9,7 @@ import { transcribe as voiceTranscribe, type VoiceOptions, type VoiceResult } fr
 import { VOICE_WORDS } from "./lib/voiceWords";
 import { wavInfo } from "./lib/wav";
 import { rateLimiter } from "./rateLimits";
+import { chosenProvider } from "./lib/models";
 
 /**
  * Speaking the plan: the browser records a voice note, uploads it as a WAV, and `transcribe`
@@ -123,7 +124,7 @@ export const transcribe = action({
     if (!bytes || !isWav(bytes)) throw new ConvexError(NOT_HEARD);
     try {
       if (!file.canPlan) throw new ConvexError("You are not a member of this event.");
-      if (process.env.MODEL_PROVIDER !== "meta" || !process.env.MODEL_API_KEY) throw new ConvexError(UNAVAILABLE);
+      if (chosenProvider() !== "meta") throw new ConvexError(UNAVAILABLE);
       await allowance(ctx, userId, file.isGuest, true);
 
       const started = Date.now();

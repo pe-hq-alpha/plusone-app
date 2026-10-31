@@ -22,7 +22,7 @@ npx convex dev --once     # first run: sign in and create a dev deployment (writ
 node scripts/auth-keys.mjs                                   # once: JWT_PRIVATE_KEY and JWKS for the demo's guest tokens
 npx convex env set SITE_URL http://localhost:5173            # where links in emails point
 npx convex env set CLERK_JWT_ISSUER_DOMAIN https://<your-clerk-frontend-api>
-npx convex env set MODEL_PROVIDER meta && npx convex env set MODEL_API_KEY <meta-key>   # or ANTHROPIC_API_KEY
+npx convex env set MODEL_API_KEY <meta-key>   # Meta's models; or ANTHROPIC_API_KEY for Claude
 echo 'VITE_CLERK_PUBLISHABLE_KEY=pk_test_…' >> .env.local     # the app's Clerk key
 npm run dev               # the app on http://localhost:5173, and the backend watching for changes
 ```
@@ -31,7 +31,7 @@ Open `http://localhost:5173/demo` for the sample events; they need only the step
 
 Or run `./start.sh`, which checks Node, installs what's missing, warns about any backend key not yet set on the deployment, and then starts both.
 
-Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **To run on Meta's models**, also set `npx convex env set MODEL_PROVIDER meta` and `npx convex env set MODEL_API_KEY …` (a Meta Model API key); without them every call runs on Claude. The minimum to try it is what the block above sets. To deploy (run `node scripts/auth-keys.mjs --prod` once for the production deployment first):
+Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **Model calls run on Meta's models** once `npx convex env set MODEL_API_KEY …` (a Meta Model API key) is set; without it, or with `MODEL_PROVIDER=claude`, every call runs on Claude. The minimum to try it is what the block above sets. To deploy (run `node scripts/auth-keys.mjs --prod` once for the production deployment first):
 
 ```bash
 npx convex deploy -y                                                    # the backend
@@ -48,10 +48,10 @@ Every push to `main` runs typecheck, tests and a build in CI, and a second workf
 
 | Variable | For |
 |---|---|
-| `ANTHROPIC_API_KEY` | Claude: the fallback for every model call, and the provider when `MODEL_PROVIDER` isn't `meta` |
+| `ANTHROPIC_API_KEY` | Claude: the fallback for every model call, and the provider when `MODEL_PROVIDER` is `claude` or no Meta key is set |
 | `ANTHROPIC_MODEL_SMART`, `ANTHROPIC_MODEL_FAST` | Optional. Override `claude-sonnet-5-5` and `claude-haiku-5-5` |
-| `MODEL_PROVIDER` | `meta` to run model calls on Meta's models; anything else (or unset) uses Claude |
-| `MODEL_API_KEY` | Meta Model API key. Without it, `MODEL_PROVIDER=meta` falls back to Claude |
+| `MODEL_PROVIDER` | Optional. Model calls run on Meta's models by default; `claude` runs them on Claude instead |
+| `MODEL_API_KEY` | Meta Model API key. Without it, calls fall back to Claude |
 | `META_MODEL_SMART`, `META_MODEL_FAST` | Optional. Override `muse-spark-1.3` per tier (Contributor ids are refused) |
 | `META_BASE_URL` | Optional. The Model API address, `https://api.meta.ai/v1` by default |
 | `BASETEN_API_KEY` | Optional. Baseten key for Muse Spark Open; without it, calls that ask for Spark Open run on Muse Spark |

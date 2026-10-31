@@ -11,9 +11,9 @@ import { type Completion, type CompletionRequest, type Effort, type Message, Mod
 export { ModelAnswerError, type Completion, type Effort, type Message, type Part, type Provider, type Tier };
 
 /**
- * Every model call goes through here. `MODEL_PROVIDER` on the deployment picks Meta's
- * models or Claude; call sites only name a tier. Meta is used only when its key is set,
- * and a Meta call that fails for a reason Claude can cover falls back to Claude.
+ * Every model call goes through here, on Meta's models by default; call sites only name a
+ * tier. `MODEL_PROVIDER=claude` on a deployment, or no Meta key, runs them on Claude, and a
+ * Meta call that fails for a reason Claude can cover falls back to Claude.
  */
 
 /** Tiers: fast for extraction and short drafts, smart for judgement and longer writing. */
@@ -82,12 +82,12 @@ function toRequest(input: CallInput, schema?: z.ZodType): CompletionRequest {
 
 let warnedNoKey = false;
 
-/** Meta when the deployment asks for it and has a key; Claude otherwise. */
+/** Meta's models by default; Claude only when a deployment asks for it, or has no Meta key. */
 export function chosenProvider(env: Record<string, string | undefined> = process.env): "meta" | "claude" {
-  if (env.MODEL_PROVIDER !== "meta") return "claude";
+  if (env.MODEL_PROVIDER === "claude") return "claude";
   if (env.MODEL_API_KEY) return "meta";
   if (!warnedNoKey) {
-    console.warn("MODEL_PROVIDER is meta but MODEL_API_KEY is not set; using Claude.");
+    console.warn("MODEL_API_KEY is not set; using Claude until a Meta Model API key is.");
     warnedNoKey = true;
   }
   return "claude";

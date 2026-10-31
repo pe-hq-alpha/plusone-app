@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalQuery } from "./_generated/server";
+import { chosenProvider } from "./lib/models";
 
 /**
  * What the uptime check reads through `/health`: the database answers, and whether model
@@ -10,7 +11,7 @@ export const status = internalQuery({
   returns: v.object({ database: v.boolean(), models: v.union(v.literal("meta"), v.literal("fallback")) }),
   handler: async (ctx) => {
     await ctx.db.query("vendorProfiles").take(1);
-    const meta = process.env.MODEL_PROVIDER === "meta" && Boolean(process.env.MODEL_API_KEY);
+    const meta = chosenProvider() === "meta";
     return { database: true, models: meta ? ("meta" as const) : ("fallback" as const) };
   },
 });

@@ -7,6 +7,7 @@ import { wonderCostUsd } from "../lib/modelCost";
 import { verifyVendor, type Spent, type VendorFacts } from "../lib/wonder";
 import { rateLimiter } from "../rateLimits";
 import { vendorCheckFields, vendorCheckStatus, verificationReport } from "../schema";
+import { chosenProvider } from "../lib/models";
 
 /**
  * The vendor check for Ops: a reviewer presses a button, the check runs in the
@@ -193,7 +194,7 @@ export const start = mutation({
     const { userId } = await requireStaff(ctx);
     const profile = await ctx.db.get(args.profileId);
     if (!profile) throw new ConvexError("That listing is no longer there.");
-    if (process.env.MODEL_PROVIDER !== "meta" || !process.env.MODEL_API_KEY) {
+    if (chosenProvider() !== "meta") {
       throw new ConvexError("Checks aren't available right now.");
     }
     const recent = await ctx.db

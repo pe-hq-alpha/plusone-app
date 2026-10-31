@@ -1679,7 +1679,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
                     setUnit(next?.unit ?? "total");
                     setUnitKey(next?.units[0].key ?? "");
                     setTyped({});
-                    setAnswers((prev) => (prev.gst ? { gst: prev.gst } : {}));
+                    setAnswers((prev): Record<string, ChargeAnswer> => (prev.gst ? { gst: prev.gst } : {}));
                   }}
                 >
                   {profile.categories.map((c) => <option key={c}>{c}</option>)}
