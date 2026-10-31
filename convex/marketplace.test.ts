@@ -312,6 +312,10 @@ describe("a vendor's prices", () => {
     expect(read.onTop).toEqual(["GST", "Transport ₹1,500", "Cleaning after the event ₹1,200", "Generator, at cost"]);
     expect(read.notProvided).toEqual(["Water"]);
     expect(read.notSaid).toEqual(["Crockery and serving ware"]);
+    // A line the package's own includes name counts as said, and isn't listed twice.
+    const withLeaf = packageCharges(sheetFor("Catering"), [{ key: "service_staff", status: "included" }], "INR", ["Banana leaf", "Serving staff"]);
+    expect(withLeaf.inPrice).toEqual([]);
+    expect(withLeaf.notSaid).toEqual(["GST", "Transport", "Water"]);
     expect(profileId).toBeTruthy();
   });
 

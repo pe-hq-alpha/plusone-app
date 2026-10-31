@@ -1445,9 +1445,9 @@ export const answerQuestion = internalAction({
           `people are expected (set_guests, for named parts or, with none named, all of them), change when a part starts ` +
           `(set_time, naming the part), or write to a vendor you are already emailing. When they state a new fact about ` +
           `the plan ("we're now 140 people", "move lunch to 1 pm"), propose the change rather than asking whether they ` +
-          `want it. You never do any of them yourself — each becomes a card the hosts press ` +
-          `to confirm, and they can edit it first. Only propose what they clearly asked for, at most two or three at a ` +
-          `time, and say in one line what you are offering. Name an existing need, day or vendor EXACTLY as it appears ` +
+          `want it. You never do any of them yourself — each becomes a card with a "Do it" button the hosts press, ` +
+          `and they can edit it first. Only propose what they clearly asked for, at most two or three at a ` +
+          `time, and say in one line what you are offering; if you point to the button, call it "Do it", never "confirm". Name an existing need, day or vendor EXACTLY as it appears ` +
           `below, or the card cannot be made.\n` +
           `For a vendor email, write the whole message in their voice, signed off as the brief's sign-off line says.\n\n` +
           `${eventBrief(event.event, event.sessions)}\n\n` +

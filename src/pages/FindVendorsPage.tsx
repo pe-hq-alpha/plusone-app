@@ -120,7 +120,7 @@ export function FindVendorsPage() {
                 <span className="ml-2 align-middle text-sm font-normal text-muted">
                   {area ? `near ${area}` : ""}
                   {area && maxPrice ? " · " : ""}
-                  {maxPrice ? `from ${money(maxPrice, "INR")} or less` : ""}
+                  {maxPrice ? `up to ${money(maxPrice, "INR")}` : ""}
                   <button type="button" className="ml-2 text-accent underline" onClick={() => apply({})}>Clear</button>
                 </span>
               )}
@@ -484,7 +484,7 @@ export function VendorListingPage() {
                       {p.taxIncluded === true ? " · GST included" : p.taxIncluded === false ? " · GST extra" : " · GST not stated"}
                     </p>
                     {p.includes.length > 0 && <p className="mt-1.5 text-sm text-muted">Includes {p.includes.join(", ")}</p>}
-                    <PackageChargeLines category={p.category} currency={p.currency} charges={p.charges} />
+                    <PackageChargeLines category={p.category} currency={p.currency} charges={p.charges} includes={p.includes} />
                   </li>
                 ))}
               </ul>
@@ -518,9 +518,9 @@ export function VendorListingPage() {
 }
 
 /** A package's charges as the vendor stated them: in the price, on top, not provided, and what they haven't said. */
-function PackageChargeLines({ category, currency, charges }: { category: string; currency: string; charges?: PackageCharge[] }) {
+function PackageChargeLines({ category, currency, charges, includes }: { category: string; currency: string; charges?: PackageCharge[]; includes: string[] }) {
   const sheet = sheetFor(category);
-  const read = packageCharges(sheet, charges?.filter((c) => c.key !== "gst"), currency);
+  const read = packageCharges(sheet, charges?.filter((c) => c.key !== "gst"), currency, includes);
   const notSaid = read.notSaid.filter((l) => l !== "GST");
   const rows: [string, string[], string][] = [
     ["Also in the price", read.inPrice, "text-muted"],

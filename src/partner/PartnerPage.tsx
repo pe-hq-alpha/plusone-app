@@ -895,7 +895,7 @@ function Briefs({ verified }: { verified: boolean }) {
           <EmptyState compact icon="mail" title="No open requests right now" body="When someone near you needs what you offer, it shows up here." />
         ) : (
           briefs.map((b) => (
-            <article key={b._id} className="card p-5 md:p-6">
+            <article key={b._id} className="card min-w-0 p-5 md:p-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   {b.category !== b.title && <p className="label mb-1">{b.category}</p>}
@@ -918,7 +918,9 @@ function Briefs({ verified }: { verified: boolean }) {
                 <div className="mt-6">
                   <h4 className="label">How the customer sees your offer</h4>
                   <p className="mb-3 mt-1 text-sm text-muted">Their Compare: every quote and offer on the same lines, with what each leaves unsaid.</p>
-                  <CustomerCompare eventId={demoEventId} category={b.category} city={b.city} />
+                  <div className="min-w-0 overflow-x-auto">
+                    <CustomerCompare eventId={demoEventId} category={b.category} city={b.city} />
+                  </div>
                 </div>
               )}
             </article>
@@ -1072,6 +1074,11 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
 
   const send = (e: FormEvent) => {
     e.preventDefault();
+    const noAmount = sheet?.lines.find((l) => answers[l.key]?.status === "priced" && !answers[l.key].amount.trim());
+    if (noAmount) {
+      setError(`Say what ${noAmount.label.toLowerCase()} costs, or mark it At cost.`);
+      return;
+    }
     setSending(true);
     setError(null);
     const lines = (sheet?.lines ?? []).map((l) => {
@@ -1132,52 +1139,43 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
       {sheet && (
         <fieldset>
           <legend className="label">Every other charge, the same for every vendor</legend>
-          <p className="mb-2.5 text-xs text-muted">
+          <p className="mb-1 text-xs text-muted">
             <strong className="font-medium text-ink">In the price</strong>: the main price covers it.{" "}
-            <strong className="font-medium text-ink">Added, in ₹</strong>: its own amount, added to the total.{" "}
-            <strong className="font-medium text-ink">Extra</strong>: billed on top, outside the total.
+            <strong className="font-medium text-ink">Added</strong>: a fixed amount, added to the total.{" "}
+            <strong className="font-medium text-ink">At cost</strong>: charged on top, outside the total.
           </p>
-          <ul className="grid gap-2">
+          <div>
             {sheet.lines.map((line) => {
               const a = answers[line.key];
-              const choose = (status: LineAnswer["status"]) => setAnswers((prev) => ({ ...prev, [line.key]: { status, amount: prev[line.key]?.amount ?? "" } }));
               return (
-                <li key={line.key} className="card-quiet flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-                  <span className="min-w-[9rem] flex-1 text-sm font-medium">{line.label}</span>
-                  <div role="radiogroup" aria-label={line.label} className="flex flex-wrap gap-1.5">
-                    {(
-                      [
-                        ["included", "In the price"],
-                        ["priced", "Added, in ₹"],
-                        ["extra", "Extra"],
-                      ] as const
-                    ).map(([status, text]) => (
-                      <button
-                        key={status}
-                        type="button"
-                        role="radio"
-                        aria-checked={a?.status === status}
-                        onClick={() => choose(status)}
-                        className={a?.status === status ? "chip-pending" : "chip-quiet hover:text-accent"}
-                      >
-                        {text}
-                      </button>
-                    ))}
-                  </div>
-                  {a && a.status !== "included" && (
-                    <input
-                      className="input w-32"
-                      inputMode="numeric"
-                      aria-label={`${line.label} amount in rupees`}
-                      value={a.amount}
-                      onChange={(e) => setAnswers((prev) => ({ ...prev, [line.key]: { ...a, amount: e.target.value } }))}
-                      placeholder={a.status === "priced" ? "₹ amount" : "₹ if known"}
+                <div key={line.key} className="charge">
+                  <span className="charge__name">{line.label}</span>
+                  <div className="charge__how">
+                    <Seg
+                      label={line.label}
+                      value={a?.status}
+                      choices={line.key === "gst" ? OFFER_CHOICES.map(([k, t]) => [k, k === "extra" ? "On top" : t]) : OFFER_CHOICES}
+                      onChange={(status) =>
+                        setAnswers((prev) => ({ ...prev, [line.key]: { status: status as LineAnswer["status"], amount: prev[line.key]?.amount ?? "" } }))
+                      }
                     />
-                  )}
-                </li>
+                    {a && a.status !== "included" && (
+                      <span className="charge__amount">
+                        <input
+                          className="input"
+                          inputMode="numeric"
+                          aria-label={`${line.label}, amount in ₹`}
+                          value={a.amount}
+                          onChange={(e) => setAnswers((prev) => ({ ...prev, [line.key]: { ...a, amount: e.target.value.replace(/[^\d.]/g, "") } }))}
+                          placeholder={a.status === "priced" ? "₹" : "₹ if known"}
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </fieldset>
       )}
 
@@ -1358,6 +1356,12 @@ const CHARGE_CHOICES: [PackageCharge["status"], string][] = [
   ["priced", "Added"],
   ["extra", "At cost"],
   ["none", "Not provided"],
+];
+/** The request sheet's answers, in the same words as a package's. */
+const OFFER_CHOICES: [PackageCharge["status"], string][] = [
+  ["included", "In the price"],
+  ["priced", "Added"],
+  ["extra", "At cost"],
 ];
 const GST_CHOICES: [PackageCharge["status"], string][] = [
   ["included", "In the price"],
@@ -1564,7 +1568,7 @@ function readPackage(o: { category: string; currency?: string; includes: string[
   const sheet = sheetFor(o.category);
   // GST said the older way (a yes or no) reads as its line.
   const charges = o.charges?.some((c) => c.key === "gst") || o.taxIncluded == null ? o.charges : [{ key: "gst", status: o.taxIncluded ? "included" : "extra" } as PackageCharge, ...(o.charges ?? [])];
-  const read = packageCharges(sheet, charges, o.currency ?? "INR");
+  const read = packageCharges(sheet, charges, o.currency ?? "INR", o.includes);
   const gstAsked = sheet?.lines.some((l) => l.key === "gst");
   if (!gstAsked && !charges?.some((c) => c.key === "gst")) read.notSaid.unshift("GST");
   return { ...read, inPrice: [...o.includes, ...read.inPrice] };
@@ -1615,6 +1619,11 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
   const draft = { category, currency: "INR", includes: includes.split("\n").map((s) => s.trim()).filter(Boolean), charges: charges() };
   const read = readPackage(draft);
   const answeredAll = lines.every((l) => answers[l.key]);
+  // An added charge with no amount yet isn't said; the preview says so rather than calling it done.
+  const noAmount = [
+    ...lines.filter((l) => answers[l.key]?.status === "priced" && !answers[l.key].amount.trim()).map((l) => l.label),
+    ...own.filter((c) => c.status === "priced" && c.label.trim() && !c.amount.trim()).map((c) => c.label.trim()),
+  ];
 
   const saveWith = (nextTitle: string, nextIncludes: string[]) => {
     setError(null);
@@ -1888,7 +1897,9 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
               <ul>{read.notProvided.map((x) => <li key={x}>{x}</li>)}</ul>
             </div>
           )}
-          {answeredAll ? (
+          {noAmount.length > 0 ? (
+            <p className="pkread__todo">Amount missing: {noAmount.join(", ")}. Add it, or mark it At cost.</p>
+          ) : answeredAll ? (
             <p className="pkread__done">Every charge said. Nothing will surprise a customer.</p>
           ) : (
             <p className="pkread__todo">
