@@ -55,7 +55,7 @@
 </div>
 
 
-> **We're building a standardised way to plan events in India, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
+> **We're building a standardised way to plan events, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
 
 Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
 
@@ -64,7 +64,7 @@ Planning an event means juggling: vendors on calls and WhatsApp, quotes in email
 
 **What it saves.** In the demo's 60th-birthday lunch, the quote that looks cheapest is the dearest once its minimum order, service, transport and GST sit on the same lines; choosing the one that really is cheaper saves the host about 10%. An event hires many vendors (the average wedding, 14), so if the same 10% holds across the package, a ₹5 lakh event keeps about ₹50,000 and a ₹20 lakh wedding about ₹2 lakh. On the founders' own baby shower, ₹29,500, about 10% of what was quoted, came as charges outside the headline prices ([measured](#measured-results)).
 
-India's weddings alone are about $130 billion a year (Jefferies, 2024); 87% of the industry is unorganised and the average wedding hires 14 vendors (Kotak Mutual Fund, Nov 2025). Demand is never the question; what's missing is one organised place where every price can be seen and compared. The aim is to standardise how events are planned, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
+We start where we live: in India, weddings alone are about $130 billion a year (Jefferies, 2024), 87% of the industry is unorganised and the average wedding hires 14 vendors (Kotak Mutual Fund, Nov 2025). Demand is never the question; what's missing is one organised place where every price can be seen and compared. The aim is to standardise how events are planned, so that every event gets a clear budget, comparable vendor options, transparent pricing and a predictable way to get it done, whatever its size: a first birthday as much as a wedding.
 
 <img src="assets/overview.svg" width="100%" alt="How PlusOne works: customers, families and event managers, describe their event in PlusOne; vendors get the same brief and send quotes back; PlusOne puts every quote on the same lines, flags missing charges and makes every price comparable, so the customer compares them line by line; the PlusOne team verifies every vendor">
 
@@ -150,7 +150,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **What was built during the hackathon?** A two-sided platform with Meta's models at its core: the standard sheet, Compare line by line, the market range, Partner and Ops, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, price lists read on open weights, and quote updates on WhatsApp. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
 
-**Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website. Vendors we have spoken to in Chennai have said they will sign up on Partner.
+**Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website. Vendors we have spoken to have said they will sign up on Partner.
 
 **Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English, Tamil and both. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing.
 
@@ -160,7 +160,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **What's real and what's a sample?** Everything you can click works and is live. The demo's event and vendors are made up and marked Sample; the model runs under the hood are real, with their dates and costs.
 
-**Where are you today, and where does it go?** Two founders, bootstrapped, the product live and free until launch. Next, one city with real vendors and a paid pilot, then India, then other countries on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne. [The vision](#the-business)
+**Where are you today, and where does it go?** Two founders, bootstrapped, the product live and free until launch. Next, a first city with real vendors and a paid pilot, then more cities and countries on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne. [The vision](#the-business)
 
 ## Meta's models in PlusOne
 
@@ -199,7 +199,7 @@ Every model step is measured on production against keys marked by hand before an
 | What was tested | Result |
 |---|---|
 | [On a real event](EVALUATIONS.md#evaluation-on-a-real-event-the-founders-own-baby-shower): the founders' own baby shower for 120, its real quotes against what was paid | ₹41,400 paid over ₹2,96,500 quoted; ₹29,500 of it, about 10% of the quoted total, in charges outside the headline prices. On the original quotes PlusOne flags the hall's unstated extra hours and the decorator's unstated set-up, where the ₹20,000 added at the end came from |
-| [Missing charges](EVALUATIONS.md#evaluation-missing-charges): what a planner would still have to ask each vendor | 36 of 37 found at 100% precision on 18 Chennai quotes; 35 of 37 at 97% on 20 held-out quotes in new shapes, the same in three runs |
+| [Missing charges](EVALUATIONS.md#evaluation-missing-charges): what a planner would still have to ask each vendor | 36 of 37 found at 100% precision on 18 realistic quotes; 35 of 37 at 97% on 20 held-out quotes in new shapes, the same in three runs |
 | [Quotes in any form](EVALUATIONS.md#evaluation-reading-quotes-in-any-form): the same quote as an email, a PDF and a phone photo | Read right 18 of 18 times; Tamil and Tanglish quotes 7 of 8 |
 | [Finding the stage](EVALUATIONS.md#evaluation-finding-the-stage) in a hall photo | Found and cut out in 9 of 10 kinds of hall; one living room's sofa was taken for a stage |
 | [Checking a vendor](EVALUATIONS.md#evaluation-checking-a-vendor) with Muse Wonder | Never confirmed a made-up vendor; backed three real ones with sources |
@@ -221,7 +221,7 @@ Every model step is measured on production against keys marked by hand before an
 
 **Where the money is.** Subscriptions and listings pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne. Bookings stay on PlusOne because the guarantee (PlusOne Assured: the quote honoured line by line, a no-show replaced), the price locked at booking, payment in stages and the vendor's track record exist only there. At the prices in our evaluation set, a 60th for 120 comes to about ₹2 lakh across hall, catering, decor and photography; an assumed 8% take would be about ₹16,000 an event against about ₹150 of model cost, a rate to test in the pilot. Every fee is disclosed. Fair pricing means informed and comparable, never one price for everyone or the cheapest bid by default.
 
-**The vision, ten years out.** Online shopping brought sellers under one roof, home services gave cleaning a fixed price, travel sites put every hotel and flight in one place; events never made that move. The aim is to be India's largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the PlusOne team coordinating every vendor end to end, at any size. Even 1% of India's $130 billion a year in weddings alone would be about $1.3 billion in bookings a year. Someone will copy the app; PlusOne wins on execution, trust, its verified network and price data, and brand, built city by city over years.
+**The vision, ten years out.** Online shopping brought sellers under one roof, home services gave cleaning a fixed price, travel sites put every hotel and flight in one place; events never made that move. The aim is to be the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the PlusOne team coordinating every vendor end to end, at any size. Even 1% of the weddings market where we start, about $130 billion a year, would be about $1.3 billion in bookings a year. Someone will copy the app; PlusOne wins on execution, trust, its verified network and price data, and brand, built city by city over years.
 
 **The full version**, with the market sources, the gap, why bookings stay, unit economics and how it reaches people: **[BUSINESS.md](BUSINESS.md)**.
 
