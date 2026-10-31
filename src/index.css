@@ -243,13 +243,13 @@ a { text-underline-offset: 0.2em; }
 }
 :root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-1920.webp"); mix-blend-mode: multiply; opacity: 0.85; }
 .backdrop--quiet {
-  opacity: 0.3;
+  opacity: 0.55;
   /* Inside the app the drawing frames the edges, mild and present; the middle, where text and lists sit, stays clear. */
-  -webkit-mask-image: radial-gradient(80% 76% at 50% 42%, transparent 50%, #000 96%);
-  mask-image: radial-gradient(80% 76% at 50% 42%, transparent 50%, #000 96%);
+  -webkit-mask-image: radial-gradient(80% 76% at 50% 42%, transparent 40%, #000 90%);
+  mask-image: radial-gradient(80% 76% at 50% 42%, transparent 40%, #000 90%);
 }
 .backdrop--contained { position: absolute; }
-:root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.26; }
+:root:not([data-theme="dark"]) .backdrop--quiet { opacity: 0.5; }
 @media (min-width: 1600px) {
   .backdrop { background-image: url("/plates/backdrop-3840.webp"); }
   :root:not([data-theme="dark"]) .backdrop { background-image: url("/plates/backdrop-light-3840.webp"); }

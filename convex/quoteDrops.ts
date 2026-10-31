@@ -179,7 +179,7 @@ export const route = internalAction({
         eventId: event._id,
         model: MODEL_FAST,
         effort: "low",
-        maxOutputTokens: 400,
+        maxOutputTokens: 4000,
         schema: routeSchema,
         messages: [
           {
