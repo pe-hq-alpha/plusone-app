@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { internalMutation, internalQuery } from "./_generated/server";
 import { leadKey } from "./lib/leads";
 import { placeFor } from "./lib/places";
@@ -53,6 +54,7 @@ const found = v.object({
   maps: v.optional(v.string()),
   instagram: v.optional(v.string()),
   facebook: v.optional(v.string()),
+  image: v.optional(v.string()),
   sources: v.array(v.string()),
 });
 
@@ -104,6 +106,8 @@ export const saveResult = internalMutation({
       leadCategory: lead.category,
       ...(Object.keys(links).length ? { links } : {}),
       foundVia: { urls: f.sources.slice(0, 6), at: now },
+      ...(f.image && website ? { cover: { url: f.image, from: website } } : {}),
+      coverCheckedAt: now,
     });
     await ctx.db.patch(lead._id, { status: "found", profileId, checkedAt: now });
     return null;
@@ -169,5 +173,32 @@ export const resetFound = internalMutation({
       }
     }
     return n;
+  },
+});
+
+/** Listings the job added with a website of their own whose preview image hasn't been looked for yet. */
+export const needCovers = internalQuery({
+  args: { limit: v.number() },
+  returns: v.array(v.object({ _id: v.id("vendorProfiles"), website: v.string() })),
+  handler: async (ctx, args) => {
+    const out: { _id: Id<"vendorProfiles">; website: string }[] = [];
+    const rows = ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_leadCategory", (q) => q.eq("cityKey", "chennai").gt("leadCategory", ""));
+    for await (const p of rows) {
+      if (out.length >= args.limit) break;
+      if (p.website && !p.coverCheckedAt && !p.ownerUserId) out.push({ _id: p._id, website: p.website });
+    }
+    return out;
+  },
+});
+
+/** Records a listing's preview image, or that it has none. */
+export const setCover = internalMutation({
+  args: { profileId: v.id("vendorProfiles"), url: v.optional(v.string()) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const p = await ctx.db.get(args.profileId);
+    if (!p || p.ownerUserId) return null;
+    await ctx.db.patch(p._id, { coverCheckedAt: Date.now(), ...(args.url && p.website ? { cover: { url: args.url.slice(0, 2000), from: p.website } } : {}) });
+    return null;
   },
 });

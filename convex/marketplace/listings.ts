@@ -48,6 +48,8 @@ export const listingCard = v.object({
   place: v.optional(placeValidator),
   /** Found through public web listings, not yet verified: said beside the listing, with its map and social links. */
   foundOnWeb: v.optional(v.boolean()),
+  /** The preview image the business set on its own site, shown from there, with the site it came from. */
+  cover: v.optional(v.object({ url: v.string(), from: v.string() })),
   links: v.optional(v.object({ maps: v.optional(v.string()), instagram: v.optional(v.string()), facebook: v.optional(v.string()) })),
 });
 
@@ -112,6 +114,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     place: profile.place ?? placeFor(profile.serviceArea?.join(", "), profile.city) ?? undefined,
     ...(profile.foundVia && !profile.ownerUserId ? { foundOnWeb: true } : {}),
     ...(profile.links ? { links: profile.links } : {}),
+    ...(profile.cover && !profile.ownerUserId ? { cover: profile.cover } : {}),
   };
 }
 

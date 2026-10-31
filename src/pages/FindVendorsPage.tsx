@@ -326,13 +326,12 @@ function ListingCard({ card, category, km }: { card: Card; category: string; km:
   const start = card.startingPrice;
   return (
     <Link to={`/vendors/${card._id}`} className="block overflow-hidden rounded-[14px] border border-line bg-cream hover:border-accent">
-      {/* A picture on every card: their own checked work, or a quiet panel for the trade until they add some. */}
+      {/* A picture on every card: their own checked work; else the preview image their own site sets for sharing,
+          shown from there; else a quiet panel for the trade until they add some. */}
       {card.photos[0] ? (
         <img src={card.photos[0].url} alt={card.photos[0].shows ?? `Work by ${card.name}`} className="aspect-[16/9] w-full object-cover" loading="lazy" />
       ) : (
-        <div className="grid aspect-[16/9] w-full place-items-center bg-accent-soft" aria-hidden="true">
-          <span className="display text-xl text-accent">{category}</span>
-        </div>
+        <CardCover cover={card.cover} name={card.name} category={category} />
       )}
       <div className="px-4 pb-3.5 pt-3">
       <div className="flex items-start justify-between gap-3">
@@ -467,7 +466,7 @@ export function VendorListingPage() {
               </span>
             </div>
             {listing.about && <p className="mt-4 leading-relaxed text-ink">{listing.about}</p>}
-            {listing.card.foundOnWeb && <FoundOnWeb name={listing.card.name} website={listing.card.website} links={listing.card.links} />}
+            {listing.card.foundOnWeb && <FoundOnWeb name={listing.card.name} website={listing.card.website} links={listing.card.links} cover={listing.card.cover} />}
 
             <h2 className="mt-8 text-xl">Packages</h2>
             {listing.packages.length === 0 ? (
@@ -550,7 +549,8 @@ function PackageChargeLines({ category, currency, charges, includes }: { categor
  * A listing PlusOne added from public web listings: said plainly, with the business's own
  * pages linked (photos stay on its map listing, never copied), and a way to claim or remove it.
  */
-function FoundOnWeb({ name, website, links }: { name: string; website?: string; links?: { maps?: string; instagram?: string; facebook?: string } }) {
+function FoundOnWeb({ name, website, links, cover }: { name: string; website?: string; links?: { maps?: string; instagram?: string; facebook?: string }; cover?: { url: string; from: string } }) {
+  const [coverFailed, setCoverFailed] = useState(false);
   const out = [
     website && { href: website, text: "Their website" },
     links?.maps && { href: links.maps, text: "Photos and directions on Google Maps" },
@@ -559,6 +559,11 @@ function FoundOnWeb({ name, website, links }: { name: string; website?: string; 
   ].filter(Boolean) as { href: string; text: string }[];
   return (
     <div className="card-quiet mt-5 px-4 py-3 text-sm">
+      {cover && !coverFailed && (
+        <a href={cover.from} target="_blank" rel="noopener noreferrer nofollow" className="mb-3 block overflow-hidden rounded-[10px]">
+          <img src={cover.url} alt={`${name}, from their website`} className="max-h-72 w-full object-cover" referrerPolicy="no-referrer" onError={() => setCoverFailed(true)} />
+        </a>
+      )}
       <p className="text-muted">
         Found through public web listings. {BRAND.name} hasn&rsquo;t verified {name} yet, and the details here are what the business
         published about itself.
@@ -579,6 +584,35 @@ function FoundOnWeb({ name, website, links }: { name: string; website?: string; 
         </a>
         .
       </p>
+    </div>
+  );
+}
+
+/**
+ * A card's picture when the vendor hasn't added photos: the preview image their own website
+ * sets for sharing its link, loaded from their site (never copied), or a panel with the trade
+ * over the line drawing. An image that won't load falls back to the panel.
+ */
+function CardCover({ cover, name, category }: { cover?: { url: string; from: string }; name: string; category: string }) {
+  const [failed, setFailed] = useState(false);
+  if (cover && !failed) {
+    return (
+      <span className="relative block">
+        <img
+          src={cover.url}
+          alt={`${name}, from their website`}
+          className="aspect-[16/9] w-full bg-paper object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setFailed(true)}
+        />
+        <span className="absolute bottom-1.5 right-2 rounded-full bg-paper/80 px-2 py-0.5 text-[10px] text-muted">From their website</span>
+      </span>
+    );
+  }
+  return (
+    <div className="vendor-cover grid aspect-[16/9] w-full place-items-center" aria-hidden="true">
+      <span className="display text-xl text-accent">{category}</span>
     </div>
   );
 }

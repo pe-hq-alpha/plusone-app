@@ -284,6 +284,9 @@ export const vendorProfileFields = {
   links: v.optional(v.object({ maps: v.optional(v.string()), instagram: v.optional(v.string()), facebook: v.optional(v.string()) })),
   /** The public pages its facts came from, and when they were found. */
   foundVia: v.optional(v.object({ urls: v.array(v.string()), at: v.number() })),
+  /** The preview image the business set on its own site (og:image), shown from there, never copied; and when it was looked for. */
+  cover: v.optional(v.object({ url: v.string(), from: v.string() })),
+  coverCheckedAt: v.optional(v.number()),
 };
 
 /** A way of charging on the category's standard sheet ("per_hour"); missing on prices saved before there were ways, which read as Compare's unit. */

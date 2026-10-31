@@ -8,6 +8,7 @@ import { areaIn, findPhones, matchLead, SEARCH_WORDS, type SearchHit } from "./l
 import { robotsChecker } from "./lib/scrapePolicy";
 import { searchCountry } from "./lib/searchTerms";
 import { findEmails, hostOf } from "./lib/text";
+import { absoluteImage } from "./lib/links";
 
 const fc = new Firecrawl({ apiKey: process.env.FIRECRAWL_API_KEY });
 
@@ -43,6 +44,19 @@ async function search(query: string): Promise<SearchHit[]> {
 }
 
 /**
+ * The preview image a business set on its own site for sharing its link (og:image or
+ * twitter:image), as an https address on the web; an icon or a tracking pixel isn't one.
+ */
+function previewImage(meta: Record<string, unknown> | undefined, base: string): string | undefined {
+  if (!meta) return undefined;
+  const raw = [meta.ogImage, meta["og:image"], meta["twitter:image"]].map((x) => (Array.isArray(x) ? x[0] : x)).find((x): x is string => typeof x === "string" && x.length > 0);
+  const url = absoluteImage(raw, base);
+  if (!url || !url.startsWith("https://")) return undefined;
+  if (/favicon|\.ico(\?|$)|\.svg(\?|$)|logo-?\d{1,2}x|pixel|spacer|blank\.(gif|png)/i.test(url)) return undefined;
+  return url;
+}
+
+/**
  * Looks one lead up: a web search for its name, trade and area; the results that name it
  * kept as links; and, where its own site's robots.txt allows, that site read for the phone,
  * email and area it publishes. Nothing is kept from a directory, map or social page but the link.
@@ -63,6 +77,7 @@ async function lookUp(lead: { name: string; area?: string; category: string }, m
   let text = named.map((h) => `${h.title ?? ""} ${h.description ?? ""}`).join("\n");
   let phone: string | undefined;
   let email: string | undefined;
+  let image: string | undefined;
   if (match.website && (await mayRead(match.website))) {
     try {
       const doc = await fc.scrape(match.website, { formats: ["markdown"], onlyMainContent: false, timeout: SCRAPE_TIMEOUT_MS });
@@ -70,6 +85,7 @@ async function lookUp(lead: { name: string; area?: string; category: string }, m
       text += `\n${page}`;
       phone = findPhones(page)[0];
       email = ownEmail(page, hostOf(match.website));
+      image = previewImage(doc.metadata as Record<string, unknown> | undefined, match.website);
     } catch {
       // A site that won't load still leaves its link and the search's own facts.
     }
@@ -83,6 +99,7 @@ async function lookUp(lead: { name: string; area?: string; category: string }, m
     ...(match.maps ? { maps: match.maps } : {}),
     ...(match.instagram ? { instagram: match.instagram } : {}),
     ...(match.facebook ? { facebook: match.facebook } : {}),
+    ...(image ? { image } : {}),
     sources: match.sources,
   };
 }
@@ -112,6 +129,38 @@ export const run = internalAction({
       }),
     );
     await ctx.scheduler.runAfter(PAUSE_MS, internal.leadsRun.run, { left: args.left - leads.length });
+    return null;
+  },
+});
+
+/**
+ * Looks for the preview image of listings found before images were kept: their own site's
+ * home page, read only where robots.txt allows, for its og:image. Schedules itself until
+ * `left` is spent or none are left. `npx convex run leadsRun:covers '{"left": 3000}'`.
+ */
+export const covers = internalAction({
+  args: { left: v.number() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    if (args.left <= 0) return null;
+    const batch = await ctx.runQuery(internal.leads.needCovers, { limit: Math.min(AT_ONCE, args.left) });
+    if (!batch.length) return null;
+    const mayRead = robotsChecker();
+    await Promise.all(
+      batch.map(async (p) => {
+        let url: string | undefined;
+        try {
+          if (await mayRead(p.website)) {
+            const doc = await fc.scrape(p.website, { formats: ["markdown"], onlyMainContent: true, timeout: SCRAPE_TIMEOUT_MS });
+            url = previewImage(doc.metadata as Record<string, unknown> | undefined, p.website);
+          }
+        } catch {
+          // A site that won't load keeps its placeholder.
+        }
+        await ctx.runMutation(internal.leads.setCover, { profileId: p._id, ...(url ? { url } : {}) });
+      }),
+    );
+    await ctx.scheduler.runAfter(PAUSE_MS, internal.leadsRun.covers, { left: args.left - batch.length });
     return null;
   },
 });

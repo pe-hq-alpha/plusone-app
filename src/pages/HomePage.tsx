@@ -1,7 +1,9 @@
-import { useQuery } from "convex/react";
+import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import { useAuthActions } from "../lib/session";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { longDate, money } from "../lib/format";
 import { Icon } from "../components/ui/Icon";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
@@ -94,7 +96,8 @@ export function HomePage() {
 
   return (
     <div className="isolate min-h-[100dvh] bg-paper">
-      <Backdrop quiet />
+      {/* The home page's drawing at the strength the public pages use: the list has room for it around the cards. */}
+      <Backdrop />
       {/* One quiet marigold wash at the top, and nothing else behind the prints. */}
       <div
         aria-hidden="true"
@@ -156,6 +159,7 @@ export function HomePage() {
                     </span>
                   </span>
                 </Link>
+                {role === "owner" && <RemoveEvent eventId={event._id} name={event.name} />}
               </li>
             ))}
 
@@ -229,5 +233,53 @@ function Header({ onSignOut }: { onSignOut: () => void }) {
       </button>
       </div>
     </header>
+  );
+}
+
+/**
+ * Removing an event from the list, asked once more on the page: it goes for everyone on it,
+ * with its days, vendors, emails, quotes, guests and files, and can't be undone.
+ */
+function RemoveEvent({ eventId, name }: { eventId: Id<"events">; name: string }) {
+  const remove = useMutation(api.events.remove);
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  if (!asking) {
+    return (
+      <button type="button" className="mt-3 px-1 text-[0.8rem] text-quiet underline-offset-4 hover:text-bad hover:underline" onClick={() => setAsking(true)}>
+        Remove this event
+      </button>
+    );
+  }
+  return (
+    <div className="mt-3 w-[21rem] rounded-[10px] border border-line bg-cream px-3.5 py-3 text-sm" role="group" aria-label={`Remove ${name}`}>
+      <p className="text-ink">Remove {name}?</p>
+      <p className="mt-1 text-[0.8rem] leading-relaxed text-muted">
+        It goes for everyone on it, with its days, vendors, emails, quotes, guests and files. Vendors you've written to aren't told. This can't be undone.
+      </p>
+      <div className="mt-2.5 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-sm rounded-full bg-bad px-3.5 py-1.5 text-paper hover:opacity-90"
+          disabled={busy}
+          onClick={() => {
+            setBusy(true);
+            setError(null);
+            void remove({ eventId, confirmName: name }).catch((err: unknown) => {
+              const data = (err as { data?: unknown }).data;
+              setError(typeof data === "string" ? data : "That didn't work. Try again.");
+              setBusy(false);
+            });
+          }}
+        >
+          {busy ? "Removing…" : "Yes, remove it"}
+        </button>
+        <button type="button" className="btn-quiet btn-sm" onClick={() => setAsking(false)} disabled={busy}>
+          Keep it
+        </button>
+      </div>
+      {error && <p role="alert" className="mt-2 text-[0.8rem] text-bad">{error}</p>}
+    </div>
   );
 }

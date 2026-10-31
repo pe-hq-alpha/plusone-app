@@ -97,6 +97,8 @@ const BLANK_FORM = {
   area: "",
   country: "",
   eventType: "party" as EventType,
+  /** The host's own name for it, when no type says it ("Diwali party"). */
+  occasionLabel: "",
   currency: "USD",
   /** Set once they pick a currency themselves, so a country change no longer overrides it. */
   currencyChosen: false,
@@ -263,10 +265,13 @@ export function OnboardingPage() {
     const b = form.coHost.trim();
     const hosts = a && b ? `${a} & ${b}` : a || b;
     // A wedding is known by the hosts' names; anything else says what it is.
-    if (form.eventType === "wedding") return hosts || "Our wedding";
+    if (form.eventType === "wedding" && !form.occasionLabel.trim()) return hosts || "Our wedding";
+    // Their own words name it best: "Diwali party", "Ravi & Meena's Diwali party".
+    const own = form.occasionLabel.trim();
+    if (own) return hosts ? `${hosts}'s ${own}` : own;
     const noun = occasionNoun({ eventType: form.eventType });
     return hosts ? `${hosts}'s ${noun}` : `Our ${noun}`;
-  }, [form.host, form.coHost, form.eventType]);
+  }, [form.host, form.coHost, form.eventType, form.occasionLabel]);
 
   async function addPictures(files: FileList | null) {
     if (!files?.length) return;
@@ -383,6 +388,7 @@ export function OnboardingPage() {
         currency: form.currency,
         totalBudget: Number(form.totalBudget),
         eventType: form.eventType,
+        occasionLabel: form.occasionLabel.trim() || undefined,
         guestEstimate: form.guestEstimate || undefined,
         helpWith: form.helpWith.length ? form.helpWith : undefined,
         helpNotes: form.helpNotes.trim() || undefined,
@@ -573,6 +579,19 @@ export function OnboardingPage() {
                 </div>
               ))}
             </fieldset>
+            <div>
+              <label className="label" htmlFor="ob-occasion">Or name it yourself</label>
+              <input
+                id="ob-occasion"
+                className="input max-w-md"
+                value={form.occasionLabel}
+                onChange={(e) => set("occasionLabel", e.target.value.slice(0, 80))}
+                placeholder="Diwali party, a 25th anniversary dinner, a team offsite"
+              />
+              <p className="mt-1 text-xs text-quiet">
+                Your words name the event everywhere. Pick the closest kind above too: it sets the parts of the day and the vendors you start with.
+              </p>
+            </div>
           </div>
         )}
 

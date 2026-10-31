@@ -283,3 +283,17 @@ a { text-underline-offset: 0.2em; }
 @media (min-width: 768px) {
   .hood-open #main, .hood-open .demo-banner { padding-right: 26rem; transition: padding-right 160ms ease-out; }
 }
+
+/* A vendor card with no picture yet: the trade's name over a faint corner of the home page's line drawing. */
+.vendor-cover {
+  background:
+    linear-gradient(var(--color-accent-soft), color-mix(in srgb, var(--color-accent-soft) 70%, transparent)),
+    url("/plates/backdrop-1920.webp") 30% 85% / 220% auto no-repeat,
+    var(--color-accent-soft);
+}
+:root:not([data-theme="dark"]) .vendor-cover {
+  background:
+    linear-gradient(var(--color-accent-soft), color-mix(in srgb, var(--color-accent-soft) 70%, transparent)),
+    url("/plates/backdrop-light-1920.webp") 30% 85% / 220% auto no-repeat,
+    var(--color-accent-soft);
+}
