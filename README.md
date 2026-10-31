@@ -84,7 +84,7 @@ It is built for the events families, teams and the event managers who plan for t
 
 Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), with no sign-up. Three sample events open there, all in rupees: Amma's 60th birthday (the default), a griha pravesam (`/demo?sample=housewarming`) and an office Diwali party with no alcohol (`/demo?sample=office`). Their vendors are made up, so nothing is really sent.
 
-**How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The response told us more than the placing: people liked it, and the families, planners and vendors we spoke to all pointed at the same gap, that there is no organised way to plan an event and know what you're paying for. So we set out to fill it. For the Meta Global AI Developer Hackathon (Startup track), PlusOne moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
+**How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The response told us more than the placing: people liked it, and the families, planners and vendors we spoke to all pointed at the same gap, that there is no organised way to plan an event and know what you're paying for. So we set out to fill it. For the Meta Global AI Developer Hackathon (Startup track), PlusOne is built on Meta's models, with the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
 
 **Team:** Padmanabhan Rajendrakumar, Founder, who built this entry and submits it, with Sharmila Raghu, Co-Founder of PlusOne.
 
@@ -111,11 +111,11 @@ Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), wi
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-PlusOne existed before the event as a planner that talked a plan through, wrote to vendors and compared their quotes, on Claude (tag `pre-hackathon`). In the nine days it grew into a two-sided platform on six Meta models: 293 commits, the code from about 40,000 lines to 63,000, the backend from 124 files to 219. Moving the existing steps onto Muse Spark is the first row below; everything after it is new.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and compared their quotes (tag `pre-hackathon`). In the nine days it grew into a two-sided platform with six Meta models at its core: 293 commits, the code from about 40,000 lines to 63,000, the backend from 124 files to 219. Everything below was built during the event.
 
 | What | Meta model | Status |
 |---|---|---|
-| Every reading and writing step moved to Meta's models, through one wrapper with retries, a logged fallback and a cost row for every call | Muse Spark 1.3 | Live in production, 27 Oct |
+| Muse Spark at the core: every reading and writing step goes through one model wrapper with retries, a logged fallback and a cost row for every call | Muse Spark 1.3 | Live in production, 27 Oct |
 | **Under the hood:** every step PlusOne ran for an event, with its model, time and cost; in the demo, recorded real runs of each model on its own material, labelled as recorded: Muse Spark reading the three catering quotes (28 Oct, 7–14 s each, $0.033 in all), Muse Spark and SAM 3.1 finding and cutting out the sample hall's stage (4.3 s and 4.0 s), Muse Glimmer checking a caterer's photo (5.6 s), Muse Spark Open reading a shorthand quote (2.8 s), Muse Voice Transcribe hearing the 47-second sample call (10.9 s, $0.0024) and Muse Wonder checking a made-up and a real caterer | Muse Spark, SAM 3.1, Muse Glimmer, Muse Spark Open, Muse Voice Transcribe, Muse Wonder | Live, 27 Oct; recorded runs 28–30 Oct |
 | The assistant changes the plan when told ("we're now 140 people", "move lunch to 1 pm"), as a card the host presses | Muse Spark 1.3 | Live, 27 Oct |
 | The planning conversation asks what the event is called rather than who hosts it; pricing for the two plans (Basic and Premium since 28 Oct); a redesigned site | Muse Spark 1.3 | Live, 27 Oct |
@@ -135,7 +135,7 @@ PlusOne existed before the event as a planner that talked a plan through, wrote 
 | **WhatsApp and Call for every vendor**, since vendors in India are reached on WhatsApp and by phone: WhatsApp opens with the first message written for the event ("Hello Kaveri Feast Co., I'm planning Amma's 60th on 30 Jan in Chennai…") | | Live, 29 Oct (`src/lib/contact.ts`, `src/components/ContactLinks.tsx`); in the demo the vendors are made up, so the buttons say what would happen |
 | **Quote updates on WhatsApp:** a host turns them on in Account with their number and a consent tick; when a vendor's quote lands, PlusOne sends a message with a link to Compare; replying STOP ends it. Never for sample events or viewers | Meta's WhatsApp Cloud API | Built 30 Oct (`convex/whatsapp.ts`, `convex/lib/whatsapp.ts`, the signed webhook in `convex/http.ts`, `src/pages/AccountPage.tsx`), 11 tests; connected to Meta's test number while the message waits for Meta's approval and PlusOne's own number for business verification |
 
-Before the hackathon, PlusOne already planned an event from a conversation, found vendors, wrote to them from the event's inbox and put their quotes in one unit, on Claude. [Repository](#repository) gives the exact line between the two.
+Before the hackathon, PlusOne already planned an event from a conversation, found vendors, wrote to them from the event's inbox and put their quotes in one unit. [Repository](#repository) gives the exact line between the two.
 
 ### How each criterion is met
 
@@ -164,7 +164,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 **Can the AI be trusted with prices?** It is measured, not assumed: charges found on held-out quotes, quotes read across email, PDF and photo, vendors checked against made-up ones, photos checked against AI-generated ones, every run with its raw results in the repository. A person verifies every vendor. [Evaluations](EVALUATIONS.md#evaluation-missing-charges)
 
-**What was built during the hackathon?** Far more than a change of model: the standard sheet, Compare line by line, the market range, PlusOne Partner for vendors and Ops for the PlusOne team, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, vendors' price lists read on open weights, and quote updates on WhatsApp, with the existing planner moved onto Meta's models too. The code grew from about 40,000 lines to 63,000 in 293 commits. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
+**What was built during the hackathon?** A two-sided platform with Meta's models at its core: the standard sheet, Compare line by line, the market range, PlusOne Partner for vendors and Ops for the PlusOne team, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, vendors' price lists read on open weights, and quote updates on WhatsApp, with Muse Spark running the planner too. The code grew from about 40,000 lines to 63,000 in 293 commits. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
 
 **What's real and what's a sample?** Everything you can click works and is live. The demo's event and its vendors are made up and marked Sample; the model runs shown under the hood are real, with their dates and costs.
 
