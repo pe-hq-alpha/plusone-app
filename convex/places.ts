@@ -1,8 +1,8 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
-import { action, internalMutation, internalQuery, mutation } from "./_generated/server";
+import { action, internalMutation, internalQuery, mutation, type ActionCtx } from "./_generated/server";
 import { requireActionUserId, requireMember } from "./lib/auth";
-import { placeFor, plain, type Place } from "./lib/places";
+import { isGoogleMapsHost, isShortMapLink, placeFor, placeFromLink, plain, type Place } from "./lib/places";
 import { placeValidator } from "./schema";
 import { rateLimiter } from "./rateLimits";
 
@@ -51,43 +51,81 @@ export const find = action({
   returns: v.union(v.null(), placeValidator),
   handler: async (ctx, args): Promise<Place | null> => {
     const userId = await requireActionUserId(ctx);
-    const text = args.text.trim().slice(0, 160);
+    // Full map links run long; anything else is a place name and is cut short.
+    const text = /^https?:\/\//i.test(args.text.trim()) ? args.text.trim().slice(0, 2000) : args.text.trim().slice(0, 160);
     const city = args.city?.trim().slice(0, 60);
     if (!text) return null;
-    // A bare area name is answered here, without anything leaving PlusOne.
-    const known = placeFor(text, city);
-    if (known?.precision === "area" && plain(text).trim().split(" ").length <= 3) return known;
-
-    const words = city && !plain(text).includes(plain(city)) ? `${text}, ${city}` : text;
-    const query = plain(words).trim();
-    const seen = await ctx.runQuery(internal.places.cached, { query });
-    if (seen) return seen.place ?? known;
-
-    const mine = await rateLimiter.limit(ctx, "placeLookup", { key: userId });
-    if (!mine.ok) throw new ConvexError(BUSY);
-    const all = await rateLimiter.limit(ctx, "placeLookupAll");
-    if (!all.ok) throw new ConvexError(BUSY);
-
-    let place: Place | undefined;
-    try {
-      const url = `${NOMINATIM}?${new URLSearchParams({ q: words, format: "jsonv2", limit: "1", countrycodes: "in" })}`;
-      const res = await fetch(url, { headers: { "user-agent": UA, "accept-language": "en" }, signal: AbortSignal.timeout(8000) });
-      if (res.ok) {
-        const [hit] = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
-        const lat = Number(hit?.lat);
-        const lng = Number(hit?.lon);
-        if (hit && Number.isFinite(lat) && Number.isFinite(lng)) {
-          place = { lat, lng, label: shortLabel(hit.display_name ?? text), precision: "address" };
-        }
-      }
-    } catch {
-      // A slow or failed lookup reads as not found; the area's middle or a dropped pin still works.
-      return known;
+    // A Google Maps link or plain coordinates, as a vendor copies them from their Google profile.
+    let link = text;
+    if (isShortMapLink(link)) {
+      const mine = await rateLimiter.limit(ctx, "placeLookup", { key: userId });
+      if (!mine.ok) throw new ConvexError(BUSY);
+      link = (await followMapLink(link)) ?? link;
     }
-    await ctx.runMutation(internal.places.remember, { query, ...(place ? { place } : {}) });
-    return place ?? known;
+    const pinned = placeFromLink(link);
+    if (pinned) return { lat: pinned.lat, lng: pinned.lng, label: pinned.name ?? "Your pin", precision: "address" };
+    const named = /^https?:\/\//i.test(link) ? /\/maps\/place\/([^/@?]+)/.exec(decodeURIComponent(link))?.[1]?.replace(/\+/g, " ") : undefined;
+    if (/^https?:\/\//i.test(text) && !named) return null;
+    return lookUp(ctx, userId, named ?? text, city);
   },
 });
+
+/** Follows a short map link to its full address, through Google's own addresses only, in at most four steps. */
+async function followMapLink(url: string): Promise<string | null> {
+  let at = url;
+  for (let hop = 0; hop < 4; hop++) {
+    if (!isGoogleMapsHost(at)) return null;
+    try {
+      const res = await fetch(at, { redirect: "manual", headers: { "user-agent": UA }, signal: AbortSignal.timeout(6000) });
+      const next = res.headers.get("location");
+      if (!next) return at;
+      const full = new URL(next, at).toString();
+      // Google's consent page carries the real address in its continue parameter.
+      const cont = new URL(full).searchParams.get("continue");
+      at = /^consent\./.test(new URL(full).hostname) && cont ? cont : full;
+      if (placeFromLink(at)) return at;
+    } catch {
+      return null;
+    }
+  }
+  return at;
+}
+
+async function lookUp(ctx: ActionCtx, userId: string, raw: string, city: string | undefined): Promise<Place | null> {
+  const text = raw.trim().slice(0, 160);
+  // A bare area name is answered here, without anything leaving PlusOne.
+  const known = placeFor(text, city);
+  if (known?.precision === "area" && plain(text).trim().split(" ").length <= 3) return known;
+
+  const words = city && !plain(text).includes(plain(city)) ? `${text}, ${city}` : text;
+  const query = plain(words).trim();
+  const seen = await ctx.runQuery(internal.places.cached, { query });
+  if (seen) return seen.place ?? known;
+
+  const mine = await rateLimiter.limit(ctx, "placeLookup", { key: userId });
+  if (!mine.ok) throw new ConvexError(BUSY);
+  const all = await rateLimiter.limit(ctx, "placeLookupAll");
+  if (!all.ok) throw new ConvexError(BUSY);
+
+  let place: Place | undefined;
+  try {
+    const url = `${NOMINATIM}?${new URLSearchParams({ q: words, format: "jsonv2", limit: "1", countrycodes: "in" })}`;
+    const res = await fetch(url, { headers: { "user-agent": UA, "accept-language": "en" }, signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      const [hit] = (await res.json()) as Array<{ lat?: string; lon?: string; display_name?: string }>;
+      const lat = Number(hit?.lat);
+      const lng = Number(hit?.lon);
+      if (hit && Number.isFinite(lat) && Number.isFinite(lng)) {
+        place = { lat, lng, label: shortLabel(hit.display_name ?? text), precision: "address" };
+      }
+    }
+  } catch {
+    // A slow or failed lookup reads as not found; the area's middle or a dropped pin still works.
+    return known;
+  }
+  await ctx.runMutation(internal.places.remember, { query, ...(place ? { place } : {}) });
+  return place ?? known;
+}
 
 /** Pins the event's venue on the map, or takes the pin away (the area's middle stands in again). */
 export const setVenue = mutation({

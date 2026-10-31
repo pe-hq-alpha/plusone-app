@@ -181,3 +181,50 @@ export function readSearch(text: string): Asked {
     ...(maxPrice ? { maxPrice } : {}),
   };
 }
+
+/** A short Google Maps share link (maps.app.goo.gl/…), which has to be followed to its full address first. */
+export function isShortMapLink(text: string): boolean {
+  return /^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|g\.co\/kgs)\//i.test(text.trim());
+}
+
+/** Whether a link may be followed while reading a map link: Google's own map and short-link addresses only. */
+export function isGoogleMapsHost(url: string): boolean {
+  try {
+    const { hostname, pathname } = new URL(url);
+    if (/^(maps\.app\.goo\.gl|goo\.gl|g\.co)$/i.test(hostname)) return true;
+    if (/^consent\.google\.[a-z.]+$/i.test(hostname)) return true;
+    return /^(www\.|maps\.)?google\.[a-z.]+$/i.test(hostname) && (hostname.startsWith("maps.") || pathname.startsWith("/maps"));
+  } catch {
+    return false;
+  }
+}
+
+const inRange = (lat: number, lng: number) => Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180 && !(lat === 0 && lng === 0);
+
+/**
+ * A point from what a vendor pastes: a Google Maps link (the place's own marker first, then
+ * a search or the map's middle) or plain coordinates ("13.0339, 80.2619"). The place's name
+ * comes with it when the link has one. Null when there is no point in it.
+ */
+export function placeFromLink(text: string): { lat: number; lng: number; name?: string } | null {
+  const raw = text.trim();
+  let s = raw;
+  try {
+    s = decodeURIComponent(raw);
+  } catch {
+    // keep the raw text
+  }
+  const name = /\/maps\/place\/([^/@?]+)/.exec(s)?.[1]?.replace(/\+/g, " ").trim();
+  const tries = [
+    /!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/,
+    /[?&](?:q|query|ll|center|destination|daddr)=(?:loc:)?(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/,
+    /\/maps\/search\/(-?\d{1,3}\.\d+)\s*,\s*\+?(-?\d{1,3}\.\d+)/,
+    /@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,
+    /^(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/,
+  ];
+  for (const re of tries) {
+    const m = re.exec(s);
+    if (m && inRange(Number(m[1]), Number(m[2]))) return { lat: Number(m[1]), lng: Number(m[2]), ...(name ? { name: name.slice(0, 80) } : {}) };
+  }
+  return null;
+}

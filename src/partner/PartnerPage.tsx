@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { lazy, Suspense, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,6 +16,9 @@ import { CustomerCompare } from "../pages/DecisionsPage";
 import { partnerHref } from "../lib/hosts";
 import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
 import { readyToUpload } from "../lib/pictures";
+import { placeFor, type Place } from "../../convex/lib/places";
+
+const VendorMap = lazy(() => import("../components/VendorMap"));
 
 /**
  * PlusOne Partner, for vendors: join or claim your listing, answer customers' briefs on
@@ -203,6 +206,7 @@ type ProfileFields = {
   phone?: string;
   whatsapp?: string;
   serviceArea?: string[];
+  place?: Place;
   languages?: string[];
   about?: string;
 };
@@ -269,7 +273,19 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
     setState("saving");
     setError(null);
     const list = (text: string) => text.split(",").map((s) => s.trim()).filter(Boolean);
-    const args = { ...f, about, serviceArea: list(areas), languages: list(languages) };
+    const args = {
+      name: f.name,
+      categories: f.categories,
+      city: f.city,
+      website: f.website,
+      email: f.email,
+      phone: f.phone,
+      whatsapp: f.whatsapp,
+      place: f.place,
+      about,
+      serviceArea: list(areas),
+      languages: list(languages),
+    };
     const done = initial
       ? update(args).then(() => {
           setState("idle");
@@ -309,60 +325,78 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
     <section className="card mt-5 p-6 md:p-7" aria-labelledby="details-h">
       <h2 id="details-h" className="display text-xl">{initial ? "Your details" : "Set up your business"}</h2>
       {!initial && <p className="mt-1 text-sm text-muted">Customers see you once we've checked you're real, usually within a day.</p>}
-      <form className="mt-4 grid gap-4 md:grid-cols-2" onSubmit={submit}>
-        <div>
-          <label className="label" htmlFor="p-name">Business name</label>
-          <input id="p-name" className="input" value={f.name} onChange={(e) => set({ name: e.target.value })} required />
-        </div>
-        <div>
-          <label className="label" htmlFor="p-city">City</label>
-          <input id="p-city" className="input" value={f.city} onChange={(e) => set({ city: e.target.value })} required />
-        </div>
-        <fieldset className="md:col-span-2">
-          <legend className="label">What you offer (up to 5)</legend>
-          <div className="flex flex-wrap gap-2">
-            {VENDOR_CATEGORIES.map((c) => (
-              <button
-                key={c}
-                type="button"
-                aria-pressed={f.categories.includes(c)}
-                onClick={() => toggle(c)}
-                className={f.categories.includes(c) ? "chip-pending" : "chip-quiet hover:text-accent"}
-              >
-                {c}
-              </button>
-            ))}
+      <form className="mt-5 grid gap-6" onSubmit={submit}>
+        <FormGroup title="Your business">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="p-name">Business name</label>
+              <input id="p-name" className="input" value={f.name} onChange={(e) => set({ name: e.target.value })} required />
+            </div>
+            <div>
+              <label className="label" htmlFor="p-city">City</label>
+              <input id="p-city" className="input" value={f.city} onChange={(e) => set({ city: e.target.value })} required />
+            </div>
           </div>
-        </fieldset>
-        <div>
-          <label className="label" htmlFor="p-web">Website</label>
-          <input id="p-web" className="input" value={f.website ?? ""} onChange={(e) => set({ website: e.target.value })} placeholder="yourbusiness.in" />
-        </div>
-        <div>
-          <label className="label" htmlFor="p-email">Email for enquiries</label>
-          <input id="p-email" type="email" className="input" value={f.email ?? ""} onChange={(e) => set({ email: e.target.value })} />
-        </div>
-        <div>
-          <label className="label" htmlFor="p-phone">Phone</label>
-          <input id="p-phone" className="input" value={f.phone ?? ""} onChange={(e) => set({ phone: e.target.value })} placeholder="+91 98400 12345" />
-        </div>
-        <div>
-          <label className="label" htmlFor="p-wa">WhatsApp</label>
-          <input id="p-wa" className="input" value={f.whatsapp ?? ""} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="Same as phone, or another" />
-        </div>
-        <div className="md:col-span-2">
-          <label className="label" htmlFor="p-area">The area you work from</label>
-          <input id="p-area" className="input" value={areas} onChange={(e) => { setAreas(e.target.value); setPreview(null); }} placeholder="Mylapore" />
-          <p className="mt-1 text-[11px] text-muted">Customers see how far you are from their venue on the map. The area is enough; your street address isn&rsquo;t shown.</p>
-        </div>
-        <div className="md:col-span-2">
-          <label className="label" htmlFor="p-lang">Languages you speak with customers</label>
-          <input id="p-lang" className="input" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="Tamil, English" />
-        </div>
-        <div className="md:col-span-2">
-          <label className="label" htmlFor="p-about">About you</label>
-          <textarea id="p-about" className="input min-h-24" value={f.about ?? ""} onChange={(e) => set({ about: e.target.value })} placeholder="What you're known for, since when, the areas you cover" />
-        </div>
+          <fieldset>
+            <legend className="label">What you offer (up to 5)</legend>
+            <div className="flex flex-wrap gap-2">
+              {VENDOR_CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={f.categories.includes(c)}
+                  onClick={() => toggle(c)}
+                  className={f.categories.includes(c) ? "chip-pending" : "chip-quiet hover:text-accent"}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+          <div>
+            <label className="label" htmlFor="p-about">About you</label>
+            <textarea id="p-about" className="input min-h-24" value={f.about ?? ""} onChange={(e) => set({ about: e.target.value })} placeholder="What you're known for, since when, the areas you cover" />
+          </div>
+        </FormGroup>
+
+        <FormGroup title="Where you work from" note="Customers see how far you are from their venue.">
+          <PlacePicker
+            city={f.city}
+            place={f.place}
+            area={areas}
+            onArea={(a) => {
+              setAreas(a);
+              setPreview(null);
+            }}
+            onPlace={(place) => set({ place })}
+          />
+        </FormGroup>
+
+        <FormGroup title="How customers reach you">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="label" htmlFor="p-phone">Phone</label>
+              <input id="p-phone" className="input" value={f.phone ?? ""} onChange={(e) => set({ phone: e.target.value })} placeholder="+91 98400 12345" />
+            </div>
+            <div>
+              <label className="label" htmlFor="p-wa">WhatsApp</label>
+              <input id="p-wa" className="input" value={f.whatsapp ?? ""} onChange={(e) => set({ whatsapp: e.target.value })} placeholder="Same as phone, or another" />
+            </div>
+            <div>
+              <label className="label" htmlFor="p-email">Email for enquiries</label>
+              <input id="p-email" type="email" className="input" value={f.email ?? ""} onChange={(e) => set({ email: e.target.value })} />
+            </div>
+            <div>
+              <label className="label" htmlFor="p-web">Website or Instagram</label>
+              <input id="p-web" className="input" value={f.website ?? ""} onChange={(e) => set({ website: e.target.value })} placeholder="yourbusiness.in" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="label" htmlFor="p-lang">Languages you speak with customers</label>
+              <input id="p-lang" className="input" value={languages} onChange={(e) => setLanguages(e.target.value)} placeholder="Tamil, English" />
+            </div>
+          </div>
+        </FormGroup>
+
         {preview && (
           <TidyPanel
             results={preview}
@@ -377,18 +411,132 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
             }}
           />
         )}
-        <div className="flex flex-wrap items-center gap-3 md:col-span-2">
+        <div className="flex flex-wrap items-center gap-3">
           <button type="submit" className="btn-primary" disabled={checking || state === "saving" || !f.name.trim() || !f.categories.length}>
             {checking ? "Checking your wording…" : state === "saving" ? "Saving…" : initial ? "Save changes" : "Join PlusOne Partner"}
           </button>
           {initial && <span className="text-xs text-quiet">A new name or website is checked again before customers see it.</span>}
         </div>
         {state === "listed" && (
-          <p className="text-sm md:col-span-2">We already list a business with that website. Look it up above and claim it, so you're not listed twice.</p>
+          <p className="text-sm">We already list a business with that website. Look it up above and claim it, so you're not listed twice.</p>
         )}
-        {error && <p role="alert" className="text-sm text-bad md:col-span-2">{error}</p>}
+        {error && <p role="alert" className="text-sm text-bad">{error}</p>}
       </form>
     </section>
+  );
+}
+
+/** One part of the setup form, under a small heading and a rule. */
+function FormGroup({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
+  return (
+    <fieldset className="grid gap-4 border-t border-line pt-5 first:border-t-0 first:pt-0">
+      <legend className="contents">
+        <span className="display block text-lg">{title}</span>
+      </legend>
+      {note && <p className="-mt-3 text-xs text-muted">{note}</p>}
+      {children}
+    </fieldset>
+  );
+}
+
+/**
+ * Where a vendor works from: paste the link from their Google Maps listing, type the
+ * shop's name or area, or tap the map. The pin is what customers measure distance from.
+ */
+function PlacePicker({
+  city,
+  place,
+  area,
+  onArea,
+  onPlace,
+}: {
+  city: string;
+  place?: Place;
+  area: string;
+  onArea: (area: string) => void;
+  onPlace: (place: Place | undefined) => void;
+}) {
+  const find = useAction(api.places.find);
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const centre = place ?? placeFor(area, city) ?? placeFor(city, city);
+
+  async function look() {
+    const said = text.trim();
+    if (!said) return;
+    setBusy(true);
+    setNote(null);
+    try {
+      const found = await find({ text: said, city });
+      if (!found || found.precision === "city") {
+        setNote("Couldn't find that. Try your area's name, or tap the map where you are.");
+      } else {
+        onPlace(found);
+        // A typed area name is also the area customers read; a link's place name isn't.
+        if (!/^https?:\/\//i.test(said) && !area.trim() && found.precision === "area") onArea(found.label);
+        setText("");
+      }
+    } catch (e) {
+      const data = (e as { data?: unknown }).data;
+      setNote(typeof data === "string" ? data : "That didn't work. Tap the map where you are instead.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="grid gap-3">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          className="input"
+          aria-label="Your Google Maps link, or your shop's name or area"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              void look();
+            }
+          }}
+          placeholder="Paste your Google Maps link, or type your area"
+        />
+        <button type="button" className="btn-primary shrink-0" disabled={busy || !text.trim()} onClick={() => void look()}>
+          {busy ? "Finding…" : "Find me"}
+        </button>
+      </div>
+      <p className="text-[11px] text-quiet">
+        On Google Maps, open your business, press <strong className="font-medium text-muted">Share</strong> and copy the link. Or tap the map where you are.
+      </p>
+      {note && <p role="alert" className="text-xs text-bad">{note}</p>}
+      <Suspense fallback={<div className="vendor-map grid place-items-center text-sm text-muted">Loading the map…</div>}>
+        <VendorMap
+          label="Map: tap where you work from"
+          centre={centre}
+          radiusKm={null}
+          pins={[]}
+          onPick={(at) => {
+            onPlace({ ...at, label: place?.label && place.label !== "Your pin" ? place.label : "Your pin", precision: "address" });
+            setNote(null);
+          }}
+        />
+      </Suspense>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className={place ? "text-ink" : "text-muted"}>
+          {place ? <>Pinned: <strong className="font-medium">{place.label}</strong></> : "No pin yet. Customers see your area's middle until you add one."}
+        </span>
+        {place && (
+          <button type="button" className="btn-quiet btn-sm" onClick={() => onPlace(undefined)}>
+            Remove the pin
+          </button>
+        )}
+      </div>
+      <div>
+        <label className="label" htmlFor="p-area">Area customers see</label>
+        <input id="p-area" className="input" value={area} onChange={(e) => onArea(e.target.value)} placeholder="Mylapore" />
+        <p className="mt-1 text-[11px] text-muted">Customers see this area and the distance from your pin; your street address isn&rsquo;t shown.</p>
+      </div>
+    </div>
   );
 }
 

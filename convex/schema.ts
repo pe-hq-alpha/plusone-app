@@ -256,6 +256,8 @@ export const vendorProfileFields = {
   /** The city it is searched under (lib/marketplace cityKey). */
   cityKey: v.string(),
   serviceArea: v.optional(v.array(v.string())),
+  /** Where the vendor works from, as they found it or tapped it on Partner's map; without it, their area's middle. */
+  place: v.optional(placeValidator),
   /** Canonical, https://host (lib/text canonicalWebsite): the key seeded and claimed listings match on. */
   website: v.optional(v.string()),
   email: v.optional(v.string()),
@@ -310,6 +312,7 @@ export const listingDetails = v.object({
   phone: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
   serviceArea: v.optional(v.array(v.string())),
+  place: v.optional(placeValidator),
   languages: v.optional(v.array(v.string())),
   about: v.optional(v.string()),
 });

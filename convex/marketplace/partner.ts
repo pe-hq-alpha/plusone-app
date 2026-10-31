@@ -7,7 +7,7 @@ import { sheetFor } from "../lib/standardSheet";
 import { canonicalWebsite } from "../lib/text";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
-import { offeringUnit, vendorOfferingFields, vendorProfileFields } from "../schema";
+import { offeringUnit, placeValidator, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
 import { requireVendor } from "./vendors";
 import { needsReview, proposeDetails, proposeOffering, proposeRemoval } from "./changes";
@@ -63,9 +63,16 @@ const profileArgs = {
   phone: v.optional(v.string()),
   whatsapp: v.optional(v.string()),
   serviceArea: v.optional(v.array(v.string())),
+  place: v.optional(placeValidator),
   languages: v.optional(v.array(v.string())),
   about: v.optional(v.string()),
 };
+
+/** A pin on the map, kept only when it is a real place; its label is the vendor's own words, shortened. */
+function cleanPlace(place: ObjectType<typeof profileArgs>["place"]) {
+  if (!place || !Number.isFinite(place.lat) || !Number.isFinite(place.lng) || Math.abs(place.lat) > 90 || Math.abs(place.lng) > 180) return undefined;
+  return { lat: place.lat, lng: place.lng, label: place.label.trim().slice(0, 80) || "Where you work from", precision: place.precision };
+}
 
 function cleanProfile(args: ObjectType<typeof profileArgs>) {
   const name = text(args.name, 120);
@@ -82,6 +89,7 @@ function cleanProfile(args: ObjectType<typeof profileArgs>) {
     phone: cleanPhone(args.phone, "phone"),
     whatsapp: cleanPhone(args.whatsapp, "WhatsApp"),
     serviceArea: cleanList(args.serviceArea, 20, 80),
+    place: cleanPlace(args.place),
     languages: cleanList(args.languages, 10, 40),
     about: text(args.about, 1500),
   };

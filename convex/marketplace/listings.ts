@@ -106,7 +106,7 @@ export async function cardFor(ctx: QueryCtx, profile: Doc<"vendorProfiles">, cat
     sample: profile.sample === true,
     photos: await photosForCustomers(ctx, profile),
     completedEvents: profile.completedEvents,
-    place: placeFor(profile.serviceArea?.join(", "), profile.city) ?? undefined,
+    place: profile.place ?? placeFor(profile.serviceArea?.join(", "), profile.city) ?? undefined,
   };
 }
 

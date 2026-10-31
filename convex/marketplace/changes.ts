@@ -77,6 +77,7 @@ function detailsText(d: Partial<Details>): string {
     d.categories?.length && `Services: ${d.categories.join(", ")}`,
     d.city && `City: ${d.city}`,
     d.serviceArea?.length && `Areas: ${d.serviceArea.join(", ")}`,
+    d.place && `On the map: ${d.place.label}`,
     d.languages?.length && `Languages: ${d.languages.join(", ")}`,
     d.phone && `Phone: ${d.phone}`,
     d.whatsapp && `WhatsApp: ${d.whatsapp}`,

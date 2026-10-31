@@ -112,7 +112,7 @@ export default function VendorMap({ centre, radiusKm, pins, onPick, onSelect, cl
     // The box may have been laid out after the map was made; measure it again first.
     m.invalidateSize();
     if (bounds.length > 1) m.fitBounds(L.latLngBounds(bounds), { padding: [24, 24], maxZoom: 14 });
-    else if (bounds.length === 1) m.setView(bounds[0], 13);
+    else if (bounds.length === 1) m.setView(bounds[0], Math.max(m.getZoom(), 13));
   }, [centre, radiusKm, pins]);
 
   return <div ref={box} role="region" aria-label={label} className={`vendor-map ${className}`} />;
