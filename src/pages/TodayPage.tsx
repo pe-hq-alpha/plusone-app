@@ -9,6 +9,7 @@ import { longDate, money, timeAgo } from "../lib/format";
 import { BudgetBar } from "../components/ui/BudgetBar";
 import { Icon } from "../components/ui/Icon";
 import { VoiceButton } from "../components/VoiceButton";
+import { QuoteDrop } from "../components/QuoteDrop";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { BRAND } from "../lib/brand";
@@ -108,6 +109,7 @@ export function TodayPage() {
 
         <aside className="today__side">
           <Tell eventId={eventId} demo={event.demo === true} />
+          {event.demo !== true && <QuoteDrop eventId={eventId} />}
           <section aria-labelledby="money-h" className="today__panel">
             <h2 id="money-h" className="text-sm font-medium text-ink">Budget</h2>
             <p className="mt-2 text-sm text-muted">

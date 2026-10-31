@@ -403,28 +403,31 @@ export const getInternal = internalQuery({
 export const addInternal = internalMutation({
   args: { eventId: v.id("events"), title: v.string(), category: v.string() },
   returns: v.id("vendorSlots"),
-  handler: async (ctx, args) => {
-    const sessions = await ctx.db
-      .query("sessions")
-      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
-      .take(50);
-    const slotId = await ctx.db.insert("vendorSlots", {
-      eventId: args.eventId,
-      sessionIds: sessions.map((e) => e._id),
-      category: args.category,
-      title: args.title,
-      budget: 0,
-      status: "research",
-    });
-    await ctx.db.insert("budgetLines", {
-      eventId: args.eventId,
-      slotId,
-      label: args.title,
-      planned: 0,
-      committed: 0,
-      paid: 0,
-    });
-    await rebalanceEventBudget(ctx, args.eventId);
-    return slotId;
-  },
+  handler: async (ctx, args) => await addPlainSlot(ctx, args),
 });
+
+/** A need with no budget yet, across every part of the event, with its budget line. */
+export async function addPlainSlot(ctx: MutationCtx, args: { eventId: Id<"events">; title: string; category: string }): Promise<Id<"vendorSlots">> {
+  const sessions = await ctx.db
+    .query("sessions")
+    .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+    .take(50);
+  const slotId = await ctx.db.insert("vendorSlots", {
+    eventId: args.eventId,
+    sessionIds: sessions.map((e) => e._id),
+    category: args.category,
+    title: args.title,
+    budget: 0,
+    status: "research",
+  });
+  await ctx.db.insert("budgetLines", {
+    eventId: args.eventId,
+    slotId,
+    label: args.title,
+    planned: 0,
+    committed: 0,
+    paid: 0,
+  });
+  await rebalanceEventBudget(ctx, args.eventId);
+  return slotId;
+}

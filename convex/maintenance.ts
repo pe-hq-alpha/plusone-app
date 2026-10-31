@@ -29,6 +29,7 @@ const CHILD_TABLES = [
   "shareLinks",
   "vendorOffers",
   "vendorBriefs",
+  "quoteDrops",
 ] as const;
 
 /**

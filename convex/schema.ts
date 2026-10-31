@@ -921,6 +921,24 @@ export const spaceItemFields = {
 };
 
 
+/** A quote dropped on the event with no vendor or need chosen (convex/quoteDrops.ts). */
+const quoteDropFields = {
+  eventId: v.id("events"),
+  userId: v.id("users"),
+  status: v.union(v.literal("reading"), v.literal("filed"), v.literal("failed")),
+  text: v.string(),
+  storageId: v.optional(v.id("_storage")),
+  filename: v.optional(v.string()),
+  contentType: v.optional(v.string()),
+  size: v.optional(v.number()),
+  vendorName: v.optional(v.string()),
+  slotTitle: v.optional(v.string()),
+  slotId: v.optional(v.id("vendorSlots")),
+  vendorId: v.optional(v.id("vendors")),
+  newNeed: v.optional(v.boolean()),
+  error: v.optional(v.string()),
+};
+
 export default defineSchema({
   ...authTables,
 
@@ -1156,6 +1174,8 @@ export default defineSchema({
     eventId: v.optional(v.id("events")),
     threadId: v.optional(v.id("threads")),
   }).index("by_address", ["address"]),
+
+  quoteDrops: defineTable(quoteDropFields).index("by_eventId", ["eventId"]),
 
   contractChecks: defineTable(contractCheckFields).index("by_eventId", ["eventId"]),
 

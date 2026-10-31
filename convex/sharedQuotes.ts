@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
-import { mutation } from "./_generated/server";
+import type { Doc, Id } from "./_generated/dataModel";
+import { mutation, type MutationCtx } from "./_generated/server";
 import { requireMember } from "./lib/auth";
 import { spend } from "./rateLimits";
 import { claimUpload } from "./lib/uploads";
@@ -12,8 +13,8 @@ import { claimUpload } from "./lib/uploads";
  * beside the rest. Each one is a model call, so it counts against the assistant's allowance.
  */
 
-const READABLE = /^(image\/(jpeg|png|webp|gif)|application\/pdf)$/;
-const MAX_BYTES = 10 * 1024 * 1024;
+export const READABLE = /^(image\/(jpeg|png|webp|gif)|application\/pdf)$/;
+export const MAX_BYTES = 10 * 1024 * 1024;
 
 /** A one-off upload URL for the photo or PDF. */
 export const generateUploadUrl = mutation({
@@ -52,28 +53,40 @@ export const add = mutation({
     if (!text && !file) throw new ConvexError("Paste their message or add a photo of it.");
     await spend(ctx, "assistant", event, userId);
 
-    const existing = await ctx.db.query("threads").withIndex("by_vendorId", (q) => q.eq("vendorId", vendor._id)).first();
-    const threadId =
-      existing?._id ??
-      (await ctx.db.insert("threads", { eventId: vendor.eventId, vendorId: vendor._id, slotId, status: "draft", followUpCount: 0 }));
-    const now = Date.now();
-    const messageId = await ctx.db.insert("messages", {
-      eventId: vendor.eventId,
-      threadId,
-      direction: "in",
-      kind: "vendor_reply",
-      status: "received",
-      fromAddress: vendor.name,
-      toAddress: "",
-      subject: file ? "Shared by you: their quote" : "Shared by you: their message",
-      bodyText: text || "(The quote is in the attached file.)",
-      attachments:
-        file && args.storageId
-          ? [{ storageId: args.storageId, filename: args.filename?.slice(0, 120) || "quote", contentType, size: file.size }]
-          : [],
-      receivedAt: now,
-    });
-    await ctx.scheduler.runAfter(0, internal.modelTasks.extractReply, { messageId });
-    return messageId;
+    return await fileSharedQuote(ctx, { vendor, slotId, text, storageId: args.storageId, filename: args.filename, contentType, size: file?.size });
   },
 });
+
+/**
+ * Keep a quote as the vendor's reply on their thread and have it read like an emailed one.
+ * Shared by "add a quote" on a need's Vendors page and a quote dropped on the event.
+ */
+export async function fileSharedQuote(
+  ctx: MutationCtx,
+  args: { vendor: Doc<"vendors">; slotId: Id<"vendorSlots">; text: string; storageId?: Id<"_storage">; filename?: string; contentType: string; size?: number },
+): Promise<Id<"messages">> {
+  const { vendor, slotId, text } = args;
+  const hasFile = Boolean(args.storageId && args.size !== undefined);
+  const existing = await ctx.db.query("threads").withIndex("by_vendorId", (q) => q.eq("vendorId", vendor._id)).first();
+  const threadId =
+    existing?._id ??
+    (await ctx.db.insert("threads", { eventId: vendor.eventId, vendorId: vendor._id, slotId, status: "draft", followUpCount: 0 }));
+  const messageId = await ctx.db.insert("messages", {
+    eventId: vendor.eventId,
+    threadId,
+    direction: "in",
+    kind: "vendor_reply",
+    status: "received",
+    fromAddress: vendor.name,
+    toAddress: "",
+    subject: hasFile ? "Shared by you: their quote" : "Shared by you: their message",
+    bodyText: text || "(The quote is in the attached file.)",
+    attachments:
+      hasFile && args.storageId
+        ? [{ storageId: args.storageId, filename: args.filename?.slice(0, 120) || "quote", contentType: args.contentType, size: args.size ?? 0 }]
+        : [],
+    receivedAt: Date.now(),
+  });
+  await ctx.scheduler.runAfter(0, internal.modelTasks.extractReply, { messageId });
+  return messageId;
+}

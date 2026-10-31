@@ -137,6 +137,7 @@ import type * as openWeights from "../openWeights.js";
 import type * as outreach from "../outreach.js";
 import type * as places from "../places.js";
 import type * as planningChat from "../planningChat.js";
+import type * as quoteDrops from "../quoteDrops.js";
 import type * as quotes from "../quotes.js";
 import type * as rateLimits from "../rateLimits.js";
 import type * as research from "../research.js";
@@ -297,6 +298,7 @@ declare const fullApi: ApiFromModules<{
   outreach: typeof outreach;
   places: typeof places;
   planningChat: typeof planningChat;
+  quoteDrops: typeof quoteDrops;
   quotes: typeof quotes;
   rateLimits: typeof rateLimits;
   research: typeof research;
