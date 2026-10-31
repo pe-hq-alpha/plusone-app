@@ -110,31 +110,24 @@ describe("clean search terms", () => {
 });
 
 describe("what the search box says before anyone types", () => {
-  test("reads naturally, with the budget the way people say it", () => {
+  test("the trade, the place and the occasion, with no mood and no price", () => {
     const base = { city: "Kochi", occasion: "a wedding", amount: 715_000, currency: "INR" };
-    expect(defaultSearchText({ ...base, category: "Venue", title: "Venue", vibes: ["Intimate"] })).toBe(
-      "Venues in Kochi for a wedding, intimate, under ₹8 lakh",
+    expect(defaultSearchText({ ...base, category: "Venue", title: "Venue", vibes: ["Intimate"] })).toBe("Venues in Kochi for a wedding");
+    expect(defaultSearchText({ ...base, category: "Officiant", title: "Iyer", area: "Panampilly Nagar", amount: 50_000 })).toBe("Iyer in Panampilly Nagar, Kochi for a wedding");
+    expect(defaultSearchText({ ...base, category: "Officiant", title: "Who leads the ceremony", amount: 50_000 })).toBe("Officiants in Kochi for a wedding");
+    expect(defaultSearchText({ category: "Photographer", title: "Photography", city: "Austin", occasion: "a wedding", amount: 4_200, currency: "USD" })).toBe(
+      "Photographers in Austin for a wedding",
     );
-    expect(defaultSearchText({ ...base, category: "Officiant", title: "Iyer", area: "Panampilly Nagar", amount: 50_000 })).toBe(
-      "Iyer in Panampilly Nagar, Kochi for a wedding, under ₹50,000",
-    );
-    expect(defaultSearchText({ ...base, category: "Officiant", title: "Who leads the ceremony", amount: 50_000 })).toBe(
-      "Officiants in Kochi for a wedding, under ₹50,000",
-    );
-    expect(
-      defaultSearchText({ category: "Photographer", title: "Photography", city: "Austin", occasion: "a wedding", amount: 4_200, currency: "USD" }),
-    ).toBe("Photographers in Austin for a wedding, under $4.2k");
   });
 
   test("a need for one part names the part, in the family's words", () => {
     expect(
       defaultSearchText({ category: "Live band", title: "Nadaswaram", area: "Mylapore", city: "Chennai", occasion: "a wedding", part: "Muhurtham", amount: 45_000, currency: "INR" }),
-    ).toBe("Nadaswaram for Muhurtham in Mylapore, Chennai, under ₹45,000");
+    ).toBe("Nadaswaram for Muhurtham in Mylapore, Chennai");
   });
 
-  test("cleans down to terms with no exact figure", () => {
-    const text = defaultSearchText({ category: "Venue", city: "Kochi", occasion: "a wedding", vibes: ["intimate"], amount: 715_000, currency: "INR" });
-    expect(cleanQuery(text, "Kochi")).toBe("Venues in Kochi wedding intimate");
+  test("a host's own search keeps their words and loses any figure", () => {
+    expect(cleanQuery("Biriyani in Neelankarai Chennai under ₹15,000", "Neelankarai Chennai")).toBe("Biriyani in Neelankarai Chennai");
   });
 });
 

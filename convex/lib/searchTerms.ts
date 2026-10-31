@@ -317,24 +317,19 @@ export function defaultSearchText(args: {
   occasion: string;
   /** The one part of the event this need is for, in the family's words (`partOfNeed`). */
   part?: string;
+  /** Kept for the callers; a mood is never searched. */
   vibes?: readonly string[];
-  amount: number;
-  currency: string;
+  /** Kept for the callers; a price is never searched. */
+  amount?: number;
+  currency?: string;
 }): string {
   const who = ownTitle(args.title, args.category) ?? needPlural(args.category);
   const area = args.area?.trim();
   const place = area ? `${area}, ${args.city}` : args.city;
-  const feel = (args.vibes ?? [])
-    .map((v) => v.trim().toLowerCase())
-    .filter(Boolean)
-    .slice(0, 2)
-    .join(" and ");
-  const budget = roughBudget(args.amount, args.currency, { sign: true });
   const Who = `${who.charAt(0).toUpperCase()}${who.slice(1)}`;
   const part = args.part?.trim();
-  return [part ? `${Who} for ${part} in ${place}` : `${Who} in ${place} for ${args.occasion}`, feel, budget ? `under ${budget}` : ""]
-    .filter(Boolean)
-    .join(", ");
+  // The trade, the place and the occasion: a mood or a price in a search brings back directories and blogs.
+  return part ? `${Who} for ${part} in ${place}` : `${Who} in ${place} for ${args.occasion}`;
 }
 
 /** Drop blanks and repeats, ignoring case. */

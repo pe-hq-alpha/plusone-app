@@ -223,7 +223,9 @@ export const planSearch = internalAction({
             : "") +
           `${eventBrief(event, sessions)}\n\nNeed: ${slot.title} (${slot.category}), budget about ${roughBudget(slot.budget, event.currency, { sign: true })}\n` +
           (area ? `Neighbourhood to search: ${area}\n` : "") +
-          `What the hosts asked for: ${args.query}\n\n` +
+          `What the hosts asked for: ${args.query}\n` +
+          "Their own words are searched as they wrote them; your searches add to them with the trade and the occasion, " +
+          "keeping any dish, style of food or speciality they named (biriyani, Chettinad, candid, destination).\n\n" +
           "Return queries (the searches), category (a short name for the kind of vendor, such as \"Photographer\") " +
           "and budgetHint (one short line for the hosts restating the budget for this need, with no figure other than " +
           "the one above).",
@@ -235,7 +237,9 @@ export const planSearch = internalAction({
 
     // No amounts survive in a search; every search is tidied and names the occasion and place.
     const cleaned = (planned?.queries ?? []).map((q) => cleanQuery(withOccasion(q, occasion), city));
-    let queries = uniqueQueries(cleaned).slice(0, 3);
+    // The host's own words lead, as they wrote them (prices taken out): "Biriyani in Neelankarai Chennai" is searched as that.
+    const theirs = cleanQuery(args.query, city);
+    let queries = uniqueQueries([theirs, ...cleaned]).slice(0, 3);
     if (queries.length < 2) queries = uniqueQueries([...queries, ...fallback]).slice(0, 3);
     // Always one search aimed at a vendor's own pricing page.
     if (!queries.some(isPricingQuery)) {

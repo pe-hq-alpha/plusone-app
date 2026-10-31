@@ -147,8 +147,8 @@ function SlotPanel({
   const markBooked = useMutation(api.slots.markBooked);
   const renameSlot = useMutation(api.slots.update);
 
-  // Starts from the host's feel for the day and a budget as people say it ("under ₹8 lakh"),
-  // never the exact figure. The server's "find them all" searches the same words.
+  // Starts from the trade, the place and the occasion; never a price or a mood, which bring back
+  // directories. The server's "find them all" searches the same words.
   const defaultQuery = defaultSearchText({
     category: slot.category,
     title: slot.title,
