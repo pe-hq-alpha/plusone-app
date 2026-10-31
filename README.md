@@ -257,7 +257,7 @@ Every fee is disclosed. Fair pricing here means informed and comparable: PlusOne
 
 One app, two sides working on the same lines: customers plan and compare, vendors answer, and the PlusOne team checks every vendor before customers see them.
 
-<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Plan it all in one place. Know what you're paying for.' over a gold line drawing of a garden dinner, with Plan an event and See the demo, a line for vendors, and PlusOne at work for a sample first birthday: done, now, waiting and next">
+<img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Plan it all in one place. Know what you're paying for.' over a gold line drawing of a garden dinner, with the three ways in (Plan an event, Find vendors, List your business), and PlusOne at work for a sample first birthday: done, now, waiting and next, with a link to the demo">
 
 ### Planning an event
 
