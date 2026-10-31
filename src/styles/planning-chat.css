@@ -1,10 +1,9 @@
-/* Planning a new event as a conversation: the talk on the left, what has been gathered on
-   the right, a tick beside each line the host has confirmed. */
+/* Planning a new event as a conversation: the talk on the left, the plan taking shape on the right. */
 
 .pc { margin-inline: auto; width: 100%; max-width: 1080px; padding: 28px clamp(16px, 4vw, 40px) 64px; }
 .pc__top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .pc__grid { display: grid; gap: 28px; margin-top: 36px; }
-@media (min-width: 900px) { .pc__grid { grid-template-columns: minmax(0, 1fr) 300px; gap: 44px; align-items: start; } }
+@media (min-width: 900px) { .pc__grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 44px; align-items: start; } }
 .pc__title { font-size: clamp(2.1rem, 3.6vw, 3.2rem); line-height: 1.08; letter-spacing: -0.01em; color: var(--color-ink-deep); }
 
 .pc__messages { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 14px; }
@@ -32,18 +31,47 @@
 .pc__input { flex: 1; resize: none; border: 0; background: transparent; box-shadow: none; font-size: 1rem; line-height: 1.5; }
 .pc__input:focus { box-shadow: none; outline: none; }
 
-.pc__card { padding: 20px 22px; border-radius: 18px; background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); }
-@media (min-width: 900px) { .pc__card { position: sticky; top: 24px; margin-top: 88px; } }
-.pc__card-title { font-size: 1.3rem; }
-.pc__card ul { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
-.pc__line { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; }
-.pc__tick { width: 20px; height: 20px; margin-top: 2px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--color-rule); }
-.pc__line.is-known .pc__tick { box-shadow: inset 0 0 0 1.5px var(--color-highlight); }
-.pc__line.is-confirmed .pc__tick { background: var(--color-done); color: var(--color-paper); box-shadow: none; }
-.pc__label { display: block; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-quiet); }
-.pc__value { display: block; font-size: 0.93rem; line-height: 1.4; color: var(--color-ink); }
-.pc__line:not(.is-known):not(.is-confirmed) .pc__value { color: var(--color-quiet); }
-.pc__hint { margin-top: 16px; font-size: 0.86rem; line-height: 1.5; color: var(--color-quiet); }
+/* The side: sample first messages before the talk starts, then the plan as it takes shape. */
+@media (min-width: 900px) { .pc__side { position: sticky; top: 24px; margin-top: 88px; max-height: calc(100dvh - 48px); overflow-y: auto; } }
+.pc-plan { padding: 20px 22px; border-radius: 18px; background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); }
+.pc-plan__title { font-size: 1.3rem; }
+.pc-plan__day { margin-top: 16px; }
+.pc-plan__dayname { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-quiet); }
+.pc-plan__day ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 8px; }
+.pc-plan__event { position: relative; padding: 8px 30px 8px 10px; border-radius: 12px; background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-line); }
+.pc-plan__name { width: 100%; background: transparent; font-size: 0.95rem; color: var(--color-ink); border: 0; padding: 0; }
+.pc-plan__name:focus { outline: none; box-shadow: 0 1px 0 var(--color-accent); }
+.pc-plan__facts { margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--color-muted); }
+.pc-plan__facts input, .pc-plan__facts select { background: transparent; border: 0; color: var(--color-muted); font-size: 0.8rem; padding: 2px 4px; border-radius: 6px; }
+.pc-plan__facts input:focus, .pc-plan__facts select:focus { outline: 1px solid var(--color-accent); }
+.pc-plan__time { width: 6.2rem; }
+.pc-plan__guests { width: 4.2rem; }
+.pc-plan__remove { position: absolute; top: 6px; right: 6px; padding: 4px; border-radius: 999px; color: var(--color-quiet); }
+.pc-plan__remove:hover { color: var(--color-bad); }
+.pc-plan__needs { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--color-line); }
+.pc-sample { width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; font-size: 0.9rem; line-height: 1.45; color: var(--color-ink);
+  background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-line); transition: box-shadow 140ms ease-out; }
+.pc-sample:hover { box-shadow: inset 0 0 0 1px var(--color-accent); }
+
+/* Choices under PlusOne's question: chips for one, ticks for many. */
+.pc-choose { margin-top: 16px; }
+.pc-choose__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pc-chip { padding: 8px 14px; border-radius: 999px; font-size: 0.9rem; color: var(--color-ink); background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line); transition: box-shadow 140ms ease-out; }
+.pc-chip:hover, .pc-chip[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--color-accent); }
+.pc-chip--go { color: var(--color-on-highlight); background: var(--color-highlight); box-shadow: none; }
+.pc-choose__own { margin-top: 10px; display: flex; gap: 8px; }
+.pc-choose__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+@media (min-width: 640px) { .pc-choose__list { grid-template-columns: 1fr 1fr; } }
+.pc-tick { width: 100%; display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 9px 12px; border-radius: 12px; background: var(--color-cream);
+  box-shadow: inset 0 0 0 1px var(--color-line); transition: box-shadow 140ms ease-out; }
+.pc-tick:hover { box-shadow: inset 0 0 0 1px var(--color-rule); }
+.pc-tick[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
+.pc-tick__box { flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 5px; box-shadow: inset 0 0 0 1.5px var(--color-rule); }
+.pc-tick[aria-pressed="true"] .pc-tick__box { background: var(--color-accent); box-shadow: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.pc-tick__label { display: block; font-size: 0.93rem; color: var(--color-ink); }
+.pc-tick__tag { margin-left: 6px; padding: 1px 7px; border-radius: 999px; font-size: 0.7rem; color: var(--color-quiet); box-shadow: inset 0 0 0 1px var(--color-line); }
+.pc-tick__detail { display: block; margin-top: 1px; font-size: 0.8rem; line-height: 1.4; color: var(--color-quiet); }
 
 @keyframes pc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes pc-dot { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }

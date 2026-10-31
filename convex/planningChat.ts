@@ -24,13 +24,12 @@ const MAX_CHARS = 1200;
 const MAX_MESSAGES = 80;
 const TYPE_IDS = EVENT_TYPES.map((t) => t.id) as [string, ...string[]];
 const CATEGORIES = VENDOR_CATEGORIES as [string, ...string[]];
-const FIELD_ENUM = z.enum(FIELDS);
 const STYLE_IDS = [...TRADITIONS.map((t) => t.id), "none", "mix", "other"] as unknown as [string, ...string[]];
 
 const reading = z.object({
   changes: z
     .object({
-      eventType: z.enum(TYPE_IDS).nullable(),
+      eventType: z.string().nullable().describe(`one of: ${TYPE_IDS.join(", ")}`),
       occasionLabel: z.string().nullable().describe("their own words for it, e.g. Amma's 60th, Griha pravesam"),
       name: z.string().nullable().describe("what to call the event, as they would: Arjun and Meera's wedding, Amma's 60th, the Acme Diwali party"),
       host: z.string().nullable().describe("first name of the main person the event is for or who is organising it, when one is named; for 'Arjun and Meera's wedding' it is Arjun. Never ask for it: null when nobody is named"),
@@ -54,11 +53,12 @@ const reading = z.object({
         )
         .nullable()
         .describe("the events of the day their latest message names or changes, each named the way they name it; ones it doesn't mention are kept as they are"),
-      tradition: z.enum(STYLE_IDS).nullable().describe("for a wedding, the tradition their words name (iyer → tamil_brahmin, a mix of two → mix); null unless they say it"),
+      tradition: z.string().nullable().describe(`for a wedding, the tradition their words name, as one of: ${STYLE_IDS.join(", ")} (iyer → tamil_brahmin, a mix of two → mix); null unless they say it`),
       needs: z
         .array(
           z.object({
-            category: z.enum(CATEGORIES),
+            // A plain string keeps the answer's grammar small enough for every provider; unknown trades are dropped by clampReading.
+            category: z.string().describe(`one of: ${CATEGORIES.join(", ")}`),
             title: z.string().describe("the need in their own words, e.g. Nadaswaram, Iyer, Mehndi artist, Cake"),
             parts: z.array(z.string()).nullable().describe("the names of the parts this need serves; null for all of them"),
           }),
@@ -68,9 +68,9 @@ const reading = z.object({
       notes: z.string().nullable().describe("anything else worth keeping for planning, added to what is already noted"),
     })
     .describe("ONLY what their latest message states or corrects; null for everything it doesn't touch"),
-  confirmed: z.array(FIELD_ENUM).describe("lines from the read-back they said are right ('yes', 'correct', 'all good' confirms every line read back)"),
-  wrong: z.array(FIELD_ENUM).describe("lines they said are wrong without giving the right value"),
-  unsure: z.array(FIELD_ENUM).describe("things they said they don't know yet"),
+  confirmed: z.array(z.string()).describe(`from: ${FIELDS.join(", ")}. `+"lines from the read-back they said are right ('yes', 'correct', 'all good' confirms every line read back)"),
+  wrong: z.array(z.string()).describe(`from: ${FIELDS.join(", ")}. `+"lines they said are wrong without giving the right value"),
+  unsure: z.array(z.string()).describe(`from: ${FIELDS.join(", ")}. `+"things they said they don't know yet"),
   weekdaySaid: z.string().nullable().describe("a weekday they named alongside a date, e.g. saturday; else null"),
   removeEvents: z.array(z.string()).describe("names of events of the day they said to drop; empty if none"),
   proposedEvents: z
@@ -226,7 +226,8 @@ export const send = action({
     // Events of the day the message names are merged into the plan by name, not swapped for it.
     if (said.sessions) said.sessions = mergeEvents(s.state.facts.sessions, said.sessions, r.removeEvents);
     else if (r.removeEvents.length) said.sessions = mergeEvents(s.state.facts.sessions, [], r.removeEvents);
-    // A wedding style the words name plainly is taken even when the reading missed it.
+    // Only a style on our list counts; one the words name plainly is taken even when the reading missed it.
+    if (said.tradition && !STYLE_IDS.includes(said.tradition)) delete said.tradition;
     if (!said.tradition && !s.state.facts.tradition) {
       const named = traditionNamed(text);
       if (named) said.tradition = named.id;
@@ -236,7 +237,9 @@ export const send = action({
     const changes: Partial<Facts> = {};
     for (const key of Object.keys(said) as (keyof Facts)[]) (changes as Record<string, unknown>)[key] = clean[key];
     if (r.changes.notes && s.state.facts.notes) changes.notes = `${s.state.facts.notes} ${clean.notes}`.slice(0, 600);
-    let next = apply(s.state, { changes, confirmed: r.confirmed, wrong: r.wrong, unsure: r.unsure, weekdaySaid: r.weekdaySaid } satisfies Reading, s.step);
+    // Only known fields count (the schema leaves them as plain words to stay small for every provider).
+    const known = (xs: string[]) => xs.filter((x): x is (typeof FIELDS)[number] => (FIELDS as readonly string[]).includes(x));
+    let next = apply(s.state, { changes, confirmed: known(r.confirmed), wrong: known(r.wrong), unsure: known(r.unsure), weekdaySaid: r.weekdaySaid } satisfies Reading, s.step);
     // Answering a set of choices in words counts as answering them (a style only once one is named).
     if (s.step.kind === "choose" && (s.step.slot !== "tradition" || next.facts.tradition)) next = { ...next, done: [...new Set([...(next.done ?? []), s.step.slot])] };
     const proposed = r.proposedEvents

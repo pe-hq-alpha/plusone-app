@@ -50,20 +50,36 @@ function assertFinished(response: { stop_reason: string | null; stop_details?: {
   }
 }
 
+/** Claude can't enforce a schema whose grammar is too big; such a schema is then asked for in words and checked by our parser. */
+const tooBigToEnforce = (err: unknown) => err instanceof Error && /compiled grammar is too large/i.test(err.message);
+
 export async function claudeComplete(req: CompletionRequest): Promise<Completion> {
   const model = claudeModel(req.tier);
   const fallback = /^claude-(sonnet-5-5|opus-5|fable-5)/.test(model);
-  const response = await anthropic().beta.messages.create({
-    model,
-    max_tokens: req.maxOutputTokens,
-    system: req.system,
-    messages: req.messages.map((m) => ({
-      role: m.role,
-      content: typeof m.content === "string" ? m.content : filesFirst(m.content).map(toBlock),
-    })),
-    output_config: { effort: req.effort, ...(req.schema ? { format: betaZodOutputFormat(req.schema) } : {}) },
-    ...(fallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
-  });
+  const format = req.schema ? betaZodOutputFormat(req.schema) : undefined;
+  const ask = (enforced: boolean) =>
+    anthropic().beta.messages.create({
+      model,
+      max_tokens: req.maxOutputTokens,
+      system:
+        enforced || !format
+          ? req.system
+          : `${req.system ?? ""}\n\nAnswer with one JSON object and nothing else, matching this JSON Schema:\n${JSON.stringify((format as { schema?: unknown }).schema ?? format)}`,
+      messages: req.messages.map((m) => ({
+        role: m.role,
+        content: typeof m.content === "string" ? m.content : filesFirst(m.content).map(toBlock),
+      })),
+      output_config: { effort: req.effort, ...(enforced && format ? { format } : {}) },
+      ...(fallback ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const } : {}),
+    });
+  let response;
+  try {
+    response = await ask(true);
+  } catch (err) {
+    if (!format || !tooBigToEnforce(err)) throw err;
+    console.warn("Claude: schema too big to enforce, asking for it in words; the answer is still checked against it");
+    response = await ask(false);
+  }
   assertFinished(response);
   return {
     text: response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join(""),

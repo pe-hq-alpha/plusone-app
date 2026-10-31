@@ -205,7 +205,15 @@ export function parseAnswer<S extends z.ZodType>(text: string, schema: S): z.inf
   try {
     data = JSON.parse(text);
   } catch {
-    throw new ModelAnswerError("The model's answer was not valid JSON");
+    // An answer asked for in words may arrive wrapped in a code fence or a sentence; take the object inside.
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    try {
+      if (start < 0 || end <= start) throw new Error("no object");
+      data = JSON.parse(text.slice(start, end + 1));
+    } catch {
+      throw new ModelAnswerError("The model's answer was not valid JSON");
+    }
   }
   let parsed = schema.safeParse(data);
   if (!parsed.success) parsed = schema.safeParse(withinLimits(data, parsed.error.issues as Issue[]));

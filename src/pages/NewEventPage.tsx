@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Link, useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 import { toCreateArgs, withDefaults, type Facts } from "../../convex/lib/wizard";
 import { VoiceButton } from "../components/VoiceButton";
@@ -12,14 +11,9 @@ import { EVENTS } from "../lib/analytics/events";
 import { BRAND } from "../lib/brand";
 import "../styles/planning-chat.css";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
-
-const EXAMPLES = [
-  "Amma's 60th in Chennai in January, a homam at home and lunch for about 120",
-  "A griha pravesam for our new flat in Whitefield, early February",
-  "Our office Diwali party in Gurugram, about 150 people",
-];
-
-const LABEL: Record<string, string> = { eventType: "What it is", host: "Who is hosting", city: "Where", date: "When", guests: "How many", budget: "Budget" };
+import { ChoiceChips } from "../components/planning/ChoiceChips";
+import { PlanPreview } from "../components/planning/PlanPreview";
+import { SampleInputs } from "../components/planning/SampleInputs";
 
 function today(): string {
   const d = new Date();
@@ -30,14 +24,16 @@ const say = (e: unknown) => (e instanceof ConvexError && typeof e.data === "stri
 
 /**
  * Planning something new, as a conversation: the host says what they're planning in their
- * own words, and PlusOne asks for what it still needs, reads back what it gathered and
- * points out anything that can't be right, until the host has confirmed every line. Then
- * the plan is built. The full form stays one click away.
+ * own words, and PlusOne probes like a planner: a wedding's tradition, the events of the day
+ * to tick, their days and times, what's often missed, then reads it all back. The plan takes
+ * shape beside the talk, editable, until it is built. The full form stays one click away.
  */
 export function NewEventPage() {
   const chat = useQuery(api.planningChat.mine);
   const send = useAction(api.planningChat.send);
   const reset = useMutation(api.planningChat.reset);
+  const pick = useMutation(api.planningChat.pick);
+  const editPlan = useMutation(api.planningChat.editPlan);
   const create = useMutation(api.events.create);
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -46,9 +42,8 @@ export function NewEventPage() {
   const [error, setError] = useState<string | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const placeholder = useMemo(() => EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)], []);
-
   const messages = chat?.messages ?? [];
+  const facts = useMemo(() => (chat ? (JSON.parse(chat.facts) as Facts) : null), [chat]);
   const started = messages.length > 1;
   // After a read-back, one tap confirms it all.
   const last = messages.at(-1);
@@ -75,6 +70,19 @@ export function NewEventPage() {
       setPending(null);
       setBusy(null);
       inputRef.current?.focus();
+    }
+  }
+
+  async function choose(ids: string[], other: string) {
+    if (busy) return;
+    setError(null);
+    setBusy("sending");
+    try {
+      await pick({ ids, other, today: today() });
+    } catch (e) {
+      setError(say(e));
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -144,6 +152,8 @@ export function NewEventPage() {
               </button>
               <span className="text-sm text-muted">Or tell me what to change.</span>
             </div>
+          ) : chat?.choose && !pending ? (
+            <ChoiceChips choose={chat.choose} busy={busy !== null} onPick={(ids, other) => void choose(ids, other)} />
           ) : (
             lastIsReadBack &&
             !busy && (
@@ -169,7 +179,7 @@ export function NewEventPage() {
               className="input pc__input"
               value={text}
               maxLength={1200}
-              placeholder={started ? "Your answer" : `For example: ${placeholder}`}
+              placeholder={started ? "Your answer, in your own words" : "What are you planning? A wedding, a birthday, an office party…"}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -192,22 +202,12 @@ export function NewEventPage() {
           </form>
         </section>
 
-        <aside className="pc__card" aria-label="What I have so far">
-          <h2 className="pc__card-title">So far</h2>
-          <ul>
-            {(chat?.lines ?? []).map((l) => (
-              <li key={l.field} className={`pc__line ${l.confirmed ? "is-confirmed" : l.text ? "is-known" : ""}`}>
-                <span className="pc__tick" aria-hidden="true">{l.confirmed && <Check size={13} strokeWidth={2.2} />}</span>
-                <span className="min-w-0">
-                  <span className="pc__label">{LABEL[l.field]}</span>
-                  <span className="pc__value">{l.text ?? "Not yet"}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="pc__hint">
-            {chat?.ready ? "Everything is confirmed." : "A tick means you've confirmed it. Nothing is set up until you build the plan."}
-          </p>
+        <aside className="pc__side" aria-label={started ? "Your plan so far" : "Ways to start"}>
+          {!started ? (
+            <SampleInputs busy={busy !== null} onPick={(t) => void submit(t)} />
+          ) : (
+            facts && <PlanPreview facts={facts} busy={busy !== null} onSave={async (sessions) => void (await editPlan({ sessions: sessions.map((x) => ({ name: x.name, startTime: x.startTime, guests: x.guests, day: x.day ?? null, ...(x.kind ? { kind: x.kind } : {}) })), today: today() }))} />
+          )}
         </aside>
       </div>
       <ThemeFooter className="mt-10" />
