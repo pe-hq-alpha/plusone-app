@@ -129,7 +129,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **A planning conversation that probes like a planner:** it asks a wedding's tradition, never assuming one, offers that tradition's events of the day to tick from a hand-checked list with its own suggestions marked, checks timings, asks once what is often missed, and builds the plan day by day beside the talk, editable | Muse Spark 1.3 (rebuilt on the pre-hackathon chat) | Live, 31 Oct |
 | **Vendors found on the open web,** listed openly as "not yet verified" with a link to their own site, to be claimed or removed by the business; vendor research searches the host's own words, never a price | Firecrawl, within robots.txt | Live, 31 Oct |
 | **Shared links that show the event:** an event page, RSVP or plan link shows the event's name, date, place and picture; each kind of event has its own line drawing, or the host's own picture | | Live, 31 Oct |
-| **A WhatsApp quote dropped on the event:** paste the message or drop the screenshot with no vendor or need chosen; it finds its vendor and need, adds them if new, and lands in Compare | Muse Spark 1.3 | Built 31 Oct |
+| **A WhatsApp quote dropped on the event:** paste the message or drop the screenshot with no vendor or need chosen; it finds its vendor and need, adds them if new, and lands in Compare | Muse Spark 1.3 | Live, 31 Oct |
 
 ### How each criterion is met
 
