@@ -111,6 +111,8 @@ Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), wi
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
+PlusOne existed before the event as a planner that talked a plan through, wrote to vendors and compared their quotes, on Claude (tag `pre-hackathon`). In the nine days it grew into a two-sided platform on six Meta models: 293 commits, the code from about 40,000 lines to 63,000, the backend from 124 files to 219. Moving the existing steps onto Muse Spark is the first row below; everything after it is new.
+
 | What | Meta model | Status |
 |---|---|---|
 | Every reading and writing step moved to Meta's models, through one wrapper with retries, a logged fallback and a cost row for every call | Muse Spark 1.3 | Live in production, 27 Oct |
@@ -162,7 +164,7 @@ Before the hackathon, PlusOne already planned an event from a conversation, foun
 
 **Can the AI be trusted with prices?** It is measured, not assumed: charges found on held-out quotes, quotes read across email, PDF and photo, vendors checked against made-up ones, photos checked against AI-generated ones, every run with its raw results in the repository. A person verifies every vendor. [Evaluations](EVALUATIONS.md#evaluation-missing-charges)
 
-**What was built during the hackathon?** The move to Meta's models, the standard sheet, Compare line by line, the market range, PlusOne Partner and Ops, voice, the venue view, the photo and vendor checks, the open directory and the map, vendors' price lists read on open weights, and quote updates on WhatsApp. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
+**What was built during the hackathon?** Far more than a change of model: the standard sheet, Compare line by line, the market range, PlusOne Partner for vendors and Ops for the PlusOne team, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, vendors' price lists read on open weights, and quote updates on WhatsApp, with the existing planner moved onto Meta's models too. The code grew from about 40,000 lines to 63,000 in 293 commits. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
 
 **What's real and what's a sample?** Everything you can click works and is live. The demo's event and its vendors are made up and marked Sample; the model runs shown under the hood are real, with their dates and costs.
 
