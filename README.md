@@ -315,7 +315,7 @@ On PlusOne Partner, for vendors, including the many with no website or listing. 
 
 | The vendor's page | Answering a customer's request |
 |---|---|
-| <img src="assets/screens/partner.jpg" alt="PlusOne Partner for a sample caterer: the business with its Verified, Transparent pricing, Standard and New badges, and Customers asking, with a catering request for a 60th birthday for 120 guests"> | <img src="assets/screens/partner-offer.jpg" alt="Answering the request on the standard sheet: ₹460 a plate for 120 with 12 dishes, 2 sweets and 8 serving staff, GST extra, service staff, crockery and water in the price, transport added at ₹1,500, and the customer sees ₹56,700"> |
+| <img src="assets/screens/partner.jpg" alt="PlusOne Partner for a sample caterer: Customers asking comes first, with a catering request for a 60th birthday for 120 guests in Mylapore, then the business with its Verified, Transparent pricing, Standard and New badges"> | <img src="assets/screens/partner-offer.jpg" alt="Answering the request on the standard sheet: ₹460 a plate for 120 with 12 dishes, 2 sweets and 8 serving staff, GST extra, service staff, crockery and water in the price, transport added at ₹1,500, and the customer sees ₹56,700"> |
 
 ### Checking vendors
 
