@@ -99,7 +99,13 @@ describe("missing charges on the decision board", () => {
       "Kaveri Feast Co.": ["GST is extra, with no amount given", "No water line, and one other charges ₹600"],
     });
     expect(gapsIn("Venue")).toEqual({
-      "Thamarai Hall": ["Doesn't say whether air conditioning is included", "Doesn't say what an extra hour costs"],
+      "Thamarai Hall": [
+        "Doesn't say whether air conditioning is included",
+        "Doesn't say when decorators can get in, or what it costs",
+        "Doesn't say whether rooms are included",
+        "Doesn't say whether car parking is included",
+        "Doesn't say what an extra hour costs",
+      ],
     });
   });
 

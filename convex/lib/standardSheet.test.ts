@@ -155,6 +155,14 @@ describe("missing charges", () => {
     expect(r.cleaning.status).toBe("included");
   });
 
+  test("a hall's one-line rent is asked about the decorators' night-before access, rooms and parking, as our own baby shower taught us", () => {
+    const hall = { total: 75_000, lines: [line("Half-day rent, 5 am to 2 pm", "core", 75_000)] };
+    const asked = missingCharges(hall, sheetFor("venue")!, []).map((m) => m.key);
+    expect(asked).toEqual(expect.arrayContaining(["early_access", "rooms", "parking", "overtime"]));
+    const later = { total: 95_000, lines: [line("Half-day rent", "core", 75_000), line("Decorators from 11 pm the night before", "extra", 20_000)] };
+    expect(Object.fromEntries(readQuote(later, sheetFor("venue")!).map((x) => [x.key, x])).early_access).toMatchObject({ status: "priced", amount: 20_000 });
+  });
+
   test("a quote that prices or includes every usual extra has nothing missing", () => {
     const full = {
       total: 52_000,

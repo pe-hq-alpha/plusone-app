@@ -128,6 +128,17 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
       { key: "electricity", label: "Electricity and generator", kind: "fee", usually: "extra", match: /\b(eb|electricity|power|generator|genset|diesel)\b/i },
       { key: "ac", label: "Air conditioning", kind: "fee", usually: "extra", match: /\b(a\/?c|air[- ]?condition\w*)\b/i },
       { key: "cleaning", label: "Cleaning", kind: "fee", usually: "extra", match: /\b(clean\w*|housekeeping|maintenance)\b/i },
+      // From the founders' own baby shower: the hall charged ₹20,000 at the end for decorators to come in the night before.
+      {
+        key: "early_access",
+        label: "Decorators' early access",
+        kind: "extra",
+        usually: "extra",
+        match: /\b(night before|previous night|early access|decorators?\b.{0,20}\b(access|entry|in|set ?up)|set ?up (time|hours?))\b/i,
+        ask: "Doesn't say when decorators can get in, or what it costs",
+      },
+      { key: "rooms", label: "Rooms", kind: "fee", usually: "extra", match: /\b(rooms?|green room|bridal suite)\b/i, ask: "Doesn't say whether rooms are included" },
+      { key: "parking", label: "Car parking", kind: "fee", usually: "extra", match: /\b(car ?park(ing)?|parking|valet)\b/i, ask: "Doesn't say whether car parking is included" },
       OVERTIME,
     ],
     units: [priced("for_day", "for the day"), priced("per_session", "per session", ["sessions"])],
