@@ -199,8 +199,16 @@ describe("a vendor joining", () => {
     const other = await user(t, "someone@else.in");
     await expect(as(t, other).mutation(api.marketplace.partner.switchBusiness, { profileId: decor.profileId })).rejects.toThrow(/isn't one of yours/);
 
+    // A vendor takes one business off; the other stays, and someone else can't remove it.
+    await expect(as(t, other).mutation(api.marketplace.partner.removeBusiness, { profileId: decor.profileId })).rejects.toThrow(/isn't one of yours/);
+    await as(t, vendor).mutation(api.marketplace.partner.removeBusiness, { profileId: decor.profileId });
+    mine = await as(t, vendor).query(api.marketplace.partner.mine, {});
+    expect(mine.businesses.map((b) => b.name)).toEqual(["Lakshmi Virundhu"]);
+    expect(mine.profile?.name).toBe("Lakshmi Virundhu");
+    expect(await t.run((ctx) => ctx.db.get(decor.profileId))).toBeNull();
+
     // Five is the most one account runs.
-    for (const n of [3, 4, 5]) await as(t, vendor).mutation(api.marketplace.partner.register, { name: `Business ${n}`, categories: ["Cake"], city: "Chennai" });
+    for (const n of [2, 3, 4, 5]) await as(t, vendor).mutation(api.marketplace.partner.register, { name: `Business ${n}`, categories: ["Cake"], city: "Chennai" });
     await expect(as(t, vendor).mutation(api.marketplace.partner.register, { name: "Business 6", categories: ["Cake"], city: "Chennai" })).rejects.toThrow(/the most one account can/);
   });
 

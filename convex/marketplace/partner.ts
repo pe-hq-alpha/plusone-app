@@ -9,7 +9,7 @@ import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit, placeValidator, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
-import { businessesOf, currentBusiness, requireVendor, roomForAnother } from "./vendors";
+import { businessesOf, currentBusiness, letGoOf, requireVendor, roomForAnother } from "./vendors";
 import { needsReview, proposeDetails, proposeOffering, proposeRemoval } from "./changes";
 
 /**
@@ -330,6 +330,24 @@ export const switchBusiness = mutation({
     const profile = await ctx.db.get(args.profileId);
     if (!profile || profile.ownerUserId !== userId) throw new ConvexError("That business isn't one of yours.");
     await ctx.db.patch(userId, { activeVendorId: profile._id });
+    return null;
+  },
+});
+
+/**
+ * A vendor takes one of their businesses off PlusOne: its listing, prices, photos and the
+ * offers it sent. Customers no longer see it. Their other businesses stay as they are.
+ */
+export const removeBusiness = mutation({
+  args: { profileId: v.id("vendorProfiles") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await requireAccount(ctx);
+    const profile = await ctx.db.get(args.profileId);
+    if (!profile || profile.ownerUserId !== userId) throw new ConvexError("That business isn't one of yours.");
+    const user = await ctx.db.get(userId);
+    await letGoOf(ctx, profile);
+    if (user?.activeVendorId === profile._id) await ctx.db.patch(userId, { activeVendorId: undefined });
     return null;
   },
 });

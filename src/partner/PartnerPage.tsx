@@ -588,6 +588,54 @@ function PlacePicker({
   );
 }
 
+/** Taking a business off PlusOne, asked twice on the page: its listing, prices, photos and offers go. */
+function RemoveBusiness({ profile }: { profile: Profile }) {
+  const remove = useMutation(api.marketplace.partner.removeBusiness);
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <section className="card-quiet mt-4 px-5 py-4" aria-labelledby="remove-h">
+      <h2 id="remove-h" className="text-sm font-medium">Remove this business</h2>
+      {!asking ? (
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted">Takes {profile.name} off PlusOne. Your other businesses stay as they are.</p>
+          <button type="button" className="btn-quiet btn-sm text-bad" onClick={() => setAsking(true)}>
+            Remove this business
+          </button>
+        </div>
+      ) : (
+        <div className="mt-1">
+          <p className="text-sm">
+            Customers will no longer see {profile.name}. Its prices, photos and the offers it sent are deleted, and this can&rsquo;t be undone.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-primary btn-sm bg-bad"
+              disabled={busy}
+              onClick={() => {
+                setBusy(true);
+                setError(null);
+                void remove({ profileId: profile._id }).catch((err) => {
+                  setError(errorText(err, "That didn't work. Try again."));
+                  setBusy(false);
+                });
+              }}
+            >
+              {busy ? "Removing…" : `Yes, remove ${profile.name}`}
+            </button>
+            <button type="button" className="btn-quiet btn-sm" onClick={() => setAsking(false)} disabled={busy}>
+              Keep it
+            </button>
+          </div>
+          {error && <p role="alert" className="mt-2 text-xs text-bad">{error}</p>}
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ---------------------------------------------------------------- your business
 
 type Profile = Doc<"vendorProfiles">;
@@ -634,6 +682,7 @@ function Dashboard({
           onSaved={() => setEditing(false)}
         />
       )}
+      {editing && !demo && <RemoveBusiness profile={profile} />}
       <Photos />
       {!demo && <Briefs verified={profile.status === "verified"} />}
       {!demo && <SentOffers />}

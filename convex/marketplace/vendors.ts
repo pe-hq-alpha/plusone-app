@@ -70,14 +70,20 @@ export async function deleteVendorRecords(ctx: MutationCtx, userId: Id<"users">)
     .query("vendorProfiles")
     .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
     .take(MAX_BUSINESSES * 2);
-  for (const profile of profiles) {
-    if (profile.source === "plusone_added" && !profile.sample) {
-      await clearOwnWork(ctx, profile._id);
-      await ctx.db.patch(profile._id, { ownerUserId: undefined, status: "pending", statusReason: undefined, statusAt: Date.now() });
-      continue;
-    }
-    await deleteProfile(ctx, profile._id);
+  for (const profile of profiles) await letGoOf(ctx, profile);
+}
+
+/**
+ * One business taken off PlusOne by its own vendor. One they set up goes, with everything
+ * it made; a listing PlusOne added goes back to waiting for its vendor, without their prices.
+ */
+export async function letGoOf(ctx: MutationCtx, profile: Doc<"vendorProfiles">): Promise<void> {
+  if (profile.source === "plusone_added" && !profile.sample) {
+    await clearOwnWork(ctx, profile._id);
+    await ctx.db.patch(profile._id, { ownerUserId: undefined, status: "pending", statusReason: undefined, statusAt: Date.now() });
+    return;
   }
+  await deleteProfile(ctx, profile._id);
 }
 
 /** A business's prices and the offers it sent. */
