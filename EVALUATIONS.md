@@ -26,6 +26,29 @@ Muse Spark choosing each charge was run twice more on the held-out set on 30 Oct
 
 The held-out set shows what the tuned set hid: the fixed rules that match a line to a charge are where the false alarms come from (15–18 on new shapes), while Muse Spark choosing from the fixed list kept to one. Its answer is also structured (a status and an amount for every line on the sheet), so it can feed Compare the way the rules do, which asking directly can't. **Compare now runs on it** (29 Oct): after each reply is read, a second, constrained Muse Spark read names every charge on the sheet, Compare's missing-charge flags come from those statuses, and the line-matching rules are kept only as the fallback for a quote without them (`convex/lib/charges.ts`). On the demo it dropped one false alarm at once: Kaveri's ₹2,500 for "the vessels and staff" no longer reads as a missing service-staff line.
 
+## Evaluation: on a real event, the founders' own baby shower
+
+A half-day baby shower (Seemantham) for 120 guests in Chennai, planned by the founders before PlusOne could have helped, with every quote and every amount paid written down afterwards. Five vendors: hall, decor, photography and video, catering, makeup. Vendors' names are left out.
+
+| Service | Quoted | Paid | What happened |
+|---|---|---|---|
+| Hall | ₹75,000 | ₹95,000 | ₹20,000 added at the end for decorators to get in from 11 pm the night before |
+| Decor | ₹77,200 | ₹77,200 | Priced from a WhatsApp photo, nothing measured; fewer lilies than billed |
+| Photography and video | ₹77,000 | ₹77,000 | Full quote in writing before booking; nothing added |
+| Catering | ₹52,300 (80 plates) | ₹73,700 | Guests rose to 120 at the same rates; ₹9,500 charged outside the plate rate |
+| Makeup | ₹15,000 | ₹15,000 | One fixed package; nothing added |
+| **Total** | **₹2,96,500** | **₹3,37,900** | **₹41,400 more than quoted (14%)** |
+
+Of the ₹41,400, ₹21,400 was 40 more guests at the caterer's own rates. The other **₹29,500, about 10% of everything quoted, was charges outside the headline prices**: the hall's ₹20,000 for extra hours and the caterer's ₹9,500 for a live counter, transport, service and leaf removal, which took the real cost from ₹535 a guest at the plate rates to about ₹614.
+
+**What PlusOne flags on those quotes.** The three quotes, worded as the vendors gave them with the names left out, were read on production on 31 Oct by the same charge reader Compare uses (Muse Spark 1.3, `evals:chargesFor`; about 2–4 s each; raw results kept privately):
+
+- **The hall** ("half-day, 5 am to 2 pm, ₹75,000"): six charges not stated, **extra hours among them**, the line the ₹20,000 came under, with GST, AC, electricity, cleaning and the dining hall.
+- **The decorator** ("as in the photo, ₹70,000; lilies 120 × ₹60"): **set-up not stated**, the set-up that needed the hall the night before, with GST, transport and lighting.
+- **The caterer**: service (₹4,000) and transport (₹2,500) read onto their own lines, water read as included, GST and crockery flagged as not stated; at the host's 120 guests, Compare puts it at about ₹614 a guest, not the ₹535 plate rate.
+
+**What changed because of it** (`7eafbda`): the hall's sheet now asks about the decorators' night-before access, rooms and car parking by name, the three things the founders would ask next time. Photography and makeup, the two vendors who put the full price in writing before booking, are exactly what the standard sheet asks every vendor for.
+
 ## Evaluation: reading quotes in any form
 
 A quote arrives as an email, a PDF or a photo of a printed page sent on WhatsApp. Six of the quotes above, each with a total marked by hand, were sent all three ways: as an email's text, as a PDF, and as a phone photo of the printed quote on a table, turned and shaded (`convex/lib/evalReading.ts`; the PDFs and photos in `scripts/eval-reading/`, made by `scripts/eval-reading.mjs`; raw results in `scripts/quote-reading-run1.json`). Each was read on production by Muse Spark 1.3 through the same reader real replies use. A reading counts as right when its total is the hand-marked one and it kept every rupee amount the quote states, including lakh figures like ₹1,10,000.
