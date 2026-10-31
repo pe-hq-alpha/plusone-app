@@ -60,7 +60,7 @@ for (const device of Object.keys(DEVICES)) {
     const { context, page, errors } = await newPage(device);
     await step(device, "Home page", page, errors, async () => {
       await page.goto(`${HOME}/`, { waitUntil: "domcontentloaded" });
-      await sees(page, "See the demo");
+      await sees(page, "Plan an event");
     });
     let event = "";
     await step(device, "Customers' demo opens on Today", page, errors, async () => {
