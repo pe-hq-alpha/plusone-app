@@ -86,7 +86,7 @@ Try it at [app.plusoneevents.site/demo](https://app.plusoneevents.site/demo), wi
 
 **How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The response told us more than the placing: people liked it, and the families, planners and vendors we spoke to all pointed at the same gap, that there is no organised way to plan an event and know what you're paying for. So we set out to fill it. For the Meta Global AI Developer Hackathon (Startup track), PlusOne moves onto Meta's models and gains the pieces that make prices comparable at the source: [what's new is listed below](#for-the-judges).
 
-**Team:** Padmanabhan Rajendrakumar, Founder (representative), who builds the core product and its move to Meta's models, and Sharmila Raghu, Co-Founder, who leads PlusOne Partner and the design of every app.
+**Team:** Padmanabhan Rajendrakumar, Founder, who built this entry and submits it, with Sharmila Raghu, Co-Founder of PlusOne.
 
 ## For the judges
 

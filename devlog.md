@@ -2,7 +2,7 @@
 
 - **Project:** PlusOne Events
 - **Event:** Meta Global AI Developer Hackathon (Cerebral Valley), 27 Oct – 4 Nov 2026 (kickoff 26 Oct, 9:30 PM IST)
-- **Team:** Padmanabhan Rajendrakumar (representative; core product and the move to Meta's models) and Sharmila Raghu (PlusOne Partner and the design of every app), the founders
+- **Team:** Padmanabhan Rajendrakumar, Founder, who built this entry and submits it, with Sharmila Raghu, Co-Founder of PlusOne
 - **What it does:** One app to plan any event (a birthday, a wedding function, an office party): it talks the plan through and sets out the budget and the vendors needed, finds vendors and writes to them from the event's own inbox, and puts every quote and every vendor's offer on the same lines, with missing charges flagged and the local price range, so customers know what they're paying for. Vendors, with or without a website, are found on PlusOne Partner and answer on the same sheet.
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable. On the other side, many good vendors have no website or listing to be found by, and prices are opaque: there is no fair, transparent place for a vendor without an online identity to register, show what they charge and be found.
 - **Status:** deployed
