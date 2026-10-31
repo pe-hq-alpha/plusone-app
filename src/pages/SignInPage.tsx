@@ -19,6 +19,10 @@ const VENDOR_PHOTOS = [
     src: "/photos/vendor-caterer.jpg",
     alt: "A catering team in a kitchen before service: a chef finishing plates on a steel counter while servers carry trays out",
   },
+  {
+    src: "/photos/vendor-makeup.jpg",
+    alt: "A makeup artist smiling as she brushes colour onto a woman in a silk saree with jasmine in her hair, an open makeup kit with a lit mirror beside them",
+  },
 ];
 
 /**
