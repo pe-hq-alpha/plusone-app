@@ -917,6 +917,8 @@ export default defineSchema({
     /** Updates on WhatsApp: the number (+E.164) they asked for them on, and when. Cleared by "STOP" or in Account. */
     whatsappNumber: v.optional(v.string()),
     whatsappOptInAt: v.optional(v.number()),
+    /** On Partner, the business this account is working on now, when it runs more than one. */
+    activeVendorId: v.optional(v.id("vendorProfiles")),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])

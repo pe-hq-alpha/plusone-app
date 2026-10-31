@@ -175,7 +175,33 @@ describe("a vendor joining", () => {
     });
     expect(mine.listed).toBe(false);
     expect(await t.query(internal.marketplace.listings.searchProfiles, { category: "Decor & Florals", city: "Chennai" })).toEqual([]);
-    await expect(as(t, vendor).mutation(api.marketplace.partner.register, signUp)).rejects.toThrow(/already runs a business/);
+    // The same website again is pointed at the listing it already has, not listed twice.
+    expect((await as(t, vendor).mutation(api.marketplace.partner.register, signUp)).kind).toBe("already_listed");
+  });
+
+  test("one account runs more than one business and switches between them", async () => {
+    const t = setup();
+    const vendor = await user(t, "lakshmi@lakshmidecor.in");
+    const decor = await as(t, vendor).mutation(api.marketplace.partner.register, signUp);
+    const food = await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Lakshmi Virundhu", categories: ["Catering"], city: "Chennai" });
+    expect(food.kind).toBe("created");
+
+    // A new business is the one being worked on; both are listed for the switcher.
+    let mine = await as(t, vendor).query(api.marketplace.partner.mine, {});
+    expect(mine.profile?._id).toBe(food.profileId);
+    expect(mine.businesses.map((b) => b.name)).toEqual(["Lakshmi Decor", "Lakshmi Virundhu"]);
+
+    await as(t, vendor).mutation(api.marketplace.partner.switchBusiness, { profileId: decor.profileId });
+    mine = await as(t, vendor).query(api.marketplace.partner.mine, {});
+    expect(mine.profile?.name).toBe("Lakshmi Decor");
+
+    // Someone else's business can't be switched to.
+    const other = await user(t, "someone@else.in");
+    await expect(as(t, other).mutation(api.marketplace.partner.switchBusiness, { profileId: decor.profileId })).rejects.toThrow(/isn't one of yours/);
+
+    // Five is the most one account runs.
+    for (const n of [3, 4, 5]) await as(t, vendor).mutation(api.marketplace.partner.register, { name: `Business ${n}`, categories: ["Cake"], city: "Chennai" });
+    await expect(as(t, vendor).mutation(api.marketplace.partner.register, { name: "Business 6", categories: ["Cake"], city: "Chennai" })).rejects.toThrow(/the most one account can/);
   });
 
   test("a business PlusOne already lists is pointed to its listing, not listed twice", async () => {

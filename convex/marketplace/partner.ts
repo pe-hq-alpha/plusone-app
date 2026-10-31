@@ -9,7 +9,7 @@ import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit, placeValidator, vendorOfferingFields, vendorProfileFields } from "../schema";
 import { badge, cardFor, level, offeringsOf, tier } from "./listings";
-import { requireVendor } from "./vendors";
+import { businessesOf, currentBusiness, requireVendor, roomForAnother } from "./vendors";
 import { needsReview, proposeDetails, proposeOffering, proposeRemoval } from "./changes";
 
 /**
@@ -105,6 +105,13 @@ const claimSummary = v.object({
   createdAt: v.number(),
 });
 
+const businessSummary = v.object({
+  _id: v.id("vendorProfiles"),
+  name: v.string(),
+  status: vendorProfileFields.status,
+  categories: v.array(v.string()),
+});
+
 /** The signed-in vendor's own listing, as they manage it, with the badges families see. */
 export const mine = query({
   args: {},
@@ -116,10 +123,11 @@ export const mine = query({
     level: v.optional(level),
     listed: v.boolean(),
     claims: v.array(claimSummary),
+    businesses: v.array(businessSummary),
   }),
   handler: async (ctx) => {
     const userId = await currentUserId(ctx);
-    const empty = { profile: null, offerings: [], badges: [], listed: false, claims: [] };
+    const empty = { profile: null, offerings: [], badges: [], listed: false, claims: [], businesses: [] };
     if (!userId) return empty;
     const claims = await ctx.db
       .query("vendorClaims")
@@ -135,11 +143,9 @@ export const mine = query({
         createdAt: c.createdAt,
       })),
     );
-    const profile = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
+    const profile = await currentBusiness(ctx, userId);
     if (!profile) return { ...empty, claims: claimRows };
+    const businesses = (await businessesOf(ctx, userId)).map((b) => ({ _id: b._id, name: b.name, status: b.status, categories: b.categories }));
     const card = await cardFor(ctx, profile, profile.categories[0] ?? "");
     return {
       profile,
@@ -149,6 +155,7 @@ export const mine = query({
       level: card.level,
       listed: isListed(profile),
       claims: claimRows,
+      businesses,
     };
   },
 });
@@ -189,11 +196,7 @@ export const register = mutation({
   ),
   handler: async (ctx, args) => {
     const userId = await requireAccount(ctx);
-    const owned = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
-    if (owned) throw new ConvexError("Your account already runs a business on PlusOne Partner.");
+    await roomForAnother(ctx, userId);
     const fields = cleanProfile(args);
     if (fields.website) {
       const existing = await ctx.db
@@ -214,6 +217,8 @@ export const register = mutation({
       joinedAt: now,
       completedEvents: 0,
     });
+    // A new business is the one they're working on next.
+    await ctx.db.patch(userId, { activeVendorId: profileId });
     return { kind: "created" as const, profileId };
   },
 });
@@ -230,11 +235,7 @@ export const claim = mutation({
     const profile = await ctx.db.get(args.profileId);
     if (!profile || profile.status === "rejected") throw new ConvexError("That listing is no longer on PlusOne.");
     if (profile.ownerUserId) throw new ConvexError("This listing has already been claimed. If it's yours, write to us.");
-    const owned = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
-    if (owned) throw new ConvexError("Your account already runs a business on PlusOne Partner.");
+    await roomForAnother(ctx, userId);
     const mine = await ctx.db
       .query("vendorClaims")
       .withIndex("by_userId", (q) => q.eq("userId", userId))
@@ -256,7 +257,10 @@ export const claim = mutation({
       createdAt: now,
       ...(byEmail ? { decidedAt: now } : {}),
     });
-    if (byEmail) await ctx.db.patch(profile._id, { ownerUserId: userId });
+    if (byEmail) {
+      await ctx.db.patch(profile._id, { ownerUserId: userId });
+      await ctx.db.patch(userId, { activeVendorId: profile._id });
+    }
     return { claimId, status: byEmail ? ("approved" as const) : ("pending" as const) };
   },
 });
@@ -316,6 +320,19 @@ export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">
   });
   return profileId;
 }
+
+/** Work on another of the account's own businesses. */
+export const switchBusiness = mutation({
+  args: { profileId: v.id("vendorProfiles") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const userId = await requireUserId(ctx);
+    const profile = await ctx.db.get(args.profileId);
+    if (!profile || profile.ownerUserId !== userId) throw new ConvexError("That business isn't one of yours.");
+    await ctx.db.patch(userId, { activeVendorId: profile._id });
+    return null;
+  },
+});
 
 // ---------------------------------------------------------------- keeping it right
 

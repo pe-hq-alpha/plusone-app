@@ -7,7 +7,7 @@ import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offerLine, offeringUnit } from "../schema";
 import { cardFor, listingCard } from "./listings";
-import { eventIdsOf, requireVendor } from "./vendors";
+import { currentBusiness, eventIdsOf, requireVendor } from "./vendors";
 
 /**
  * Offers: a verified Partner vendor's answer to a family's brief, priced on the standard
@@ -202,10 +202,7 @@ export const mine = query({
   handler: async (ctx) => {
     const userId = await currentUserId(ctx);
     if (!userId) return [];
-    const profile = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
+    const profile = await currentBusiness(ctx, userId);
     if (!profile) return [];
     const offers = await ctx.db
       .query("vendorOffers")

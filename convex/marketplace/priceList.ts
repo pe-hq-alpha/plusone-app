@@ -3,6 +3,7 @@ import { internal } from "../_generated/api";
 import { action, internalMutation, internalQuery } from "../_generated/server";
 import { requireActionUserId } from "../lib/auth";
 import { isTrial } from "../lib/marketplace";
+import { currentBusiness } from "./vendors";
 import { generateObject, MODEL_FAST, type Part } from "../lib/models";
 import { keepPackages, type PackageDraft, priceListInstructions, priceListSchema } from "../lib/priceList";
 import { sheetFor } from "../lib/standardSheet";
@@ -24,10 +25,7 @@ export const caller = internalQuery({
   args: { userId: v.id("users") },
   returns: v.union(v.null(), v.object({ categories: v.array(v.string()), isGuest: v.boolean() })),
   handler: async (ctx, args) => {
-    const profile = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", args.userId))
-      .first();
+    const profile = await currentBusiness(ctx, args.userId);
     if (!profile) return null;
     const user = await ctx.db.get(args.userId);
     const isGuest = Boolean(user?.isAnonymous);

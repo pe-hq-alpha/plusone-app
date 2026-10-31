@@ -8,7 +8,7 @@ import { EVENT_TYPES, eventTypeOf } from "../lib/occasion";
 import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit } from "../schema";
-import { eventIdsOf } from "./vendors";
+import { currentBusiness, eventIdsOf } from "./vendors";
 
 /**
  * Briefs: a family's need, sent to PlusOne Partner so verified vendors answer it on the
@@ -142,10 +142,7 @@ export const open = query({
   handler: async (ctx) => {
     const userId = await currentUserId(ctx);
     if (!userId) return [];
-    const profile = await ctx.db
-      .query("vendorProfiles")
-      .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", userId))
-      .first();
+    const profile = await currentBusiness(ctx, userId);
     if (!profile || profile.status !== "verified") return [];
     const briefs: Doc<"vendorBriefs">[] = [];
     if (isTrial(profile)) {

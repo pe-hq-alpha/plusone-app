@@ -52,13 +52,58 @@ export function PartnerPage() {
       )}
       {mine.profile ? (
         <>
+          {!me?.isGuest && <Businesses businesses={mine.businesses} current={mine.profile._id} />}
           {mine.profile.status === "verified" && <WaitingChanges />}
-          <Dashboard profile={mine.profile} offerings={mine.offerings} badges={mine.badges} tier={mine.tier} level={mine.level} />
+          <Dashboard key={mine.profile._id} profile={mine.profile} offerings={mine.offerings} badges={mine.badges} tier={mine.tier} level={mine.level} />
         </>
       ) : (
         <Join claims={mine.claims} />
       )}
     </main>
+  );
+}
+
+const STATUS_WORD: Record<string, string> = { pending: "being checked", verified: "verified", rejected: "not listed", suspended: "paused" };
+
+/**
+ * The businesses one account runs: switch between them, or add another (a caterer who
+ * also does decor, a studio under a second name). Each one is checked on its own.
+ */
+function Businesses({ businesses, current }: { businesses: { _id: Id<"vendorProfiles">; name: string; status: string }[]; current: Id<"vendorProfiles"> }) {
+  const switchTo = useMutation(api.marketplace.partner.switchBusiness);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const full = businesses.length >= 5;
+  return (
+    <>
+      <nav className="mt-4 flex flex-wrap items-center gap-2" aria-label="Your businesses">
+        {businesses.length > 1 &&
+          businesses.map((b) => (
+            <button
+              key={b._id}
+              type="button"
+              aria-pressed={b._id === current}
+              className={`rounded-full px-3.5 py-1.5 text-sm transition ${b._id === current ? "bg-accent text-paper" : "bg-cream text-muted ring-1 ring-line hover:text-accent"}`}
+              onClick={() => {
+                setAdding(false);
+                setError(null);
+                if (b._id !== current) void switchTo({ profileId: b._id }).catch((err) => setError(errorText(err, "That didn't switch. Try again.")));
+              }}
+            >
+              {b.name}
+              <span className={`ml-1.5 text-xs ${b._id === current ? "opacity-80" : "text-quiet"}`}>{STATUS_WORD[b.status] ?? b.status}</span>
+            </button>
+          ))}
+        {!full && (
+          <button type="button" className="btn-quiet btn-sm" aria-expanded={adding} onClick={() => setAdding(!adding)}>
+            <Icon name={adding ? "close" : "plus"} size={14} />
+            {adding ? "Close" : "Add another business"}
+          </button>
+        )}
+      </nav>
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+      {adding && <ProfileForm onSaved={() => setAdding(false)} />}
+    </>
   );
 }
 
@@ -291,7 +336,10 @@ function ProfileForm({ initial, onSaved }: { initial?: ProfileFields; onSaved?: 
           setState("idle");
           onSaved?.();
         })
-      : register(args).then((r) => setState(r.kind === "already_listed" ? "listed" : "idle"));
+      : register(args).then((r) => {
+          setState(r.kind === "already_listed" ? "listed" : "idle");
+          if (r.kind === "created") onSaved?.();
+        });
     done.catch((err) => {
       setError(errorText(err, "That didn't save. Try again."));
       setState("idle");

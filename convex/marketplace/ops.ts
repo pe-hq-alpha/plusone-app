@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { internalMutation, mutation, query } from "../_generated/server";
 import { currentUserId, requireStaff } from "../lib/auth";
 import { profileStatus, vendorOfferingFields, vendorProfileFields, vettingReviewFields } from "../schema";
+import { roomForAnother } from "./vendors";
 
 /**
  * PlusOne Ops: the team's side of Partner. Vendors waiting to be verified, claims
@@ -174,11 +175,7 @@ export const decideClaim = mutation({
     if (args.approve) {
       if (!profile) throw new ConvexError("That listing is no longer there.");
       if (profile.ownerUserId) throw new ConvexError("Someone else already runs this listing.");
-      const owned = await ctx.db
-        .query("vendorProfiles")
-        .withIndex("by_ownerUserId", (q) => q.eq("ownerUserId", claim.userId))
-        .first();
-      if (owned) throw new ConvexError("This person already runs another listing.");
+      await roomForAnother(ctx, claim.userId, "This person");
       await ctx.db.patch(profile._id, { ownerUserId: claim.userId });
       // Anyone else waiting on the same listing is turned down with it.
       const others = await ctx.db
