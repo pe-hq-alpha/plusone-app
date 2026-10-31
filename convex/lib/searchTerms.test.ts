@@ -139,24 +139,16 @@ describe("what the search box says before anyone types", () => {
 });
 
 describe("the searches PlusOne falls back on", () => {
-  test("an intimate wedding venue in Kochi at 8 lakh", () => {
+  test("an intimate wedding venue in Kochi at 8 lakh: no price and no mood in any search", () => {
+    // "under 8 lakh" and "intimate" pull in directories and listicles, not vendors' own sites.
     expect(
       fallbackQueries({ need: "Venue", title: "Venue", place: "Kochi", vibe: "intimate", budgetWords: "8 lakh", occasion: "wedding" }),
-    ).toEqual([
-      "wedding venues in Kochi",
-      "intimate wedding venues in Kochi",
-      "wedding venues in Kochi under 8 lakh",
-      "venue Kochi wedding packages pricing",
-    ]);
+    ).toEqual(["wedding venues in Kochi", "venue Kochi wedding packages pricing"]);
   });
 
   test("an Officiant renamed Iyer searches for the Iyer, in the family's word", () => {
     const queries = fallbackQueries({ need: "Officiant", title: "Iyer", place: "Chennai", budgetWords: "₹50,000", occasion: "wedding" });
-    expect(queries).toEqual([
-      "Iyer for wedding in Chennai",
-      "Iyer for wedding in Chennai under ₹50,000",
-      "Iyer Chennai wedding packages pricing",
-    ]);
+    expect(queries).toEqual(["Iyer for wedding in Chennai", "Iyer Chennai wedding packages pricing"]);
   });
 
   test("a need for one part searches by the need, the part and the place first", () => {
@@ -175,22 +167,17 @@ describe("the searches PlusOne falls back on", () => {
     expect(queries.join(" ")).not.toMatch(/who leads|priest|qazi|granthi|hindu|muslim|sikh/i);
   });
 
-  test("every query names the place and the occasion, and only one mentions money", () => {
+  test("every query names the place and the occasion, and none mentions money", () => {
     const queries = fallbackQueries({ need: "Photographer", title: "Photography", place: "Austin", budgetWords: "$4.2k", occasion: "wedding" });
-    expect(queries).toEqual([
-      "wedding photographers in Austin",
-      "wedding photographers in Austin under $4.2k",
-      "photographer Austin wedding packages pricing",
-    ]);
+    expect(queries).toEqual(["wedding photographers in Austin", "photographer Austin wedding packages pricing"]);
     expect(queries.every((q) => q.includes("Austin") && q.includes("wedding"))).toBe(true);
-    expect(queries.filter((q) => q.includes("$"))).toEqual(["wedding photographers in Austin under $4.2k"]);
+    expect(queries.filter((q) => /\$|₹|under/.test(q))).toEqual([]);
     expect(queries.filter((q) => /pricing/.test(q))).toHaveLength(1);
   });
 
   test("another occasion uses its own word", () => {
     expect(fallbackQueries({ need: "Venue", place: "Austin", occasion: "birthday party", budgetWords: "$2k" })).toEqual([
       "birthday party venues in Austin",
-      "birthday party venues in Austin under $2k",
       "venue Austin birthday party packages pricing",
     ]);
   });

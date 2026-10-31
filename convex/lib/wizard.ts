@@ -24,10 +24,16 @@ export type Facts = {
   guests: number | null;
   budget: number | null;
   currency: string;
-  sessions: { name: string; startTime: string; guests: number | null }[];
+  /**
+   * The events of the day. `day` counts from the first day (0); null when not said, and then
+   * a multi-day event spreads them in order. `kind` is lib/vocab's CEREMONY_KINDS.
+   */
+  sessions: { name: string; startTime: string; guests: number | null; day?: number | null; kind?: string }[];
   /** Each vendor need in the family's words, and the parts (by name) it serves; no parts means all of them. */
   needs: { category: string; title: string; parts?: string[] }[];
   notes: string;
+  /** A wedding's style as the host chose it (lib/traditions id), "none", "mix", or their own words; "" until asked. */
+  tradition: string;
 };
 
 export const EMPTY_FACTS: Facts = {
@@ -47,6 +53,7 @@ export const EMPTY_FACTS: Facts = {
   sessions: [],
   needs: [],
   notes: "",
+  tradition: "",
 };
 
 /** What must be known before building; everything else has a sensible default. */
@@ -129,9 +136,13 @@ function daySpan(start: string, end: string): number {
 /** The arguments `events.create` takes, from complete facts. */
 export function toCreateArgs(f: Facts, place: { country?: string } = {}) {
   const type = f.eventType ?? "party";
-  const span = Math.min(daySpan(f.date, f.endDate), 6);
-  const endDate = span > 0 ? f.endDate : f.date;
-  const sessions = f.sessions.slice(0, 12);
+  const sessions = f.sessions.slice(0, MAX_EVENTS);
+  // Events that say their day keep it; the event runs from the first day to the last.
+  const days = sessions.map((s) => (typeof s.day === "number" ? Math.max(0, Math.min(MAX_DAYS, Math.floor(s.day))) : null));
+  const placed = days.some((d) => d !== null);
+  const lastDay = placed ? Math.max(0, ...days.map((d) => d ?? 0)) : 0;
+  const span = placed ? lastDay : Math.min(daySpan(f.date, f.endDate), 6);
+  const endDate = placed ? addDays(f.date, lastDay) : span > 0 ? f.endDate : f.date;
   const weights = sessions.map((s) => s.guests ?? f.guests ?? 1);
   return {
     name: f.name.trim().slice(0, 120),
@@ -150,16 +161,22 @@ export function toCreateArgs(f: Facts, place: { country?: string } = {}) {
     guestEstimate: f.guests ?? undefined,
     helpNotes: f.notes.trim().slice(0, 1000) || undefined,
     sessions: sessions.length
-      ? sessions.map((s, i) => ({
-          name: s.name.trim().slice(0, 80) || "The event",
-          // Multi-day events spread their parts across the days, in order.
-          date: span > 0 ? addDays(f.date, Math.min(span, Math.round((i * span) / Math.max(1, sessions.length - 1)))) : f.date,
-          guestCount: Math.max(0, Math.floor(s.guests ?? f.guests ?? 0)),
-          budget: weights[i],
-        }))
+      ? sessions.map((s, i) => {
+          // A placed event keeps its day; otherwise multi-day events spread their parts across the days, in order.
+          const day = placed ? (days[i] ?? 0) : span > 0 ? Math.min(span, Math.round((i * span) / Math.max(1, sessions.length - 1))) : 0;
+          return {
+            name: s.name.trim().slice(0, 80) || "The event",
+            date: addDays(f.date, day),
+            dayIndex: day,
+            guestCount: Math.max(0, Math.floor(s.guests ?? f.guests ?? 0)),
+            budget: weights[i],
+            ...(/^([01]\d|2[0-3]):[0-5]\d$/.test(s.startTime) ? { startTime: s.startTime } : {}),
+            ...(s.kind ? { kind: s.kind } : {}),
+          };
+        })
       : undefined,
     needs: f.needs.length
-      ? f.needs.slice(0, 20).map((n) => ({
+      ? f.needs.slice(0, MAX_NEEDS + 2).map((n) => ({
           category: n.category,
           title: n.title,
           booked: false,
@@ -195,18 +212,30 @@ export function clampReading(raw: Partial<Facts>, known: { types: readonly strin
     guests: num(raw.guests),
     budget: num(raw.budget),
     currency: /^[A-Z]{3}$/.test(str(raw.currency, 3)) ? str(raw.currency, 3) : "INR",
-    sessions: (Array.isArray(raw.sessions) ? raw.sessions : []).slice(0, 8).map((s) => ({
-      name: str(s?.name, 80),
-      startTime: /^\d{2}:\d{2}$/.test(str(s?.startTime, 5)) ? str(s?.startTime, 5) : "",
-      guests: num(s?.guests),
-    })).filter((s) => s.name),
+    sessions: (Array.isArray(raw.sessions) ? raw.sessions : []).slice(0, MAX_EVENTS).map((s) => {
+      const day = typeof s?.day === "number" && Number.isFinite(s.day) ? Math.max(0, Math.min(MAX_DAYS, Math.floor(s.day))) : null;
+      const kind = str(s?.kind, 20);
+      return {
+        name: str(s?.name, 80),
+        startTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(str(s?.startTime, 5)) ? str(s?.startTime, 5) : "",
+        guests: num(s?.guests),
+        ...(day !== null ? { day } : {}),
+        ...(kind ? { kind } : {}),
+      };
+    }).filter((s) => s.name),
     needs: (Array.isArray(raw.needs) ? raw.needs : [])
       .filter((n) => known.categories.includes(n?.category))
-      .slice(0, 14)
+      .slice(0, MAX_NEEDS)
       .map((n) => {
         const parts = (Array.isArray(n.parts) ? n.parts : []).map((p) => str(p, 80)).filter(Boolean).slice(0, 8);
         return { category: n.category, title: str(n.title, 60) || n.category, ...(parts.length ? { parts } : {}) };
       }),
     notes: str(raw.notes, 600),
+    tradition: str(raw.tradition, 60),
   };
 }
+
+/** The most events of the day, days and vendor needs a plan holds. */
+export const MAX_EVENTS = 14;
+export const MAX_DAYS = 10;
+export const MAX_NEEDS = 18;

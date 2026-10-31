@@ -192,25 +192,20 @@ export const planSearch = internalAction({
         model: MODEL_FAST,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         schema: z.object({
-          queries: z.array(z.string()).min(1).max(5),
+          queries: z.array(z.string()).min(1).max(3),
           category: z.string(),
           budgetHint: z.string(),
         }),
         prompt:
           "You plan the web searches that find vendors for the hosts below. The goal is each vendor's own website, " +
           "not a directory, marketplace or blog that lists them.\n" +
-          "Write 3 to 5 searches the way a person types into a search box: short keyword phrases, never sentences, " +
+          "Write 2 or 3 searches the way a person types into a search box: short keyword phrases, never sentences, " +
           "no quotation marks, at most eight words each. " +
           `Every search names the place and the occasion ("${city}", "${occasion}"), because a search without the ` +
           "occasion finds the wrong kind of business.\n" +
           "Start from these shapes:\n" +
           `- "${occasion} ${needs} in ${city}"\n` +
           (part ? `- "${own ?? needs} for ${part} in ${city}", naming the part of the ${occasion} this need is for\n` : "") +
-          `- "<one word for the feel they want> ${occasion} ${needs} in ${city}", if the brief names a feel\n` +
-          (budgetWords
-            ? `- "${occasion} ${needs} in ${city} under ${budgetWords}": the one search that mentions money, using ` +
-              `the words "${budgetWords}" and never another figure\n`
-            : "") +
           `- "<the need> ${city} ${occasion} packages pricing", which tends to land on a vendor's own price page\n` +
           (own
             ? `The hosts call this need "${own}" rather than "${slot.category}". ` +
@@ -219,7 +214,8 @@ export const planSearch = internalAction({
             : "") +
           "Leave out words that pull in lists and directories " +
           "(\"best\", \"top 10\", \"near me\"). " +
-          "Never copy the hosts' request into a search as it is, and never put an exact amount in one.\n" +
+          "Never copy the hosts' request into a search as it is. Never put a price, an amount or a budget in a search, " +
+          "and no mood words (relaxed, elegant): they pull in directories and blogs. The budget is used when ranking, not searching.\n" +
           (area
             ? `They want vendors close to ${area}. ` +
               `Name "${area} ${event.city}" in every search: local vendors turn up for the neighbourhood, ` +
@@ -237,22 +233,14 @@ export const planSearch = internalAction({
       console.warn("planSearch: the planner failed, using the fixed searches", err instanceof Error ? err.message : err);
     }
 
-    // Budget words survive in one search at most; every search is tidied and names the occasion and place.
-    let withBudget = false;
-    const cleaned = (planned?.queries ?? []).map((q) => {
-      const keep = !withBudget && Boolean(budgetWords) && q.toLowerCase().includes(budgetWords.toLowerCase());
-      if (keep) withBudget = true;
-      return cleanQuery(withOccasion(q, occasion), city, keep ? budgetWords : undefined);
-    });
-    let queries = uniqueQueries(cleaned).slice(0, 5);
-    if (queries.length < 3) {
-      const extra = fallback.filter((q) => !(withBudget && q.includes(budgetWords)));
-      queries = uniqueQueries([...queries, ...extra]).slice(0, 5);
-    }
+    // No amounts survive in a search; every search is tidied and names the occasion and place.
+    const cleaned = (planned?.queries ?? []).map((q) => cleanQuery(withOccasion(q, occasion), city));
+    let queries = uniqueQueries(cleaned).slice(0, 3);
+    if (queries.length < 2) queries = uniqueQueries([...queries, ...fallback]).slice(0, 3);
     // Always one search aimed at a vendor's own pricing page.
     if (!queries.some(isPricingQuery)) {
       const pricing = fallback.find(isPricingQuery) ?? cleanQuery(`${singularNeed(needs)} ${city} ${occasion} packages pricing`, city);
-      if (queries.length < 5) queries.push(pricing);
+      if (queries.length < 3) queries.push(pricing);
       else queries[queries.length - 1] = pricing;
     }
     return {

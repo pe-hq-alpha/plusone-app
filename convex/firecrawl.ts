@@ -264,7 +264,8 @@ const pickLink = (links: string[], re: RegExp, exclude: Set<string>, host: strin
 /** Searches per run, all at once. Each returns links and snippets only; the pages are read after merging. */
 const MAX_SEARCHES = 5;
 /** Reading a shortlisted page for its text; a slow one is skipped, not waited on. */
-const CANDIDATE_SCRAPE_TIMEOUT_MS = 30_000;
+/** A vendor page that hasn't loaded in 12 s stays a candidate without its text, so one slow site never holds up the rest. */
+const CANDIDATE_SCRAPE_TIMEOUT_MS = 12_000;
 
 export const searchVendors = internalAction({
   args: {

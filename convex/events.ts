@@ -233,6 +233,8 @@ const createArgs = {
           rites: v.optional(v.array(v.object({ name: v.string(), gloss: v.string() }))),
           /** Its kind of ceremony (lib/vocab CEREMONY_KINDS). */
           kind: v.optional(v.string()),
+          /** When it starts, HH:MM, if the host said. */
+          startTime: v.optional(v.string()),
         }),
       ),
     ),
@@ -349,6 +351,7 @@ export async function insertEvent(
       name: string; dayIndex: number; date: string; weight: number; guestCount: number; description?: string;
       key?: string; significance?: string; rites?: { name: string; gloss: string }[];
       kind?: string;
+      startTime?: string;
     }[];
     if (args.sessions && args.sessions.length > 0) {
       plan = args.sessions.slice(0, 20).map((e) => {
@@ -368,6 +371,7 @@ export async function insertEvent(
           significance: e.significance?.trim().slice(0, 600) || undefined,
           rites: e.rites?.slice(0, 10),
           kind: e.kind && (CEREMONY_KINDS as readonly string[]).includes(e.kind) ? e.kind : undefined,
+          startTime: e.startTime && /^([01]\d|2[0-3]):[0-5]\d$/.test(e.startTime) ? e.startTime : undefined,
         };
       });
       if (plan.every((e) => e.weight === 0)) plan = plan.map((e) => ({ ...e, weight: 1 }));
@@ -401,6 +405,7 @@ export async function insertEvent(
         significance: e.significance,
         rites: e.rites?.length ? e.rites : undefined,
         kind: e.kind ?? guessKind(e.name),
+        ...(e.startTime ? { startTime: e.startTime } : {}),
       });
       sessionIds.push(id);
       sessionNames.push(e.name);

@@ -98,6 +98,7 @@ import type * as lib_templates from "../lib/templates.js";
 import type * as lib_terms from "../lib/terms.js";
 import type * as lib_text from "../lib/text.js";
 import type * as lib_tidy from "../lib/tidy.js";
+import type * as lib_traditions from "../lib/traditions.js";
 import type * as lib_unzip from "../lib/unzip.js";
 import type * as lib_uploads from "../lib/uploads.js";
 import type * as lib_uptime from "../lib/uptime.js";
@@ -256,6 +257,7 @@ declare const fullApi: ApiFromModules<{
   "lib/terms": typeof lib_terms;
   "lib/text": typeof lib_text;
   "lib/tidy": typeof lib_tidy;
+  "lib/traditions": typeof lib_traditions;
   "lib/unzip": typeof lib_unzip;
   "lib/uploads": typeof lib_uploads;
   "lib/uptime": typeof lib_uptime;

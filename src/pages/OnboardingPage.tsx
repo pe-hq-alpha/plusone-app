@@ -43,7 +43,7 @@ import { examplesFor } from "../lib/regionExamples";
 import "../styles/onboarding.css";
 
 /** Named, so the host can see where they are and how much is left. */
-const STEPS = ["Names and dates", "Kind of event", "Parts of the day", "People", "Budget", "Vendors", "Look and feel"];
+const STEPS = ["Names and dates", "Kind of event", "Events of the day", "People", "Budget", "Vendors", "Look and feel"];
 const KIND_STEP = 1;
 const CEREMONIES_STEP = 2;
 const GUESTS_STEP = 3;
@@ -128,6 +128,9 @@ export function OnboardingPage() {
   const create = useMutation(api.events.create);
   const uploadUrl = useMutation(api.events.generateInspirationUploadUrl);
   const [step, setStep] = useState(0);
+  /** The furthest step reached, so going back doesn't untick what is already done. */
+  const [reached, setReached] = useState(0);
+  useEffect(() => setReached((r) => Math.max(r, step)), [step]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -433,7 +436,8 @@ export function OnboardingPage() {
     return <div className="grid min-h-[60vh] place-items-center text-sm text-muted">Loading…</div>;
   }
 
-  const stepState = (i: number) => (i < step ? "done" : i === step ? "now" : "next");
+  // Steps already filled stay ticked when the host goes back to change an earlier one.
+  const stepState = (i: number) => (i === step ? "now" : i < Math.max(step, reached) ? "done" : "next");
   const STATE_WORD = { done: "Done", now: "Now", next: "Next" } as const;
 
   return (
@@ -457,7 +461,7 @@ export function OnboardingPage() {
                   <button
                     type="button"
                     className="ob-step__btn"
-                    disabled={i > step && rows.length === 0}
+                    disabled={i > Math.max(step, reached) && rows.length === 0}
                     onClick={() => setStep(i)}
                     aria-current={i === step ? "step" : undefined}
                   >
@@ -558,7 +562,7 @@ export function OnboardingPage() {
           <div className="grid gap-6">
             <fieldset>
               <legend className="label">Kind of event</legend>
-              <p className="-mt-1 text-xs text-quiet">It sets the parts of the day and the vendors {BRAND.name} starts you with.</p>
+              <p className="-mt-1 text-xs text-quiet">It sets the events of the day and the vendors {BRAND.name} starts you with.</p>
               {(["family", "work", "other"] as const).map((g) => (
                 <div key={g} className="mt-3">
                   <p className="text-xs text-quiet">{g === "family" ? "Family and friends" : g === "work" ? "Work and community" : "Something else"}</p>
@@ -589,7 +593,7 @@ export function OnboardingPage() {
                 placeholder="Diwali party, a 25th anniversary dinner, a team offsite"
               />
               <p className="mt-1 text-xs text-quiet">
-                Your words name the event everywhere. Pick the closest kind above too: it sets the parts of the day and the vendors you start with.
+                Your words name the event everywhere. Pick the closest kind above too: it sets the events of the day and the vendors you start with.
               </p>
             </div>
           </div>

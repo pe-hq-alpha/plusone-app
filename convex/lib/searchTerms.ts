@@ -289,14 +289,10 @@ export function fallbackQueries(args: {
   // "wedding venues in Kochi", or "Iyer for wedding in Chennai" in the couple's own word.
   const lead = own ? `${own} for ${occasion} in ${place}` : `${occasion} ${needs} in ${place}`;
   const part = args.part?.trim();
-  const queries = [
-    part ? `${own ?? needs} for ${part} in ${place}` : "",
-    lead,
-    args.vibe ? `${args.vibe} ${lead}` : "",
-    args.budgetWords ? `${lead} under ${args.budgetWords}` : "",
-    `${own ?? singularNeed(needs)} ${place} ${occasion} packages pricing`,
-  ];
-  return uniqueQueries(queries.map((q) => (q ? cleanQuery(q, place, args.budgetWords) : ""))).slice(0, 5);
+  // No price and no mood in a search: "under 15,000" and "relaxed" pull in directories and
+  // listicles, not vendors' own sites. The budget and the feel are used when ranking instead.
+  const queries = [part ? `${own ?? needs} for ${part} in ${place}` : "", lead, `${own ?? singularNeed(needs)} ${place} ${occasion} packages pricing`];
+  return uniqueQueries(queries.map((q) => (q ? cleanQuery(q, place) : ""))).slice(0, 3);
 }
 
 /** Put the occasion in a search that left it out: "venues in Kochi" -> "wedding venues in Kochi". */
