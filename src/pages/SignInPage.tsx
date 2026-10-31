@@ -33,6 +33,9 @@ const VENDOR_PHOTOS = [
  * come in at /signin, vendors at /partner, with their own words and landing on PlusOne
  * Partner. One person can be both.
  */
+/** Clerk's own heading repeats the page's title, so it is left out and the card kept tight, and the door fits one screen. */
+const COMPACT = { elements: { header: { display: "none" }, card: { padding: "16px 24px", gap: "12px" }, footer: { marginTop: "-4px" } } };
+
 export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?: string; audience?: "customer" | "vendor" }) {
   const [params] = useSearchParams();
   const { error } = useAuthActions();
@@ -79,15 +82,15 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
       <div className="relative isolate flex min-h-screen flex-col">
         <Backdrop contained />
         <PublicNav signIn={false} brand={false} />
-        <div className="grid flex-1 place-items-center px-4 py-8">
+        <div className="grid flex-1 place-items-center px-4 py-2">
         <div className="w-full max-w-md">
         <p className="pub-eyebrow">{vendor ? `${BRAND.name} Partner` : newHere ? "Create your account" : "Sign in"}</p>
-        <h1 className="pub-title !text-[2.4rem]">
+        <h1 className="pub-title !text-[2rem]">
           {vendor ? (newHere ? <>List <em>your business</em></> : <>Welcome <em>back</em></>) : newHere ? <>Let&rsquo;s plan <em>your event</em></> : <>Welcome <em>back</em></>}
         </h1>
-        <p className="mt-2 text-sm text-muted lg:hidden">{pitch}</p>
+        {!vendor && <p className="mt-2 text-sm text-muted lg:hidden">{pitch}</p>}
         {error && <p role="alert" className="mt-4 rounded-[12px] bg-bad-bg px-4 py-3 text-sm text-bad">{error}</p>}
-        <label className="mt-5 flex items-start gap-3 rounded-[12px] border border-line bg-cream px-4 py-3 text-sm leading-relaxed">
+        <label className="mt-4 flex items-start gap-3 rounded-[12px] border border-line bg-cream px-4 py-2.5 text-sm leading-relaxed">
           <input
             type="checkbox"
             required
@@ -102,31 +105,26 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
             logging of my IP address.
           </span>
         </label>
-        {!agreed && <p className="mt-2 text-xs text-muted">Tick the box to sign in or create an account.</p>}
         <div
-          className={`mt-4 flex justify-center transition-opacity ${agreed ? "" : "pointer-events-none opacity-50"}`}
+          className={`mt-3 flex justify-center transition-opacity ${agreed ? "" : "pointer-events-none opacity-50"}`}
           inert={!agreed}
           aria-disabled={!agreed}
+          title={agreed ? undefined : "Tick the box above to sign in or create an account"}
         >
           {newHere ? (
-            <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} />
+            <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} appearance={COMPACT} />
           ) : (
-            <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} />
+            <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} appearance={COMPACT} />
           )}
         </div>
-        <p className="mt-5 text-center text-sm text-muted">
-          Just looking?{" "}
+        <p className="mt-4 text-center text-sm text-muted">
           <Link to={vendor ? partnerHref("/demo") : "/demo"} className="text-accent underline underline-offset-2">
             {vendor ? "Try it as a sample caterer" : "See the demo"}
-          </Link>{" "}
-          first. No sign-up.
-        </p>
-        <p className="mt-2 text-center text-sm text-muted">
-          {vendor ? "Planning an event? " : "A vendor? "}
-          <Link to={vendor ? "/signin" : partnerHref("/")} className="text-accent underline underline-offset-2">
-            {vendor ? "Sign in here" : `Sign in to ${BRAND.name} Partner`}
           </Link>
-          .
+          , no sign-up <span aria-hidden="true">·</span> {vendor ? "Planning an event? " : "A vendor? "}
+          <Link to={vendor ? "/signin" : partnerHref("/")} className="whitespace-nowrap text-accent underline underline-offset-2">
+            {vendor ? "Sign in here" : `${BRAND.name} Partner`}
+          </Link>
         </p>
         </div>
         </div>
