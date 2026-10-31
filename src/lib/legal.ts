@@ -2,7 +2,8 @@ import { BRAND } from "./brand";
 
 /** Who answers privacy and other complaints, named on the Privacy and Terms pages. */
 export const GRIEVANCE_OFFICER = {
-  name: "Padmanabhan R",
+  // A role title until the founders go public with the submission on 4 Nov; then the officer's full name, as India's IT Rules expect.
+  name: "The Founder",
   // TODO: switch to grievance@plusoneevents.site once that mailbox exists.
   email: `hello@${BRAND.domain}`,
 } as const;

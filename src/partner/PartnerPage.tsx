@@ -411,9 +411,13 @@ function Dashboard({
   level?: string;
 }) {
   const [editing, setEditing] = useState(false);
+  // In the vendors' demo, the customer's request is the point, so it comes first, above the sample business.
+  const demo = useQuery(api.users.me)?.isGuest === true;
   return (
     <>
-      <section className="card mt-5 p-6 md:p-7">
+      {demo && <Briefs verified={profile.status === "verified"} />}
+      {demo && <SentOffers />}
+      <section className={`card p-6 md:p-7 ${demo ? "mt-8" : "mt-5"}`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="display text-2xl">{profile.name}</h2>
@@ -435,8 +439,8 @@ function Dashboard({
         />
       )}
       <Photos />
-      <Briefs verified={profile.status === "verified"} />
-      <SentOffers />
+      {!demo && <Briefs verified={profile.status === "verified"} />}
+      {!demo && <SentOffers />}
       <Prices profile={profile} offerings={offerings} />
     </>
   );
