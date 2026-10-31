@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { internalQuery } from "./_generated/server";
+import { coverPath } from "./lib/covers";
 
 /**
  * What a shared link shows in a chat or a post: the event's name, its date and place, and its
@@ -17,7 +18,7 @@ const when = (iso: string) => {
 
 export const card = internalQuery({
   args: { kind: v.union(v.literal("s"), v.literal("r"), v.literal("p")), key: v.string() },
-  returns: v.union(v.null(), v.object({ title: v.string(), description: v.string(), image: v.optional(v.string()), eventType: v.string() })),
+  returns: v.union(v.null(), v.object({ title: v.string(), description: v.string(), image: v.optional(v.string()), eventType: v.string(), cover: v.string() })),
   handler: async (ctx, args) => {
     const key = args.key.slice(0, 80);
     let eventId = null;
@@ -49,6 +50,7 @@ export const card = internalQuery({
       description: `${lead}${[dates, place].filter(Boolean).join(" · ")}`.trim(),
       ...(image ? { image } : {}),
       eventType: event.eventType ?? "party",
+      cover: coverPath(event.eventType, event.name, event.occasionLabel),
     };
   },
 });

@@ -330,7 +330,7 @@ export function sharedCard(path: string): { kind: "s" | "r" | "p"; key: string }
   return m ? { kind: m[1] as "s" | "r" | "p", key: m[2] } : null;
 }
 
-type Card = { title: string; description: string; image?: string; eventType: string };
+type Card = { title: string; description: string; image?: string; eventType: string; cover?: string };
 // Cloudflare's streaming HTML rewriter, present on Pages.
 declare const HTMLRewriter: {
   new (): { on(selector: string, handler: { element(e: { setAttribute(n: string, v: string): void; setInnerContent(t: string): void }): void }): InstanceType<typeof HTMLRewriter>; transform(r: Response): Response };
@@ -351,7 +351,8 @@ async function withSharedPreview(context: Context, response: Response): Promise<
     if (!res.ok) return response;
     const data = (await res.json()) as Card | null;
     if (!data) return response;
-    const image = data.image ?? `${url.origin}/covers/${/^[a-z_]{3,30}$/.test(data.eventType) ? data.eventType : "party"}.jpg`;
+    const cover = typeof data.cover === "string" && /^\/covers\/[a-z_]{3,40}\.jpg$/.test(data.cover) ? data.cover : `/covers/${/^[a-z_]{3,30}$/.test(data.eventType) ? data.eventType : "party"}.jpg`;
+    const image = data.image ?? `${url.origin}${cover}`;
     const set = (selector: string, value: string) => ({ selector, value });
     const tags = [
       set('meta[property="og:title"]', data.title),

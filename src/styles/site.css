@@ -1,0 +1,25 @@
+/* The event's own page: the cover across the top, the invitation card over it, the day as a timeline. */
+.site__hero { position: relative; padding-top: clamp(190px, 36vw, 400px); }
+.site__cover { position: absolute; inset: 0 0 auto 0; height: clamp(300px, 50vw, 540px); overflow: hidden; background: #11141c; }
+.site__cover img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
+.site__cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 78%, var(--color-paper) 100%); }
+.site__cover--photo::after { background: linear-gradient(to bottom, rgb(0 0 0 / 0.08) 40%, var(--color-paper) 100%); }
+
+.site__card { border-radius: 22px; background: var(--color-paper); padding: 34px 24px 28px; text-align: center;
+  box-shadow: 0 30px 70px -30px rgb(var(--shadow-rgb) / 0.55), inset 0 0 0 1px var(--color-line); }
+@media (min-width: 640px) { .site__card { padding: 44px 44px 34px; } }
+.site__rule { display: block; width: 64px; height: 1px; margin: 18px auto 14px; background: var(--color-accent); opacity: 0.7; position: relative; }
+.site__rule::after { content: ""; position: absolute; left: 50%; top: -3px; width: 7px; height: 7px; transform: translateX(-50%) rotate(45deg); background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.site__countdown { display: inline-block; margin-top: 12px; padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; letter-spacing: 0.04em;
+  color: var(--color-accent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent); }
+
+.site__h { font-family: var(--font-display, inherit); font-size: 1.6rem; line-height: 1.15; display: flex; align-items: center; gap: 14px; }
+.site__h::after { content: ""; flex: 1; height: 1px; background: var(--color-line); }
+
+.site__parts { margin-top: 10px; display: grid; gap: 0; border-left: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-line)); margin-left: 6px; }
+.site__part { position: relative; display: grid; grid-template-columns: 1fr; gap: 2px; padding: 12px 0 16px 22px; }
+.site__part::before { content: ""; position: absolute; left: -5px; top: 18px; width: 9px; height: 9px; border-radius: 999px; background: var(--color-paper); box-shadow: inset 0 0 0 2px var(--color-accent); }
+@media (min-width: 640px) { .site__part { grid-template-columns: 9.5rem 1fr; gap: 16px; align-items: baseline; } }
+.site__time { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-quiet); padding-top: 4px; }
+
+.site__rsvp { border-radius: 18px; padding: 26px 24px; text-align: center; background: color-mix(in srgb, var(--color-highlight) 12%, var(--color-cream)); box-shadow: inset 0 0 0 1px var(--color-line); }

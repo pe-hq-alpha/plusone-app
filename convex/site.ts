@@ -1,4 +1,5 @@
 import { ConvexError, v } from "convex/values";
+import { coverPath } from "./lib/covers";
 import type { Doc, Id } from "./_generated/dataModel";
 import { mutation, query, type MutationCtx, type QueryCtx } from "./_generated/server";
 import { logActivity, requireMember } from "./lib/auth";
@@ -190,6 +191,9 @@ const siteView = v.union(
       showRsvp: v.boolean(),
       sessions: v.array(publicSession),
       gifts: v.optional(publicGifts),
+      name: v.string(),
+      cover: v.string(),
+      coverIsPhoto: v.boolean(),
     }),
     v.null(),
   );
@@ -214,7 +218,15 @@ async function siteView_(ctx: QueryCtx, site: Doc<"eventSites">) {
     showRsvp: site.showRsvp,
     sessions,
     gifts: await giftsForGuests(ctx, site, event),
+    name: event.name,
+    ...(await coverOf(ctx, event)),
   };
+}
+
+/** The host's own picture when they set one, else the drawing for the festival or kind of event. */
+async function coverOf(ctx: QueryCtx, event: Doc<"events">): Promise<{ cover: string; coverIsPhoto: boolean }> {
+  const own = event.coverImage ? await ctx.storage.getUrl(event.coverImage) : null;
+  return own ? { cover: own, coverIsPhoto: true } : { cover: coverPath(event.eventType, event.name, occasionOf(event)), coverIsPhoto: false };
 }
 
 async function siteBySlug(ctx: QueryCtx, slug: string) {
