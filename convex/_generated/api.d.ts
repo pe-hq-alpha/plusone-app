@@ -132,6 +132,7 @@ import type * as members from "../members.js";
 import type * as messages from "../messages.js";
 import type * as modelCalls from "../modelCalls.js";
 import type * as modelTasks from "../modelTasks.js";
+import type * as og from "../og.js";
 import type * as openWeights from "../openWeights.js";
 import type * as outreach from "../outreach.js";
 import type * as places from "../places.js";
@@ -291,6 +292,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   modelCalls: typeof modelCalls;
   modelTasks: typeof modelTasks;
+  og: typeof og;
   openWeights: typeof openWeights;
   outreach: typeof outreach;
   places: typeof places;

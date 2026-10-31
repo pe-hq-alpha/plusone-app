@@ -12,6 +12,23 @@ import type { Id } from "./_generated/dataModel";
 
 const http = httpRouter();
 
+/** A shared link's preview (convex/og.ts), for the site's middleware to put in the page's meta tags. */
+http.route({
+  path: "/og",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const kind = url.searchParams.get("kind");
+    const key = url.searchParams.get("key") ?? "";
+    if ((kind !== "s" && kind !== "r" && kind !== "p") || !key) return new Response("null", { status: 404 });
+    const card = await ctx.runQuery(internal.og.card, { kind, key });
+    return new Response(JSON.stringify(card), {
+      status: card ? 200 : 404,
+      headers: { "content-type": "application/json", "cache-control": "public, max-age=300" },
+    });
+  }),
+});
+
 auth.addHttpRoutes(http);
 
 /**

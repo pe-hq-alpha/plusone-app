@@ -313,7 +313,7 @@ export const onRequest = async (context: Context): Promise<Response> => {
   } catch {
     // Logging must never break a page.
   }
-  const response = await context.next();
+  const response = await withSharedPreview(context, await context.next());
   if (!newVisitorId) return response;
   try {
     const out = new Response(response.body, response);
@@ -323,3 +323,49 @@ export const onRequest = async (context: Context): Promise<Response> => {
     return response;
   }
 };
+
+/** A shared event page, RSVP link or plan, by its address: /s/<slug>, /r/<token>, /p/<token>. */
+export function sharedCard(path: string): { kind: "s" | "r" | "p"; key: string } | null {
+  const m = /^\/(s|r|p)\/([A-Za-z0-9_-]{1,80})\/?$/.exec(path);
+  return m ? { kind: m[1] as "s" | "r" | "p", key: m[2] } : null;
+}
+
+type Card = { title: string; description: string; image?: string; eventType: string };
+// Cloudflare's streaming HTML rewriter, present on Pages.
+declare const HTMLRewriter: {
+  new (): { on(selector: string, handler: { element(e: { setAttribute(n: string, v: string): void; setInnerContent(t: string): void }): void }): InstanceType<typeof HTMLRewriter>; transform(r: Response): Response };
+};
+
+/**
+ * A shared event link shows that event in a chat or a post: its name, date and place, and its
+ * picture (the host's own, else the illustration for its kind), instead of PlusOne's general
+ * preview. Anything that fails leaves the page as it was.
+ */
+async function withSharedPreview(context: Context, response: Response): Promise<Response> {
+  try {
+    const base = context.env.CONVEX_SITE_URL;
+    const url = new URL(context.request.url);
+    const card = sharedCard(url.pathname);
+    if (!base || !card || !(response.headers.get("content-type") ?? "").includes("text/html")) return response;
+    const res = await fetch(new URL(`/og?kind=${card.kind}&key=${encodeURIComponent(card.key)}`, base).toString(), { signal: AbortSignal.timeout(1500) });
+    if (!res.ok) return response;
+    const data = (await res.json()) as Card | null;
+    if (!data) return response;
+    const image = data.image ?? `${url.origin}/covers/${/^[a-z_]{3,30}$/.test(data.eventType) ? data.eventType : "party"}.jpg`;
+    const set = (selector: string, value: string) => ({ selector, value });
+    const tags = [
+      set('meta[property="og:title"]', data.title),
+      set('meta[property="og:description"]', data.description),
+      set('meta[property="og:image"]', image),
+      set('meta[name="twitter:title"]', data.title),
+      set('meta[name="twitter:description"]', data.description),
+      set('meta[name="twitter:image"]', image),
+      set('meta[name="description"]', data.description),
+    ];
+    let rewriter = new HTMLRewriter().on("title", { element: (e) => e.setInnerContent(`${data.title} · PlusOne Events`) });
+    for (const t of tags) rewriter = rewriter.on(t.selector, { element: (e) => e.setAttribute("content", t.value) });
+    return rewriter.transform(response);
+  } catch {
+    return response;
+  }
+}

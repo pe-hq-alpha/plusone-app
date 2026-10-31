@@ -13,6 +13,7 @@ import { BRAND } from "../lib/brand";
 import { occasionNoun } from "../../convex/lib/occasion";
 import { Backdrop } from "../components/ui/Backdrop";
 import { eventCover } from "../lib/eventCover";
+import { readyToUpload } from "../lib/pictures";
 
 /** Each card is nudged a degree or two off square, like prints on a board. */
 const TILTS = ["-2.5deg", "1.8deg", "-1.2deg", "2.4deg", "-1.9deg", "1.3deg"];
@@ -115,7 +116,7 @@ export function HomePage() {
           </p>
 
           <ul className="mt-10 flex flex-wrap items-stretch gap-x-10 gap-y-12">
-            {mine.map(({ event, role, summary }, i) => (
+            {mine.map(({ event, role, summary, coverUrl }, i) => (
               <li key={event._id}>
                 <Link
                   to={`/e/${event._id}`}
@@ -126,7 +127,7 @@ export function HomePage() {
                   <span aria-hidden="true" className="relative block aspect-[3/2] overflow-hidden rounded-[3px] bg-accent-soft/70">
                     {/* The photos are portrait and their faces sit in the upper half, so a landscape slot
                         shows them from 40% down: heads in frame, and a card short enough to fit the screen. */}
-                    <img src={eventCover(event.eventType)} alt="" loading="lazy" decoding="async" className="size-full object-cover object-[50%_40%]" />
+                    <img src={coverUrl ?? eventCover(event.eventType)} alt="" loading="lazy" decoding="async" className="size-full object-cover object-[50%_40%]" />
                     <span className="absolute bottom-2 left-2 rounded-full bg-paper/85 px-2.5 py-1 text-[0.68rem] uppercase tracking-[0.12em] text-ink">
                       {event.occasionLabel?.trim() || occasionNoun(event)}
                     </span>
@@ -159,6 +160,7 @@ export function HomePage() {
                     </span>
                   </span>
                 </Link>
+                {role !== "viewer" && <CoverPicker eventId={event._id} custom={Boolean(coverUrl)} />}
                 {role === "owner" && <RemoveEvent eventId={event._id} name={event.name} />}
               </li>
             ))}
@@ -280,6 +282,46 @@ function RemoveEvent({ eventId, name }: { eventId: Id<"events">; name: string })
         </button>
       </div>
       {error && <p role="alert" className="mt-2 text-[0.8rem] text-bad">{error}</p>}
+    </div>
+  );
+}
+
+/** Change the card's picture to one of your own, or go back to the illustration for its kind. */
+function CoverPicker({ eventId, custom }: { eventId: Id<"events">; custom: boolean }) {
+  const uploadUrl = useMutation(api.events.generateInspirationUploadUrl);
+  const setCover = useMutation(api.events.setCover);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const pick = (file: File | undefined) => {
+    if (!file) return;
+    setBusy(true);
+    setError(null);
+    void (async () => {
+      const blob = await readyToUpload(file, 1600);
+      const url = await uploadUrl({});
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": blob.type || file.type }, body: blob });
+      if (!res.ok) throw new Error(`Upload failed (${res.status})`);
+      const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+      await setCover({ eventId, storageId });
+    })()
+      .catch((err: unknown) => {
+        const data = (err as { data?: unknown }).data;
+        setError(typeof data === "string" ? data : "That picture didn't go through. Try another.");
+      })
+      .finally(() => setBusy(false));
+  };
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-[0.8rem]">
+      <label className={`cursor-pointer text-quiet underline-offset-4 hover:text-accent hover:underline ${busy ? "pointer-events-none opacity-60" : ""}`}>
+        {busy ? "Uploading…" : custom ? "Change picture" : "Use your own picture"}
+        <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp" onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} disabled={busy} />
+      </label>
+      {custom && !busy && (
+        <button type="button" className="text-quiet underline-offset-4 hover:text-accent hover:underline" onClick={() => void setCover({ eventId })}>
+          Use the illustration
+        </button>
+      )}
+      {error && <span role="alert" className="w-full text-bad">{error}</span>}
     </div>
   );
 }

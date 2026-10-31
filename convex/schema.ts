@@ -71,6 +71,8 @@ export const eventFields = {
   inspirationNotes: v.optional(v.string()),
   /** Pictures the couple chose during onboarding; they start the wedding's Space. */
   inspirationImages: v.optional(v.array(v.id("_storage"))),
+  /** The host's own picture for the event's card and shared links; without it, the illustration for its kind. */
+  coverImage: v.optional(v.id("_storage")),
   /** How the couple describe the feel they want; shapes vendor searches and email tone. */
   styleVibes: v.optional(v.array(v.string())),
   stylePalette: v.optional(v.string()),

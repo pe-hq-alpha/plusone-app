@@ -35,6 +35,8 @@ export const listMine = query({
       event: eventDoc,
       role,
       /** Enough for the card to say where this wedding stands without opening it. */
+      /** The host's own picture for the card, when they've set one. */
+      coverUrl: v.optional(v.string()),
       summary: v.object({
         daysToGo: v.number(),
         needs: v.number(),
@@ -95,9 +97,11 @@ export const listMine = query({
         Math.round((new Date(event.startDate).getTime() - new Date(today).getTime()) / 86_400_000),
       );
 
+      const coverUrl = event.coverImage ? ((await ctx.storage.getUrl(event.coverImage)) ?? undefined) : undefined;
       out.push({
         event,
         role: m.role,
+        ...(coverUrl ? { coverUrl } : {}),
         summary: { daysToGo, needs: slots.length, booked, committed, quotesToCompare, awaiting, nextStep },
       });
     }
@@ -184,6 +188,31 @@ export const generateInspirationUploadUrl = mutation({
   handler: async (ctx) => {
     await requireAccount(ctx);
     return await ctx.storage.generateUploadUrl();
+  },
+});
+
+const COVER_TYPES = /^image\/(jpeg|png|webp)$/;
+const COVER_MAX_BYTES = 8 * 1024 * 1024;
+
+/**
+ * The event's own picture, for its card and the previews of its shared links: set from an
+ * upload, or taken away (the illustration for its kind shows again). The old picture is deleted.
+ */
+export const setCover = mutation({
+  args: { eventId: v.id("events"), storageId: v.optional(v.id("_storage")) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { event } = await requireMember(ctx, args.eventId, "planner");
+    if (args.storageId) {
+      const file = await ctx.db.system.get(args.storageId);
+      if (!file || !COVER_TYPES.test(file.contentType ?? "") || file.size > COVER_MAX_BYTES) {
+        if (file) await ctx.storage.delete(args.storageId);
+        throw new ConvexError("Use a JPEG, PNG or WebP picture under 8 MB.");
+      }
+    }
+    if (event.coverImage && event.coverImage !== args.storageId) await ctx.storage.delete(event.coverImage).catch(() => undefined);
+    await ctx.db.patch(event._id, { coverImage: args.storageId });
+    return null;
   },
 });
 

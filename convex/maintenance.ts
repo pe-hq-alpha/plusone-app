@@ -78,6 +78,7 @@ export async function deleteEventBatch(
   const event = await ctx.db.get(eventId);
   if (event) {
     for (const picture of event.inspirationImages ?? []) await deleteFile(ctx, picture);
+    if (event.coverImage) await deleteFile(ctx, event.coverImage);
     // The inbox goes back to the mail provider: the allowance is small, and a deleted
     // event holding one means the next host has to share the fallback.
     if (event.inboxId) {

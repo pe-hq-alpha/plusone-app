@@ -299,3 +299,15 @@ describe("onRequest: visitor cookie and account", () => {
     expect(waitUntil).not.toHaveBeenCalled();
   });
 });
+
+describe("shared links show their own event", () => {
+  test("an event page, an RSVP link and a shared plan are known by their address; nothing else is", async () => {
+    const { sharedCard } = await import("../functions/_middleware");
+    expect(sharedCard("/s/priya-and-arun")).toEqual({ kind: "s", key: "priya-and-arun" });
+    expect(sharedCard("/r/AbCdEfGhIjKlMnOpQrStUvWx12")).toEqual({ kind: "r", key: "AbCdEfGhIjKlMnOpQrStUvWx12" });
+    expect(sharedCard("/p/tok_12345678901234/")).toEqual({ kind: "p", key: "tok_12345678901234" });
+    expect(sharedCard("/e/abc")).toBeNull();
+    expect(sharedCard("/s/a/b")).toBeNull();
+    expect(sharedCard("/s/<script>")).toBeNull();
+  });
+});

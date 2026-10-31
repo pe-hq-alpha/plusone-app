@@ -69,11 +69,23 @@ export function JoinPage() {
                     setError(null);
                     accept({ token })
                       .then((eventId) => navigate(`/e/${eventId}`))
-                      .catch((e: unknown) => setError(e instanceof Error ? e.message.replace(/^.*ConvexError: /, "").split("\n")[0] : "Could not join."));
+                      // The server's own words ("This invite was sent to s•••@gmail.com…"), never "Server Error".
+                      .catch((e: unknown) => {
+                        const data = (e as { data?: unknown }).data;
+                        setError(typeof data === "string" ? data : "That didn't work. Try again, or ask for a new link.");
+                      });
                   }}
                 >
                   Join the plan
                 </button>
+              )}
+              {error && /sign in with that address/i.test(error) && (
+                <p className="mt-3 text-sm text-muted">
+                  Signed in with another address?{" "}
+                  <button type="button" className="text-accent underline underline-offset-2" onClick={() => void signOut()}>
+                    Sign out and use the invited one
+                  </button>
+                </p>
               )}
             </div>
             <ThemeFooter className="mt-8" />
