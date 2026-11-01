@@ -558,9 +558,20 @@ export function Board({
       </div>
 
       {items.length === 0 && !draft && (
-        <p className="board__hint" data-board-ui>
-          {canEdit ? "Drop pictures here, paste a link, or double-click anywhere to leave a note." : "Nothing on the board yet."}
-        </p>
+        <div className="board__hint" data-board-ui>
+          {canEdit ? (
+            <>
+              <h2>Gather the look of your event</h2>
+              <ol>
+                <li>Drop or paste pictures of things you like: decor, outfits, cakes, the venue.</li>
+                <li>Add a note, a link, a colour or a vendor from the toolbar below, or double-click anywhere to write.</li>
+                <li>Each part of the event has its own area; anything outside them is for the whole event.</li>
+              </ol>
+            </>
+          ) : (
+            <p>Nothing here yet. Whoever is planning can add pictures, notes and colours.</p>
+          )}
+        </div>
       )}
 
       {(busy || error) && (

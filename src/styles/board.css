@@ -1,10 +1,9 @@
-/* The board: one open canvas per event. A faint dot grid that moves with the view, each part
+/* The board: one open canvas per event. A plain sheet that moves with the view, each part
    of the event as a soft labelled zone, and what was kept laid on top as cards and chips. */
 
 .board { position: relative; height: calc(100dvh - 7.5rem); min-height: 28rem; overflow: hidden; touch-action: none; user-select: none; cursor: default;
   border-radius: 18px; box-shadow: inset 0 0 0 1px var(--color-line);
-  background-color: color-mix(in srgb, var(--color-paper) 92%, var(--color-cream));
-  background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--color-rule) 75%, transparent) 1px, transparent 1.4px); }
+  background-color: color-mix(in srgb, var(--color-paper) 92%, var(--color-cream)); }
 .board.is-panning, .board.is-grab { cursor: grabbing; }
 .board__world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 
@@ -56,7 +55,12 @@
 .board-vendor__open { margin-top: 8px; display: inline-block; font-size: 0.86rem; color: var(--color-accent); text-underline-offset: 3px; }
 .board-vendor__open:hover { text-decoration: underline; }
 
-.board__hint { position: absolute; left: 50%; top: 42%; transform: translateX(-50%); max-width: 26rem; text-align: center; font-size: 0.93rem; color: var(--color-quiet); pointer-events: none; }
+/* What to do on an empty board, as a card in the middle of it. */
+.board__hint { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); width: min(26rem, calc(100% - 32px)); padding: 22px 24px;
+  border-radius: 18px; background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-line), 0 18px 40px -28px rgb(var(--shadow-rgb) / 0.5);
+  font-size: 0.93rem; line-height: 1.55; color: var(--color-muted); pointer-events: none; }
+.board__hint h2 { margin: 0 0 10px; font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; color: var(--color-ink); }
+.board__hint ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 6px; }
 .board__status { position: absolute; left: 50%; top: 16px; transform: translateX(-50%); padding: 8px 14px; border-radius: 999px; font-size: 0.86rem;
   background: var(--color-cream); color: var(--color-muted); box-shadow: 0 10px 26px -14px rgb(var(--shadow-rgb) / 0.5), inset 0 0 0 1px var(--color-line); }
 .board__status.is-error { color: var(--color-bad); }

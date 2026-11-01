@@ -12,7 +12,7 @@ import { Walkthrough, shouldOfferWalkthrough } from "./Walkthrough";
 import { PlusOneLockup } from "./brand/Wordmarks";
 import { PlanReady } from "./PlanReady";
 import { FeedbackBox } from "./FeedbackBox";
-import { AssistantDrawer } from "./assistant/AssistantDrawer";
+import { ASK_EVENT, AssistantDrawer } from "./assistant/AssistantDrawer";
 import { BRAND } from "../lib/brand";
 import { PartWord, PeopleWord } from "../lib/words";
 import { Backdrop } from "./ui/Backdrop";
@@ -194,6 +194,10 @@ export function EventLayout() {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-1 md:ml-2">
+            {/* The assistant, where people look first; the corner button opens the same drawer. */}
+            <button type="button" onClick={() => window.dispatchEvent(new Event(ASK_EVENT))} className="shell-ask max-md:!hidden" data-tour="ask-top">
+              <Icon name="heart" size={15} /> Ask
+            </button>
             {/* Anyone new, signed up or in the demo, should be able to find the tour at once. */}
             <button type="button" onClick={() => setWalking(true)} title="A quick tour of the whole plan" aria-label="Show me around" className="shell-tool">
               <Icon name="star" size={17} />

@@ -203,6 +203,10 @@ a { text-underline-offset: 0.2em; }
 .shell-lane.is-here::after { transform: scaleX(1); }
 .shell-tool { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; color: var(--color-muted); transition: background-color 160ms ease-out, color 160ms ease-out; }
 .shell-tool:hover { color: var(--color-accent); background: var(--color-accent-soft); }
+/* The assistant's door in the top bar: a solid pill, so it reads as something to press. */
+.shell-ask { display: inline-flex; align-items: center; gap: 6px; height: 34px; margin-right: 6px; padding: 0 14px; border-radius: 999px; font-size: 0.86rem; font-weight: 500;
+  color: var(--color-on-accent); background: var(--color-accent); transition: background-color 160ms ease-out, transform 160ms ease-out; }
+.shell-ask:hover { background: var(--color-accent-deep); transform: translateY(-1px); }
 
 .shell-route { display: flex; align-items: center; list-style: none; margin-block: 0; overflow-x: auto; scrollbar-width: none; }
 .shell-route::-webkit-scrollbar { display: none; }

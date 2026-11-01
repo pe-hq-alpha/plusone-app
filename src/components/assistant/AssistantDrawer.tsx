@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { BRAND } from "../../lib/brand";
 import { Icon } from "../ui/Icon";
 import { AssistantChat } from "./AssistantChat";
 
@@ -24,14 +25,18 @@ const PAGES: Record<string, { context: string; openers: string[] }> = {
 export function pageContext(pathname: string, sessions: Ceremony[]): { context: string; openers: string[] } | null {
   const rest = pathname.replace(/^\/e\/[^/]+\/?/, "");
   const [section, id] = rest.split("/");
-  // The Assistant page is the conversation, and Today has its own line to it.
-  if (section === "assistant" || !section) return null;
+  // The Assistant page is the conversation itself.
+  if (section === "assistant") return null;
+  if (!section) return { context: "the Today page", openers: ["What should we do next?", "What's still not booked?", "Find us a caterer"] };
   if (section === "sessions" && id) {
     const c = sessions.find((e) => e._id === id);
     if (c) return { context: `the ${c.name}`, openers: [`What's left to do for the ${c.name}?`, `How's the ${c.name} budget?`] };
   }
   return PAGES[section ?? ""] ?? { context: "their plan", openers: ["What should we book next?"] };
 }
+
+/** Fired by any "Ask" button outside the drawer (the top bar's) to open it. */
+export const ASK_EVENT = "plusone:ask";
 
 /**
  * The assistant on every page: a button in the corner opens it beside
@@ -44,6 +49,13 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
   const here = pageContext(pathname, sessions);
   // On a phone the board's own toolbar sits where this button would.
   const onBoard = /\/spaces(\/|$)/.test(pathname);
+
+  // The top bar's Ask button opens the same drawer.
+  useEffect(() => {
+    const onAsk = () => setOpen(true);
+    window.addEventListener(ASK_EVENT, onAsk);
+    return () => window.removeEventListener(ASK_EVENT, onAsk);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -80,12 +92,12 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
         <button
           type="button"
           data-tour="ask"
-          aria-label="Ask"
+          aria-label={`Ask ${BRAND.name}`}
           onClick={() => setOpen(true)}
-          className={`no-print fixed bottom-[78px] right-3 z-40 ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent p-3 text-sm font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep md:bottom-7 md:right-7 md:px-4`}
+          className={`no-print fixed bottom-[78px] right-3 z-40 ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent py-3 pl-4 pr-5 text-[0.95rem] font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] ring-4 ring-accent/15 transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep md:bottom-7 md:right-7`}
           style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
-          <Icon name="heart" size={17} /> <span className="max-md:hidden">Ask</span>
+          <Icon name="heart" size={17} /> <span>Ask {BRAND.name}</span>
         </button>
       )}
       {open && (
