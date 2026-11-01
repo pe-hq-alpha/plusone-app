@@ -28,6 +28,9 @@
     <meta property="og:image" content="/og.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
       <link rel="preconnect" href="%VITE_CONVEX_URL%" crossorigin />
+    <!-- Sign-in's card comes from Clerk in a chain of requests; opening the connection early shortens it. -->
+    <link rel="preconnect" href="https://clerk.plusoneevents.site" crossorigin />
+    <link rel="dns-prefetch" href="https://clerk.plusoneevents.site" />
   </head>
   <body>
     <div id="root"></div>

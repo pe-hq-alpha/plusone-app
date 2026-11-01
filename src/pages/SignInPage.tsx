@@ -47,17 +47,19 @@ const SIGN_UP_HEIGHT = 438;
 /**
  * Clerk draws its card on its own, about a second in, and adds the password box a frame
  * later, so the card grew and the links under it jumped. The space is kept from the start,
- * and the card stays invisible (still laid out, so Clerk measures normally) until it has
- * a password box and has stopped changing size, then fades in at its final size.
+ * and the whole sign-in column (heading, agreement, card and links) stays invisible, still
+ * laid out so Clerk measures normally, until the card has its password box and has stopped
+ * changing size; then it all fades in together, at its final size.
  */
-function SettledCard({ minHeight, children }: { minHeight: number; children: ReactNode }) {
+function SettledCard({ minHeight, onReady, children }: { minHeight: number; onReady: () => void; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [ready, setReady] = useState(false);
+  const readyRef = useRef(onReady);
+  readyRef.current = onReady;
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     let quiet: number | undefined;
-    const done = () => setReady(true);
+    const done = () => readyRef.current();
     // Every change restarts a short wait; once the form has held still for it, it's settled.
     // With its password box the wait is short; a form without one waits a little longer.
     const check = () => {
@@ -79,11 +81,7 @@ function SettledCard({ minHeight, children }: { minHeight: number; children: Rea
     };
   }, []);
   return (
-    <div
-      ref={ref}
-      style={{ minHeight }}
-      className={`flex w-full justify-center transition-opacity duration-150 motion-reduce:transition-none ${ready ? "opacity-100" : "opacity-0"}`}
-    >
+    <div ref={ref} style={{ minHeight }} className="flex w-full justify-center">
       {children}
     </div>
   );
@@ -107,6 +105,7 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
     ? `Answer requests from families and event managers on the same sheet every vendor fills in, keep your prices itemised, and get verified so they can find you.`
     : `${BRAND.name} finds vendors, writes to them from your event\u2019s own inbox and reads their quotes into your budget, so the legwork is done and the choices stay yours.`;
   const [agreed, setAgreed] = useState(() => pendingAgreement() === TERMS_VERSION);
+  const [cardReady, setCardReady] = useState(false);
   const agree = (value: boolean) => {
     setAgreed(value);
     rememberAgreement(value);
@@ -136,7 +135,8 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
         <Backdrop contained />
         <PublicNav signIn={false} brand={false} />
         <div className="grid flex-1 place-items-center px-4 py-2">
-        <div className="w-full max-w-md">
+        {/* Everything in the column appears at once, when Clerk's card is ready (see SettledCard). */}
+        <div className={`w-full max-w-md transition-opacity duration-200 motion-reduce:transition-none ${cardReady ? "opacity-100" : "opacity-0"}`}>
         <p className="pub-eyebrow">{vendor ? `${BRAND.name} Partner` : newHere ? "Create your account" : "Sign in"}</p>
         <h1 className="pub-title !text-[2rem]">
           {vendor ? (newHere ? <>List <em>your business</em></> : <>Welcome <em>back</em></>) : newHere ? <>Let&rsquo;s plan <em>your event</em></> : <>Welcome <em>back</em></>}
@@ -165,11 +165,11 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
           title={agreed ? undefined : "Tick the box above to sign in or create an account"}
         >
           {newHere ? (
-            <SettledCard minHeight={SIGN_UP_HEIGHT}>
+            <SettledCard minHeight={SIGN_UP_HEIGHT} onReady={() => setCardReady(true)}>
               <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} appearance={COMPACT} />
             </SettledCard>
           ) : (
-            <SettledCard minHeight={SIGN_IN_HEIGHT}>
+            <SettledCard minHeight={SIGN_IN_HEIGHT} onReady={() => setCardReady(true)}>
               <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} appearance={COMPACT} />
             </SettledCard>
           )}
