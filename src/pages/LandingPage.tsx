@@ -133,6 +133,7 @@ export function LandingPage() {
 
         <main id="main" className="rs__body">
           <div className="rs__pitch">
+            <p className="rs__badge"><span className="rs__badge-wide">Early access · Full launch in the 2026 holiday season or early 2027</span><span className="rs__badge-narrow">Early access · Full launch holidays 2026 or early 2027</span></p>
             <h1 id="hero-title" className="rs__title">
               Plan it all <span className="rs__keep">in one place.</span> <br />
               <em>Know what you&rsquo;re <span className="rs__keep">paying for.</span></em>

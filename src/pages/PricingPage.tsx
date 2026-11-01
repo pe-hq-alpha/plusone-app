@@ -118,6 +118,7 @@ export function PricingPage() {
           <span className="chip-ok">Free until launch</span>
           <h2 id="free-now" className="mt-2 text-lg">Basic is free to use until we launch.</h2>
           <p className="mt-1 text-sm text-muted">No card needed. At launch it moves to the introductory price below, and we&rsquo;ll tell you well before.</p>
+          <p className="mt-1 text-sm text-muted">Full launch in the 2026 holiday season or early 2027.</p>
         </div>
         <Link to="/signin?new=1" className="btn-primary shrink-0">Plan an event</Link>
       </section>
