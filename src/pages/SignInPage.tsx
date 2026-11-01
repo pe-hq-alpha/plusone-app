@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { SignIn, SignUp } from "@clerk/react";
 import { Link, useSearchParams } from "react-router-dom";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
@@ -39,6 +39,55 @@ const VENDOR_PHOTOS = [
  */
 /** Clerk's own heading repeats the page's title, so it is left out and the card kept tight, and the door fits one screen. */
 const COMPACT = { elements: { header: { display: "none" }, card: { padding: "16px 24px", gap: "12px" }, footer: { marginTop: "-4px" } } };
+
+/** The settled heights of Clerk's cards (measured on production at 1440 and 390 px, 1 Nov): sign-in 356, sign-up 438. */
+const SIGN_IN_HEIGHT = 356;
+const SIGN_UP_HEIGHT = 438;
+
+/**
+ * Clerk draws its card on its own, about a second in, and adds the password box a frame
+ * later, so the card grew and the links under it jumped. The space is kept from the start,
+ * and the card stays invisible (still laid out, so Clerk measures normally) until it has
+ * a password box and has stopped changing size, then fades in at its final size.
+ */
+function SettledCard({ minHeight, children }: { minHeight: number; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let quiet: number | undefined;
+    const done = () => setReady(true);
+    // Every change restarts a short wait; once the form has held still for it, it's settled.
+    // With its password box the wait is short; a form without one waits a little longer.
+    const check = () => {
+      window.clearTimeout(quiet);
+      if (!el.querySelector("form, input")) return;
+      quiet = window.setTimeout(done, el.querySelector('input[type="password"]') ? 120 : 400);
+    };
+    const resize = new ResizeObserver(check);
+    const mutate = new MutationObserver(check);
+    resize.observe(el);
+    mutate.observe(el, { childList: true, subtree: true });
+    // Never stay hidden: show it after three seconds whatever happens.
+    const cap = window.setTimeout(done, 3000);
+    return () => {
+      resize.disconnect();
+      mutate.disconnect();
+      window.clearTimeout(quiet);
+      window.clearTimeout(cap);
+    };
+  }, []);
+  return (
+    <div
+      ref={ref}
+      style={{ minHeight }}
+      className={`flex w-full justify-center transition-opacity duration-150 motion-reduce:transition-none ${ready ? "opacity-100" : "opacity-0"}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?: string; audience?: "customer" | "vendor" }) {
   const [params] = useSearchParams();
@@ -116,9 +165,13 @@ export function SignInPage({ redirectTo, audience = "customer" }: { redirectTo?:
           title={agreed ? undefined : "Tick the box above to sign in or create an account"}
         >
           {newHere ? (
-            <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} appearance={COMPACT} />
+            <SettledCard minHeight={SIGN_UP_HEIGHT}>
+              <SignUp routing="hash" signInUrl={signInUrl} forceRedirectUrl={back} appearance={COMPACT} />
+            </SettledCard>
           ) : (
-            <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} appearance={COMPACT} />
+            <SettledCard minHeight={SIGN_IN_HEIGHT}>
+              <SignIn routing="hash" signUpUrl={signUpUrl} forceRedirectUrl={back} signUpForceRedirectUrl={back} appearance={COMPACT} />
+            </SettledCard>
           )}
         </div>
         <p className="mt-4 text-center text-sm text-muted">
