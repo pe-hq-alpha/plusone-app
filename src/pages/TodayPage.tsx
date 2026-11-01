@@ -16,6 +16,7 @@ import { BRAND } from "../lib/brand";
 import { PeopleWord } from "../lib/words";
 import { usePrivacy } from "../lib/privacy";
 import { addTask, removeTask, updateTask } from "../lib/optimistic";
+import { useEventSuggestions } from "../lib/useEventSuggestions";
 import "../styles/today.css";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
@@ -67,6 +68,7 @@ export function TodayPage() {
   const route = useQuery(api.copilot.route, { eventId, today });
   const days = daysUntil(event.startDate, today);
   const rows = route ? rowsOf(route) : undefined;
+  const prompts = useEventSuggestions(eventId);
 
   return (
     <div className="today">
@@ -137,7 +139,7 @@ export function TodayPage() {
         </section>
 
         <aside className="today__side">
-          <Tell eventId={eventId} demo={event.demo === true} />
+          <Tell eventId={eventId} demo={event.demo === true} prompts={prompts} />
           {event.demo !== true && <QuoteDrop eventId={eventId} />}
           <TodoNote eventId={eventId} />
         </aside>
@@ -182,10 +184,8 @@ function RouteRow({ row }: { row: Row }) {
   );
 }
 
-const PROMPTS = ["What should we book next?", "We're now 140 people", "Find us a photographer", "Move lunch to 1 pm"];
-
 /** One line to tell the co-pilot anything; the conversation itself carries on in the Assistant. */
-function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean }) {
+function Tell({ eventId, demo = false, prompts }: { eventId: Id<"events">; demo?: boolean; prompts: string[] }) {
   const ask = useMutation(api.assistant.ask);
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -254,7 +254,7 @@ function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean
         </div>
       </form>
       <ul className="mt-4 flex flex-wrap gap-2" aria-label="Things to try">
-        {PROMPTS.map((p) => (
+        {prompts.map((p) => (
           <li key={p}>
             <button type="button" className="today__prompt" disabled={busy} onClick={() => void send(p)}>
               {p}

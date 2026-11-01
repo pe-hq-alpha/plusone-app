@@ -5,12 +5,14 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { PageHeader } from "../components/ui/PageHeader";
 import { AssistantChat } from "../components/assistant/AssistantChat";
+import { useEventSuggestions } from "../lib/useEventSuggestions";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
 
 export function AssistantPage() {
   const { event, role, sessions } = useOutletContext<EventData>();
   const eventId = event._id as Id<"events">;
+  const openers = useEventSuggestions(eventId);
   const history = useQuery(api.assistant.history, { eventId });
   const clear = useMutation(api.assistant.clear);
   const canEdit = role !== "viewer";
@@ -28,7 +30,7 @@ export function AssistantPage() {
           ) : undefined
         }
       />
-      <AssistantChat eventId={eventId} canEdit={canEdit} sessions={sessions} currency={event.currency} />
+      <AssistantChat eventId={eventId} canEdit={canEdit} sessions={sessions} currency={event.currency} openers={openers} />
     </div>
   );
 }
