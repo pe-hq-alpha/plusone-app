@@ -37,12 +37,30 @@
 }
 .rs__links {
   position: absolute; right: 3%; top: calc(57 / 20.48 * 1cqw);
-  display: flex; align-items: center; gap: calc(26 / 20.48 * 1cqw);
+  display: flex; align-items: center; gap: calc(12 / 20.48 * 1cqw);
 }
-.rs__links .rs__link + .rs__link { padding-left: calc(26 / 20.48 * 1cqw); border-left: 1px solid var(--rs-rule); }
-.rs__link { font-size: clamp(0.85rem, calc(20 / 20.48 * 1cqw), 0.95rem); letter-spacing: -0.005em; color: var(--color-ink); text-decoration: none; }
-.rs__link:hover { color: var(--color-accent); }
-.rs__link--accent { color: var(--color-accent); }
+/* Each link reads as a button over the drawing: a frosted pill with a hairline, lifting a little on hover. */
+.rs__link {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: clamp(34px, calc(46 / 20.48 * 1cqw), 44px); padding: 0 clamp(12px, calc(20 / 20.48 * 1cqw), 18px);
+  border-radius: 999px; white-space: nowrap;
+  font-size: clamp(0.85rem, calc(20 / 20.48 * 1cqw), 0.95rem); letter-spacing: -0.005em; color: var(--color-ink); text-decoration: none;
+  background: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  box-shadow: inset 0 0 0 1px var(--rs-rule);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+.rs__link:hover {
+  color: var(--color-accent); background: var(--color-paper); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent), 0 8px 20px -10px color-mix(in srgb, var(--color-ink-deep) 55%, transparent);
+}
+.rs__link:active { transform: translateY(0); }
+.rs__link--accent { background: var(--color-accent); color: var(--color-on-accent); box-shadow: none; }
+.rs__link--accent:hover {
+  background: var(--color-accent-deep); color: var(--color-on-accent);
+  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+@media (prefers-reduced-motion: reduce) { .rs__link, .rs__link:hover { transform: none; transition: none; } }
 
 .rs__body > * { position: absolute; }
 
@@ -56,8 +74,11 @@
 .rs__lede {
   margin: calc(38 / 20.48 * 1cqw) 0 0; font-size: calc(26 / 20.48 * 1cqw); line-height: 1.55; color: var(--color-muted);
 }
-.rs__actions { display: flex; flex-wrap: wrap; gap: calc(22 / 20.48 * 1cqw) calc(26 / 20.48 * 1cqw); margin-top: calc(60 / 20.48 * 1cqw); }
-.rs__actions .rs__pill { flex-shrink: 0; min-width: 0; }
+/* All three on one line at every desktop width: measured to end inside the pitch column from 1101 to 2560px. */
+.rs__actions { display: flex; flex-wrap: nowrap; gap: calc(16 / 20.48 * 1cqw); margin-top: calc(60 / 20.48 * 1cqw); }
+@media (min-width: 1101px) {
+  .rs__actions .rs__pill { flex-shrink: 0; min-width: 0; padding: 0 calc(28 / 20.48 * 1cqw); font-size: calc(27 / 20.48 * 1cqw); }
+}
 .rs__pill {
   display: inline-flex; align-items: center; justify-content: center;
   height: calc(74 / 20.48 * 1cqw); min-width: calc(256 / 20.48 * 1cqw); padding: 0 calc(36 / 20.48 * 1cqw);
@@ -136,11 +157,10 @@
 /* On phones the bar keeps one line clear of the wordmark: How it works waits in the page
    and its footer, and vendors get the short word. */
 @media (max-width: 520px) {
-  .rs__links { gap: 10px !important; }
-  .rs__links .rs__link + .rs__link { padding-left: 10px !important; }
+  .rs__links { gap: 6px !important; }
+  .rs__links .rs__link { height: 34px; padding: 0 11px; }
   .rs__link--wide, .rs__wide { display: none; }
   .rs__narrow { display: inline; }
-  .rs__links .rs__link--wide + .rs__link { padding-left: 0 !important; border-left: 0; }
 }
 
 /* Below desktop the measured frame gives way to a plain stack. */
@@ -150,9 +170,8 @@
   .rs__brand, .rs__links { position: static; }
   .rs__mark { font-size: 1.75rem; }
   .rs__events { font-size: 0.62rem; margin: 2px 0 0 1.55rem; }
-  .rs__links { gap: 14px; }
-  .rs__links .rs__link + .rs__link { padding-left: 14px; }
-  .rs__link { font-size: 0.86rem; }
+  .rs__links { gap: 8px; }
+  .rs__link { height: 38px; padding: 0 14px; font-size: 0.86rem; }
   .rs__body { display: grid; gap: 40px; padding-top: 28px; }
   .rs__body > * { position: static; width: auto; }
   .rs__title { font-size: clamp(2.6rem, 9vw, 4rem); }
@@ -296,8 +315,8 @@
 .rs-foot-mark { display: inline-flex; align-items: center; gap: 10px; }
 .rs-foot-mark img { border-radius: 7px; }
 
-/* With the drawing at full strength, text that sits on its lines gets a soft halo in the page colour. */
-.rs__brand, .rs__link, .rs__status-title, .rs__example, .rs__event, .rs-line__title, .rs-line__text {
+/* With the drawing at full strength, text that sits on its lines gets a soft halo in the page colour (the top links have their own pill). */
+.rs__brand, .rs__status-title, .rs__example, .rs__event, .rs-line__title, .rs-line__text {
   text-shadow: 0 0 6px var(--color-paper), 0 0 12px var(--color-paper), 0 0 20px var(--color-paper);
 }
 
