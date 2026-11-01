@@ -36,6 +36,7 @@ type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings"
     id: string;
     name: string;
     from: "web" | "verified" | "sample";
+    addedByYou?: boolean;
   };
 
 /** What a quote's place in its city's range means. It places a price; it never calls one fair. */
@@ -201,6 +202,21 @@ function Kpi({ label, value, note, tone }: { label: string; value: string; note:
   );
 }
 
+/**
+ * One need's quotes line by line, on that need's own page: the emailed ones, the ones the
+ * host added and verified vendors' offers, with Book, exactly as Compare shows them.
+ */
+export function NeedQuotes({ eventId, slotId, city, demo, canEdit, eventName, eventDate }: {
+  eventId: Id<"events">; slotId: string; city: string; demo: boolean; canEdit: boolean; eventName: string; eventDate: string;
+}) {
+  const board = useQuery(api.dashboard.board, { eventId });
+  const need = board?.needs.find((n) => n.slotId === slotId);
+  if (!board || !need) return null;
+  const priced = need.offers.length > 0 || need.vendors.some((v) => v.quote !== null);
+  if (!priced) return <p className="text-sm text-muted">No quotes yet. Add one a vendor told you, or write to vendors from the list below.</p>;
+  return <NeedBoard need={need} currency={board.currency} city={city} demo={demo} canEdit={canEdit} eventId={eventId} eventName={eventName} eventDate={dayMonth(eventDate)} onNeedPage />;
+}
+
 /** One need, with everyone in the running side by side. */
 /**
  * One need's quotes and offers line by line, as its customer sees them. For the vendors'
@@ -224,6 +240,7 @@ function NeedBoard({
   eventName,
   eventDate,
   compareOnly = false,
+  onNeedPage = false,
 }: {
   need: Need;
   currency: string;
@@ -234,6 +251,8 @@ function NeedBoard({
   eventName?: string;
   eventDate?: string;
   compareOnly?: boolean;
+  /** Shown on the need's own page: no link to it, and no heading, since the page has one. */
+  onNeedPage?: boolean;
 }) {
   const markBooked = useMutation(api.slots.markBooked);
   const setStatus = useMutation(api.threads.setStatus);
@@ -289,8 +308,14 @@ function NeedBoard({
     <section className="card overflow-hidden max-md:flex max-md:flex-col" aria-labelledby={`need-${need.slotId}`} data-tour="decision">
       <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1 border-b border-line px-6 py-4">
         <div className="min-w-0">
-          <h2 id={`need-${need.slotId}`} className="display text-[1.3rem] leading-tight">
-            {need.title}
+          <h2 id={`need-${need.slotId}`} className={onNeedPage ? "sr-only" : "display text-[1.3rem] leading-tight"}>
+            {compareOnly || onNeedPage ? (
+              need.title
+            ) : (
+              <Link to={`/e/${eventId}/vendors/${need.slotId}`} className="hover:text-accent" title={`Open ${need.title}: add a quote, find more vendors`}>
+                {need.title} <Icon name="arrow" size={15} />
+              </Link>
+            )}
           </h2>
           <p className="mt-0.5 text-xs text-quiet">
             {need.sessionNames.length > 0 ? need.sessionNames.join(" · ") : "the whole event"} · {money(need.budget, currency)} planned
@@ -390,7 +415,7 @@ function NeedBoard({
                     <span className="flex flex-wrap items-baseline gap-x-2">
                       <span className="font-medium">{v.name}</span>
                       {v.isTopPick && <span className="text-[11px] text-accent" title={`${BRAND.name}'s estimate from reviews, price and fit`}>top pick, {BRAND.name}&rsquo;s estimate</span>}
-                      {v.shortlisted && <span className="text-[11px] text-accent" title="Shortlisted by you">♥ shortlisted</span>}
+                      {v.shortlisted && <span className="text-[11px] text-accent" title="Saved to your list">♥ saved</span>}
                     </span>
                     {v.rating !== undefined && (
                       <span className="mt-0.5 flex items-center gap-1 text-xs text-quiet">
@@ -587,7 +612,7 @@ function LineByLine({
                 <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink max-md:sticky max-md:top-0 max-md:z-[2] max-md:bg-cream">
                   {c.name}
                   <span className={`block text-[11px] font-normal ${c.from === "web" ? "text-quiet" : "text-accent"}`}>
-                    {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : "Quote by email"}
+                    {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : c.addedByYou ? "Added by you" : "Quote by email"}
                   </span>
                   {contact && (
                     <ContactLinks

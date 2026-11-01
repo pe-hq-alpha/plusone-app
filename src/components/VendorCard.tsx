@@ -151,26 +151,26 @@ export function VendorCard({
 }) {
   const privacy = usePrivacy();
   const [pictureOk, setPictureOk] = useState(true);
+  const [more, setMore] = useState(false);
+  const details = Boolean(vendor.summary) || vendor.packages?.length > 0;
   return (
-    <li className={`card rise flex min-w-0 flex-col overflow-hidden p-5 ${selected ? "ring-2 ring-accent/40" : ""}`}>
-      {vendor.imageUrl && pictureOk && (
-        // The vendor's own site's preview picture, shown from their site.
-        <div className="-mx-5 -mt-5 mb-4 h-36 overflow-hidden bg-cream">
-          <img src={vendor.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setPictureOk(false)} className="h-full w-full object-cover" />
-        </div>
-      )}
+    <li className={`card rise flex min-w-0 flex-col overflow-hidden p-4 ${selected ? "ring-2 ring-accent/40" : ""}`}>
       <div className="flex items-start gap-3">
         {rank !== undefined && (
           <span
-            className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-accent text-sm text-paper"
+            className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent text-xs text-paper"
             aria-label={`Ranked ${rank}, ${BRAND.name}'s estimate`}
             title={`${BRAND.name}'s estimate`}
           >
             {rank}
           </span>
         )}
+        {vendor.imageUrl && pictureOk && (
+          // The vendor's own site's preview picture, small, shown from their site.
+          <img src={vendor.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" onError={() => setPictureOk(false)} className="h-11 w-11 shrink-0 rounded-[10px] bg-cream object-cover" />
+        )}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[1.05rem] font-medium">{vendor.name}</p>
+          <p className="truncate text-[1rem] font-medium leading-snug">{vendor.name}</p>
           <p className="mt-0.5 text-xs text-muted">
             {vendor.city ?? fallbackCity}
             {" · "}
@@ -178,12 +178,16 @@ export function VendorCard({
           </p>
         </div>
         {canEdit && (
+          // Saved to the host's own list only when they press it; nothing is saved for them.
           <button
-            className={vendor.shortlisted ? "chip-pending" : "chip-quiet"}
+            type="button"
+            className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[1.05rem] transition ${vendor.shortlisted ? "text-accent" : "text-quiet hover:text-accent"}`}
             onClick={onToggleShortlist}
             aria-pressed={vendor.shortlisted}
+            aria-label={vendor.shortlisted ? `Saved: ${vendor.name}. Press to remove from your list` : `Save ${vendor.name} to your list`}
+            title={vendor.shortlisted ? "Saved to your list" : "Save to your list"}
           >
-            {vendor.shortlisted ? "♥ Shortlisted" : "♡ Shortlist"}
+            {vendor.shortlisted ? "♥" : "♡"}
           </button>
         )}
       </div>
@@ -191,27 +195,36 @@ export function VendorCard({
       <Reviews vendor={vendor} />
 
       {vendor.rankReason && (
-        <p className="mt-3 border-l-2 border-accent-soft pl-3 text-sm italic leading-relaxed text-muted">
-          <span className="not-italic text-xs text-quiet">{BRAND.name}&rsquo;s estimate: </span>
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted" title={vendor.rankReason}>
           {vendor.rankReason}
         </p>
       )}
 
-      {vendor.summary && <p className="mt-3 text-sm leading-relaxed">{vendor.summary}</p>}
-
-      {vendor.packages?.length > 0 && (
-        <ul className="mt-3 space-y-0.5 text-xs text-muted">
-          {vendor.packages.slice(0, 3).map((p, i) => (
-            <li key={i}>
-              <span className="text-ink">{p.name}</span>
-              {p.price ? ` · ${money(p.price, vendor.priceCurrency ?? currency)}` : ""}
-              {p.description ? ` — ${p.description}` : ""}
-            </li>
-          ))}
-        </ul>
+      {details && (
+        <>
+          {more && (
+            <div className="mt-2 space-y-2">
+              {vendor.summary && <p className="text-sm leading-relaxed">{vendor.summary}</p>}
+              {vendor.packages?.length > 0 && (
+                <ul className="space-y-0.5 text-xs text-muted">
+                  {vendor.packages.slice(0, 3).map((p, i) => (
+                    <li key={i}>
+                      <span className="text-ink">{p.name}</span>
+                      {p.price ? ` · ${money(p.price, vendor.priceCurrency ?? currency)}` : ""}
+                      {p.description ? ` — ${p.description}` : ""}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          <button type="button" className="mt-1.5 self-start text-xs text-accent underline-offset-2 hover:underline" aria-expanded={more} onClick={() => setMore((m) => !m)}>
+            {more ? "Less" : vendor.packages?.length ? `More, with ${vendor.packages.length === 1 ? "its package" : "packages"}` : "More"}
+          </button>
+        </>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
         {vendor.website && (
           <a className="inline-flex items-center gap-1 underline decoration-line hover:text-accent" href={vendor.website} target="_blank" rel="noreferrer">
             Website <Icon name="external" size={12} />
@@ -225,7 +238,7 @@ export function VendorCard({
         ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-2 border-t border-line pt-3">
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-line pt-2.5">
         {vendor.email ? (
           <span className="truncate font-mono text-[11px] text-muted">{privacy.email(vendor.email)}</span>
         ) : canEdit ? (

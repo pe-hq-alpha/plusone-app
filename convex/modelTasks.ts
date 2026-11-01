@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { givenTotal } from "./lib/given";
 import { z } from "zod";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
@@ -804,9 +805,21 @@ export async function readVendorReply(ctx: ActionCtx, args: {
   subject: string;
   body: string;
   pdf?: { bytes: ArrayBuffer; filename: string; mediaType?: string };
+  /** The hosts added it themselves: their note of what the vendor told them, or what they were sent. */
+  fromHost?: boolean;
+  given?: { amount: number; unit: "total" | "per_person"; headcount?: number };
 }): Promise<ReplyReading> {
   const { event, slot } = args;
+  const hostNote = args.fromHost
+    ? `This is not an email from the vendor: the hosts added it themselves, as their own note of what the vendor told ` +
+      `them (in person, on the phone or on WhatsApp) or a copy of what they were sent. Treat any price in it as the ` +
+      `vendor's quote ("quote"), even if it is short and informal; a price "a plate", "per head" or "/pax" is per_person. ` +
+      (args.given
+        ? `The hosts also typed the price: ${formatMoney(args.given.amount, event.currency)} ${args.given.unit === "per_person" ? `a plate${args.given.headcount ? ` for ${args.given.headcount} people` : ""}` : "in all"}. Use it.\n`
+        : "\n")
+    : "";
   const text =
+    hostNote +
     `A vendor replied to the hosts' inquiry about ${anOccasion(event)}. Classify the reply and extract pricing details. ` +
     `The hosts' dates are ${event.startDate} to ${event.endDate}; say whether this reply confirms those dates. ` +
     `Hosts' currency is ${event.currency}; the slot is ${slot?.title ?? "a vendor slot"} with a budget of ` +
@@ -958,6 +971,8 @@ export const extractReply = internalAction({
       subject: message.subject,
       body: message.bodyText,
       pdf: file,
+      fromHost: message.fromHost === true,
+      given: message.given,
     });
     if (attached && object.attachmentKind === "contract" && !attached.contentType.startsWith("image/")) {
       await ctx.runMutation(internal.inbound.createContractCheck, {
@@ -966,6 +981,16 @@ export const extractReply = internalAction({
         filename: attached.filename,
         vendorId: thread.vendorId,
       });
+    }
+    // A price the host typed always becomes the quote, even when the words gave no total.
+    const typed = message.given ? givenTotal(message.given) : null;
+    if (typed && !(nn(object.total) && nn(object.total)! > 0)) {
+      object.total = typed;
+      object.classification = "quote";
+      if (!object.lines.length && message.given) {
+        object.lines = [{ item: slot?.title ?? "The quote", kind: "core", unit: message.given.unit, quantity: message.given.unit === "per_person" ? (message.given.headcount ?? null) : 1, unitPrice: message.given.amount, amount: typed, optional: false }];
+      }
+      if (message.given?.unit === "per_person" && message.given.headcount && !object.headcountAssumed) object.headcountAssumed = message.given.headcount;
     }
     const extracted = {
       total: nn(object.total),

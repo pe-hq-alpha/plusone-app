@@ -278,11 +278,12 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
   const remove = useMutation(api.tasks.remove).withOptimisticUpdate(removeTask);
   const [text, setText] = useState("");
   const [showDone, setShowDone] = useState(false);
+  const { offset, dragging, handle, putBack } = useMovable(`plusone.note.${eventId}`);
   // Newest first: a note is what was on the host's mind most recently.
   const open = (tasks ?? []).filter((t) => !t.done).sort((a, b) => b._creationTime - a._creationTime);
   const done = (tasks ?? []).filter((t) => t.done);
   const Line = ({ t }: { t: NonNullable<typeof tasks>[number] }) => (
-    <li className="note__line group">
+    <li className="note__line">
       <button
         type="button"
         className={`note__tick ${t.done ? "is-done" : ""}`}
@@ -298,11 +299,20 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
     </li>
   );
   return (
-    <section aria-labelledby="note-h" className="today__panel note" data-tour="notes">
-      <h2 id="note-h" className="text-sm font-medium text-ink">Notes to self</h2>
-      <p className="mt-0.5 text-xs text-muted">Anything you don't want to forget.</p>
+    <section
+      aria-labelledby="note-h"
+      className={`note ${dragging ? "is-dragging" : ""}`}
+      data-tour="notes"
+      style={offset.x || offset.y ? { translate: `${offset.x}px ${offset.y}px` } : undefined}
+    >
+      <button type="button" className="note__tape" aria-label="Move the note (drag it anywhere)" title="Drag to move the note" {...handle} />
+      {(offset.x !== 0 || offset.y !== 0) && (
+        <button type="button" className="note__back" onClick={putBack}>Put it back</button>
+      )}
+      <h2 id="note-h" className="text-[0.98rem] font-medium">Notes to self</h2>
+      <p className="text-xs">Anything you don't want to forget.</p>
       <form
-        className="mt-3"
+        className="mt-2"
         onSubmit={(e) => {
           e.preventDefault();
           const title = text.trim();
@@ -314,13 +324,13 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
         <input id="note-add" className="note__input" placeholder="Jot something down" value={text} maxLength={200} onChange={(e) => setText(e.target.value)} />
       </form>
       {open.length > 0 && (
-        <ul className="mt-2 grid">
+        <ul className="mt-1 grid">
           {open.map((t) => <Line key={t._id} t={t} />)}
         </ul>
       )}
       {done.length > 0 && (
-        <div className="mt-2">
-          <button type="button" className="text-xs text-quiet hover:text-accent" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}>
+        <div className="mt-1">
+          <button type="button" className="note__done" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}>
             Done ({done.length}) · {showDone ? "hide" : "show"}
           </button>
           {showDone && <ul className="mt-1 grid">{done.map((t) => <Line key={t._id} t={t} />)}</ul>}
@@ -328,4 +338,59 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
       )}
     </section>
   );
+}
+
+/**
+ * Something the host can drag around by a handle on a wide screen, kept where they left it
+ * in this browser (a per-viewer convenience: storage may be missing, so it falls back to its
+ * place). On a phone or tablet it stays put in the column.
+ */
+function useMovable(key: string) {
+  const read = (): { x: number; y: number } => {
+    try {
+      const v = JSON.parse(localStorage.getItem(key) ?? "null") as { x?: number; y?: number } | null;
+      return v && typeof v.x === "number" && typeof v.y === "number" ? { x: v.x, y: v.y } : { x: 0, y: 0 };
+    } catch {
+      return { x: 0, y: 0 };
+    }
+  };
+  const wide = () => typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches;
+  const [offset, setOffset] = useState(() => (wide() ? read() : { x: 0, y: 0 }));
+  const [dragging, setDragging] = useState(false);
+  const start = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+  const save = (v: { x: number; y: number }) => {
+    try {
+      if (v.x === 0 && v.y === 0) localStorage.removeItem(key);
+      else localStorage.setItem(key, JSON.stringify(v));
+    } catch {
+      /* kept for this visit only */
+    }
+  };
+  const handle = {
+    onPointerDown: (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (!wide()) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      start.current = { px: e.clientX, py: e.clientY, x: offset.x, y: offset.y };
+      setDragging(true);
+    },
+    onPointerMove: (e: React.PointerEvent<HTMLButtonElement>) => {
+      const s = start.current;
+      if (!s) return;
+      setOffset({ x: Math.round(s.x + e.clientX - s.px), y: Math.round(s.y + e.clientY - s.py) });
+    },
+    onPointerUp: () => {
+      if (!start.current) return;
+      start.current = null;
+      setDragging(false);
+      setOffset((v) => {
+        save(v);
+        return v;
+      });
+    },
+  };
+  const putBack = () => {
+    setOffset({ x: 0, y: 0 });
+    save({ x: 0, y: 0 });
+  };
+  return { offset, dragging, handle, putBack };
 }

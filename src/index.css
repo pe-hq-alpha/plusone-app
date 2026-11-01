@@ -208,23 +208,23 @@ a { text-underline-offset: 0.2em; }
   color: var(--color-on-accent); background: var(--color-accent); transition: background-color 160ms ease-out, transform 160ms ease-out; }
 .shell-ask:hover { background: var(--color-accent-deep); transform: translateY(-1px); }
 
-.shell-route { display: flex; align-items: center; list-style: none; margin-block: 0; overflow-x: auto; scrollbar-width: none; }
+/* The lane's pages as tabs: equal, any order, the one you're on underlined in marigold; never steps joined by a line. */
+.shell-route { display: flex; align-items: stretch; gap: 4px; list-style: none; margin-block: 0; overflow-x: auto; scrollbar-width: none; }
 .shell-route::-webkit-scrollbar { display: none; }
-.shell-route li { display: flex; align-items: center; flex-shrink: 0; }
-.shell-route li + li::before { content: ""; width: 26px; height: 1px; margin-right: 12px; background: repeating-linear-gradient(90deg, var(--color-rule) 0 4px, transparent 4px 7px); }
-.shell-stop { display: inline-flex; align-items: center; gap: 8px; padding: 11px 12px 11px 0; font-size: 0.86rem; color: var(--color-muted); white-space: nowrap; transition: color 160ms ease-out; }
-.shell-stop:hover { color: var(--color-ink); }
-.shell-node { width: 9px; height: 9px; border-radius: 50%; background: var(--color-paper); box-shadow: inset 0 0 0 1.5px var(--color-rule); transition: background-color 200ms ease-out, box-shadow 200ms ease-out; }
-.shell-stop:hover .shell-node { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
+.shell-route li { display: flex; flex-shrink: 0; }
+.shell-stop { position: relative; display: inline-flex; align-items: center; gap: 7px; padding: 10px 14px; border-radius: 10px 10px 0 0; font-size: 0.88rem; color: var(--color-muted); white-space: nowrap; transition: color 160ms ease-out, background-color 160ms ease-out; }
+.shell-stop:hover { color: var(--color-ink); background: color-mix(in srgb, var(--color-accent) 7%, transparent); }
+.shell-stop::after { content: ""; position: absolute; left: 10px; right: 10px; bottom: 0; height: 2px; border-radius: 2px; background: var(--color-accent); transform: scaleX(0); transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1); }
 .shell-stop.active { color: var(--color-ink); font-weight: 500; }
-.shell-stop.active .shell-node { background: var(--color-highlight); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-highlight) 22%, transparent), 0 0 10px 1px color-mix(in srgb, var(--color-highlight) 40%, transparent); }
+.shell-stop.active::after { transform: scaleX(1); }
+.shell-node { display: none; }
 
 .shell-dock { position: fixed; inset: auto 0 0 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr); padding-bottom: env(safe-area-inset-bottom); background: var(--color-paper); border-top: 1px solid var(--color-line); }
 .shell-dock__lane { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 62px; font-size: 0.7rem; color: var(--color-quiet); }
 .shell-dock__lane.is-here { color: var(--color-accent); font-weight: 500; }
 .shell-dock__lane.is-here::before { content: ""; position: absolute; top: -1px; left: 30%; right: 30%; height: 2px; border-radius: 2px; background: var(--color-highlight); }
 @media (min-width: 768px) { .shell-dock { display: none; } }
-@media (prefers-reduced-motion: reduce) { .shell-lane::after, .shell-node { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .shell-lane::after, .shell-stop::after { transition: none; } }
 
 /* The tour: the ring dims everything but its element and glides only within a page; the card
    fades in once the ring has arrived, so nothing slides across the screen half-placed. */

@@ -225,7 +225,6 @@ export function EventLayout() {
               {current.stops.map((st) => (
                 <li key={st.to}>
                   <NavLink to={st.to} end={st.end} data-tour={st.tour} className="shell-stop">
-                    <span className="shell-node" aria-hidden="true" />
                     {st.label}
                     {st.to === "inbox" && inboxBadge}
                   </NavLink>

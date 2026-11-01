@@ -168,3 +168,64 @@ describe("a quote the host was sent outside the inbox", () => {
     warn.mockRestore();
   });
 });
+
+describe("a quote a vendor told the host, added on the need's page", () => {
+  test("a typed price for a new vendor becomes a quote straight away, with no model call, and the vendor isn't shortlisted", async () => {
+    vi.useFakeTimers();
+    const fetchFn = metaReads();
+    const t = setup();
+    const { ownerId, slotId } = await eventWithVendor(t);
+    const res = await as(t, ownerId).mutation(api.sharedQuotes.addFromHost, { slotId, vendorName: "Star Biryani", amount: 380, unit: "per_person" });
+    expect(res.reading).toBe(false);
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    expect(fetchFn).not.toHaveBeenCalled();
+    const vendor = await t.run((ctx) => ctx.db.get(res.vendorId));
+    expect(vendor).toMatchObject({ name: "Star Biryani", shortlisted: false, slotId });
+    const quotes = await t.run((ctx) => ctx.db.query("quotes").collect());
+    // Per plate, counted for the need's 120 people.
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]).toMatchObject({ vendorId: res.vendorId, total: 45600, headcountAssumed: 120 });
+    expect(quotes[0].state === undefined || quotes[0].state === "applied").toBe(true);
+    const thread = await t.run((ctx) => ctx.db.get(quotes[0].threadId));
+    expect(thread?.status).toBe("quoted");
+    // Compared with the rest on the need's page.
+    const compared = await as(t, ownerId).query(api.quotes.compareForSlot, { slotId });
+    expect(compared.map((q) => q.vendor.name)).toEqual(["Star Biryani"]);
+  });
+
+  test("the same name finds the vendor already on the need; spoken words are read, with the typed price kept if the reading finds none", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("MODEL_PROVIDER", "meta");
+    vi.stubEnv("MODEL_API_KEY", "LLM_1_test");
+    const noPrice = { ...READING, classification: "other", total: null, lines: [], headcountAssumed: null };
+    const fetchFn = vi.fn(async (_u: unknown, init?: RequestInit) =>
+      Response.json({ model: "muse-spark-1.3", choices: [{ finish_reason: "stop", message: { content: String(init?.body ?? "").includes("The charges for") ? JSON.stringify(CHARGES) : JSON.stringify(noPrice) } }], usage: { prompt_tokens: 100, completion_tokens: 50 } }),
+    );
+    vi.stubGlobal("fetch", fetchFn);
+    const t = setup();
+    const { ownerId, slotId, vendorId } = await eventWithVendor(t);
+    const res = await as(t, ownerId).mutation(api.sharedQuotes.addFromHost, { slotId, vendorName: "  mylai virundhu ", text: "He said around 50 thousand all in, delivery included", amount: 50000, unit: "total" });
+    expect(res.vendorId).toBe(vendorId);
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    const prompt = String(fetchFn.mock.calls[0][1]?.body);
+    expect(prompt).toContain("the hosts added it themselves");
+    const quotes = await t.run((ctx) => ctx.db.query("quotes").collect());
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]).toMatchObject({ vendorId, total: 50000 });
+  });
+
+  test("on an event that checks every quote first, one the host typed still goes straight in; nothing at all is refused", async () => {
+    vi.useFakeTimers();
+    metaReads();
+    const t = setup();
+    const { ownerId, eventId, slotId } = await eventWithVendor(t);
+    await t.run((ctx) => ctx.db.patch(eventId, { sendMode: "review" }));
+    await expect(as(t, ownerId).mutation(api.sharedQuotes.addFromHost, { slotId, vendorName: "Star Biryani" })).rejects.toThrow(/Type what they quoted/);
+    await as(t, ownerId).mutation(api.sharedQuotes.addFromHost, { slotId, vendorName: "Star Biryani", amount: 52000, unit: "total" });
+    await t.finishAllScheduledFunctions(vi.runAllTimers);
+    const quotes = await t.run((ctx) => ctx.db.query("quotes").collect());
+    expect(quotes[0].state === undefined || quotes[0].state === "applied").toBe(true);
+    expect(await as(t, ownerId).query(api.quotes.heldForSlot, { slotId })).toEqual([]);
+  });
+});
+

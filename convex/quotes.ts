@@ -170,6 +170,29 @@ export const undo = mutation({
  * away (with an undo) unless the wedding checks quotes first or the reading looks off,
  * in which case it waits for the couple.
  */
+/** Quotes on one need waiting for the host to check, with why, for the need's page. */
+export const heldForSlot = query({
+  args: { slotId: v.id("vendorSlots") },
+  returns: v.array(v.object({ _id: v.id("quotes"), vendorName: v.string(), total: v.number(), currency: v.string(), heldBecause: v.optional(v.string()), summary: v.string() })),
+  handler: async (ctx, args) => {
+    const slot = await ctx.db.get(args.slotId);
+    if (!slot) return [];
+    await requireMember(ctx, slot.eventId);
+    const quotes = await ctx.db.query("quotes").withIndex("by_slotId", (q) => q.eq("slotId", args.slotId)).take(100);
+    const waiting = quotes.filter((q) => q.state === "waiting");
+    return await Promise.all(
+      waiting.map(async (q) => ({
+        _id: q._id,
+        vendorName: (await ctx.db.get(q.vendorId))?.name ?? "A vendor",
+        total: q.total,
+        currency: q.currency,
+        heldBecause: q.heldBecause,
+        summary: q.summary,
+      })),
+    );
+  },
+});
+
 export const upsertFromMessage = internalMutation({
   args: {
     messageId: v.id("messages"),
@@ -258,6 +281,8 @@ export const upsertFromMessage = internalMutation({
       budget: slot.budget,
       slotBooked: slot.status === "booked",
       reviewFirst: event.sendMode === "review",
+      fromHost: message.fromHost === true,
+      typedPrice: message.given !== undefined,
     });
     const quoteId = await ctx.db.insert("quotes", { ...fields, ...(held ? { state: "waiting" as const, heldBecause: held } : {}) });
     if (!held) {
@@ -276,7 +301,7 @@ export const upsertFromMessage = internalMutation({
     });
     await trackForEvent(ctx, "quote.received", thread.eventId, { fromAttachment: Boolean(args.fromAttachment), held: Boolean(held) });
     // The host hears about it on WhatsApp too, if they asked to (a sample event never sends).
-    if (!event.demo) await ctx.scheduler.runAfter(0, internal.whatsapp.notifyQuote, { eventId: thread.eventId, vendorName: vendor.name, needTitle: slot.title });
+    if (!event.demo && !message.fromHost) await ctx.scheduler.runAfter(0, internal.whatsapp.notifyQuote, { eventId: thread.eventId, vendorName: vendor.name, needTitle: slot.title });
     return quoteId;
   },
 });

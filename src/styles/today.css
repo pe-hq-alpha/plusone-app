@@ -101,19 +101,39 @@ a.route__row:hover .route__act { text-decoration: underline; text-underline-offs
 .quote-drop--over { box-shadow: 0 0 0 2px var(--color-accent); }
 .quote-drop__file { display: inline-flex; align-items: center; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 10px; border-radius: 999px; font-size: 0.8rem; background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-line); }
 
-/* Notes to self: a sticky note in the page's own colours, with a strip along the top like a note's gummed edge. */
-.note { background: color-mix(in srgb, var(--color-highlight) 14%, var(--color-cream)); box-shadow: inset 0 3px 0 color-mix(in srgb, var(--color-highlight) 45%, transparent), inset 0 0 0 1px var(--color-line); }
-.note__input { width: 100%; padding: 8px 0; border: 0; border-bottom: 1px dashed var(--color-rule); background: transparent; font-size: 0.92rem; color: var(--color-ink); outline: none; }
-.note__input::placeholder { color: var(--color-quiet); }
-.note__input:focus { border-bottom-color: var(--color-accent); }
-.note__line { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; font-size: 0.92rem; line-height: 1.4; }
-.note__line + .note__line { border-top: 1px solid color-mix(in srgb, var(--color-line) 70%, transparent); }
-.note__tick { flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px var(--color-rule); color: var(--color-on-accent); transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
-.note__tick:hover { box-shadow: inset 0 0 0 1.5px var(--color-accent); }
-.note__tick.is-done { background: var(--color-accent); box-shadow: none; }
-.note__text { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--color-ink); }
-.note__text.is-done { color: var(--color-quiet); text-decoration: line-through; }
-.note__remove { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; color: var(--color-quiet); opacity: 0; transition: opacity 160ms ease-out, color 160ms ease-out; }
-.note__line:hover .note__remove, .note__remove:focus-visible { opacity: 1; }
-.note__remove:hover { color: var(--color-bad); }
-@media (hover: none) { .note__remove { opacity: 0.6; } }
+/* Notes to self: a real sticky note. Light marigold paper with dark ink in both themes, a little
+   tilted, lifted off the page by a soft shadow, a strip of tape at the top (the handle to move it
+   on a wide screen) and faint ruled lines to write on. */
+.note { --note-ink: var(--color-on-highlight); --note-line: color-mix(in srgb, var(--color-on-highlight) 12%, transparent);
+  position: relative; padding: 30px 22px 18px; border-radius: 3px 3px 14px 3px;
+  background-color: color-mix(in srgb, var(--color-highlight) 30%, #fffbee);
+  background-image: repeating-linear-gradient(to bottom, transparent 0 27px, var(--note-line) 27px 28px);
+  background-position: 0 58px;
+  color: var(--note-ink);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.08), 0 14px 28px -12px rgb(0 0 0 / 0.45);
+  rotate: -1.2deg; transition: rotate 200ms ease-out, box-shadow 200ms ease-out; }
+.note:hover { rotate: -0.4deg; }
+.note.is-dragging { rotate: 1deg; box-shadow: 0 2px 2px rgb(0 0 0 / 0.1), 0 26px 40px -14px rgb(0 0 0 / 0.55); transition: none; z-index: 40; }
+.note h2, .note p { color: var(--note-ink); }
+.note p { opacity: 0.7; }
+.note__tape { position: absolute; top: -11px; left: 50%; translate: -50% 0; width: 96px; height: 24px; rotate: -3deg; border-radius: 2px;
+  background: color-mix(in srgb, #ffffff 55%, transparent); box-shadow: 0 1px 2px rgb(0 0 0 / 0.12); border: 0; padding: 0; touch-action: none; }
+@media (min-width: 1024px) { .note__tape { cursor: grab; } .note.is-dragging .note__tape { cursor: grabbing; } }
+.note__back { position: absolute; top: 8px; right: 12px; font-size: 0.72rem; color: var(--note-ink); opacity: 0.6; text-decoration: underline; text-underline-offset: 2px; }
+.note__back:hover { opacity: 1; }
+.note__input { width: 100%; padding: 6px 0; border: 0; border-bottom: 1px dashed color-mix(in srgb, var(--note-ink) 35%, transparent); background: transparent; font-size: 0.95rem; color: var(--note-ink); outline: none; }
+.note__input::placeholder { color: color-mix(in srgb, var(--note-ink) 45%, transparent); }
+.note__input:focus { border-bottom-color: var(--note-ink); }
+.note__line { display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; min-height: 28px; font-size: 0.95rem; line-height: 20px; }
+.note__tick { flex: none; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 1px; border-radius: 999px; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--note-ink) 45%, transparent); color: #fffbee; transition: background-color 160ms ease-out, box-shadow 160ms ease-out; }
+.note__tick:hover { box-shadow: inset 0 0 0 1.5px var(--note-ink); }
+.note__tick.is-done { background: var(--note-ink); box-shadow: none; }
+.note__text { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--note-ink); }
+.note__text.is-done { opacity: 0.5; text-decoration: line-through; }
+.note__remove { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 999px; color: var(--note-ink); opacity: 0; transition: opacity 160ms ease-out; }
+.note__line:hover .note__remove, .note__remove:focus-visible { opacity: 0.6; }
+.note__remove:hover { opacity: 1; }
+.note__done { font-size: 0.75rem; color: var(--note-ink); opacity: 0.65; }
+.note__done:hover { opacity: 1; }
+@media (hover: none) { .note__remove { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .note, .note:hover { rotate: none; transition: none; } }

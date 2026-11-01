@@ -366,7 +366,7 @@ export async function bookElsewhereHelper(
     sourceUrls: [],
     reviewHighlights: [],
     pagesRead: [],
-    shortlisted: true,
+    shortlisted: false,
     scrapedAt: Date.now(),
   });
   await ctx.db.patch(slot._id, { status: "booked", bookedVendorId: vendorId });

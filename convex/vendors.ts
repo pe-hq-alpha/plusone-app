@@ -121,7 +121,7 @@ export const addManual = mutation({
       sourceUrls: website ? [website] : [],
       reviewHighlights: [],
       pagesRead: [],
-      shortlisted: true,
+      shortlisted: false,
       scrapedAt: Date.now(),
     });
     await logActivity(ctx, {

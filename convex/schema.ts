@@ -640,6 +640,10 @@ export const messageFields = {
   errorMessage: v.optional(v.string()),
   sentAt: v.optional(v.number()),
   receivedAt: v.optional(v.number()),
+  /** Added by the host (a quote told to them, a WhatsApp photo, a pasted message), not received by email. */
+  fromHost: v.optional(v.boolean()),
+  /** The figures the host typed for it, kept so the quote never depends on reading the words alone. */
+  given: v.optional(v.object({ amount: v.number(), unit: v.union(v.literal("total"), v.literal("per_person")), headcount: v.optional(v.number()) })),
 };
 
 export const quoteFields = {

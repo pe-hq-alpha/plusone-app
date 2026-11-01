@@ -271,7 +271,7 @@ export const file = internalMutation({
         sourceUrls: [],
         reviewHighlights: [],
         pagesRead: [],
-        shortlisted: true,
+        shortlisted: false,
         scrapedAt: Date.now(),
       });
       vendor = await ctx.db.get(vendorId);

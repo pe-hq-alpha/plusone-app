@@ -1,6 +1,5 @@
 import { anOccasion } from "../../convex/lib/occasion";
 import { defaultSearchText, partOfNeed } from "../../convex/lib/searchTerms";
-import { missingCharges, sheetFor } from "../../convex/lib/standardSheet";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
@@ -9,7 +8,6 @@ import type { Id } from "../../convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
 import { ConvexError } from "convex/values";
 import { flattenSlots, money, statusLabel, timeAgo, type FlatSlot } from "../lib/format";
-import { BookButton } from "../components/BookButton";
 import { SUGGESTED_CATEGORIES } from "../../convex/lib/templates";
 import { Icon } from "../components/ui/Icon";
 import { RenameTitle } from "../components/ui/RenameTitle";
@@ -17,6 +15,8 @@ import { VendorCard } from "../components/VendorCard";
 import { awayKm, NearVenue, venueSpot, type BookedHall, type Nearby } from "../components/NearVenue";
 import { kmText, placeFor, type Place } from "../../convex/lib/places";
 import { ConfirmOutreach } from "../components/ConfirmOutreach";
+import { VoiceButton } from "../components/VoiceButton";
+import { NeedQuotes } from "./DecisionsPage";
 import { BRAND } from "../lib/brand";
 import { vendorHello } from "../lib/contact";
 import { callText, toWav16k } from "../lib/audio";
@@ -135,17 +135,11 @@ function SlotPanel({
   const vendors = useQuery(api.vendors.listBySlot, { slotId: slot._id });
   const run = useQuery(api.research.latestForSlot, { slotId: slot._id });
   const drafts = useQuery(api.outreach.listDrafts, { slotId: slot._id })?.map((d) => ({ ...d.message, vendor: d.vendor }));
-  const quotes = useQuery(api.quotes.compareForSlot, { slotId: slot._id })?.map((q) => ({ ...q.quote, vendorName: q.vendor.name, isBooked: q.isBooked }));
-  // What each quote leaves unsaid, against the need's standard sheet and the other quotes.
-  const sheet = sheetFor(slot.category);
-  const gapsFor = (q: NonNullable<typeof quotes>[number]) =>
-    sheet && quotes ? missingCharges(q, sheet, quotes.filter((o) => o._id !== q._id)).map((m) => m.message) : [];
   const startResearch = useMutation(api.research.start);
   const toggleShortlist = useMutation(api.vendors.toggleShortlist);
   const setEmail = useMutation(api.vendors.setEmail);
   const addManual = useMutation(api.vendors.addManual);
   const draft = useMutation(api.outreach.draft);
-  const markBooked = useMutation(api.slots.markBooked);
   const renameSlot = useMutation(api.slots.update);
 
   // Starts from the trade, the place and the occasion; never a price or a mood, which bring back
@@ -273,6 +267,35 @@ function SlotPanel({
         canEdit && <BookedElsewhere slot={slot} currency={event.currency} />
       )}
 
+      {/* Quotes first: everything quoted for this need side by side, and a way to add one a vendor told you. */}
+      {slot.status !== "booked" && (
+        <section aria-labelledby="need-quotes-h" className="space-y-3">
+          <h3 id="need-quotes-h" className="text-lg">Quotes</h3>
+          {canEdit && (
+            <AddQuote
+              eventId={event._id as Id<"events">}
+              slot={slot}
+              vendors={(vendors ?? []).map((v) => ({ _id: v._id, name: v.name }))}
+              headcount={guestCount}
+              currency={event.currency}
+              demo={event.demo === true}
+            />
+          )}
+          <HeldQuotes slotId={slot._id} canEdit={canEdit} />
+          <NeedQuotes
+            eventId={event._id as Id<"events">}
+            slotId={slot._id}
+            city={event.city}
+            demo={event.demo === true}
+            canEdit={canEdit}
+            eventName={event.name}
+            eventDate={event.startDate}
+          />
+        </section>
+      )}
+
+      {slot.status !== "booked" && <h3 className="pt-2 text-lg">Find vendors</h3>}
+
       {slot.status !== "booked" && (
         <AskVerified
           eventId={event._id}
@@ -337,12 +360,12 @@ function SlotPanel({
                   type="button"
                   aria-pressed={onlyShortlisted}
                   onClick={() => setOnlyShortlisted((v) => !v)}
-                  title={onlyShortlisted ? "Show everyone again" : "Show only the ones you've hearted"}
+                  title={onlyShortlisted ? "Show everyone again" : "Show only the ones you've saved"}
                   className={`ml-3 rounded-full px-3 py-1 text-xs align-middle transition ${
                     onlyShortlisted ? "bg-accent text-paper" : "bg-cream text-muted shadow-[inset_0_0_0_1px_var(--color-line)] hover:text-accent"
                   }`}
                 >
-                  ♥ {shortlistedCount} shortlisted
+                  ♥ {shortlistedCount} saved
                 </button>
               )}
             </h3>
@@ -504,60 +527,6 @@ function SlotPanel({
         </section>
       )}
 
-      {quotes && quotes.length > 0 && (
-        <section aria-labelledby="quotes-h" className="card relative overflow-x-auto p-5">
-          <h3 id="quotes-h" className="text-lg">Quotes side by side</h3>
-          <table className="mt-3 w-full text-sm">
-            <thead className="text-left text-xs uppercase tracking-wide text-muted">
-              <tr>
-                <th className="py-2 pr-4">Vendor</th>
-                <th className="py-2 pr-4">Total</th>
-                <th className="py-2 pr-4">Deposit</th>
-                <th className="py-2 pr-4">Includes</th>
-                <th className="py-2 pr-4">Watch out</th>
-                <th className="py-2"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {quotes.map((q) => (
-                <tr key={q._id}>
-                  <td className="py-2 pr-4 font-medium">{q.vendorName}</td>
-                  <td className="py-2 pr-4">{money(q.total, q.currency)}</td>
-                  <td className="py-2 pr-4">{q.deposit ? money(q.deposit, q.currency) : "—"}</td>
-                  <td className="py-2 pr-4 text-xs text-muted">{q.includes.slice(0, 3).join(", ") || "—"}</td>
-                  <td className="py-2 pr-4 text-xs text-warn">{[...q.redFlags.slice(0, 2), ...gapsFor(q).slice(0, 3)].join("; ") || "—"}</td>
-                  <td className="py-2 text-right">
-                    {canEdit && slot.status !== "booked" && (
-                      <BookButton vendorName={q.vendorName} className="btn-ghost btn-sm" onBook={(notify) => markBooked({ slotId: slot._id, vendorId: q.vendorId, notify })} />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
-      {canEdit && slot.status !== "booked" && vendors && vendors.length > 0 && (
-        <SharedQuote eventId={event._id} vendors={vendors.map((v) => ({ _id: v._id, name: v.name }))} demo={event.demo === true} />
-      )}
-
-
-      {slot.status !== "booked" && (
-        <NearVenue
-          event={event}
-          hall={hall}
-          vendors={nearby}
-          radiusKm={radiusKm}
-          setRadiusKm={setRadiusKm}
-          insideOnly={insideOnly}
-          setInsideOnly={setInsideOnly}
-          canEdit={canEdit}
-        />
-      )}
-
-      <SessionsForSlot slot={slot} sessions={sessions} canEdit={canEdit} />
-
       {canEdit && (
         <details className="card p-5">
           <summary className="cursor-pointer text-sm font-medium">Add a vendor you know, to ask for a quote</summary>
@@ -578,6 +547,22 @@ function SlotPanel({
           </form>
         </details>
       )}
+
+      {slot.status !== "booked" && (
+        <NearVenue
+          event={event}
+          hall={hall}
+          vendors={nearby}
+          radiusKm={radiusKm}
+          setRadiusKm={setRadiusKm}
+          insideOnly={insideOnly}
+          setInsideOnly={setInsideOnly}
+          canEdit={canEdit}
+        />
+      )}
+
+      <SessionsForSlot slot={slot} sessions={sessions} canEdit={canEdit} />
+
       {error && <p role="alert" className="text-sm text-bad">{error}</p>}
     </div>
   );
@@ -678,24 +663,69 @@ function BookedSummary({ eventId, slot, currency }: { eventId: Id<"events">; slo
   );
 }
 
+/** Quotes on this need waiting for the host to check (a reading far from the budget, another currency), with why. */
+function HeldQuotes({ slotId, canEdit }: { slotId: Id<"vendorSlots">; canEdit: boolean }) {
+  const held = useQuery(api.quotes.heldForSlot, { slotId });
+  const apply = useMutation(api.quotes.apply);
+  const dismiss = useMutation(api.quotes.dismiss);
+  if (!held || held.length === 0) return null;
+  return (
+    <ul className="grid gap-2" aria-label="Quotes to check">
+      {held.map((q) => (
+        <li key={q._id} className="card-quiet flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+          <span className="min-w-0">
+            <span className="font-medium">{q.vendorName}</span> · {money(q.total, q.currency)}
+            {q.heldBecause && <span className="block text-xs text-muted">{q.heldBecause}</span>}
+          </span>
+          {canEdit && (
+            <span className="flex shrink-0 gap-2">
+              <button type="button" className="btn-ghost btn-sm" onClick={() => void apply({ quoteId: q._id })}>It's right, compare it</button>
+              <button type="button" className="btn-quiet btn-sm" onClick={() => void dismiss({ quoteId: q._id })}>Not this</button>
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
- * A quote that came outside the inbox: a WhatsApp photo, a screenshot, a PDF or a pasted
- * message. It is read like an emailed reply, into the same lines, and lands in Compare.
+ * Add a quote on the need's page: one a vendor told you in person or on the phone (typed or
+ * said into the microphone), a photo or PDF they sent, or a recording of the call. For a
+ * vendor already on this need or a new one by name. A typed price goes straight in beside
+ * the others; words, photos and calls are read into the same lines.
  */
-function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendors: Array<{ _id: Id<"vendors">; name: string }>; demo: boolean }) {
+function AddQuote({ eventId, slot, vendors, headcount, currency, demo }: {
+  eventId: Id<"events">;
+  slot: Slot;
+  vendors: Array<{ _id: Id<"vendors">; name: string }>;
+  headcount: number;
+  currency: string;
+  demo: boolean;
+}) {
   const uploadUrl = useMutation(api.sharedQuotes.generateUploadUrl);
-  const add = useMutation(api.sharedQuotes.add);
+  const add = useMutation(api.sharedQuotes.addFromHost);
   const voiceUploadUrl = useMutation(api.voiceBrief.uploadUrl);
   const hear = useAction(api.voiceBrief.transcribe);
+  const [open, setOpen] = useState(false);
   const [hearing, setHearing] = useState(false);
   // The demo's sample call is with Kaveri Feast Co., one of its caterers, so it is offered on Catering only.
   const sampleCallee = vendors.find((v) => /^Kaveri Feast/.test(v.name));
-  const [vendorId, setVendorId] = useState<Id<"vendors">>(vendors[0]._id);
+  const [who, setWho] = useState("");
   const [text, setText] = useState("");
+  const [amount, setAmount] = useState("");
+  // Food is priced by the plate; most other needs (decor, a photographer, a hall) for the whole event.
+  const byPlate = /cater|food|biryani|cake|sweet|lunch|dinner|breakfast|snack|bar|drink/i.test(`${slot.category} ${slot.title}`);
+  const [unit, setUnit] = useState<"per_person" | "total">(byPlate ? "per_person" : "total");
+  const [people, setPeople] = useState(headcount > 0 ? String(headcount) : "");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : "";
+  const num = (x: string) => Number(x.replace(/[^\d.]/g, ""));
+  const price = amount.trim() ? num(amount) : undefined;
+  const ready = who.trim().length > 0 && (text.trim().length > 0 || Boolean(file) || (price !== undefined && price > 0));
 
   async function send() {
     setBusy(true);
@@ -708,10 +738,22 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
         if (!res.ok) throw new Error("That upload didn't go. Try again.");
         storageId = ((await res.json()) as { storageId: Id<"_storage"> }).storageId;
       }
-      await add({ vendorId, text: text.trim() || undefined, storageId, filename: file?.name, contentType: file?.type || undefined });
-      setDone(`Reading ${vendors.find((v) => v._id === vendorId)?.name ?? "their"} quote. It lands in Compare in a few seconds.`);
+      const known = vendors.find((v) => v.name.trim().toLowerCase() === who.trim().toLowerCase());
+      const res = await add({
+        slotId: slot._id,
+        ...(known ? { vendorId: known._id } : { vendorName: who.trim() }),
+        text: text.trim() || undefined,
+        storageId,
+        filename: file?.name,
+        contentType: file?.type || undefined,
+        ...(price !== undefined && price > 0 ? { amount: price, unit, headcount: unit === "per_person" && people ? num(people) : undefined } : {}),
+      });
+      setDone(res.reading ? `Reading what ${who.trim()} quoted. It appears below in a few seconds.` : `${who.trim()}'s quote is in, below with the others.`);
+      setWho("");
       setText("");
+      setAmount("");
       setFile(null);
+      setOpen(false);
     } catch (e) {
       setError(e instanceof Error ? e.message.replace(/^.*ConvexError: /, "") : "That didn't go. Try again.");
     } finally {
@@ -721,7 +763,7 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
 
   /**
    * A call with the vendor: the recording is heard speaker by speaker and its words put in the
-   * box, for the person to check before the quote is read like any pasted message.
+   * box, for the person to check before the quote is read like any typed note.
    */
   async function hearCall(recording: Blob, callee?: string) {
     setHearing(true);
@@ -733,9 +775,10 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
       if (!res.ok) throw new Error("That recording didn't go. Try again.");
       const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
       const heard = await hear({ storageId, eventId, call: true });
-      const name = callee ?? vendors.find((v) => v._id === vendorId)?.name ?? "the vendor";
+      const name = callee ?? (who.trim() || "the vendor");
+      if (callee) setWho(callee);
       setText(callText(name, heard.turns.length ? heard.turns : [{ text: heard.text }]));
-      setDone("Here's the call, speaker by speaker. Check it, then read the quote.");
+      setDone("Here's the call, speaker by speaker. Check it, then add the quote.");
     } catch (e) {
       setError(e instanceof Error ? e.message.replace(/^.*ConvexError: /, "") : "We couldn't hear that recording. Try again.");
     } finally {
@@ -743,69 +786,85 @@ function SharedQuote({ eventId, vendors, demo }: { eventId: Id<"events">; vendor
     }
   }
 
+  if (!open) {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className="btn-primary btn-sm" onClick={() => setOpen(true)}>
+          <Icon name="plus" size={15} /> Add a quote
+        </button>
+        <p className="text-xs text-muted">One a vendor told you in person or on the phone, or a photo, PDF or call recording.</p>
+        {done && <p className="w-full text-xs text-ok" aria-live="polite">{done}</p>}
+      </div>
+    );
+  }
+
   return (
-    <details className="card p-5">
-      <summary className="cursor-pointer text-sm font-medium">Add a quote they sent on WhatsApp, by hand or on a call</summary>
-      <p className="mt-1 text-xs text-muted">A photo or screenshot of their price list, a PDF, their message pasted in, or a recording of your call with them. It&rsquo;s read into the same lines as every other quote.</p>
-      <form
-        className="mt-3 grid gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send();
-        }}
-      >
-        <select className="input sm:w-72" value={vendorId} onChange={(e) => setVendorId(e.target.value as Id<"vendors">)} aria-label="Which vendor">
-          {vendors.map((v) => (
-            <option key={v._id} value={v._id}>{v.name}</option>
-          ))}
-        </select>
-        <textarea className="input min-h-20" value={text} onChange={(e) => setText(e.target.value)} placeholder="Paste their message (optional with a photo)" aria-label="Their message" />
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <label className={`btn-quiet btn-sm cursor-pointer bg-cream ${hearing || busy ? "pointer-events-none opacity-60" : ""}`}>
-            {hearing ? "Listening to the call…" : "Add a recording of your call"}
-            <input
-              type="file"
-              className="hidden"
-              accept="audio/*"
-              disabled={hearing || busy}
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                e.target.value = "";
-                if (f) void hearCall(f);
-              }}
-            />
+    <form
+      className="card grid gap-3 p-5"
+      aria-label="Add a quote"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (ready) void send();
+      }}
+    >
+      <div className="flex items-baseline justify-between gap-3">
+        <h4 className="text-base font-medium">Add a quote for {slot.title.toLowerCase()}</h4>
+        <button type="button" className="text-xs text-muted hover:text-accent" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+      <label className="grid gap-1 text-sm">
+        <span className="label">Who quoted it</span>
+        <input className="input" list={`vendors-${slot._id}`} value={who} onChange={(e) => setWho(e.target.value)} placeholder="A vendor here, or a new name" autoFocus />
+        <datalist id={`vendors-${slot._id}`}>
+          {vendors.map((v) => <option key={v._id} value={v.name} />)}
+        </datalist>
+      </label>
+      <label className="grid gap-1 text-sm">
+        <span className="label">What did they quote?</span>
+        <textarea className="input min-h-20" value={text} onChange={(e) => setText(e.target.value)} placeholder={byPlate ? `e.g. ${symbol}380 a plate for ${headcount || 50}, delivery ${symbol}300 extra` : `e.g. ${symbol}45,000 for everything, set-up the evening before, transport extra`} />
+      </label>
+      <div className="flex flex-wrap items-center gap-2">
+        <VoiceButton eventId={eventId} disabled={busy || hearing} onText={(heard) => setText((t) => (t.trim() ? `${t.trim()} ${heard}` : heard))} />
+        <label className={`btn-quiet btn-sm cursor-pointer ${hearing || busy ? "pointer-events-none opacity-60" : ""}`}>
+          {hearing ? "Listening to the call…" : "Add a call recording"}
+          <input type="file" className="hidden" accept="audio/*" disabled={hearing || busy} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void hearCall(f); }} />
+        </label>
+        <label className="btn-quiet btn-sm cursor-pointer">
+          {file ? file.name.slice(0, 28) : "Add a photo or PDF"}
+          <input type="file" className="hidden" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        </label>
+        {demo && sampleCallee && (
+          <button type="button" className="btn-quiet btn-sm" disabled={hearing || busy} onClick={() => void fetch("/sample-call.mp3").then((r) => r.blob()).then((blob) => hearCall(blob, sampleCallee.name))}>
+            Try a sample call
+          </button>
+        )}
+      </div>
+      <fieldset className="grid gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
+        <legend className="mb-1 text-xs text-muted">The price, if you have it, so it's counted exactly</legend>
+        <label className="grid gap-1 text-sm">
+          <span className="label">Price {symbol && `(${symbol})`}</span>
+          <input className="input" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={byPlate ? "380" : "45000"} />
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="label">For</span>
+          <select className="input" value={unit} onChange={(e) => setUnit(e.target.value as "per_person" | "total")}>
+            <option value="per_person">a plate / person</option>
+            <option value="total">everything</option>
+          </select>
+        </label>
+        {unit === "per_person" && (
+          <label className="grid gap-1 text-sm">
+            <span className="label">People</span>
+            <input className="input w-24" inputMode="numeric" value={people} onChange={(e) => setPeople(e.target.value)} />
           </label>
-          {demo && sampleCallee && (
-            <button
-              type="button"
-              className="btn-quiet btn-sm"
-              disabled={hearing || busy}
-              onClick={() => {
-                setVendorId(sampleCallee._id);
-                void fetch("/sample-call.mp3")
-                  .then((r) => r.blob())
-                  .then((blob) => hearCall(blob, sampleCallee.name));
-              }}
-            >
-              Try a sample call
-            </button>
-          )}
-          {demo && !sampleCallee && <span className="text-xs text-muted">A sample call with a caterer is on Catering.</span>}
-        </div>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,application/pdf"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-cream file:px-3 file:py-1.5 file:text-ink"
-          aria-label="A photo or PDF of their quote"
-        />
-        <div className="flex flex-wrap items-center gap-3">
-          <button className="btn-ghost btn-sm" disabled={busy || (!text.trim() && !file)}>{busy ? "Sending…" : "Read this quote"}</button>
-          {done && <p className="text-xs text-muted">{done}</p>}
-          {error && <p role="alert" className="text-xs text-bad">{error}</p>}
-        </div>
-      </form>
-    </details>
+        )}
+      </fieldset>
+      <div className="flex flex-wrap items-center gap-3">
+        <button className="btn-primary" disabled={busy || hearing || !ready}>{busy ? "Adding…" : "Add the quote"}</button>
+        {!who.trim() && <p className="text-xs text-quiet">Say who quoted it.</p>}
+        {done && <p className="text-xs text-muted">{done}</p>}
+        {error && <p role="alert" className="text-xs text-bad">{error}</p>}
+      </div>
+    </form>
   );
 }
 

@@ -100,6 +100,8 @@ const vendorRow = v.object({
       redFlags: v.array(v.string()),
       validUntil: v.optional(v.string()),
       summary: v.string(),
+      /** The host added it themselves rather than it arriving by email. */
+      addedByYou: v.boolean(),
       deltaVsBudget: v.number(),
       /** The quote in the need's comparison unit, at the host's numbers (lib/comparable). */
       perUnit: v.union(v.number(), v.null()),
@@ -340,6 +342,8 @@ export const board = query({
         if (state === "emailed" || state === "chased") awaiting += 1;
 
         const availability = thread ? (availabilityByThread.get(thread._id) ?? null) : null;
+        // A quote the host added themselves (told to them, a photo, a pasted message), not one that came by email.
+        const addedByYou = quote ? (await ctx.db.get(quote.messageId))?.fromHost === true : false;
 
         rows.push({
           vendorId: vendor._id,
@@ -368,6 +372,7 @@ export const board = query({
                 redFlags: quote.redFlags,
                 validUntil: quote.validUntil,
                 summary: quote.summary,
+                addedByYou,
                 deltaVsBudget: quote.total - slot.budget,
                 ...comparison(quote, basis, units),
                 tier: placeInBand(basis === "total" ? quote.total : compare(quote, basis, units).perUnit, quote.currency, band),
