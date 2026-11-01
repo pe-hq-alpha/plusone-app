@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Plan it all in one place. Know what you're paying for.', the line 'One app from the first idea to the day itself, with every quote and every vendor's offer on the same lines', and chips saying birthdays to offsites and that it reads and writes with Meta's Muse Spark, beside the Today screen of a sample 60th birthday">
+<img src="assets/banner.jpg" width="100%" alt="PlusOne Events: the headline 'Plan it all in one place. Know what you're paying for.', the line 'One app from the first idea to the day itself, with every quote and every vendor's offer on the same lines', and chips saying birthdays to offsites and that it reads and writes with Meta's Muse Spark, beside the Overview screen of a sample 60th birthday">
 
 # PlusOne Events
 
@@ -265,7 +265,7 @@ Each step says what came before the hackathon and what is new.
 
 **Finding vendors, free.** At [/vendors](https://app.plusoneevents.site/vendors), anyone can search in their own words, on a list or a map, with no sign-in: each listed vendor's packages on the standard sheet, checked photos and track record, plus vendors' own sites on the open web. Until real vendors join, the directory holds 26 sample vendors, marked Sample.
 
-<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and six caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
+<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and the caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
 
 **Answering as a vendor.** On PlusOne Partner, a vendor sets up or claims their business, pins where they work by pasting their Google Maps link, and can run several businesses from one login. They price packages the way their trade charges, or bring the price list they already send, and say every charge on each one: GST, service staff, transport, crockery, water and any other they name, each in the price, added at a fixed amount, at cost or not provided, so customers see it before they ask; answer customers' requests on the same sheet, never seeing the customer's name or budget; and land beside the customer's other quotes. A person checks every business before customers see it.
 

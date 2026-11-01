@@ -27,9 +27,9 @@ For families, teams and event managers. Each step is marked *before the hackatho
 4. **Find vendors two ways** *(web search before the hackathon; verified vendors and the map new)*. PlusOne searches the open web, reads vendors' own sites down to their pricing pages and ranks what it finds with a reason for each, every price linked to its page. Or, on a need, see PlusOne's verified vendors for that trade and city by name, with their photo, starting price and distance from the venue, and press **Ask verified vendors** so they answer it on PlusOne Partner. A map pins the venue with a circle around it, so the host can keep to vendors nearby or look further out.
 5. **Write from the event's own inbox** *(before the hackathon; the inbox's count of conversations with something new, 1 Nov)*. PlusOne sends the inquiries from the event's address, follows up with vendors who go quiet (up to three times) and answers simple questions. Anything that is the host's to decide comes back as one clear question.
 
-| Vendors found on the open web | The event's inbox |
+| A need's page, quotes first | The event's inbox |
 |---|---|
-| <img src="assets/screens/vendors.jpg" alt="Find: a priest for the morning pooja, researched on the open web, with the best match ranked on reviews, price against the budget and fit"> | <img src="assets/screens/inbox.jpg" alt="The inbox: six vendor conversations with their status, and the first email to a nadaswaram group with a follow-up due"> |
+| <img src="assets/screens/vendors.jpg" alt="The catering need for the sample 60th: Add a quote for one a vendor told you in person or on the phone, then the five quotes and offers pinned by number on the Chennai price bar from Value to Luxury, with the typical price marked in gold"> | <img src="assets/screens/inbox.jpg" alt="The inbox: six vendor conversations with their status, and the first email to a nadaswaram group with a follow-up due"> |
 
 <img src="assets/screens/near-venue.jpg" width="100%" alt="Flowers and decoration for the sample 60th: Near your venue, with Thamarai Hall in Mylapore pinned as the booked hall, a 5 km circle on the map of Chennai, and the decorators numbered by distance beside it, verified ones and ones found on the web, from under 1 km to 1.4 km">
 
@@ -53,7 +53,7 @@ For families, teams and event managers. Each step is marked *before the hackatho
 
 At [/vendors](https://app.plusoneevents.site/vendors), anyone can look for a caterer, decorator, photographer, hall or any other kind of vendor, with no sign-in and no plan, in their own words ("photographers near Adyar under 20k") and on a list or a map. Each listed vendor shows their packages on the standard sheet (the price, how it's charged, what's in it, GST), their checked photos of past work and their track record. A search of the open web finds vendors with their own sites who aren't on PlusOne yet, without writing to anyone. Until real vendors join as Chennai opens, the directory holds 26 sample vendors (caterers, decorators and photographers), made up and marked Sample on every card; their photos are free-licence stock pictures. To get quotes that compare, a family or event manager starts a plan; a Partner vendor's number is shared once a booking is made through PlusOne.
 
-<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and six caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
+<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and the caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
 
 ## Answering as a vendor
 
