@@ -145,7 +145,7 @@ export function LandingPage() {
             <h2 id="status-title" className="rs__status-title">{BRAND.name} at work</h2>
             <p className="rs__example">Example</p>
             <p className="rs__event">
-              <span>{ex.hero.event}</span> · <span>{ex.hero.city}</span> · <span>Sat 24 Jan</span> · about {ex.hero.people} people
+              <span>{ex.hero.event}</span> · <span>Sat 24 Jan</span> · about {ex.hero.people} people
             </p>
             <ol className="rs__route">
               {route(ex.hero.plan).map((s, i) => (

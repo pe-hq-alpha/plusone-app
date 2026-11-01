@@ -55,8 +55,8 @@ describe("where a visitor is", () => {
 
 describe("examples in the visitor's money", () => {
   it("shows rupees in India and dollars elsewhere", () => {
-    expect(examplesFor("IN").compare.range).toMatch(/Chennai: ₹/);
-    expect(examplesFor("IN-DL").compare.range).toMatch(/Delhi: ₹/);
+    expect(examplesFor("IN").compare.range).toMatch(/^Across these quotes: ₹/);
+    expect(examplesFor("IN-DL").compare.range).toMatch(/₹503/);
     expect(examplesFor("US").compare.range).toMatch(/\$/);
     expect(examplesFor(undefined).compare.range).toMatch(/\$/);
   });
