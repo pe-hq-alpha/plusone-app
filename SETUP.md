@@ -7,7 +7,7 @@
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 796 tests, no network, no keys
+npm test              # 803 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 

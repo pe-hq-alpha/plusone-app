@@ -11,16 +11,16 @@ One app, two sides working on the same lines: customers plan and compare, vendor
 For families, teams and event managers.
 
 1. **Talk it through.** "Amma's 60th, a homam at home and lunch for about 120." PlusOne asks for what it still needs, one thing at a time, reads it all back and flags anything that can't be right, like a weekday that doesn't match the date. The model reads each message; fixed rules decide what to ask next and when the plan is ready (`/new`, `convex/planningChat.ts`). A form at `/new/manual` does the same step by step.
-2. **Open on Today.** PlusOne's route through the event: what is done, under way, over to you and up next, each with the button that finishes it (`src/pages/TodayPage.tsx`). A box beside it takes a change in plain words: "we're now 140 people".
+2. **Open on Overview.** The budget, vendors booked and people coming at the top, then PlusOne's route through the event: what is done, under way, over to you and up next, each with the button that finishes it (`src/pages/TodayPage.tsx`). A box beside it takes a change in plain words: "we're now 140 people".
 
-<img src="assets/screens/today.jpg" width="100%" alt="Today for the sample 60th birthday: four done steps, two under way, one over to you, with the budget and a box to tell PlusOne a change">
+<img src="assets/screens/today.jpg" width="100%" alt="Overview for the sample 60th birthday: the budget, vendors booked and guests coming at the top, then where things stand and a box to tell PlusOne a change">
 
-3. **Everything in one place.** Four lanes, Today, Plan, Vendors and People, hold the functions, to-dos, budget, vendors, inbox, guests, gifts and the event page, so nothing lives in a separate spreadsheet or chat (`src/components/EventLayout.tsx`). The words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
+3. **Everything in one place.** Four lanes, Overview, Plan, Vendors and People, hold the functions, to-dos, budget, vendors, inbox, guests, gifts and the event page, so nothing lives in a separate spreadsheet or chat (`src/components/EventLayout.tsx`). The words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
 
 <table>
 <tr>
-<td width="30%" valign="top"><img src="assets/screens/today-phone.jpg" alt="Today on a phone: the box to tell PlusOne a change comes first, with the four lanes as a bar along the bottom"></td>
-<td valign="top"><img src="assets/screens/plan.jpg" alt="The Plan lane: the event, its budget committed, a morning pooja and a birthday lunch, and the next to-dos"><br><sub>On a phone, Today opens on the box to tell PlusOne a change, and the four lanes move to a bar along the bottom. On a laptop, the Plan lane: the event, the money committed so far, its two functions and what to do next.</sub></td>
+<td width="30%" valign="top"><img src="assets/screens/today-phone.jpg" alt="Overview on a phone: the budget first, then vendors and guests side by side, with the four lanes as a bar along the bottom"></td>
+<td valign="top"><img src="assets/screens/plan.jpg" alt="The Plan lane: a morning pooja and a birthday lunch, each need with its price or what is planned for it, beside the budget, vendors and guests"><br><sub>On a phone, Overview opens on the budget, then vendors and guests side by side, and the four lanes move to a bar along the bottom. On a laptop, the Plan lane: the two functions, each need with its price or what is planned for it, beside the budget, vendors and guests.</sub></td>
 </tr>
 </table>
 

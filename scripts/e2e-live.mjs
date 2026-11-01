@@ -63,7 +63,7 @@ for (const device of Object.keys(DEVICES)) {
       await sees(page, "Plan an event");
     });
     let event = "";
-    await step(device, "Customers' demo opens on Today", page, errors, async () => {
+    await step(device, "Customers' demo opens on Overview", page, errors, async () => {
       await page.goto(`${APP}/demo`, { waitUntil: "domcontentloaded" });
       await page.waitForURL(/\/e\/[a-z0-9]+/, { timeout: 30_000 });
       event = page.url().match(/(\/e\/[a-z0-9]+)/)[1];

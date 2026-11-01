@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-796_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-803_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -86,8 +86,8 @@ More vendors on Partner widen what customers can compare; more customers bring v
 ## For the judges
 
 **Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th with no sign-up (also a griha pravesam, `/demo?sample=housewarming`, and an office Diwali party, `/demo?sample=office`; their vendors are made up, so nothing is really sent).
-1. Start on **Today**, then **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them.
-2. Press **Under the hood** in the top bar for each step's Meta model, time and cost; type "We're now 140 people" on Today to watch one run.
+1. Start on **Overview**, then **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them.
+2. Press **Under the hood** in the top bar for each step's Meta model, time and cost; type "We're now 140 people" on Overview to watch one run.
 3. Open [PlusOne Partner's demo](https://partner.plusoneevents.site/demo) as a sample caterer, answer the customer's request on the same sheet, and see the offer as the customer does.
 4. Open [Find vendors](https://app.plusoneevents.site/vendors) and search "caterers near Mylapore under 450": vendors on a map in a circle around the area.
 
@@ -130,6 +130,8 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **Vendors found on the open web,** listed openly as "not yet verified" with a link to their own site, to be claimed or removed by the business; vendor research searches the host's own words, never a price | Firecrawl, within robots.txt | Live, 31 Oct |
 | **Shared links that show the event:** an event page, RSVP or plan link shows the event's name, date, place and picture; each kind of event has its own line drawing, or the host's own picture. The event page opens on that picture, with the day as a timeline, a calendar file and directions | | Live, 31 Oct |
 | **A WhatsApp quote dropped on the event:** paste the message or drop the screenshot with no vendor or need chosen; it finds its vendor and need, adds them if new, and lands in Compare | Muse Spark 1.3 | Live, 31 Oct |
+| **A vendor booked outside PlusOne, in one step:** name, price agreed and what's paid; the need is booked, the budget takes the price, what's paid is marked paid and the balance goes on what's due. The assistant offers the same step as a "Do it" card | Muse Spark 1.3 (the assistant's card) | Live, 1 Nov |
+| **Overview, milestones and RSVP links:** the event opens on the budget, vendors booked and people coming; where things stand reads as milestones in the need's own name, never a vendor's; the event page lists everyone's own RSVP link to copy or send on WhatsApp | | Live, 1 Nov |
 
 ### How each criterion is met
 
@@ -137,7 +139,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, charges outside the headline prices came to about 10% of the quoted total. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 796 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 803 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -173,7 +175,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | Model | Where it works in PlusOne | Status |
 |---|---|---|
 | **Muse Spark 1.3** (Meta Model API) | Every reading and writing step: the planning conversation, search plans and vendor ranking, inquiries and follow-ups, quotes in replies, PDFs and photos, RSVPs, guest-list imports and the "Tell PlusOne" box. Structured answers come back as JSON Schema, checked against Zod schemas | Live in production since 27 Oct |
-| **Muse Voice Transcribe** | The voice brief, spoken in Tamil, English or both (the demo's Today box can play a recorded sample brief, heard the same way); and a recorded call with a vendor, heard speaker by speaker (diarization) and read into the standard sheet (the demo's 47-second call in 10.9 s, every figure right: ₹460 a plate, GST ₹2,760, transport ₹2,500, water flagged) | Live in production since 28 Oct |
+| **Muse Voice Transcribe** | The voice brief, spoken in Tamil, English or both (the demo's Overview box can play a recorded sample brief, heard the same way); and a recorded call with a vendor, heard speaker by speaker (diarization) and read into the standard sheet (the demo's 47-second call in 10.9 s, every figure right: ₹460 a plate, GST ₹2,760, transport ₹2,500, water flagged) | Live in production since 28 Oct |
 | **SAM 3.1** | Cuts the stage and the wall behind it out of the hall's own photo, from boxes Muse Spark finds or a tap, so the page can dress them in a look; masks cached (9 s the first time, 1 s after) | Live in production, 29 Oct (`convex/lib/sam.ts`, `convex/venueView.ts`) |
 | **Muse Wonder** | The verification agent in Ops: checks a vendor against their own site and public pages, with links; a person decides | Live in production, 28 Oct (`convex/lib/wonder.ts`, `convex/marketplace/checks.ts`) |
 | **Muse Spark Open** (open weights, on Baseten) | **Bring your price list** on Partner: a vendor pastes or photographs the list they already send customers, and it drafts each package on their trade's sheet to check and save (a printed rate card into three packages, all right, in 8.4 s) | Live in production, 29 Oct (`convex/marketplace/priceList.ts`) |
@@ -182,7 +184,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **See it at work:** the **Under the hood** button in any event lists every step PlusOne ran, with the Meta model, time and cost. In the demo it opens on recorded real runs of each model on its own material.
 
-<img src="assets/screens/under-the-hood.jpg" width="100%" alt="Under the hood open beside Today in the sample event: recorded real runs of Muse Spark 1.3 reading three caterers' replies (7 to 14 seconds, about a cent each) and Muse Spark with SAM 3.1 finding the stage in the sample hall, each with its time, tokens and cost">
+<img src="assets/screens/under-the-hood.jpg" width="100%" alt="Under the hood open beside Overview in the sample event: recorded real runs of Muse Spark 1.3 reading three caterers' replies (7 to 14 seconds, about a cent each) and Muse Spark with SAM 3.1 finding the stage in the sample hall, each with its time, tokens and cost">
 
 Every call goes through one wrapper, `convex/lib/models.ts`: retries on 429, 500 and 503 honouring `Retry-After`; a call Meta can't answer moves to Claude, with the switch logged; Muse Spark Open and Muse Glimmer step down to Muse Spark. A malformed request is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and cost.
 
@@ -237,14 +239,14 @@ One app, two sides working on the same lines: customers plan and compare, vendor
 
 **Planning an event** (families, teams and event managers):
 1. **Talk it through**, typed or spoken; PlusOne asks for what it still needs and reads the plan back (`convex/planningChat.ts`).
-2. **Open on Today**, PlusOne's route through the event: done, under way, over to you, next. Four lanes (Today, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page.
+2. **Open on Overview**: the budget (committed, paid, still free), vendors booked and people coming, then PlusOne's route through the event: done, under way, over to you, next, with to-dos beside it. Four lanes (Overview, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page.
 3. **Find vendors** on the open web or among verified Partner vendors, on a map around the venue, and **write from the event's own inbox**; PlusOne follows up and answers simple questions.
 4. **Every quote on the same lines**, from an email, PDF, WhatsApp photo or call, then **Compare line by line** with missing charges flagged, the city's range from Value to Luxury, what each price includes, track records and checked photos.
 5. **See it on your venue**, **keep the budget honest** (a quote moves it, with an undo; one that looks off waits) and **guests and RSVPs** per function.
 
 <table>
 <tr>
-<td width="50%" valign="top"><img src="assets/screens/today.jpg" alt="Today for the sample 60th birthday: four done steps, two under way, one over to you, with the budget and a box to tell PlusOne a change"></td>
+<td width="50%" valign="top"><img src="assets/screens/today.jpg" alt="Overview for the sample 60th birthday: the budget, vendors booked and guests coming at the top, then where things stand and a box to tell PlusOne a change"></td>
 <td width="50%" valign="top"><img src="assets/screens/near-venue.jpg" alt="Flowers and decoration for the sample 60th: Near your venue, with Thamarai Hall in Mylapore pinned as the booked hall, a 5 km circle on the map of Chennai, and the decorators numbered by distance beside it"></td>
 </tr>
 </table>
@@ -286,7 +288,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 796 tests, no network, no keys
+npm test              # 803 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
@@ -294,7 +296,7 @@ The evaluations' raw results are in `scripts/*-run*.json`, so every number above
 
 ## Status and limits
 
-Planning works end to end: the conversation, the plan, Today, vendor search, emails, replies, quotes on the same lines, verified vendors' offers, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together.
+Planning works end to end: the conversation, the plan, Overview, vendor search, emails, replies, quotes on the same lines, verified vendors' offers, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together.
 
 - Vendor search is only as good as vendors' own websites: a vendor with no prices online comes back without one, until it replies.
 - A city's price range shows once eight listed prices sit behind it; until then Compare shows the range across the event's own quotes. A price that can't be put in the unit honestly is shown as quoted, not converted.
