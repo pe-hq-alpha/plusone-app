@@ -1,8 +1,8 @@
 import { sampleFor } from "../../convex/lib/regions";
 
 /**
- * The made-up examples on the home page, How it works and the manual form, in the
- * visitor's own money: rupees for India (Delhi's vendors in the north, Chennai's
+ * The made-up examples on the home page, How it works and the manual form. Names read
+ * the same anywhere (no city, no one culture's names), in the visitor's own money: rupees for India (Delhi's vendors in the north, Chennai's
  * elsewhere), dollars everywhere else. Amounts are written the way people there would
  * quote them, never converted.
  */
@@ -40,16 +40,16 @@ const ELSEWHERE: RegionExamples = {
 };
 
 const CHENNAI: RegionExamples = {
-  hero: { event: "Aarav's 1st birthday", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
+  hero: { event: "Mia's 1st birthday", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
   search: "caterers in Chennai for a 60th birthday lunch, under ₹500 a plate",
   compare: {
     title: "Catering · housewarming lunch for 150",
     unit: "Per plate",
     totalLabel: "For your 150",
     rows: [
-      { name: "Annam Caterers", quoted: "₹380 a plate + ₹6,000 service", per: "₹420", total: "₹63,000", tag: "Best per plate", best: true },
-      { name: "Saapadu Kitchen", quoted: "₹62,000 all in", per: "₹517", total: "₹77,500", tag: "Priced for 120" },
-      { name: "Kaveri Feast Co.", quoted: "₹450 a plate + ₹2,500 transport", per: "₹467", total: "₹70,000" },
+      { name: "Harvest Table Caterers", quoted: "₹380 a plate + ₹6,000 service", per: "₹420", total: "₹63,000", tag: "Best per plate", best: true },
+      { name: "Green Leaf Kitchen", quoted: "₹62,000 all in", per: "₹517", total: "₹77,500", tag: "Priced for 120" },
+      { name: "Silver Spoon Co.", quoted: "₹450 a plate + ₹2,500 transport", per: "₹467", total: "₹70,000" },
     ],
     range: "Across these quotes: ₹420 to ₹517 a plate",
   },
@@ -59,16 +59,16 @@ const CHENNAI: RegionExamples = {
 };
 
 const DELHI: RegionExamples = {
-  hero: { event: "Kiara's 1st birthday", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
+  hero: { event: "Mia's 1st birthday", people: 80, plan: "Plan set out: party at 5:00, cake at 6:30" },
   search: "banquet halls in Gurugram for an office Diwali party for 120",
   compare: {
-    title: "Catering · office Diwali dinner for 150",
+    title: "Catering · office party dinner for 150",
     unit: "Per plate",
     totalLabel: "For your 150",
     rows: [
-      { name: "Rasoi Ghar Caterers", quoted: "₹450 a plate + ₹8,000 service", per: "₹503", total: "₹75,500", tag: "Best per plate", best: true },
-      { name: "Chandni Caterers", quoted: "₹70,000 all in", per: "₹583", total: "₹87,500", tag: "Priced for 120" },
-      { name: "Annapurna Kitchens", quoted: "₹520 a plate + ₹3,000 transport", per: "₹540", total: "₹81,000" },
+      { name: "Golden Fork Caterers", quoted: "₹450 a plate + ₹8,000 service", per: "₹503", total: "₹75,500", tag: "Best per plate", best: true },
+      { name: "Olive & Thyme", quoted: "₹70,000 all in", per: "₹583", total: "₹87,500", tag: "Priced for 120" },
+      { name: "The Feast House", quoted: "₹520 a plate + ₹3,000 transport", per: "₹540", total: "₹81,000" },
     ],
     range: "Across these quotes: ₹503 to ₹583 a plate",
   },
