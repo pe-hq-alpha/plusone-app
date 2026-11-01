@@ -140,6 +140,22 @@ export const rsvpLink = mutation({
   },
 });
 
+/** Everyone's own RSVP link at once, made the first time, for the event page's list to copy or send. */
+export const rsvpLinks = mutation({
+  args: { eventId: v.id("events") },
+  returns: v.array(v.object({ guestId: v.id("guests"), name: v.string(), rsvp: v.string(), token: v.string() })),
+  handler: async (ctx, args) => {
+    await requireMember(ctx, args.eventId, "planner");
+    const guests = await ctx.db
+      .query("guests")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .take(500);
+    const out = [];
+    for (const g of guests) out.push({ guestId: g._id, name: g.name, rsvp: g.rsvp, token: await ensureRsvpToken(ctx, g) });
+    return out.sort((a, b) => a.name.localeCompare(b.name));
+  },
+});
+
 // ---------------------------------------------------------------- for everyone
 
 const publicSession = v.object({

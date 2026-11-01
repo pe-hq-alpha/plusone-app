@@ -22,6 +22,8 @@ export const list = query({
       vendorsCount: v.number(),
       bestQuote: v.union(quoteDoc, v.null()),
       bookedVendor: v.union(vendorDoc, v.null()),
+      /** What's committed in the budget for this need: a booking's price, quote or not. */
+      committed: v.union(v.number(), v.null()),
     }),
   ),
   handler: async (ctx, args) => {
@@ -43,7 +45,8 @@ export const list = query({
       let bestQuote = null;
       for (const q of quotes) if (isLive(q) && (!bestQuote || q.total < bestQuote.total)) bestQuote = q;
       const bookedVendor = slot.bookedVendorId ? await ctx.db.get(slot.bookedVendorId) : null;
-      out.push({ slot, vendorsCount: vendors.length, bestQuote, bookedVendor });
+      const line = await ctx.db.query("budgetLines").withIndex("by_slotId", (q) => q.eq("slotId", slot._id)).first();
+      out.push({ slot, vendorsCount: vendors.length, bestQuote, bookedVendor, committed: line && line.committed > 0 ? line.committed : null });
     }
     return out;
   },

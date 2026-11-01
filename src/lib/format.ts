@@ -56,7 +56,7 @@ import type { api } from "../../convex/_generated/api";
 type SlotRow = FunctionReturnType<typeof api.slots.list>[number];
 export type FlatSlot = SlotRow["slot"] & Omit<SlotRow, "slot">;
 export function flattenSlots(rows: SlotRow[] | undefined): FlatSlot[] | undefined {
-  return rows?.map((r) => ({ ...r.slot, vendorsCount: r.vendorsCount, bestQuote: r.bestQuote, bookedVendor: r.bookedVendor }));
+  return rows?.map((r) => ({ ...r.slot, vendorsCount: r.vendorsCount, bestQuote: r.bestQuote, bookedVendor: r.bookedVendor, committed: r.committed }));
 }
 
 /** Date helpers for the onboarding steps, kept in ISO (YYYY-MM-DD) form. */

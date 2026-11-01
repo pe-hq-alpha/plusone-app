@@ -247,8 +247,8 @@ function NeedLine({ row, currency }: { row: NeedRow; currency: string }) {
       ) : (
         <span className="dbp__state">{STATE_LABEL[row.state]}</span>
       )}
-      <span className="dbp__price">
-        {priceText(row.price, currency)}
+      <span className={`dbp__price ${row.price ? "" : "text-quiet"}`} title={row.price ? undefined : "What the budget sets aside for this until a quote comes in"}>
+        {priceText(row.price, currency, row.planned)}
       </span>
     </li>
   );

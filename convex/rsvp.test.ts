@@ -126,6 +126,19 @@ describe("one invitation email", () => {
   });
 });
 
+describe("everyone's links on one list", () => {
+  test("each person gets their own link, the same one the copy button and email use; viewers can't list them", async () => {
+    const t = setup();
+    const s = await seed(t);
+    const first = await as(t, s.plannerId).mutation(api.site.rsvpLink, { guestId: s.ravi });
+    const links = await as(t, s.plannerId).mutation(api.site.rsvpLinks, { eventId: s.eventId });
+    expect(links.length).toBeGreaterThanOrEqual(2);
+    expect(new Set(links.map((l) => l.token)).size).toBe(links.length);
+    expect(links.find((l) => l.guestId === s.ravi)?.token).toBe(first);
+    await expect(as(t, s.viewerId).mutation(api.site.rsvpLinks, { eventId: s.eventId })).rejects.toThrow();
+  });
+});
+
 describe("the link and the email kept in step", () => {
   test("the link's 3 of 4, then a plain emailed yes, stays 3 of 4", async () => {
     const t = setup();

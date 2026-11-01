@@ -135,10 +135,7 @@ export function WebsitePage() {
             )}
           </section>
 
-          <section className="card px-6 py-5">
-            <h2 className="display text-xl">RSVPs</h2>
-            <p className="mt-1 text-sm text-muted">Everyone on your list has their own RSVP link: copy it from the {peopleWord(event)} page and send it however you like. Their answers, numbers and food needs land on the list by themselves.</p>
-          </section>
+          <RsvpLinks eventId={eventId} eventName={event.name} canEdit={canEdit} people={peopleWord(event)} />
           {error && <p role="alert" className="text-sm text-bad">{error}</p>}
         </div>
       )}
@@ -151,4 +148,66 @@ function storyExample(o: EventData["event"]): string {
   if (isWedding(o)) return "How you met, the proposal…";
   if (isWorkEvent(o)) return "What the event is for, and who will be there…";
   return "Why you're gathering, and what the day means to the family…";
+}
+
+/**
+ * Every person's own RSVP link on one list: copy one, send it on WhatsApp, or copy them
+ * all as "Name: link" lines. Each link knows who it is for, so answers land on the right row.
+ */
+function RsvpLinks({ eventId, eventName, canEdit, people }: { eventId: Id<"events">; eventName: string; canEdit: boolean; people: string }) {
+  const make = useMutation(api.site.rsvpLinks);
+  const [links, setLinks] = useState<{ guestId: string; name: string; rsvp: string; token: string }[] | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const linkFor = (token: string) => `${window.location.origin}/r/${token}`;
+  const copy = (key: string, text: string) =>
+    void navigator.clipboard.writeText(text).then(
+      () => {
+        setCopied(key);
+        window.setTimeout(() => setCopied((c) => (c === key ? null : c)), 1600);
+      },
+      () => setError("Couldn't copy. Select the link and copy it instead."),
+    );
+  const message = (name: string, token: string) => `Hi ${name.split(" ")[0]}, please let us know if you can come to ${eventName}: ${linkFor(token)}`;
+
+  return (
+    <section className="card px-6 py-5" aria-labelledby="rsvp-links-h">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 id="rsvp-links-h" className="display text-xl">RSVP links</h2>
+        {links && links.length > 0 && (
+          <button type="button" className="btn-quiet btn-sm" onClick={() => copy("all", links.map((l) => `${l.name}: ${linkFor(l.token)}`).join("\n"))}>
+            {copied === "all" ? "All copied" : "Copy all links"}
+          </button>
+        )}
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        Each person on your list has their own link. Send it however you like; their answer, how many are coming and any food needs land on the {people} list by themselves.
+      </p>
+      {!canEdit ? null : links === null ? (
+        <button type="button" className="btn-ghost btn-sm mt-4" onClick={() => void make({ eventId }).then(setLinks, () => setError("Couldn't load the links. Try again."))}>
+          Show everyone's links
+        </button>
+      ) : links.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">Add people to your {people} list first, and their links appear here.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-line">
+          {links.map((l) => (
+            <li key={l.guestId} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2.5">
+              <span className="min-w-[8rem] flex-1 text-sm">
+                {l.name}
+                <span className="ml-2 text-xs text-quiet">{l.rsvp === "yes" ? "coming" : l.rsvp === "no" ? "can't come" : "no answer yet"}</span>
+              </span>
+              <button type="button" className="btn-quiet btn-sm" onClick={() => copy(l.guestId, linkFor(l.token))}>
+                <Icon name="link" size={14} /> {copied === l.guestId ? "Copied" : "Copy link"}
+              </button>
+              <a className="btn-quiet btn-sm" href={`https://wa.me/?text=${encodeURIComponent(message(l.name, l.token))}`} target="_blank" rel="noreferrer noopener">
+                WhatsApp
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+      {error && <p role="alert" className="mt-2 text-sm text-bad">{error}</p>}
+    </section>
+  );
 }

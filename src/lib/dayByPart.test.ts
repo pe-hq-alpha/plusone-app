@@ -155,7 +155,8 @@ describe("a need's state", () => {
     const gifts = needRow(slot({ _id: "g" }));
     expect(gifts.state).toBe("next");
     expect(gifts.detail).toBe("To choose");
-    expect(priceText(gifts.price, "INR")).toBe("—");
+    expect(priceText(gifts.price, "INR")).toBe("");
+    expect(priceText(gifts.price, "INR", 12000)).toMatch(/12,000 planned$/);
   });
 });
 

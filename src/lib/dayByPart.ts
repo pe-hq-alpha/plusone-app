@@ -83,6 +83,8 @@ export type SlotLike = {
   vendorsCount: number;
   bookedVendor: { name: string } | null;
   bestQuote: { total: number } | null;
+  /** The budget's committed amount: a booking's price even without a quote (booked outside PlusOne). */
+  committed?: number | null;
 };
 
 type VendorState = "not_contacted" | "emailed" | "chased" | "replied" | "quoted" | "declined" | "booked" | "needs_attention";
@@ -111,6 +113,8 @@ export type NeedRow = {
   priceNote?: string;
   /** Live quotes in, which is when Compare has something to show. */
   quotes: number;
+  /** What the budget sets aside for the need, shown until there is a price. */
+  planned: number;
 };
 
 const times = (n: number) => (n === 1 ? "once" : n === 2 ? "twice" : `${n} times`);
@@ -123,11 +127,11 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
   const quoted = live.filter((v) => v.quote);
   const asking = live.find((v) => v.state === "needs_attention");
   const question = asking ? `${asking.name} has a question for you` : "";
-  const base = { slotId: slot._id, title: slot.title, quotes: quoted.length };
+  const base = { slotId: slot._id, title: slot.title, quotes: quoted.length, planned: slot.budget };
 
   if (slot.status === "booked") {
     const booked = vendors.find((v) => v.state === "booked");
-    const amount = booked?.quote?.total ?? slot.bestQuote?.total;
+    const amount = booked?.quote?.total ?? slot.committed ?? slot.bestQuote?.total;
     return {
       ...base,
       state: "booked",
@@ -179,9 +183,9 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
   };
 }
 
-/** The price as the row prints it: one amount, or a range. "—" when there is none. */
-export function priceText(price: NeedRow["price"], currency: string): string {
-  if (!price) return "—";
+/** The price as the row prints it: one amount, or a range; with none yet, what's planned for it. */
+export function priceText(price: NeedRow["price"], currency: string, planned?: number): string {
+  if (!price) return planned && planned > 0 ? `${money(planned, currency)} planned` : "";
   return price.low === price.high ? money(price.low, currency) : `${money(price.low, currency)} – ${money(price.high, currency)}`;
 }
 
