@@ -51,12 +51,13 @@ export async function weekItems(ctx: QueryCtx, event: Doc<"events">, today: stri
     .sort((a, b) => (a.lastInboundAt ?? 0) - (b.lastInboundAt ?? 0))
     .slice(0, 5);
   for (const thread of waiting) {
-    const vendor = await ctx.db.get("vendors", thread.vendorId);
+    // The need, not the vendor's name: the name is one tap away, in the thread.
+    const slot = await ctx.db.get("vendorSlots", thread.slotId);
     const days = thread.lastInboundAt ? Math.max(0, Math.floor((now - thread.lastInboundAt) / DAY)) : 0;
     add(
       {
         kind: "reply",
-        title: `Answer ${vendor?.name ?? "a vendor"}`,
+        title: slot ? `Answer a vendor about your ${lower(slot.title)}` : "Answer a vendor",
         detail: clip(thread.pendingQuestion ?? thread.attentionReason ?? "They're waiting to hear back.", 160),
         href: `inbox/${thread._id}`,
         hrefLabel: "Reply",

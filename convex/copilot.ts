@@ -24,6 +24,33 @@ const NOT_WORK = new Set<Doc<"activity">["type"]>(["event_created", "research_st
 const lower = inSentence;
 const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
+/** The kinds of work that read as a milestone for one need, rather than one line per vendor. */
+const MILESTONE = new Set<Doc<"activity">["type"]>(["vendor_found", "inquiry_sent", "vendor_replied", "quote_received", "follow_up_sent", "booked"]);
+
+/**
+ * One need's milestone, in the need's own name (the host may call it "Biryani place"),
+ * with no vendor named; without a need, the same milestone in general words.
+ */
+export function milestone(type: Doc<"activity">["type"], n: number, slot?: Pick<Doc<"vendorSlots">, "title">): string | undefined {
+  const forNeed = slot ? ` for your ${lower(slot.title)}` : "";
+  switch (type) {
+    case "vendor_found":
+      return slot ? `Found ${count(n, "option")}${forNeed}` : "Found vendors to consider";
+    case "inquiry_sent":
+      return `Wrote to ${count(n, "vendor")}${forNeed}`;
+    case "vendor_replied":
+      return `${count(n, "reply", "replies")} in${forNeed}`;
+    case "quote_received":
+      return `${count(n, "quote")} in${forNeed}`;
+    case "follow_up_sent":
+      return `Followed up with ${n === 1 ? "a vendor" : "vendors"} who went quiet${slot ? ` about your ${lower(slot.title)}` : ""}`;
+    case "booked":
+      return slot ? `${slot.title} booked` : "A vendor booked";
+    default:
+      return undefined;
+  }
+}
+
 export const route = query({
   args: { eventId: v.id("events"), today: v.string() },
   returns: v.object({
@@ -45,19 +72,47 @@ export const route = query({
       weekItems(ctx, event, args.today, 4),
     ]);
     const slotById = new Map(slots.map((s) => [s._id, s]));
-    const slotHref = (id?: Doc<"vendorSlots">["_id"]) => (id && slotById.has(id) ? `vendors/${id}` : undefined);
 
-    const done = activity
-      .filter((a) => isAppActor(a) && !NOT_WORK.has(a.type))
-      .slice(0, 4)
-      .map((a) => ({ title: clip(a.text, 170), detail: "", href: a.refs?.threadId ? `inbox/${a.refs.threadId}` : slotHref(a.refs?.slotId), at: a._creationTime }));
+    // Done: milestones, never vendors' names. A need's finds, letters, replies and quotes
+    // each read as one line ("Found 6 options for your caterer"); the names are a tap away.
+    // A free-text line that names a vendor stays on the History page; the route keeps to milestones.
+    const vendorNames = (await ctx.db.query("vendors").withIndex("by_eventId", (q) => q.eq("eventId", event._id)).take(300))
+      .map((v) => v.name.trim())
+      .filter((n) => n.length >= 3);
+    const namesVendor = (text: string) => vendorNames.some((n) => text.includes(n));
+    const work = activity.filter((a) => isAppActor(a) && !NOT_WORK.has(a.type) && (MILESTONE.has(a.type) || !namesVendor(a.text)));
+    const threadById = new Map(threads.map((t) => [t._id, t]));
+    const slotOf = (a: Doc<"activity">) => {
+      const id = a.refs?.slotId ?? (a.refs?.threadId ? threadById.get(a.refs.threadId)?.slotId : undefined);
+      return id ? slotById.get(id) : undefined;
+    };
+    const groups = new Map<string, { a: Doc<"activity">; slot?: Doc<"vendorSlots">; n: number }>();
+    for (const a of work) {
+      const slot = slotOf(a);
+      const key = MILESTONE.has(a.type) ? `${a.type}:${slot?._id ?? "any"}` : a._id;
+      const g = groups.get(key);
+      if (g) g.n += 1;
+      else groups.set(key, { a, slot, n: 1 });
+    }
+    const top = [...groups.values()].slice(0, 4);
+    const found = await Promise.all(
+      top.map(({ a, slot }) =>
+        a.type === "vendor_found" && slot ? ctx.db.query("vendors").withIndex("by_slotId", (q) => q.eq("slotId", slot._id)).take(100).then((r) => r.length) : Promise.resolve(0),
+      ),
+    );
+    const done = top.map(({ a, slot, n }, i) => ({
+      title: milestone(a.type, Math.max(n, found[i]), slot) ?? clip(a.text, 170),
+      detail: "",
+      href: slot ? `vendors/${slot._id}` : a.refs?.threadId ? `inbox/${a.refs.threadId}` : undefined,
+      at: a._creationTime,
+    }));
 
     // Under way: searches still reading websites, then vendors written to and not yet heard from.
     const now: { title: string; detail: string; href?: string; at?: number }[] = [];
     for (const run of runs.filter((r) => r.status === "running").slice(0, 2)) {
       const slot = slotById.get(run.slotId);
       if (!slot) continue;
-      now.push({ title: `Looking for ${needPlural(slot.category)} for your ${lower(slot.title)}`, detail: run.step, href: `vendors/${slot._id}`, at: run.startedAt });
+      now.push({ title: `Looking for ${needPlural(slot.category)} for your ${lower(slot.title)}`, detail: run.step.startsWith("Found ") ? "Reading vendors' websites for prices and contacts" : run.step, href: `vendors/${slot._id}`, at: run.startedAt });
     }
     const silent = new Map<string, { slot: Doc<"vendorSlots">; n: number; last: number }>();
     for (const t of threads) {

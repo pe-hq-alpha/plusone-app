@@ -419,11 +419,11 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
   await logActivity(ctx, { ...app, text: `${BRAND.name} found vendors near Mylapore for all 8 needs, and ranked them.` });
   await logActivity(ctx, { ...app, text: `${BRAND.name} wrote to 6 vendors from the event's own inbox: the hall, 3 caterers, a photographer and a nadaswaram group.` });
   await logActivity(ctx, { eventId, actorLabel: "Divya", actorKind: "person", type: "booked", text: "booked Thamarai Hall for ₹80,000, and Karthik paid the ₹25,000 advance.", refs: { vendorId: thamarai, slotId: hall._id } });
-  await logActivity(ctx, { ...app, text: "Annam Caterers quoted ₹66,150, priced for 150 plates though you expect 120.", refs: { vendorId: annam, threadId: annamMail.threadId } });
-  await logActivity(ctx, { ...app, text: "Saapadu Kitchen quoted ₹62,000 all in for 120, about ₹517 a plate.", refs: { vendorId: saapadu, threadId: saapaduMail.threadId } });
-  await logActivity(ctx, { ...app, text: "Kaveri Feast Co. quoted ₹56,500 for 120 before GST, and asked a question only you can answer.", refs: { vendorId: kaveri, threadId: kaveriMail.threadId } });
+  await logActivity(ctx, { ...app, type: "quote_received", text: "Annam Caterers quoted ₹66,150, priced for 150 plates though you expect 120.", refs: { vendorId: annam, threadId: annamMail.threadId } });
+  await logActivity(ctx, { ...app, type: "quote_received", text: "Saapadu Kitchen quoted ₹62,000 all in for 120, about ₹517 a plate.", refs: { vendorId: saapadu, threadId: saapaduMail.threadId } });
+  await logActivity(ctx, { ...app, type: "quote_received", text: "Kaveri Feast Co. quoted ₹56,500 for 120 before GST, and asked a question only you can answer.", refs: { vendorId: kaveri, threadId: kaveriMail.threadId } });
   await logActivity(ctx, { ...app, text: `${BRAND.name} lined up the three catering quotes per plate, for your 120 guests.`, refs: { slotId: catering._id } });
-  await logActivity(ctx, { ...app, text: "Nila Studio and Mangala Isai haven't replied yet, so they were followed up once." });
+  await logActivity(ctx, { ...app, type: "follow_up_sent", text: "Nila Studio and Mangala Isai haven't replied yet, so they were followed up once." });
   await logActivity(ctx, { ...app, text: "7 guests have replied. Prakash and Meena's family need Jain food, and Saroja Paati and Gopal Mama don't eat onion or garlic." });
   await seedBoard(ctx, eventId, [
     {

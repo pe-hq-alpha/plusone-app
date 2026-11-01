@@ -1,3 +1,4 @@
+import { useAuth } from "@clerk/react";
 import { useConvexAuth } from "convex/react";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
 import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
@@ -179,8 +180,11 @@ function PartnerRoutes() {
  */
 function SignedInOrOut({ signedOut, children }: { signedOut: ReactNode; children: ReactNode }) {
   const { isLoading, isAuthenticated } = useConvexAuth();
+  const { isSignedIn } = useAuth();
   const [hint] = useState(likelySignedOut);
-  if (isLoading) return hint ? <>{signedOut}</> : <Waiting />;
+  // Just signed in, the account is still being set up: wait, rather than flash the
+  // signed-out page (the home page at /) on the way into the app.
+  if (isLoading) return hint && !isSignedIn ? <>{signedOut}</> : <Waiting />;
   return isAuthenticated ? <>{children}</> : <>{signedOut}</>;
 }
 
