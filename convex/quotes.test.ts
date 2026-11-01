@@ -106,4 +106,16 @@ describe("quotes read from replies", () => {
     await t.run((ctx) => ctx.db.patch(s.threadId, { lastInboundAt: Date.now() + 60_000 }));
     expect((await as(t, s.ownerId).query(api.threads.list, { eventId: s.eventId }))[0].unread).toBe(true);
   });
+
+  test("the inbox count: a reply not yet opened counts for you until you open it, and a vendor waiting on you always counts", async () => {
+    const t = setup();
+    const s = await seed(t);
+    const count = (who: typeof s.ownerId) => as(t, who).query(api.threads.inboxCount, { eventId: s.eventId });
+    expect(await count(s.ownerId)).toBe(1);
+    await as(t, s.ownerId).mutation(api.threads.markRead, { threadId: s.threadId });
+    expect(await count(s.ownerId)).toBe(0);
+    expect(await count(s.otherId)).toBe(1);
+    await t.run((ctx) => ctx.db.patch(s.threadId, { pendingQuestion: "Which day is the shoot?" }));
+    expect(await count(s.ownerId)).toBe(1);
+  });
 });

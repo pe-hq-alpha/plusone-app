@@ -396,6 +396,31 @@ export const attentionCount = query({
   },
 });
 
+/**
+ * Conversations with something new for this person: a vendor's reply they haven't opened
+ * yet, or one waiting on an answer. The number on Inbox, on Vendors and in the tab's title.
+ */
+export const inboxCount = query({
+  args: { eventId: v.id("events") },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const { userId } = await requireMember(ctx, args.eventId);
+    const threads = await ctx.db
+      .query("threads")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .take(500);
+    const reads = await ctx.db
+      .query("threadReads")
+      .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
+      .take(2000);
+    const readAt = new Map(reads.filter((r) => r.userId === userId).map((r) => [r.threadId, r.readAt]));
+    return threads.filter((t) => {
+      const unread = t.lastInboundAt !== undefined && (readAt.get(t._id) ?? 0) < t.lastInboundAt;
+      return unread || t.status === "needs_attention" || Boolean(t.pendingQuestion);
+    }).length;
+  },
+});
+
 /** This person has opened the conversation: its replies so far are read. */
 export const markRead = mutation({
   args: { threadId: v.id("threads") },

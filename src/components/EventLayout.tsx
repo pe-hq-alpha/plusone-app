@@ -106,7 +106,7 @@ export function EventLayout() {
   const welcoming = params.get("welcome") === "1";
   // Only asked once the event has loaded, so a non-member never hits the member check.
   const waiting =
-    useQuery(api.threads.attentionCount, data ? { eventId: data.event._id as Id<"events"> } : "skip") ?? 0;
+    useQuery(api.threads.inboxCount, data ? { eventId: data.event._id as Id<"events"> } : "skip") ?? 0;
 
   // A new page of the plan opens at its top; moving within one (a thread, a need) keeps the place.
   const page = pathname.split("/")[3] ?? "";
@@ -155,7 +155,8 @@ export function EventLayout() {
   const inboxBadge = waiting > 0 && (
     <span
       className="grid h-[1.15rem] min-w-[1.15rem] place-items-center rounded-full bg-highlight px-1 text-[0.7rem] font-semibold tabular-nums text-on-highlight"
-      aria-label={`${waiting} ${waiting === 1 ? "conversation needs" : "conversations need"} you`}
+      aria-label={`${waiting} new in the inbox`}
+      title={`${waiting} new: a reply you haven't opened, or a vendor waiting on you`}
     >
       {waiting}
     </span>
