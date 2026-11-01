@@ -87,6 +87,32 @@ describe("moving a ceremony on the board", () => {
 });
 
 describe("to-dos", () => {
+  test("a new plan saves no pre-made to-dos; the host jots their own", async () => {
+    const t = setup();
+    const s = await seed(t);
+    await t.run((ctx) => ctx.db.patch(s.eventId, { generation: "running" }));
+    await t.mutation(internal.events.saveFirstPlan, {
+      eventId: s.eventId,
+      ceremonies: [{ sessionId: s.sangeet, about: "An evening of music with both families.", todos: ["Book the DJ", "Pick the songs"] }],
+      wholeEvent: ["Send the invitations"],
+    });
+    const tasks = await t.run((ctx) => ctx.db.query("tasks").withIndex("by_eventId", (q) => q.eq("eventId", s.eventId)).take(20));
+    expect(tasks).toHaveLength(0);
+    expect((await t.run((ctx) => ctx.db.get(s.eventId)))?.generation).toBe("done");
+  });
+
+  test("old pre-made to-dos stay out of sight unless ticked; the host's own always show", async () => {
+    const t = setup();
+    const s = await seed(t);
+    await t.run(async (ctx) => {
+      await ctx.db.insert("tasks", { eventId: s.eventId, title: "Pre-made, open", done: false, autoSource: "generation" });
+      await ctx.db.insert("tasks", { eventId: s.eventId, title: "Pre-made, ticked", done: true, autoSource: "generation" });
+      await ctx.db.insert("tasks", { eventId: s.eventId, title: "My own note", done: false });
+    });
+    const list = await signedInAs(t, s.userId).query(api.tasks.list, { eventId: s.eventId });
+    expect(list.map((x) => x.title).sort()).toEqual(["My own note", "Pre-made, ticked"]);
+  });
+
   test("stay on the wedding when their ceremony is removed", async () => {
     const t = setup();
     const s = await seed(t);

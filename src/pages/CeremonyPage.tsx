@@ -11,7 +11,6 @@ import { StatusChip } from "../components/ui/StatusChip";
 import { Icon } from "../components/ui/Icon";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
-import { addTask, removeTask, updateTask } from "../lib/optimistic";
 import { SpaceView } from "../components/spaces/SpaceView";
 import { keptPalette } from "../lib/spaces";
 import { isWorkEvent, partWord } from "../../convex/lib/occasion";
@@ -76,7 +75,6 @@ export function CeremonyPage() {
   const c = sessions.find((e) => e._id === sessionId);
   const part = partWord(event);
   const slots = flattenSlots(useQuery(api.slots.list, { eventId }));
-  const tasks = useQuery(api.tasks.list, c ? { eventId, sessionId: c._id } : "skip");
   const spaceItems = useQuery(api.spaces.list, { eventId });
   const update = useMutation(api.sessions.update);
   const remove = useMutation(api.sessions.remove);
@@ -99,7 +97,7 @@ export function CeremonyPage() {
   const mine = (slots ?? []).filter((s) => s.sessionIds.includes(ceremony._id));
 
   async function removeCeremony() {
-    if (!window.confirm(`Remove ${ceremony.name} from your plan? Its to-dos stay on your list, and any vendor you've already contacted moves to another ${part}.`)) return;
+    if (!window.confirm(`Remove ${ceremony.name} from your plan? Any vendor you've already contacted moves to another ${part}.`)) return;
     await remove({ sessionId: ceremony._id });
     navigate("../../plan", { relative: "path" });
   }
@@ -160,8 +158,6 @@ export function CeremonyPage() {
             Find vendors <Icon name="arrow" size={15} />
           </Link>
         </section>
-
-        <Checklist eventId={eventId} sessionId={ceremony._id} tasks={tasks} canEdit={canEdit} />
 
         {canEdit && sessions.length > 1 && (
           <button type="button" onClick={() => void removeCeremony()} className="justify-self-start text-sm text-bad underline underline-offset-2 hover:opacity-80">
@@ -310,53 +306,3 @@ function Meaning({ ceremony: c, canEdit, onSave, part, work }: { ceremony: Cerem
   );
 }
 
-type Task = NonNullable<FunctionReturnType<typeof api.tasks.list>>[number];
-
-export function Checklist({ eventId, sessionId, tasks, canEdit, title = "To do" }: { eventId: Id<"events">; sessionId?: Id<"sessions">; tasks: Task[] | undefined; canEdit: boolean; title?: string }) {
-  const add = useMutation(api.tasks.add).withOptimisticUpdate(addTask);
-  const update = useMutation(api.tasks.update).withOptimisticUpdate(updateTask);
-  const remove = useMutation(api.tasks.remove).withOptimisticUpdate(removeTask);
-  const [draft, setDraft] = useState("");
-  const open = tasks?.filter((t) => !t.done).length ?? 0;
-  return (
-    <section className="card p-5" aria-label={title}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="display text-lg">{title}</h2>
-        {tasks && <span className="text-xs text-quiet">{open} open</span>}
-      </div>
-      <ul className="mt-2 grid">
-        {(tasks ?? []).map((t) => (
-          <li key={t._id} className="group flex items-start gap-2.5 py-1.5">
-            <input
-              type="checkbox"
-              className="mt-1 h-4 w-4 shrink-0 accent-accent"
-              checked={t.done}
-              disabled={!canEdit}
-              onChange={(e) => void update({ taskId: t._id, patch: { done: e.target.checked } })}
-              aria-label={`${t.done ? "Not done" : "Done"}: ${t.title}`}
-            />
-            <span className={`min-w-0 flex-1 text-sm leading-snug ${t.done ? "text-quiet line-through" : ""}`}>{t.title}</span>
-            {canEdit && (
-              <button type="button" onClick={() => void remove({ taskId: t._id })} aria-label={`Delete ${t.title}`} className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-quiet opacity-60 transition hover:bg-accent-soft hover:text-accent group-hover:opacity-100">
-                <Icon name="close" size={12} />
-              </button>
-            )}
-          </li>
-        ))}
-      </ul>
-      {canEdit && (
-        <form
-          className="mt-2 flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!draft.trim()) return;
-            void add({ eventId, sessionId, title: draft }).then(() => setDraft(""));
-          }}
-        >
-          <input className="input py-2 text-sm" placeholder="Add a to-do" value={draft} onChange={(e) => setDraft(e.target.value)} aria-label="New to-do" />
-          <button type="submit" className="btn-quiet btn-sm shrink-0">Add</button>
-        </form>
-      )}
-    </section>
-  );
-}

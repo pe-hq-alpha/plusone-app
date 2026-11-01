@@ -369,13 +369,9 @@ export async function seedOfficeParty(ctx: MutationCtx, userId: Id<"users">): Pr
 
   // ---- To-dos for Ananya. -------------------------------------------------------------
   const todos: { title: string; inDays?: number; done?: boolean; slotId?: Id<"vendorSlots"> }[] = [
-    { title: "Get finance sign-off on the ₹9 lakh budget", done: true },
-    { title: "Send the save-the-date on Slack", done: true },
     { title: "Collect T-shirt sizes for the hampers", inDays: 10, slotId: hampers._id },
-    { title: "Pick the venue: Kanak Hall or Saffron Terrace", inDays: 4, slotId: venue._id },
-    { title: "Share the Jain and vegan list with the venue", inDays: 21, slotId: venue._id },
-    { title: "Finalise the Diwali award categories with the leadership team", inDays: 14 },
-    { title: "Book cabs home for anyone leaving after 11 pm", inDays: 28 },
+    { title: "Award categories: check with leadership", inDays: 14 },
+    { title: "Cabs home for anyone leaving after 11 pm", inDays: 28 },
   ];
   for (const [order, todo] of todos.entries()) {
     await ctx.db.insert("tasks", {

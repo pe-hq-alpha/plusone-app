@@ -61,14 +61,14 @@ const stepsFor = ({ part, people }: Words): Step[] => [
     open: "days",
     target: "ceremony",
     title: `Inside a ${part}`,
-    body: `Its time and place, ${people} and budget, its Space, the vendors it needs and its to-dos.`,
+    body: `Its time and place, ${people} and budget, its Space and the vendors it needs.`,
     place: "bottom",
   },
   {
-    path: "tasks",
-    target: "todos",
-    title: "To-dos for every part",
-    body: `What needs doing, ${part} by ${part}, ticked off by whoever does it.`,
+    path: "",
+    target: "notes",
+    title: "Notes to self",
+    body: "A sticky note for anything you don't want to forget. Jot it down, tick it off when it's done.",
     place: "bottom",
   },
   {
@@ -146,7 +146,7 @@ const stepsFor = ({ part, people }: Words): Step[] => [
     path: "print",
     target: "ask",
     title: "Ask, from any page",
-    body: "Questions are answered from your plan, starting with the page you're on. It can add a to-do or a vendor for you once you say yes.",
+    body: "Questions are answered from your plan, starting with the page you're on. It can add a vendor or a guest for you once you say yes.",
     place: "bottom",
   },
   {

@@ -15,7 +15,7 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
       },
       {
         ask: "What's on each part's page?",
-        answer: "Everything for that one part of the event: when and where, headcount and budget, what it means or what it's for, its own to-do list and its own Space. Once its Space has pictures, it can suggest a palette from them, and the one you keep becomes that part's colours.",
+        answer: "Everything for that one part of the event: when and where, headcount and budget, what it means or what it's for, and its own Space. Once its Space has pictures, it can suggest a palette from them, and the one you keep becomes that part's colours.",
       },
       {
         ask: "How is the budget split?",
@@ -27,7 +27,7 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
       },
       {
         ask: "What does Overview show?",
-        answer: "At the top: the budget (committed, paid and still free), vendors booked and people coming. Below it, where things stand, read straight from your plan: what PlusOne has done, what it is doing now, what is waiting on you, and what it will pick up next. Waiting on you means a vendor needing your answer, quotes ready to choose between, something usually booked by this point, or people still to reply. Compare holds every quote side by side, and To-dos, your own checklist, sits beside it.",
+        answer: "At the top: the budget (committed, paid and still free), vendors booked and people coming. Below it, where things stand, read straight from your plan: what PlusOne has done, what it is doing now, what is waiting on you, and what it will pick up next. Waiting on you means a vendor needing your answer, quotes ready to choose between, something usually booked by this point, or people still to reply. Compare holds every quote side by side, and Notes to self, a sticky note for anything you don't want to forget, sits beside it.",
       },
     ],
   },

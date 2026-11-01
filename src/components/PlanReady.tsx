@@ -7,7 +7,7 @@ import { Icon } from "./ui/Icon";
 
 /** Long enough to take the plan in; the button waits at least this long. */
 const HOLD_MS = 2000;
-/** If the first to-dos haven't started by now, they aren't coming. */
+/** If the parts' descriptions haven't started by now, they aren't coming. */
 const NOT_STARTED_MS = 8000;
 /** Past this, the plan opens on its own. */
 const OPEN_ANYWAY_MS = 45_000;
@@ -15,7 +15,7 @@ const OPEN_ANYWAY_MS = 45_000;
 /**
  * Straight after a plan is created: the whole plan at once, its days side by side with
  * each part of it under its day, and three plain checks that tick as they become true.
- * The last one, the first to-dos, is the only part still being written.
+ * The last one, a line on what each part is about, is the only part still being written.
  */
 export function PlanReady({ event, sessions, onDone }: { event: Doc<"events">; sessions: Doc<"sessions">[]; onDone: () => void }) {
   const [held, setHeld] = useState(false);
@@ -48,7 +48,7 @@ export function PlanReady({ event, sessions, onDone }: { event: Doc<"events">; s
   const checks: { label: string; done: boolean }[] = [
     { label: `${sessions.length} ${partWord(event, sessions.length !== 1)} on ${days.length} ${days.length === 1 ? "day" : "days"}`, done: true },
     { label: "Budget shared across them", done: true },
-    { label: event.generation === "failed" ? "First to-dos: add your own as you go" : `First to-dos for each ${partWord(event)}`, done: !writing },
+    { label: event.generation === "failed" ? `Describe each ${partWord(event)} as you go` : `What each ${partWord(event)} is about`, done: !writing },
   ];
 
   return (

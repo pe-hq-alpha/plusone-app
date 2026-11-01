@@ -18,7 +18,7 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
     status: "Free until launch",
     when: "a month from launch",
     highlights: [
-      { t: "The whole event in one place", d: "The plan, budget, guests and to-dos, set out and kept up to date." },
+      { t: "The whole event in one place", d: "The plan, budget, guests and your notes, set out and kept up to date." },
       { t: "Vendors found and written to", d: "From the open web and verified vendors, chased when they go quiet." },
       { t: "Every quote on the same lines", d: "Emails, PDFs and WhatsApp price lists, so you see what's included." },
       { t: "What it should cost", d: "Each price beside what similar vendors charge, and what it leaves out." },

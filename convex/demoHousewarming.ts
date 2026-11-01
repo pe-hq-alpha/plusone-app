@@ -394,14 +394,9 @@ export async function seedHousewarming(ctx: MutationCtx, userId: Id<"users">): P
   // ---- To-dos: a few for each part of the day, some already done. ----------------
   const by = (iso: string) => Date.parse(`${iso}T10:00:00+05:30`);
   const todos: { title: string; session?: Id<"sessions">; slot?: Id<"vendorSlots">; dueAt?: number; done?: boolean }[] = [
-    { title: "Confirm the muhurtham with the priest", session: pravesam._id, slot: priest._id, done: true },
-    { title: "Book the clubhouse lawn with the society office", session: lunch._id, done: true },
-    { title: "Buy new vessels for boiling milk", session: pravesam._id, dueAt: by(addDays(date, -7)) },
-    { title: "Keep a small table for the homam near the balcony door", session: pravesam._id },
-    { title: "Buy flowers, fruits and betel leaves for the puja", session: pravesam._id, dueAt: by(addDays(date, -1)) },
-    { title: "Tell the society office about the lunch: guests at the gate and parking", session: lunch._id, dueAt: by(addDays(date, -14)) },
-    { title: "Send the final count to Kaveri Leaf Caterers", session: lunch._id, slot: catering._id, dueAt: by(addDays(date, -10)) },
-    { title: "Choose the return gifts: steel dabbas or plants", slot: gifts._id },
+    { title: "Buy new vessels for boiling milk", dueAt: by(addDays(date, -7)) },
+    { title: "Tell the society office about parking for guests", dueAt: by(addDays(date, -14)) },
+    { title: "Steel dabbas or plants for return gifts?", slot: gifts._id },
   ];
   for (const [order, t] of todos.entries()) {
     await ctx.db.insert("tasks", {

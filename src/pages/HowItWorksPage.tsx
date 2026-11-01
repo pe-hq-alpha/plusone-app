@@ -8,7 +8,7 @@ import { PublicHero, PublicNav } from "../components/public/PublicNav";
 const SOLVES = [
   {
     t: "One place instead of many tools",
-    d: "The plan and its budget, the vendors and every message with them, the guests and their replies, the event page and the to-dos. For a birthday at home or a conference at work, nothing lives in a separate spreadsheet or chat.",
+    d: "The plan and its budget, the vendors and every message with them, the guests and their replies, the event page and your notes to self. For a birthday at home or a conference at work, nothing lives in a separate spreadsheet or chat.",
   },
   {
     t: "Quotes you can compare",

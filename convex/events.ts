@@ -715,7 +715,7 @@ export const setGeneration = internalMutation({
   },
 });
 
-/** Save the first pass over a new plan: ceremony descriptions where missing, and first to-dos. */
+/** Save the first pass over a new plan: the parts' descriptions where missing. */
 export const saveFirstPlan = internalMutation({
   args: {
     eventId: v.id("events"),
@@ -730,13 +730,8 @@ export const saveFirstPlan = internalMutation({
       const session = await ctx.db.get(c.sessionId);
       if (!session || session.eventId !== args.eventId) continue;
       if (c.about && !session.significance) await ctx.db.patch(c.sessionId, { significance: c.about });
-      for (const [i, title] of c.todos.entries()) {
-        await ctx.db.insert("tasks", { eventId: args.eventId, sessionId: c.sessionId, title, done: false, autoSource: "generation", order: i });
-      }
     }
-    for (const [i, title] of args.wholeEvent.entries()) {
-      await ctx.db.insert("tasks", { eventId: args.eventId, title, done: false, autoSource: "generation", order: i });
-    }
+    // No pre-made to-dos (founder, 1 Nov): the host jots their own notes. The suggested ones are not saved.
     await ctx.db.patch(args.eventId, { generation: "done" });
     await track(ctx, "plan.first_pass", event.createdBy, { ms: Date.now() - event._creationTime });
     return null;

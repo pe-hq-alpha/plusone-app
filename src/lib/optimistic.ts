@@ -7,7 +7,7 @@ import type { Doc, Id } from "../../convex/_generated/dataModel";
  * Optimistic updates for the actions people repeat most. The screen changes the moment
  * someone acts, and Convex replaces the guess with the server's answer when it arrives,
  * so a round trip to the backend never shows as a wait. Each one touches every loaded
- * copy of the list, since the same tasks show on the to-do page and on each session.
+ * copy of the list (the Overview's notes to self, and the guest list).
  */
 
 type Task = Doc<"tasks">;

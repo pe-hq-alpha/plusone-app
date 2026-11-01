@@ -23,7 +23,6 @@ const NewEventPage = page(() => import("./pages/NewEventPage"), "NewEventPage");
 const TodayPage = page(() => import("./pages/TodayPage"), "TodayPage");
 const PlanPage = page(() => import("./pages/PlanPage"), "PlanPage");
 const CeremonyPage = page(() => import("./pages/CeremonyPage"), "CeremonyPage");
-const TasksPage = page(() => import("./pages/TasksPage"), "TasksPage");
 const BudgetPage = page(() => import("./pages/BudgetPage"), "BudgetPage");
 const HistoryPage = page(() => import("./pages/HistoryPage"), "HistoryPage");
 const SpacesPage = page(() => import("./pages/SpacesPage"), "SpacesPage");
@@ -110,7 +109,8 @@ export default function App() {
                     <Route index element={<TodayPage />} />
                     <Route path="plan" element={<PlanPage />} />
                     <Route path="sessions/:sessionId" element={<CeremonyPage />} />
-                    <Route path="tasks" element={<TasksPage />} />
+                    {/* To-dos became the Overview's "Notes to self" (1 Nov); old links land there. */}
+                    <Route path="tasks" element={<Navigate to=".." replace />} />
                     <Route path="budget" element={<BudgetPage />} />
                     <Route path="spaces" element={<SpacesPage />} />
                     <Route path="spaces/:sessionId" element={<SpacesPage />} />

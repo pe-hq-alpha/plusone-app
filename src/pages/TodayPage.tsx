@@ -15,6 +15,7 @@ import { EVENTS } from "../lib/analytics/events";
 import { BRAND } from "../lib/brand";
 import { PeopleWord } from "../lib/words";
 import { usePrivacy } from "../lib/privacy";
+import { addTask, removeTask, updateTask } from "../lib/optimistic";
 import "../styles/today.css";
 
 type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
@@ -266,44 +267,40 @@ function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean
 }
 
 /**
- * To-dos as a note beside the overview rather than a page of its own: what's still open,
- * ticked off in place, and a line to add one.
+ * Notes to self: a sticky note beside the overview that the host writes themselves.
+ * Jot at the top; tick one to strike it out into a folded "Done" list; × takes it away.
  */
 function TodoNote({ eventId }: { eventId: Id<"events"> }) {
   const tasks = useQuery(api.tasks.list, { eventId });
-  const add = useMutation(api.tasks.add);
-  const update = useMutation(api.tasks.update);
+  // Instant on screen; the server's answer replaces the guess when it arrives.
+  const add = useMutation(api.tasks.add).withOptimisticUpdate(addTask);
+  const update = useMutation(api.tasks.update).withOptimisticUpdate(updateTask);
+  const remove = useMutation(api.tasks.remove).withOptimisticUpdate(removeTask);
   const [text, setText] = useState("");
-  const open = (tasks ?? []).filter((t) => !t.done);
-  const shown = open.slice(0, 5);
+  const [showDone, setShowDone] = useState(false);
+  // Newest first: a note is what was on the host's mind most recently.
+  const open = (tasks ?? []).filter((t) => !t.done).sort((a, b) => b._creationTime - a._creationTime);
+  const done = (tasks ?? []).filter((t) => t.done);
+  const Line = ({ t }: { t: NonNullable<typeof tasks>[number] }) => (
+    <li className="note__line group">
+      <button
+        type="button"
+        className={`note__tick ${t.done ? "is-done" : ""}`}
+        aria-label={t.done ? `Not done: ${t.title}` : `Done: ${t.title}`}
+        onClick={() => void update({ taskId: t._id, patch: { done: !t.done } })}
+      >
+        {t.done && <Icon name="check" size={12} />}
+      </button>
+      <span className={t.done ? "note__text is-done" : "note__text"}>{t.title}</span>
+      <button type="button" className="note__remove" aria-label={`Remove: ${t.title}`} onClick={() => void remove({ taskId: t._id })}>
+        <Icon name="close" size={12} />
+      </button>
+    </li>
+  );
   return (
-    <section aria-labelledby="todo-h" className="today__panel">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="todo-h" className="text-sm font-medium text-ink">To-dos</h2>
-        {tasks && tasks.length > 0 && (
-          <Link to="tasks" className="text-xs text-accent underline-offset-4 hover:underline">
-            All {tasks.length}
-          </Link>
-        )}
-      </div>
-      {tasks === undefined ? null : shown.length === 0 ? (
-        <p className="mt-2 text-sm text-muted">Nothing open. Add anything you don't want to forget.</p>
-      ) : (
-        <ul className="mt-2 grid gap-1.5">
-          {shown.map((t) => (
-            <li key={t._id} className="flex items-start gap-2 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1"
-                aria-label={`Done: ${t.title}`}
-                onChange={() => void update({ taskId: t._id, patch: { done: true } })}
-              />
-              <span>{t.title}</span>
-            </li>
-          ))}
-          {open.length > shown.length && <li className="text-xs text-quiet">and {open.length - shown.length} more</li>}
-        </ul>
-      )}
+    <section aria-labelledby="note-h" className="today__panel note" data-tour="notes">
+      <h2 id="note-h" className="text-sm font-medium text-ink">Notes to self</h2>
+      <p className="mt-0.5 text-xs text-muted">Anything you don't want to forget.</p>
       <form
         className="mt-3"
         onSubmit={(e) => {
@@ -313,9 +310,22 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
           void add({ eventId, title }).then(() => setText(""));
         }}
       >
-        <label htmlFor="todo-add" className="sr-only">Add a to-do</label>
-        <input id="todo-add" className="input" placeholder="Add a to-do" value={text} maxLength={200} onChange={(e) => setText(e.target.value)} />
+        <label htmlFor="note-add" className="sr-only">Jot something down</label>
+        <input id="note-add" className="note__input" placeholder="Jot something down" value={text} maxLength={200} onChange={(e) => setText(e.target.value)} />
       </form>
+      {open.length > 0 && (
+        <ul className="mt-2 grid">
+          {open.map((t) => <Line key={t._id} t={t} />)}
+        </ul>
+      )}
+      {done.length > 0 && (
+        <div className="mt-2">
+          <button type="button" className="text-xs text-quiet hover:text-accent" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}>
+            Done ({done.length}) · {showDone ? "hide" : "show"}
+          </button>
+          {showDone && <ul className="mt-1 grid">{done.map((t) => <Line key={t._id} t={t} />)}</ul>}
+        </div>
+      )}
     </section>
   );
 }

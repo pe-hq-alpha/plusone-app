@@ -354,18 +354,11 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
     summary: "Plants and seed kits as return gifts.", score: 78, rankReason: "Thoughtful and cheaper; harder to carry home on a bus.",
   });
 
-  // ---- To-dos: a few for each part of the day. -----------------------------------
+  // ---- Notes to self: a few things the host jotted down. ------------------------
   const friday = comingFriday(today);
   const todos: { title: string; on?: Id<"sessions">; done?: boolean; slotId?: Id<"vendorSlots">; dueAt?: number }[] = [
-    { title: "Book the hall", on: lunch._id, done: true, slotId: hall._id },
-    { title: "Choose a caterer by Friday", on: lunch._id, slotId: catering._id, dueAt: Date.parse(`${friday}T12:30:00Z`) },
-    { title: "Tell the caterer how many guests need Jain food", on: lunch._id, slotId: catering._id },
-    { title: "Choose the return gifts", on: lunch._id, slotId: gifting._id },
-    { title: "Order the eggless cake", on: lunch._id, slotId: cake._id },
-    { title: "Confirm the vadhyar and the homam time", on: pooja._id, slotId: priest._id },
-    { title: "Get the list of homam materials", on: pooja._id },
-    { title: "Order flowers and garlands for the pooja", on: pooja._id },
-    { title: "Send the invitation to relatives on WhatsApp" },
+    { title: "Choose a caterer by Friday", slotId: catering._id, dueAt: Date.parse(`${friday}T12:30:00Z`) },
+    { title: "Ask Amma who she wants at the pooja" },
     { title: "Book Divya's flight to Chennai" },
   ];
   for (const [order, t] of todos.entries()) {

@@ -35,7 +35,8 @@ export const list = query({
     const tasks = args.sessionId
       ? await ctx.db.query("tasks").withIndex("by_sessionId", (q) => q.eq("sessionId", args.sessionId)).take(200)
       : await ctx.db.query("tasks").withIndex("by_eventId", (q) => q.eq("eventId", args.eventId)).take(500);
-    return tasks.filter((t) => t.eventId === args.eventId).sort(byPlan);
+    // Pre-made to-dos from before 1 Nov stay out of sight unless they were ticked; the host's own always show.
+    return tasks.filter((t) => t.eventId === args.eventId && !(t.autoSource === "generation" && !t.done)).sort(byPlan);
   },
 });
 

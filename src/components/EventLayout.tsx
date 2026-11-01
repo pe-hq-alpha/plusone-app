@@ -78,7 +78,7 @@ function lanesFor(event: { eventType?: EventType }): { key: Lane; label: string;
 /** Which lane a page belongs to, from the first part of its path; null for the odd jobs. */
 function laneOf(section: string): Lane | null {
   if (section === "") return "today";
-  if (["plan", "sessions", "tasks", "budget", "spaces", "board"].includes(section)) return "plan";
+  if (["plan", "sessions", "budget", "spaces", "board"].includes(section)) return "plan";
   if (["vendors", "decisions", "inbox"].includes(section)) return "vendors";
   if (["guests", "gifts", "website", "members"].includes(section)) return "people";
   return null;
@@ -313,7 +313,7 @@ function Preload({ eventId }: { eventId: Id<"events"> }) {
     const t = window.setTimeout(() => {
       setWarm(true);
       for (const load of [
-        () => import("../pages/TodayPage"), () => import("../pages/PlanPage"), () => import("../pages/CeremonyPage"), () => import("../pages/TasksPage"),
+        () => import("../pages/TodayPage"), () => import("../pages/PlanPage"), () => import("../pages/CeremonyPage"),
         () => import("../pages/BudgetPage"), () => import("../pages/VendorsPage"), () => import("../pages/DecisionsPage"),
         () => import("../pages/InboxPage"), () => import("../pages/GuestsPage"), () => import("../pages/AssistantPage"),
         () => import("../pages/MembersPage"), () => import("../pages/SettingsPage"), () => import("../pages/HistoryPage"), () => import("../pages/SpacesPage"), () => import("../pages/WebsitePage"), () => import("../pages/GiftsPage"),
