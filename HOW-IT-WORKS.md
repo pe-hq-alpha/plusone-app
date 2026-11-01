@@ -15,7 +15,7 @@ For families, teams and event managers.
 
 <img src="assets/screens/today.jpg" width="100%" alt="Overview for the sample 60th birthday: the budget, vendors booked and guests coming at the top, then where things stand and a box to tell PlusOne a change">
 
-3. **Everything in one place.** Four lanes, Overview, Plan, Vendors and People, hold the functions, to-dos, budget, vendors, inbox, guests, gifts and the event page, so nothing lives in a separate spreadsheet or chat (`src/components/EventLayout.tsx`). The words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
+3. **Everything in one place.** Four lanes, Overview, Plan, Vendors and People, hold the functions, budget, vendors, inbox, guests, gifts and the event page, so nothing lives in a separate spreadsheet or chat (`src/components/EventLayout.tsx`). The words follow the event: functions and guests for a birthday, sessions and attendees for a conference.
 
 <table>
 <tr>

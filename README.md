@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-803_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-805_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -131,7 +131,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **Shared links that show the event:** an event page, RSVP or plan link shows the event's name, date, place and picture; each kind of event has its own line drawing, or the host's own picture. The event page opens on that picture, with the day as a timeline, a calendar file and directions | | Live, 31 Oct |
 | **A WhatsApp quote dropped on the event:** paste the message or drop the screenshot with no vendor or need chosen; it finds its vendor and need, adds them if new, and lands in Compare | Muse Spark 1.3 | Live, 31 Oct |
 | **A vendor booked outside PlusOne, in one step:** name, price agreed and what's paid; the need is booked, the budget takes the price, what's paid is marked paid and the balance goes on what's due. The assistant offers the same step as a "Do it" card | Muse Spark 1.3 (the assistant's card) | Live, 1 Nov |
-| **Overview, milestones and RSVP links:** the event opens on the budget, vendors booked and people coming; where things stand reads as milestones in the need's own name, never a vendor's; the event page lists everyone's own RSVP link to copy or send on WhatsApp | | Live, 1 Nov |
+| **Overview, milestones, RSVP links and Notes to self:** the event opens on the budget, vendors booked and people coming; where things stand reads as milestones in the need's own name, never a vendor's; the event page lists everyone's own RSVP link to copy or send on WhatsApp; to-dos became Notes to self, a sticky note the host writes, with no pre-made list | | Live, 1 Nov |
 
 ### How each criterion is met
 
@@ -139,7 +139,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, charges outside the headline prices came to about 10% of the quoted total. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 803 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 805 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -239,7 +239,7 @@ One app, two sides working on the same lines: customers plan and compare, vendor
 
 **Planning an event** (families, teams and event managers):
 1. **Talk it through**, typed or spoken; PlusOne asks for what it still needs and reads the plan back (`convex/planningChat.ts`).
-2. **Open on Overview**: the budget (committed, paid, still free), vendors booked and people coming, then PlusOne's route through the event: done, under way, over to you, next, with to-dos beside it. Four lanes (Overview, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page.
+2. **Open on Overview**: the budget (committed, paid, still free), vendors booked and people coming, then PlusOne's route through the event: done, under way, over to you, next, with Notes to self beside it: a sticky note the host jots on, ticks off and folds away. Four lanes (Overview, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page.
 3. **Find vendors** on the open web or among verified Partner vendors, on a map around the venue, and **write from the event's own inbox**; PlusOne follows up and answers simple questions.
 4. **Every quote on the same lines**, from an email, PDF, WhatsApp photo or call, then **Compare line by line** with missing charges flagged, the city's range from Value to Luxury, what each price includes, track records and checked photos.
 5. **See it on your venue**, **keep the budget honest** (a quote moves it, with an undo; one that looks off waits) and **guests and RSVPs** per function.
@@ -288,7 +288,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 803 tests, no network, no keys
+npm test              # 805 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
