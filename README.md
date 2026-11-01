@@ -16,7 +16,7 @@
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
 ![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-794_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-796_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
 
 <table align="center">
@@ -128,7 +128,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **Every charge on a package:** Partner rebuilt as tabs (Requests, Packages, Photos, Details), packages added and edited in place, and each one says every charge, in the price, added, at cost or not provided, beside a live view of what customers read; customers see them on the vendor's page | | Live, 31 Oct |
 | **A planning conversation that probes like a planner:** it asks a wedding's tradition, never assuming one, offers that tradition's events of the day to tick from a hand-checked list with its own suggestions marked, checks timings, asks once what is often missed, and builds the plan day by day beside the talk, editable | Muse Spark 1.3 (rebuilt on the pre-hackathon chat) | Live, 31 Oct |
 | **Vendors found on the open web,** listed openly as "not yet verified" with a link to their own site, to be claimed or removed by the business; vendor research searches the host's own words, never a price | Firecrawl, within robots.txt | Live, 31 Oct |
-| **Shared links that show the event:** an event page, RSVP or plan link shows the event's name, date, place and picture; each kind of event has its own line drawing, or the host's own picture | | Live, 31 Oct |
+| **Shared links that show the event:** an event page, RSVP or plan link shows the event's name, date, place and picture; each kind of event has its own line drawing, or the host's own picture. The event page opens on that picture, with the day as a timeline, a calendar file and directions | | Live, 31 Oct |
 | **A WhatsApp quote dropped on the event:** paste the message or drop the screenshot with no vendor or need chosen; it finds its vendor and need, adds them if new, and lands in Compare | Muse Spark 1.3 | Live, 31 Oct |
 
 ### How each criterion is met
@@ -137,7 +137,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, charges outside the headline prices came to about 10% of the quoted total. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 794 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 796 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -286,7 +286,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 794 tests, no network, no keys
+npm test              # 796 tests, no network, no keys
 npm run typecheck     # the app and the backend
 ```
 
