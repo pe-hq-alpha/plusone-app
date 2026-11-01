@@ -1215,13 +1215,13 @@ export const parseRsvp = internalAction({
  * outputs handle `oneOf` badly, and the codebase already leans on nullable fields.
  */
 const proposalSchema = z.object({
-  kind: z.enum(["add_guest", "add_need", "research", "set_budget", "add_session", "set_guests", "set_time", "write_vendor"]),
+  kind: z.enum(["add_guest", "add_need", "research", "set_budget", "add_session", "set_guests", "set_time", "write_vendor", "book_elsewhere"]),
   label: z.string().describe("one short line naming the action, e.g. 'Add Meera Iyer to the guest list'"),
   why: z.string().nullable().describe("one sentence on why you are offering it, from what they just said"),
 
   // Which existing thing this is about. Name it EXACTLY as it appears in the plan.
-  needTitle: z.string().nullable().describe("for research/set_budget on a need: the exact title of an existing need"),
-  vendorName: z.string().nullable().describe("for write_vendor: the exact name of a vendor already being emailed"),
+  needTitle: z.string().nullable().describe("for research/set_budget/book_elsewhere on a need: the exact title of an existing need"),
+  vendorName: z.string().nullable().describe("for write_vendor: the exact name of a vendor already being emailed; for book_elsewhere: the name of the vendor they booked themselves"),
   sessionNames: z.array(z.string()).nullable().describe("which days this is for; null means every day"),
 
   // add_guest
@@ -1250,6 +1250,9 @@ const proposalSchema = z.object({
   guestCount: z.number().nullable().describe("for add_session: roughly how many people; for set_guests: the new number of people expected"),
   startTime: z.string().nullable().describe("for set_time: the new start time as 24-hour HH:MM, e.g. 13:00 for 1 pm"),
   budgetShare: z.number().nullable().describe("for add_session: roughly what share of the budget; a weight, not an amount"),
+
+  // book_elsewhere (amount is the agreed price)
+  paid: z.number().nullable().describe("for book_elsewhere: how much they have paid so far, 0 if nothing yet; the full amount when they say it's paid"),
 
   // write_vendor
   message: z.string().nullable().describe("for write_vendor: the email to send, in the hosts' voice, signed off"),
@@ -1365,6 +1368,22 @@ function resolveProposal(p: Proposal, board: BoardContext): Record<string, unkno
         budgetShare: Math.max(0, p.budgetShare ?? 0),
       };
     }
+    case "book_elsewhere": {
+      const need = matchByName(board.needs, p.needTitle, (n) => n.title);
+      const name = p.vendorName?.trim();
+      const amount = p.amount;
+      if (!need || !name || amount === null || !Number.isFinite(amount) || amount <= 0) return null;
+      const paid = Math.max(0, Math.min(amount, p.paid ?? 0));
+      return {
+        ...base,
+        slotId: need.slotId,
+        slotTitle: need.title,
+        vendorName: name.slice(0, 120),
+        amount: Math.round(amount),
+        paid: Math.round(paid),
+        ...(need.status === "booked" ? { blocked: `${need.title} is already booked.` } : {}),
+      };
+    }
     case "write_vendor": {
       const vendor = matchByName(board.vendors, p.vendorName, (t) => t.vendorName);
       const message = p.message?.trim();
@@ -1432,12 +1451,17 @@ export const answerQuestion = internalAction({
           (board.context
             ? `They asked while looking at ${board.context}, so read short or vague questions as being about that.\n\n`
             : "") +
-          `You can offer to do eight things, as proposals: add a guest, add a vendor need, search the web for vendors for ` +
+          `You can offer to do nine things, as proposals: add a guest, add a vendor need, search the web for vendors for ` +
           `an existing need, change a budget (the total, one day, or one need), add a day to the plan, change how many ` +
           `people are expected (set_guests, for named parts or, with none named, all of them), change when a part starts ` +
-          `(set_time, naming the part), or write to a vendor you are already emailing. When they state a new fact about ` +
+          `(set_time, naming the part), write to a vendor you are already emailing, or record a vendor they booked ` +
+          `themselves outside ${BRAND.name} (book_elsewhere: the need, the vendor's name, the agreed price as amount, and ` +
+          `what's paid so far), which books the need, puts the price in the budget and the balance on what's due. ` +
+          `If they booked something with no matching need yet, propose add_need first and say they can record the booking ` +
+          `once it's there. When they state a new fact about ` +
           `the plan ("we're now 140 people", "move lunch to 1 pm"), propose the change rather than asking whether they ` +
           `want it. You never do any of them yourself — each becomes a card with a "Do it" button the hosts press, ` +
+          `so never write that something is added, booked, updated or done; say what you are offering. ` +
           `and they can edit it first. Only propose what they clearly asked for, at most two or three at a ` +
           `time, and say in one line what you are offering; if you point to the button, call it "Do it", never "confirm". Name an existing need, day or vendor EXACTLY as it appears ` +
           `below, or the card cannot be made.\n` +
@@ -1472,9 +1496,15 @@ export const answerQuestion = internalAction({
         });
       }
 
+      // A card that couldn't be made must not leave an answer that sounds like it was.
+      const dropped = object.proposals.slice(0, 3).length - toolCalls.length;
+      const content =
+        dropped > 0
+          ? `${object.answer}\n\n(${dropped === 1 ? "One change" : "Some changes"} couldn't be set up from here, so nothing has changed yet. You can make ${dropped === 1 ? "it" : "them"} on the page itself.)`
+          : object.answer;
       await ctx.runMutation(internal.assistant.finishReply, {
         replyId: args.replyId,
-        content: object.answer,
+        content,
         status: "done",
         toolCalls: toolCalls.length ? toolCalls : undefined,
       });

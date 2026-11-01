@@ -10,8 +10,9 @@ import { internal } from "./_generated/api";
 import { workflow } from "./workflows";
 import { track } from "./analytics";
 import { isLive } from "./lib/quoteHold";
-import { addBookingPayments } from "./dues";
+import { addBookingPayments, recountPaid } from "./dues";
 import { byDayThenOrder } from "./lib/sessionOrder";
+import { BRAND } from "./lib/brand";
 
 export const list = query({
   args: { eventId: v.id("events") },
@@ -309,6 +310,102 @@ export const markBooked = mutation({
     return null;
   },
 });
+
+/**
+ * A vendor the host booked themselves, outside PlusOne: in one step it joins the need,
+ * the need is booked, the agreed price goes into the budget, and what's been paid and
+ * what's left go on the list of what's due. Nobody is written to.
+ */
+export const bookedElsewhere = mutation({
+  args: {
+    slotId: v.id("vendorSlots"),
+    name: v.string(),
+    phone: v.optional(v.string()),
+    /** The price agreed, in the event's currency. */
+    total: v.number(),
+    /** Paid so far. */
+    paid: v.optional(v.number()),
+  },
+  returns: v.id("vendors"),
+  handler: async (ctx, args) => {
+    const slot = await ctx.db.get(args.slotId);
+    if (!slot) throw new ConvexError("That need isn't in the plan any more.");
+    const { userId } = await requireMember(ctx, slot.eventId, "planner");
+    return await bookElsewhereHelper(ctx, { slot, userId, name: args.name, phone: args.phone, total: args.total, paid: args.paid });
+  },
+});
+
+/** The booked-elsewhere step itself, shared by the Vendors page's form and the assistant's card. */
+export async function bookElsewhereHelper(
+  ctx: MutationCtx,
+  args: { slot: Doc<"vendorSlots">; userId: Id<"users">; name: string; phone?: string; total: number; paid?: number },
+): Promise<Id<"vendors">> {
+  const { slot, userId } = args;
+  const event = await ctx.db.get(slot.eventId);
+  if (!event) throw new ConvexError("Event not found.");
+  if (slot.status === "booked") throw new ConvexError(`${slot.title} is already booked.`);
+  const name = args.name.trim().slice(0, 120);
+  if (!name) throw new ConvexError("Add the vendor's name.");
+  if (!Number.isFinite(args.total) || args.total <= 0) throw new ConvexError("Add the price you agreed.");
+  const total = Math.round(args.total);
+  const paid = Math.round(Math.max(0, args.paid ?? 0));
+  if (paid > total) throw new ConvexError("What's been paid is more than the agreed price.");
+  await track(ctx, "vendor.booked", userId, { category: slot.category, notify: false });
+
+  const vendorId = await ctx.db.insert("vendors", {
+    eventId: slot.eventId,
+    slotId: slot._id,
+    name,
+    phone: args.phone?.trim().slice(0, 40) || undefined,
+    category: slot.category,
+    packages: [],
+    highlights: [],
+    sourceUrls: [],
+    reviewHighlights: [],
+    pagesRead: [],
+    shortlisted: true,
+    scrapedAt: Date.now(),
+  });
+  await ctx.db.patch(slot._id, { status: "booked", bookedVendorId: vendorId });
+  await setCommittedForSlotHelper(ctx, slot._id, total);
+
+  // What's paid is marked done today; the rest is due a month before the event (or in a week, if that's past).
+  const now = new Date().toISOString().slice(0, 10);
+  const monthBefore = addDaysIso(event.startDate, -30);
+  if (paid > 0) {
+    await ctx.db.insert("dues", { eventId: slot.eventId, slotId: slot._id, vendorId, kind: "payment", fromBooking: true, label: "Advance", amount: paid, dueDate: now, doneAt: Date.now() });
+  }
+  if (total - paid > 0) {
+    await ctx.db.insert("dues", {
+      eventId: slot.eventId,
+      slotId: slot._id,
+      vendorId,
+      kind: "payment",
+      fromBooking: true,
+      label: paid > 0 ? "Balance" : "Payment",
+      amount: total - paid,
+      dueDate: monthBefore > now ? monthBefore : addDaysIso(now, 7),
+    });
+  }
+
+  // The budget's paid figure follows the paid payments.
+  await recountPaid(ctx, slot._id);
+
+  await logActivity(ctx, {
+    eventId: slot.eventId,
+    actorUserId: userId,
+    type: "booked",
+    text: `booked ${name} for ${slot.title}, outside ${BRAND.name}.`,
+    refs: { slotId: slot._id, vendorId },
+  });
+  return vendorId;
+}
+
+function addDaysIso(iso: string, days: number): string {
+  const d = new Date(`${iso}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
 
 /**
  * Remove a vendor need from the plan, with everything that was only ever a

@@ -27,6 +27,7 @@ const KIND_ICON: Record<string, Parameters<typeof Icon>[0]["name"]> = {
   set_guests: "guests",
   set_time: "calendar",
   write_vendor: "mail",
+  book_elsewhere: "check",
 };
 
 /**
@@ -158,6 +159,15 @@ export function ProposalCard({
                 <>
                   <p className="text-xs text-muted">{String((p.sessionNames as string[] | undefined)?.[0] ?? "This part")}</p>
                   <Field label="Starts at" value={String(value("startTime") ?? "")} onChange={(v) => set("startTime", v)} type="time" />
+                </>
+              )}
+              {kind === "book_elsewhere" && (
+                <>
+                  <p className="text-xs text-muted">For {String(p.slotTitle ?? "this need")}</p>
+                  <Field label="Vendor" value={String(value("vendorName") ?? "")} onChange={(v) => set("vendorName", v)} />
+                  <NumberField label="Price agreed" value={Number(value("amount") ?? 0)} onChange={(v) => set("amount", v)} step={100} />
+                  <NumberField label="Paid so far" value={Number(value("paid") ?? 0)} onChange={(v) => set("paid", v)} step={100} />
+                  <p className="text-xs text-quiet">The need is marked booked, the price goes into the budget and the rest on what's due. Nobody is written to.</p>
                 </>
               )}
               {kind === "write_vendor" && (

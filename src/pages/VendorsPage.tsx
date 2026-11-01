@@ -7,6 +7,7 @@ import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import type { FunctionReturnType } from "convex/server";
+import { ConvexError } from "convex/values";
 import { flattenSlots, money, statusLabel, timeAgo, type FlatSlot } from "../lib/format";
 import { BookButton } from "../components/BookButton";
 import { SUGGESTED_CATEGORIES } from "../../convex/lib/templates";
@@ -265,7 +266,25 @@ function SlotPanel({
         {canEdit && <RemoveSlot slot={slot} eventId={event._id as Id<"events">} />}
       </header>
 
-      <SessionsForSlot slot={slot} sessions={sessions} canEdit={canEdit} />
+      {/* Booked: what was agreed, paid and still due. Not yet: a way to record one booked outside PlusOne. */}
+      {slot.status === "booked" ? (
+        <BookedSummary eventId={event._id as Id<"events">} slot={slot} currency={event.currency} />
+      ) : (
+        canEdit && <BookedElsewhere slot={slot} currency={event.currency} />
+      )}
+
+      {slot.status !== "booked" && (
+        <AskVerified
+          eventId={event._id}
+          slotId={slot._id}
+          category={slot.category}
+          city={event.city}
+          vendors={verified.filter((v) => !v.foundOnWeb && near(v.place ?? null))}
+          away={(v) => awayKm(centre, v.place ?? null)}
+          canEdit={canEdit}
+        />
+      )}
+
 
       {canEdit && (
         <section className="card p-5" data-tour="vendor-research">
@@ -306,30 +325,7 @@ function SlotPanel({
         </section>
       )}
 
-      {slot.status !== "booked" && (
-        <NearVenue
-          event={event}
-          hall={hall}
-          vendors={nearby}
-          radiusKm={radiusKm}
-          setRadiusKm={setRadiusKm}
-          insideOnly={insideOnly}
-          setInsideOnly={setInsideOnly}
-          canEdit={canEdit}
-        />
-      )}
 
-      {slot.status !== "booked" && (
-        <AskVerified
-          eventId={event._id}
-          slotId={slot._id}
-          category={slot.category}
-          city={event.city}
-          vendors={verified.filter((v) => !v.foundOnWeb && near(v.place ?? null))}
-          away={(v) => awayKm(centre, v.place ?? null)}
-          canEdit={canEdit}
-        />
-      )}
 
       <section aria-labelledby="found-h">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -546,9 +542,25 @@ function SlotPanel({
         <SharedQuote eventId={event._id} vendors={vendors.map((v) => ({ _id: v._id, name: v.name }))} demo={event.demo === true} />
       )}
 
+
+      {slot.status !== "booked" && (
+        <NearVenue
+          event={event}
+          hall={hall}
+          vendors={nearby}
+          radiusKm={radiusKm}
+          setRadiusKm={setRadiusKm}
+          insideOnly={insideOnly}
+          setInsideOnly={setInsideOnly}
+          canEdit={canEdit}
+        />
+      )}
+
+      <SessionsForSlot slot={slot} sessions={sessions} canEdit={canEdit} />
+
       {canEdit && (
         <details className="card p-5">
-          <summary className="cursor-pointer text-sm font-medium">Add a vendor you already know</summary>
+          <summary className="cursor-pointer text-sm font-medium">Add a vendor you know, to ask for a quote</summary>
           <form
             className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_1fr_auto]"
             onSubmit={(e) => {
@@ -566,9 +578,103 @@ function SlotPanel({
           </form>
         </details>
       )}
-
       {error && <p role="alert" className="text-sm text-bad">{error}</p>}
     </div>
+  );
+}
+
+/**
+ * Booked one yourself, outside PlusOne? Name, price agreed and what's been paid: the
+ * need is booked, the budget takes the price, and the balance goes on what's due.
+ */
+function BookedElsewhere({ slot, currency }: { slot: Slot; currency: string }) {
+  const save = useMutation(api.slots.bookedElsewhere);
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ name: "", phone: "", total: "", paid: "" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const symbol = currency === "INR" ? "₹" : currency === "USD" ? "$" : "";
+  const num = (x: string) => Number(x.replace(/[^\d.]/g, ""));
+
+  if (!open) {
+    return (
+      <section className="card-quiet flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+        <p className="text-sm">
+          <span className="font-medium">Already booked one yourself?</span>{" "}
+          <span className="text-muted">Add it here and the budget and payments update with it.</span>
+        </p>
+        <button type="button" className="btn-ghost btn-sm" onClick={() => setOpen(true)}>
+          I've booked one
+        </button>
+      </section>
+    );
+  }
+  return (
+    <section className="card p-5" aria-labelledby="booked-elsewhere-h">
+      <h3 id="booked-elsewhere-h" className="text-lg">The {slot.title.toLowerCase()} you booked</h3>
+      <form
+        className="mt-3 grid gap-3 sm:grid-cols-2"
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setError(null);
+          setBusy(true);
+          try {
+            await save({ slotId: slot._id, name: f.name, phone: f.phone || undefined, total: num(f.total), paid: f.paid ? num(f.paid) : undefined });
+            setOpen(false);
+          } catch (err) {
+            setError(err instanceof ConvexError ? String(err.data) : "Couldn't save that. Try again.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <label className="grid gap-1 text-sm">
+          <span className="label">Vendor</span>
+          <input className="input" required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Their name" />
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="label">Phone (optional)</span>
+          <input className="input" type="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} />
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="label">Price agreed {symbol && `(${symbol})`}</span>
+          <input className="input" required inputMode="numeric" value={f.total} onChange={(e) => setF({ ...f, total: e.target.value })} placeholder="Amount" />
+        </label>
+        <label className="grid gap-1 text-sm">
+          <span className="label">Paid so far {symbol && `(${symbol})`}</span>
+          <input className="input" inputMode="numeric" value={f.paid} onChange={(e) => setF({ ...f, paid: e.target.value })} placeholder="Amount" />
+        </label>
+        <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+          <button className="btn-primary" disabled={busy || !f.name.trim() || !(num(f.total) > 0)}>
+            {busy ? "Saving…" : "Mark as booked"}
+          </button>
+          <button type="button" className="btn-quiet btn-sm" onClick={() => setOpen(false)}>Cancel</button>
+          <p className="text-xs text-muted">Nobody is written to. Searching and quotes for this need stop.</p>
+        </div>
+        {error && <p role="alert" className="text-sm text-bad sm:col-span-2">{error}</p>}
+      </form>
+    </section>
+  );
+}
+
+/** A booked need at a glance: who, the price, what's paid and what's still due. */
+function BookedSummary({ eventId, slot, currency }: { eventId: Id<"events">; slot: Slot; currency: string }) {
+  const dues = useQuery(api.dues.list, { eventId });
+  const mine = (dues ?? []).filter((d) => d.kind === "payment" && d.vendorId && d.vendorId === slot.bookedVendorId);
+  const paid = mine.filter((d) => d.doneAt).reduce((n, d) => n + (d.amount ?? 0), 0);
+  const due = mine.filter((d) => !d.doneAt).reduce((n, d) => n + (d.amount ?? 0), 0);
+  return (
+    <section className="card flex flex-wrap items-center justify-between gap-3 px-5 py-4" aria-label="Booked">
+      <p className="text-sm">
+        <span className="font-medium">Booked{slot.bookedVendor ? `: ${slot.bookedVendor.name}` : ""}</span>
+        {mine.length > 0 && (
+          <span className="text-muted">
+            {" "}· {money(paid, currency)} paid{due > 0 ? ` · ${money(due, currency)} still due` : " · all paid"}
+          </span>
+        )}
+      </p>
+      <Link to="../budget" relative="path" className="btn-quiet btn-sm">Budget and payments</Link>
+    </section>
   );
 }
 

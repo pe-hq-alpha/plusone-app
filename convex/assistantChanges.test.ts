@@ -90,4 +90,34 @@ describe("the assistant's plan changes", () => {
       signedInAs(t, s.plannerId).mutation(api.assistant.runProposal, { eventId: s.eventId, replyId: s.replyId, index: 1 }),
     ).rejects.toThrow("Times are written as HH:MM.");
   });
+
+  test("a vendor booked outside PlusOne: booked, in the budget, and paid, from one card", async () => {
+    const t = setup();
+    const s = await seed(t, []);
+    const slotId = await t.run((ctx) => ctx.db.insert("vendorSlots", { eventId: s.eventId, sessionIds: [s.lunchId], category: "Catering", title: "Biryani place", budget: 5000, status: "research" }));
+    await t.run((ctx) =>
+      ctx.db.patch(s.replyId, {
+        toolCalls: [{ name: "propose", status: "proposed", args: { kind: "book_elsewhere", label: "Record the biryani booking", slotId, slotTitle: "Biryani place", vendorName: "Star Biryani", amount: 3800, paid: 3800 } }],
+      }),
+    );
+    const res = await signedInAs(t, s.plannerId).mutation(api.assistant.runProposal, { eventId: s.eventId, replyId: s.replyId, index: 0 });
+    expect(res.done).toMatch(/^Biryani place is booked with Star Biryani at .*3,800.*paid\. The budget and payments are updated\.$/);
+    const slot = await t.run((ctx) => ctx.db.get(slotId));
+    expect(slot?.status).toBe("booked");
+    const line = await t.run((ctx) => ctx.db.query("budgetLines").withIndex("by_slotId", (q) => q.eq("slotId", slotId)).first());
+    expect(line?.committed).toBe(3800);
+    expect(line?.paid).toBe(3800);
+    const dues = await t.run((ctx) => ctx.db.query("dues").withIndex("by_slotId", (q) => q.eq("slotId", slotId)).take(10));
+    expect(dues.map((d) => [d.label, d.amount, Boolean(d.doneAt)])).toEqual([["Advance", 3800, true]]);
+  });
+
+  test("booked elsewhere with part paid leaves the balance on what's due", async () => {
+    const t = setup();
+    const s = await seed(t, []);
+    const slotId = await t.run((ctx) => ctx.db.insert("vendorSlots", { eventId: s.eventId, sessionIds: [s.lunchId], category: "Catering", title: "Catering", budget: 60000, status: "research" }));
+    await signedInAs(t, s.plannerId).mutation(api.slots.bookedElsewhere, { slotId, name: "Annam Caterers", total: 56000, paid: 20000 });
+    const dues = await t.run((ctx) => ctx.db.query("dues").withIndex("by_slotId", (q) => q.eq("slotId", slotId)).take(10));
+    expect(dues.map((d) => [d.label, d.amount, Boolean(d.doneAt)]).sort()).toEqual([["Advance", 20000, true], ["Balance", 36000, false]]);
+    await expect(signedInAs(t, s.plannerId).mutation(api.slots.bookedElsewhere, { slotId, name: "Someone else", total: 1000 })).rejects.toThrow(/already booked/);
+  });
 });

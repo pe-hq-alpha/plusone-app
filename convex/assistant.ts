@@ -4,7 +4,7 @@ import { internalMutation, internalQuery, mutation, query, type MutationCtx } fr
 import { logActivity, requireMember } from "./lib/auth";
 import { chatMessageDoc } from "./lib/docs";
 import { addGuestHelper, findDuplicateGuest } from "./guests";
-import { addSlotHelper, updateSlotHelper } from "./slots";
+import { addSlotHelper, bookElsewhereHelper, updateSlotHelper } from "./slots";
 import { startResearchHelper } from "./research";
 import { spend } from "./rateLimits";
 import { addSessionHelper } from "./sessions";
@@ -35,6 +35,8 @@ const proposalEdits = v.object({
   budgetShare: v.optional(v.number()),
   message: v.optional(v.string()),
   asWritten: v.optional(v.boolean()),
+  vendorName: v.optional(v.string()),
+  paid: v.optional(v.number()),
 });
 
 /**
@@ -305,6 +307,18 @@ export const runProposal = mutation({
         tab = "";
         break;
       }
+      case "book_elsewhere": {
+        const slot = await ctx.db.get(p.slotId as Id<"vendorSlots">);
+        if (!slot || slot.eventId !== args.eventId) {
+          throw new ConvexError(`${p.slotTitle ?? "That need"} is not part of your plan any more.`);
+        }
+        const total = Number(p.amount);
+        const paid = Number(p.paid ?? 0);
+        await bookElsewhereHelper(ctx, { slot, userId, name: String(p.vendorName ?? ""), total, paid });
+        done = `${slot.title} is booked with ${String(p.vendorName ?? "them")} at ${money(total)}${paid > 0 ? `, ${money(paid)} paid` : ""}. The budget and payments are updated.`;
+        tab = `vendors/${slot._id}`;
+        break;
+      }
       case "write_vendor": {
         const thread = await ctx.db.get(p.threadId as Id<"threads">);
         if (!thread || thread.eventId !== args.eventId) {
@@ -359,6 +373,7 @@ const OVERRIDABLE: Record<string, string[]> = {
   set_guests: ["guestCount", "sessionIds"],
   set_time: ["startTime"],
   write_vendor: ["message", "asWritten"],
+  book_elsewhere: ["vendorName", "amount", "paid"],
 };
 
 function mergeOverrides(stored: Record<string, unknown>, overrides: unknown): Record<string, unknown> {
