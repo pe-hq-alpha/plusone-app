@@ -20,7 +20,7 @@
 - **Credits spent:** about $3.70 of the $150 Meta credit by the evening of 29 Oct, adding the day's logged runs: $0.98 in 129 calls by the morning (`evalsCost:perEvent`), about $2.30 in the afternoon's evaluations and vendor checks, and about $0.43 in the evening (the planted-page check, the photo evaluation's Muse Spark half, the demo's charge reading). Modal: the Glimmer GPU on credits ($3.79 metered by 13:20, plus $0.22 for the photo evaluation). Baseten: a few cents of $100. ElevenLabs: six 1K images for the photo evaluation. On 30 Oct, a few more small runs: two held-out evaluation runs on Muse Spark (about 20 calls each) and five price-list reads on Muse Spark Open (Baseten's credits); the full total is read with `evalsCost` before submitting.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-10-31T16:30:00+05:30
+- **Last updated:** 2026-11-01T09:05:00+05:30
 
 ## Evidence
 
@@ -62,7 +62,21 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-10-31 - ca5e6ab..HEAD (founder review: polish, Partner onboarding, the README halved)
+### 2026-11-01 - d7d6ff7..HEAD (the founder's walk through his own event)
+
+Paddy planned his own Diwali event in the app and said what got in the way; each item below is a fix for one of them, built by Claude Code (claude-opus-5-5) in this session.
+
+- **Home page** (`d7d6ff7`, `10f6f77`): the three buttons stay on one line at every desktop width (measured from 1101 to 2560 px); the top links became buttons that lift on hover; the examples name no city, so they read the same for any visitor.
+- **Signing in** (`492a1b5`): the home page no longer flashes while a new sign-in is set up; the app waits on a plain page, then opens.
+- **Where things stand shows milestones** (`492a1b5`): "Found 6 options for your caterer", "3 quotes in for your catering", "Caterer booked", in the need's own name, never a vendor's; a history line that names a vendor stays on the History page. Tests check that no vendor's name reaches these lines in all three samples.
+- **The assistant, easy to find** (`acd75a6`): an Ask button in the top bar and a labelled "Ask PlusOne" button on every page, Overview included. The board lost its dotted background and says what to do when it's empty.
+- **A vendor booked outside PlusOne, in one step** (`06c30e1`): name, price agreed and what's paid; the need is booked, the budget takes the price, what's paid is marked paid and the balance goes on what's due. The assistant gained the same step as a card: it had said "added" to "I booked a biryani vendor for 3,800 and paid" without a way to do it. It is now told never to say something is done when it has only offered it, and says so when a change couldn't be set up. A need's page now runs booking, verified vendors, the web search with its results right below, quotes, then the map.
+- **The plan and RSVPs** (`3733d35`): a need with no price shows what's planned for it instead of a dash, and a booking made outside PlusOne shows its price. The event page lists everyone's own RSVP link to copy or send on WhatsApp, or copy all at once.
+- **Overview** (`240a45b`): Today is now Overview, opening on the budget (committed, paid, still free), vendors booked and people coming; To-dos left the Plan tabs and sits beside it as a note.
+- **A full footer on the home page**: brand line, PlusOne Events' own Instagram, X, LinkedIn, Facebook and YouTube, then Plan, Vendors and Company links, with the theme switch at the base. A brief for it went to Muse Code (`14-home-footer.txt`); the run was stopped part way, so Claude Code finished it from its own draft and Muse wasn't used for it.
+- **Checked:** `npm test` 803 passed (83 files), `npm run typecheck` clean; each screen seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll. Everything up to `240a45b` deployed at about 09:00 IST and walked live: 15 of 15 steps. **Credits:** none (no live model calls).
+
+### 2026-10-31 - ca5e6ab..8042db0 (founder review: polish, Partner onboarding, the README halved)
 
 - **The firsthand story** (`ca5e6ab`): the README and the story now open the theme's "a problem you know firsthand" with the founders' own half-day baby shower for 120 in Chennai: other halls quoted about ₹2 to ₹3.5 lakh with AC, parking and rooms on top, the hall booked at ₹75,000 costing ₹20,000 more for the decorators' early access, decorators pricing a design from a WhatsApp photo, and transport at about four times its cost. The real quotes and bills go through PlusOne next.
 - **What if someone copies it** (`d415840`, `7e26389`): the README's vision answers it plainly: they will; PlusOne competes on execution, quality, trust, the vendor network, brand and distribution, built over years, city by city.
@@ -81,6 +95,8 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 - **The pitch, said plainly** (`331a53c`, `d46ac57`, the founder's call): "a standardised way to plan events", with India said once and lightly; PlusOne is an app anyone can use. The narration is locked at V1.3 (445 spoken words): the hook is the founders' own baby shower.
 - **Phone polish** (founder's review list): on a phone, Compare's line-by-line table keeps the vendors' names above every line; the home page offers the demo under its three buttons; the ten sample caterers each have their own menu instead of one shared one.
 - **Checked:** 773 tests, `npm run typecheck` clean, CI green, the live demo walked 15 of 15 after each deploy. **Credits:** about $0.01 (the "140 people" change in the live walk).
+
+- **The evening** (`850c4f4`..`8042db0`): vendor leads, businesses found on the open web and listed as not yet verified; vendor thumbnails from their own sites; removing an event and naming your own occasion; the planning conversation's screen (choices to tick, the plan taking shape, samples to start from) and vendor research that searches the host's own words first, never a price or a mood; event covers drawn for each kind of event, or the host's own picture, on the event page and in shared-link previews; the event page opening on its picture with the day as a timeline, a calendar file and directions; and **quote drop**: paste a WhatsApp quote or drop its screenshot on the event, and Muse Spark finds its vendor and need and files it into Compare (live; a token cap that cut answers short was raised from 400 to 4,000). The demo now shows only its made-up vendors. 794 → 796 tests; the live demo walked 15 of 15 after the last deploy.
 
 ### 2026-10-30 - bafb7f9..ca5e6ab (the last build day)
 - **Vendors on a map, around the venue** (`b7e0d90`, Paddy's request of 29 Oct): each need shows "Near your venue", with the venue pinned, a circle of 2, 5, 10 or 20 km, and every verified and web-found vendor whose area is known numbered by distance; "Only inside the circle" trims the verified list and the web results to who's near, and each verified vendor shows how far it is. The venue's pin comes from the event's area, from its name looked up on OpenStreetMap (Nominatim, kept once found, rate-limited), or from a tap on the map. Find vendors takes a plain search ("caterers near Mylapore under 450"), read on the spot when it names a trade, otherwise by Muse Spark (`directory.read`, recorded as `vendorSearchRead`), and shows a list or a map. Partner asks each vendor for the area they work from.

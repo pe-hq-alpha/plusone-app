@@ -93,6 +93,15 @@ function useReveal() {
   }, []);
 }
 
+/** PlusOne Events' own pages. Only these links; the old wedding-brand handles are never used. */
+const SOCIALS = [
+  { name: "Instagram", href: "https://www.instagram.com/_plusoneevents_/", path: "M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 4.6a5.2 5.2 0 1 0 0 10.4 5.2 5.2 0 0 0 0-10.4zm0 8.6a3.4 3.4 0 1 1 0-6.8 3.4 3.4 0 0 1 0 6.8zm5.4-9.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" },
+  { name: "X", href: "https://x.com/plusoneevents_", path: "M17.8 3h3.1l-6.8 7.7 8 10.3h-6.2l-4.9-6.3L5.4 21H2.3l7.2-8.3L1.8 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5z" },
+  { name: "LinkedIn", href: "https://www.linkedin.com/company/plusoneevents-in", path: "M20.4 20.4h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.1zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.4H3.5V9h3.6v11.4zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0z" },
+  { name: "Facebook", href: "https://www.facebook.com/people/PlusOne-Events/61595741763302/", path: "M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z" },
+  { name: "YouTube", href: "https://www.youtube.com/@plusoneevents-in", path: "M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z" },
+] as const;
+
 export function LandingPage() {
   const ex = examplesFor(useRegion());
   // Marigold on ink at night; by day its own ink-blue drawing, which reads far better on ivory than gold.
@@ -286,20 +295,44 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="foot">
-        <div className="wrap foot__inner">
-          <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneLockup /></p>
-          <p>
-            <Link to="/how-it-works" className="lp-footer__link">How it works</Link>
-            <span aria-hidden="true"> · </span>
-            <Link to="/pricing" className="lp-footer__link">Pricing</Link>
-          </p>
+      <footer className="foot site-foot">
+        <div className="wrap site-foot__grid">
+          <div className="site-foot__brand">
+            <p className="brand brand--static rs-foot-mark"><img src="/icon-192.png" alt="" width="28" height="28" /><PlusOneLockup /></p>
+            <p className="site-foot__line">Everything for your event in one place, with every quote on the same lines.</p>
+            <ul className="site-foot__social" aria-label={`${BRAND.name} on social media`}>
+              {SOCIALS.map((s) => (
+                <li key={s.name}>
+                  <a href={s.href} target="_blank" rel="noreferrer noopener" aria-label={`${BRAND.name} on ${s.name}`} title={s.name}>
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d={s.path} /></svg>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <nav className="site-foot__col" aria-label="Plan">
+            <h2>Plan</h2>
+            <Link to="/signin?new=1">Plan an event</Link>
+            <Link to="/demo">See the demo</Link>
+            <Link to="/how-it-works">How it works</Link>
+            <Link to="/pricing">Pricing</Link>
+          </nav>
+          <nav className="site-foot__col" aria-label="Vendors">
+            <h2>Vendors</h2>
+            <Link to="/vendors">Find vendors</Link>
+            <Link to={partnerHref("/")}>List your business</Link>
+            <Link to={partnerHref("/demo")}>Try it as a sample caterer</Link>
+          </nav>
+          <nav className="site-foot__col" aria-label="Company">
+            <h2>Company</h2>
+            <a href={`mailto:hello@${BRAND.domain}`}>Contact us</a>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+          </nav>
+        </div>
+        <div className="wrap site-foot__base">
+          <p>&copy; {new Date().getFullYear()} {BRAND.name} Events</p>
           <ThemeSwitch compact />
-          <p className="lp-footer__legal">
-            <Link to="/privacy" className="lp-footer__link">Privacy</Link>
-            <span aria-hidden="true"> · </span>
-            <Link to="/terms" className="lp-footer__link">Terms</Link>
-          </p>
         </div>
       </footer>
     </div>
