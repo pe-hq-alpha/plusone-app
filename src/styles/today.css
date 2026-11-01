@@ -1,10 +1,24 @@
-/* Today: the co-pilot's route for one event. The same nodes and lines as the home page's
+/* Overview: the event at a glance, then the co-pilot's route. The same nodes and lines as the home page's
    running status, drawn at reading size: done in moss, under way lit in marigold, over to
    you dashed, up next hollow. */
 
 .today__head { max-width: 46rem; }
 .today__title { font-size: clamp(2.1rem, 3.6vw, 3.2rem); line-height: 1.08; letter-spacing: -0.01em; color: var(--color-ink-deep); text-wrap: balance; }
 .today__when { margin-top: 10px; font-size: 0.95rem; color: var(--color-muted); }
+
+/* At a glance: the budget leads, wider, then vendors and people. */
+.today__glance { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+.today__stat--money { grid-column: 1 / -1; }
+@media (min-width: 720px) { .today__stat--money { grid-column: auto; } }
+@media (min-width: 720px) { .today__glance { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr); } }
+.today__stat { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border-radius: 18px; background: var(--color-cream); box-shadow: inset 0 0 0 1px var(--color-line);
+  color: var(--color-ink); text-decoration: none; transition: box-shadow 160ms ease-out, transform 160ms ease-out; }
+.today__stat:hover { box-shadow: inset 0 0 0 1px var(--color-accent); transform: translateY(-1px); }
+.today__stat-label { font-size: 0.86rem; color: var(--color-muted); }
+.today__stat-big { font-family: var(--font-display); font-size: 1.7rem; line-height: 1.15; color: var(--color-ink-deep); }
+.today__stat-big small { font-family: var(--font-sans); font-size: 0.86rem; color: var(--color-muted); }
+.today__stat-foot { font-size: 0.86rem; color: var(--color-quiet); }
+.today__stat--money .today__stat-big { font-size: 2rem; }
 
 .today__grid { display: grid; gap: 28px; margin-top: 32px; }
 @media (min-width: 1024px) { .today__grid { grid-template-columns: minmax(0, 1fr) 340px; gap: 44px; align-items: start; } }

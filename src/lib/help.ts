@@ -26,8 +26,8 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
         answer: "Ask it anything about your event in your own words: what's urgent, what's due this month, how the budget looks. It knows your days, your budget and the vendors you've found. When it suggests a change, you see it as a card and nothing happens until you confirm. Anything it has been asked to remember is listed, and you can remove any of it.",
       },
       {
-        ask: "What does Today show?",
-        answer: "Where things stand, read straight from your plan: what PlusOne has done, what it is doing now, what is waiting on you, and what it will pick up next. Waiting on you means a vendor needing your answer, quotes ready to choose between, something usually booked by this point, or people still to reply. Compare holds every quote side by side, and To-dos is your own checklist.",
+        ask: "What does Overview show?",
+        answer: "At the top: the budget (committed, paid and still free), vendors booked and people coming. Below it, where things stand, read straight from your plan: what PlusOne has done, what it is doing now, what is waiting on you, and what it will pick up next. Waiting on you means a vendor needing your answer, quotes ready to choose between, something usually booked by this point, or people still to reply. Compare holds every quote side by side, and To-dos, your own checklist, sits beside it.",
       },
     ],
   },

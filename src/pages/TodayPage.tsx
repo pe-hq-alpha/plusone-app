@@ -78,6 +78,34 @@ export function TodayPage() {
         </p>
       </header>
 
+      {/* At a glance, first: the money, then vendors and people. */}
+      <section className="today__glance" aria-label="At a glance">
+        <Link to="budget" className="today__stat today__stat--money">
+          <span className="today__stat-label">Budget</span>
+          <span className="today__stat-big">
+            {money(stats.committedTotal, event.currency)} <small>committed of {money(event.totalBudget, event.currency)}</small>
+          </span>
+          <BudgetBar className="mt-2 h-2" spent={stats.committedTotal} budget={event.totalBudget} label="Budget committed" />
+          <span className="today__stat-foot">
+            {money(stats.paidTotal, event.currency)} paid · {money(Math.max(0, event.totalBudget - stats.committedTotal), event.currency)} still free
+          </span>
+        </Link>
+        <Link to="vendors" className="today__stat">
+          <span className="today__stat-label">Vendors</span>
+          <span className="today__stat-big">
+            {stats.slotCounts.booked} <small>of {stats.slotCounts.research + stats.slotCounts.contacted + stats.slotCounts.quoted + stats.slotCounts.booked} booked</small>
+          </span>
+          <span className="today__stat-foot">{stats.slotCounts.quoted} with quotes to compare</span>
+        </Link>
+        <Link to="guests" className="today__stat">
+          <span className="today__stat-label">{PeopleWord(event)}</span>
+          <span className="today__stat-big">
+            {stats.guestCounts?.yes ?? 0} <small>coming</small>
+          </span>
+          <span className="today__stat-foot">{stats.guestCounts?.pending ?? 0} still to say · {stats.guestCounts?.no ?? 0} not</span>
+        </Link>
+      </section>
+
       <div className="today__grid">
         <section aria-labelledby="route-h" className="today__route" data-tour="this-week">
           <div className="today__route-head">
@@ -110,27 +138,7 @@ export function TodayPage() {
         <aside className="today__side">
           <Tell eventId={eventId} demo={event.demo === true} />
           {event.demo !== true && <QuoteDrop eventId={eventId} />}
-          <section aria-labelledby="money-h" className="today__panel">
-            <h2 id="money-h" className="text-sm font-medium text-ink">Budget</h2>
-            <p className="mt-2 text-sm text-muted">
-              <span className="display text-2xl text-ink">{money(stats.committedTotal, event.currency)}</span> committed of{" "}
-              {money(event.totalBudget, event.currency)}
-            </p>
-            <BudgetBar className="mt-3 h-2" spent={stats.committedTotal} budget={event.totalBudget} label="Budget committed" />
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              <Link to="budget" className="text-accent underline-offset-4 hover:underline">Budget and dues</Link>
-              <Link to="decisions" className="text-accent underline-offset-4 hover:underline">Compare quotes</Link>
-            </div>
-          </section>
-          <section aria-labelledby="people-h" className="today__panel">
-            <h2 id="people-h" className="text-sm font-medium text-ink">{PeopleWord(event)}</h2>
-            <p className="mt-2 text-sm text-muted">
-              {stats.guestCounts?.yes ?? 0} coming · {stats.guestCounts?.no ?? 0} not · {stats.guestCounts?.pending ?? 0} still to say
-            </p>
-            <Link to="guests" className="mt-3 inline-flex items-center gap-1 text-sm text-accent underline-offset-4 hover:underline">
-              Open the list <Icon name="arrow" size={14} />
-            </Link>
-          </section>
+          <TodoNote eventId={eventId} />
         </aside>
       </div>
     </div>
@@ -190,7 +198,7 @@ function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean
     setBusy(true);
     setError(null);
     try {
-      await ask({ eventId, content, context: "the Today page" });
+      await ask({ eventId, content, context: "the Overview page" });
       navigate("assistant");
     } catch (e) {
       setError(e instanceof ConvexError && typeof e.data === "string" ? e.data : "That didn't send. Try again.");
@@ -253,6 +261,61 @@ function Tell({ eventId, demo = false }: { eventId: Id<"events">; demo?: boolean
           </li>
         ))}
       </ul>
+    </section>
+  );
+}
+
+/**
+ * To-dos as a note beside the overview rather than a page of its own: what's still open,
+ * ticked off in place, and a line to add one.
+ */
+function TodoNote({ eventId }: { eventId: Id<"events"> }) {
+  const tasks = useQuery(api.tasks.list, { eventId });
+  const add = useMutation(api.tasks.add);
+  const update = useMutation(api.tasks.update);
+  const [text, setText] = useState("");
+  const open = (tasks ?? []).filter((t) => !t.done);
+  const shown = open.slice(0, 5);
+  return (
+    <section aria-labelledby="todo-h" className="today__panel">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id="todo-h" className="text-sm font-medium text-ink">To-dos</h2>
+        {tasks && tasks.length > 0 && (
+          <Link to="tasks" className="text-xs text-accent underline-offset-4 hover:underline">
+            All {tasks.length}
+          </Link>
+        )}
+      </div>
+      {tasks === undefined ? null : shown.length === 0 ? (
+        <p className="mt-2 text-sm text-muted">Nothing open. Add anything you don't want to forget.</p>
+      ) : (
+        <ul className="mt-2 grid gap-1.5">
+          {shown.map((t) => (
+            <li key={t._id} className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                aria-label={`Done: ${t.title}`}
+                onChange={() => void update({ taskId: t._id, patch: { done: true } })}
+              />
+              <span>{t.title}</span>
+            </li>
+          ))}
+          {open.length > shown.length && <li className="text-xs text-quiet">and {open.length - shown.length} more</li>}
+        </ul>
+      )}
+      <form
+        className="mt-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const title = text.trim();
+          if (!title) return;
+          void add({ eventId, title }).then(() => setText(""));
+        }}
+      >
+        <label htmlFor="todo-add" className="sr-only">Add a to-do</label>
+        <input id="todo-add" className="input" placeholder="Add a to-do" value={text} maxLength={200} onChange={(e) => setText(e.target.value)} />
+      </form>
     </section>
   );
 }

@@ -27,7 +27,7 @@ export function pageContext(pathname: string, sessions: Ceremony[]): { context: 
   const [section, id] = rest.split("/");
   // The Assistant page is the conversation itself.
   if (section === "assistant") return null;
-  if (!section) return { context: "the Today page", openers: ["What should we do next?", "What's still not booked?", "Find us a caterer"] };
+  if (!section) return { context: "the Overview page", openers: ["What should we do next?", "What's still not booked?", "Find us a caterer"] };
   if (section === "sessions" && id) {
     const c = sessions.find((e) => e._id === id);
     if (c) return { context: `the ${c.name}`, openers: [`What's left to do for the ${c.name}?`, `How's the ${c.name} budget?`] };

@@ -36,7 +36,7 @@ type Stop = { to: string; label: string; end?: boolean; tour?: string };
  */
 function lanesFor(event: { eventType?: EventType }): { key: Lane; label: string; icon: LucideIcon; home: string; tour?: string; stops: Stop[] }[] {
   return [
-    { key: "today", label: "Today", icon: Compass, home: "", stops: [] },
+    { key: "today", label: "Overview", icon: Compass, home: "", stops: [] },
     {
       key: "plan",
       label: "Plan",
@@ -44,7 +44,6 @@ function lanesFor(event: { eventType?: EventType }): { key: Lane; label: string;
       home: "plan",
       stops: [
         { to: "plan", label: PartWord(event, true) },
-        { to: "tasks", label: "To-dos" },
         { to: "budget", label: "Budget" },
         { to: "spaces", label: "Spaces" },
       ],
@@ -171,7 +170,7 @@ export function EventLayout() {
             <PlusOneLockup />
           </Link>
           <span className="hidden h-6 w-px shrink-0 bg-line sm:block" aria-hidden="true" />
-          <Link to="" className="min-w-0 flex-1 lg:flex-none" title="Today">
+          <Link to="" className="min-w-0 flex-1 lg:flex-none" title="Overview">
             <span className="display block truncate text-[1.08rem] leading-tight text-ink">{event.name}</span>
             <span className="hidden truncate text-[0.72rem] text-quiet sm:block">
               {longDate(event.startDate)} · {event.city}
