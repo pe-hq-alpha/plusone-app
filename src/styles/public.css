@@ -5,11 +5,38 @@
 .pub-brand { display: grid; justify-items: start; text-decoration: none; line-height: 1; }
 @media (min-width: 1024px) { .pub-nav--no-brand { justify-content: flex-end; } .pub-nav--no-brand .pub-brand { display: none; } }
 .pub-nav--wide { max-width: none; padding-left: 16px; padding-right: 16px; }
-.pub-links { display: flex; align-items: center; gap: 0; }
-.pub-link { padding: 4px 14px; font-size: 0.9rem; color: var(--color-ink); text-decoration: none; }
-.pub-link + .pub-link { border-left: 1px solid var(--color-line); }
-.pub-link:hover, .pub-link[aria-current="page"] { color: var(--color-accent); }
-.pub-link--accent { color: var(--color-accent); }
+.pub-links { display: flex; align-items: center; gap: 8px; }
+/* Each link reads as a button, exactly as on the home page (.rs__link in
+   styles/running-status.css, which PublicNav also applies): a frosted pill with a
+   hairline, lifting a little on hover. The values below mirror those rules, so a
+   reader of this file sees the contract without opening the other one. */
+.pub-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: clamp(34px, calc(46 / 20.48 * 1cqw), 44px); padding: 0 clamp(12px, calc(20 / 20.48 * 1cqw), 18px);
+  border-radius: 999px; white-space: nowrap;
+  font-size: clamp(0.85rem, calc(20 / 20.48 * 1cqw), 0.95rem); letter-spacing: -0.005em; color: var(--color-ink); text-decoration: none;
+  background: color-mix(in srgb, var(--color-paper) 72%, transparent);
+  box-shadow: inset 0 0 0 1px var(--color-line);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease, color 180ms ease;
+  text-shadow: none;
+}
+.pub-link[aria-current="page"] {
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent), 0 8px 20px -10px color-mix(in srgb, var(--color-ink-deep) 55%, transparent);
+}
+.pub-link:hover {
+  color: var(--color-accent); background: var(--color-paper); transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 60%, transparent), 0 8px 20px -10px color-mix(in srgb, var(--color-ink-deep) 55%, transparent);
+}
+.pub-link:active { transform: translateY(0); }
+.pub-link:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; border-radius: 999px; }
+.pub-link--accent { background: var(--color-accent); color: var(--color-on-accent); box-shadow: none; }
+.pub-link--accent:hover {
+  background: var(--color-accent-deep); color: var(--color-on-accent);
+  box-shadow: 0 8px 20px -10px color-mix(in srgb, var(--color-accent) 80%, transparent);
+}
+@media (prefers-reduced-motion: reduce) { .pub-link, .pub-link:hover { transform: none; transition: none; } }
 
 .pub-hero { max-width: 46rem; margin: 0 auto; padding: clamp(40px, 6vw, 72px) 24px clamp(28px, 4vw, 44px); text-align: center; }
 .pub-eyebrow { margin: 0 0 14px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent); }
@@ -17,15 +44,23 @@
 .pub-title em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-accent); }
 .pub-lede { margin: 16px auto 0; max-width: 38rem; font-size: clamp(1.02rem, 1.3vw, 1.15rem); line-height: 1.6; color: var(--color-muted); text-wrap: pretty; }
 
+@media (max-width: 1100px) {
+  .pub-link { height: 38px; padding: 0 14px; font-size: 0.86rem; }
+}
 @media (max-width: 640px) {
   .pub-nav { padding-top: 18px; }
   .pub-brand__mark { font-size: 1.6rem; }
-  .pub-link { padding: 4px 9px; font-size: 0.82rem; }
   .pub-link--hide-sm { display: none; }
 }
+/* On phones the bar keeps one line clear of the wordmark, as on the home page. */
+@media (max-width: 520px) {
+  .pub-links { gap: 6px; }
+  .pub-link { height: 34px; padding: 0 11px; }
+}
 
-/* The drawing's corners sit behind the top bar; a soft halo in the page colour keeps the bar readable. */
-.pub-nav .po-lockup, .pub-link {
+/* The drawing's corners sit behind the top bar; a soft halo in the page colour keeps
+   the lockup readable. The links have their own pill background, so none applies to them. */
+.pub-nav .po-lockup {
   text-shadow: 0 0 6px var(--color-paper), 0 0 12px var(--color-paper), 0 0 20px var(--color-paper);
 }
 .pub-nav { position: relative; }
