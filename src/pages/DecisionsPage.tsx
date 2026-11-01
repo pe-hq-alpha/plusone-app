@@ -276,6 +276,17 @@ function NeedBoard({
   // spread in the header count every price on the sheet, not only the emailed quotes.
   const perUnits = columns.map((c) => c.perUnit).filter((x): x is number => x !== null);
   const bestPerUnit = perUnits.length > 1 ? Math.min(...perUnits) : null;
+  // The bar: on the city's range when there is one (one priced quote is enough), or, before
+  // any vendor in the city has listed prices, across the host's own quotes (two or more),
+  // per plate when every quote can say it, otherwise by their totals.
+  const cityPoints = columns.flatMap((c) => {
+    const price = rangePrice(c);
+    return price !== null ? [{ id: c.id, name: c.name, price }] : [];
+  });
+  const everyPerUnit = columns.length > 1 && columns.every((c) => c.perUnit !== null);
+  const ownPoints = columns.map((c) => ({ id: c.id, name: c.name, price: everyPerUnit ? c.perUnit! : c.total })).filter((p) => p.price > 0);
+  const rangePoints = need.market ? (cityPoints.length > 0 ? cityPoints : null) : ownPoints.length > 1 ? ownPoints : null;
+  const rangeUnit = need.market || everyPerUnit ? unitWord : "all in";
   const spreadAll = perUnits.length > 1 ? { low: Math.min(...perUnits), high: Math.max(...perUnits) } : need.spread;
 
   async function book(v: VendorRow, notify: boolean) {
@@ -356,17 +367,9 @@ function NeedBoard({
 
       {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
 
-      {need.market && columns.some((c) => rangePrice(c) !== null) && (
+      {rangePoints && (
         <div className="border-b border-line">
-          <PriceRange
-            band={need.market}
-            city={city}
-            unitWord={unitWord}
-            points={columns.flatMap((c) => {
-              const price = rangePrice(c);
-              return price !== null ? [{ id: c.id, name: c.name, price }] : [];
-            })}
-          />
+          <PriceRange band={need.market} city={city} unitWord={rangeUnit} currency={currency} points={rangePoints} />
         </div>
       )}
 
