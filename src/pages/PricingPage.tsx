@@ -33,7 +33,7 @@ const PLANS: { id: PlanId; name: string; line: string; status: string; when: str
     when: "a month once it opens",
     highlights: [
       { t: "Your own planner", d: `Someone from the ${BRAND.name} team who knows your event and plans it with you.` },
-      { t: "Vendors shortlisted for you", d: "The right options found, checked and lined up, so you only choose." },
+      { t: "Vendors picked out for you", d: "The right options found, checked and lined up, so you only choose." },
       { t: "Someone negotiating for you", d: "On your side with every vendor, so you don't pay more than you should." },
       { t: "Kept moving, every week", d: "Your planner chases what's late and tells you what's next." },
       { t: "On call, and there on the day", d: "By phone any time, and in person when the day needs them." },
@@ -50,7 +50,7 @@ const ALL: { group: string; rows: Row[] }[] = [
     rows: [
       { feature: "Tell us about the event in your own words; the plan is set out for you", basic: true, premium: true },
       { feature: "Speak instead of typing, in Tamil, English or both", basic: true, premium: true },
-      { feature: "Today: what's done, what's under way and what's next", basic: true, premium: true },
+      { feature: "Overview: the budget first, then what's done, under way and next", basic: true, premium: true },
       { feature: "Changes made by just saying them", basic: true, premium: true },
       { feature: "The budget, deposits and deadlines in one list", basic: true, premium: true },
       { feature: "A board for ideas and pictures", basic: true, premium: true },
@@ -65,7 +65,7 @@ const ALL: { group: string; rows: Row[] }[] = [
       { feature: "Every quote on the same lines, from email, PDF or WhatsApp", basic: true, premium: true },
       { feature: "Missing charges flagged, and prices compared with similar vendors", basic: true, premium: true },
       { feature: "See the decor on a photo of your own venue", basic: true, premium: true },
-      { feature: "Vendors shortlisted and lined up by your planner", basic: false, premium: true },
+      { feature: "Vendors picked out and lined up by your planner", basic: false, premium: true },
       { feature: "Someone negotiating with each vendor for you", basic: false, premium: true },
     ],
   },

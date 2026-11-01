@@ -397,8 +397,9 @@ export const attentionCount = query({
 });
 
 /**
- * Conversations with something new for this person: a vendor's reply they haven't opened
- * yet, or one waiting on an answer. The number on Inbox, on Vendors and in the tab's title.
+ * Conversations with a vendor's reply this person hasn't opened yet: the number on Inbox, on
+ * Vendors and in the tab's title, the same count as the Inbox's Unread filter. Opening one
+ * clears it for them. (A vendor waiting on an answer shows on Overview as "over to you".)
  */
 export const inboxCount = query({
   args: { eventId: v.id("events") },
@@ -414,10 +415,7 @@ export const inboxCount = query({
       .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
       .take(2000);
     const readAt = new Map(reads.filter((r) => r.userId === userId).map((r) => [r.threadId, r.readAt]));
-    return threads.filter((t) => {
-      const unread = t.lastInboundAt !== undefined && (readAt.get(t._id) ?? 0) < t.lastInboundAt;
-      return unread || t.status === "needs_attention" || Boolean(t.pendingQuestion);
-    }).length;
+    return threads.filter((t) => t.status !== "draft" && t.lastInboundAt !== undefined && (readAt.get(t._id) ?? 0) < t.lastInboundAt).length;
   },
 });
 

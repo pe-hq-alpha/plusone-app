@@ -781,7 +781,7 @@ function VendorPicker({ eventId, onPick }: { eventId: Id<"events">; onPick: (id:
           <li key={v._id}>
             <button type="button" className="flex w-full items-baseline justify-between gap-3 rounded-[10px] px-2 py-2 text-left text-sm hover:bg-accent-soft" onClick={() => void onPick(v._id)}>
               <span className="min-w-0 truncate text-ink">{v.name}</span>
-              <span className="shrink-0 text-xs text-quiet">{v.booked ? "Booked" : v.shortlisted ? "Shortlisted" : v.need}</span>
+              <span className="shrink-0 text-xs text-quiet">{v.booked ? "Booked" : v.shortlisted ? "Saved" : v.need}</span>
             </button>
           </li>
         ))}

@@ -101,7 +101,7 @@ function AmountCell({ value, disabled, onSave, label }: { value: number; disable
  * vendors, all in the event's own currency.
  */
 export function BudgetPage() {
-  const { event, role, sessions } = useOutletContext<EventData>();
+  const { event, role, sessions, stats } = useOutletContext<EventData>();
   const eventId = event._id as Id<"events">;
   const canEdit = role !== "viewer";
   const summary = useQuery(api.budget.summary, { eventId });
@@ -142,7 +142,11 @@ export function BudgetPage() {
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Totals">
         <Tile label="Budget" value={money(summary.totalBudget, cur)} />
-        <Tile label="Committed" value={money(summary.committedTotal, cur)} note={`${committedPct}% of the budget`} />
+        <Tile
+          label="Committed"
+          value={money(summary.committedTotal, cur)}
+          note={summary.committedTotal > stats.bookedTotal ? `${money(stats.bookedTotal, cur)} booked; the rest is quotes you're weighing` : `${committedPct}% of the budget, all booked`}
+        />
         <Tile label="Paid" value={money(summary.paidTotal, cur)} note={summary.committedTotal > 0 ? `${money(Math.max(0, summary.committedTotal - summary.paidTotal), cur)} still to pay` : undefined} />
         <Tile label={left < 0 ? "Over" : "Left"} value={money(Math.abs(left), cur)} tone={left < 0 ? "bad" : "ink"} note="Budget less what's committed" />
       </section>

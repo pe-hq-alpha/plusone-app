@@ -5,7 +5,7 @@ Three layers, run in this order before every release and before submitting.
 ## 1. Automated tests (every push, in CI)
 
 ```bash
-npm test             # 688 tests in 71 files: the backend, the rules and the app's logic
+npm test             # 812 tests in 84 files: the backend, the rules and the app's logic
 npm run typecheck    # app and backend
 ```
 
@@ -33,5 +33,6 @@ failure under it.
 
 ## Always on
 
-An uptime check (`.github/workflows/uptime.yml`) runs every 15 minutes through judging against the home page, both
-demos and the backend's `/health`.
+The backend checks the live site every five minutes through judging (`convex/uptime.ts`): the home page, both demos
+and `/health`, with the last day at `/uptime`. GitHub's own check (`.github/workflows/uptime.yml`) watches the same
+addresses from outside.

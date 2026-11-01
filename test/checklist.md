@@ -25,7 +25,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 - [ ] Every screenshot in the README matches today's app.
 - [ ] `app.plusoneevents.site/demo` opens Amma's 60th with no sign-up, in under 10 seconds on a phone on mobile data.
 - [ ] The demo bar says it's a sample and points at Under the hood; the dot on Under the hood shows until it's opened.
-- [ ] Following the README's "Try it in two minutes" word for word works: Today → Vendors → Compare → the vendors' demo → Under the hood → "We're now 140 people".
+- [ ] Following the README's "Try it in two minutes" word for word works: Overview → Vendors → Compare → the vendors' demo → Under the hood → "We're now 140 people".
 - [ ] The demo video link plays (once it exists) and is public or unlisted.
 
 ## 2. Home site (plusoneevents.site)
@@ -56,20 +56,22 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 - [ ] `/new/manual`: the step-by-step form makes the same event.
 - [ ] The microphone in the planning chat records a spoken plan in English, in Tamil, and in both mixed; the words land in the box to check before sending (allow the microphone when asked).
 
-## 5. Today
+## 5. Overview
 
-- [ ] Today shows done, under way, over to you and up next, each with the button that finishes it; each button does what it says.
+- [ ] Overview opens on the budget (committed, paid, still free), then vendors booked and people coming.
+- [ ] Where things stand reads as milestones in the need's own name ("Found 6 options for your caterer", "Caterer booked"), never a vendor's name; each button does what it says.
+- [ ] Notes to self: add, tick, move, remove; a ticked note goes into the folded Done list, and on a laptop the note drags by its tape and stays where it's left after a reload.
+- [ ] The suggestions under "Tell PlusOne" fit the event (a small party doesn't see "We're now 140 people").
 - [ ] The "Tell PlusOne" box: "We're now 140 people" gives a card; pressing it changes the guest count everywhere (Plan, Compare's per-plate totals).
 - [ ] "Move lunch to 1 pm" gives a card that moves the function.
 - [ ] Nothing changes without pressing the card.
 - [ ] The microphone in the box works; in the demo, "Play a sample" plays a recorded brief and its words appear in the box.
-- [ ] On a phone the four lanes (Today, Plan, Vendors, People) sit in a bar along the bottom.
+- [ ] On a phone the four lanes (Overview, Plan, Vendors, People) sit in a bar along the bottom.
 
 ## 6. Plan lane
 
-- [ ] The event, its money committed so far, its functions and the next to-dos are right.
+- [ ] The event, its money committed so far and its functions are right; a need with no price shows what's planned for it.
 - [ ] Open a function (`sessions/…`): time, place and guests show; edit and save.
-- [ ] To-dos (`tasks`): add, tick, untick, delete.
 - [ ] Budget (`budget`): lines add up; editing a line updates the total.
 - [ ] Dues: every deposit, balance and vendor deadline in one list; "Add to calendar" downloads a file that opens in the phone's calendar.
 - [ ] History (`history`) lists what happened, newest first.
@@ -85,6 +87,8 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 
 ## 8. Quotes that didn't come by email
 
+- [ ] On a need's own page, "Add a quote" for a vendor already there and for a new name: typed with a price per plate (lands at once), spoken into the microphone, and as a photo; each sits beside the emailed quotes marked "Added by you", with Book.
+- [ ] "Already booked one yourself?" on a need: name, price agreed and what's paid; the need shows booked, the budget takes the price, the paid part is marked paid and the balance shows in Dues.
 - [ ] Add a quote as a pasted message: it is read into lines and lands in Compare.
 - [ ] Add a photo or screenshot of a price list: the same.
 - [ ] Add a PDF: the same.
@@ -96,7 +100,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 
 - [ ] Catering in the demo: three caterers' emailed quotes and two verified vendors' offers, line by line, at the host's headcount.
 - [ ] Missing charges flagged in words ("No water line, and one other charges ₹600").
-- [ ] Each price placed in the city's range (or the event's own quotes' range, said so).
+- [ ] Each price placed in the city's range; where the city has none yet (sound and lighting, say), two or more quotes get a bar across your own quotes, each labelled lowest, highest or how far over the lowest.
 - [ ] "What's in it" shows hours, photographers, dishes, with the lower ones marked.
 - [ ] Track record: each verified vendor's level (New, Trusted, Top) and events done; web-found vendors say they aren't on PlusOne yet.
 - [ ] Past work: checked photos beside each Partner vendor's offer, with their tags; tapping a photo opens it.
@@ -120,6 +124,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 - [ ] Guests (`guests`): add, edit, remove; import a spreadsheet of guests.
 - [ ] Each guest gets an invitation with their own RSVP link (`/r/…`); replying saves per function, with head count and food needs.
 - [ ] The event page (`website`, public at `/s/…`) is written from the plan; editing it updates the public page; search engines are asked not to list it.
+- [ ] The event page lists everyone's own RSVP link: copy one, send one on WhatsApp, copy all.
 - [ ] Gifts (`gifts`): add and mark received.
 - [ ] Share the plan as a read-only link (`/p/…`): it opens signed out and can't be edited; revoking it stops it working.
 - [ ] Print (`print`) fits the plan on one page.
@@ -146,7 +151,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 
 - [ ] The top-bar button opens the panel: every step with its Meta model, time and cost.
 - [ ] In the demo it opens on the recorded runs, each labelled recorded with its date: Muse Spark on the three quotes, Muse Spark and SAM 3.1 on the hall, Muse Glimmer on a photo, Muse Spark Open on a quote.
-- [ ] "We're now 140 people" on Today adds a new live step to the panel.
+- [ ] "We're now 140 people" on Overview adds a new live step to the panel.
 
 ## 16. PlusOne Partner, the vendors' demo (partner.plusoneevents.site/demo)
 

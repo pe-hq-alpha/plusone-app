@@ -37,16 +37,17 @@ export function suggestionsFor(s: SuggestionState, max = 4): string[] {
 
   // The next need nobody has started on.
   const fresh = s.needs.find((n) => n.status === "research");
-  if (fresh) add(`Find vendors for ${lower(fresh.title)}`);
+  if (fresh) add(`Find vendors for your ${lower(fresh.title)}`);
 
   // A change in the event's own numbers: the biggest part's headcount, or a part's time.
   const biggest = [...s.parts].sort((a, b) => b.guestCount - a.guestCount)[0];
   if (biggest && biggest.guestCount > 0) {
     const more = biggest.guestCount + (biggest.guestCount >= 100 ? 20 : biggest.guestCount >= 30 ? 10 : 5);
-    add(s.parts.length > 1 ? `We're now ${more} people for ${lower(biggest.name)}` : `We're now ${more} people`);
+    // A part's name is the host's own (often a proper name: "Diwali party"), so its case is kept.
+    add(s.parts.length > 1 ? `We're now ${more} people for ${biggest.name}` : `We're now ${more} people`);
   }
   const timed = s.parts.find((p) => p.startTime && laterBy(p.startTime, 60));
-  if (timed?.startTime) add(`Move ${lower(timed.name)} to ${laterBy(timed.startTime, 60)}`);
+  if (timed?.startTime) add(`Move ${timed.name} to ${laterBy(timed.startTime, 60)}`);
 
   // People and money.
   if (s.guests.pending > 0) add(`Who hasn't replied yet?`);

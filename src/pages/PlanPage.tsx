@@ -72,9 +72,12 @@ export function PlanPage() {
       <aside className="grid content-start gap-4 md:grid-cols-3 lg:sticky lg:top-6 lg:grid-cols-1">
         <section className="card p-5" aria-labelledby="budget-h" data-tour="budget">
           <h2 id="budget-h" className="display text-lg">Budget</h2>
-          <p className="display mt-1 text-[1.7rem] leading-tight text-ink">{money(stats.committedTotal, event.currency)}</p>
-          <p className="text-xs text-quiet">committed of {money(event.totalBudget, event.currency)}</p>
-          <BudgetBar className="mt-3 h-1.5" spent={stats.committedTotal} budget={event.totalBudget} label="Budget committed" />
+          <p className="display mt-1 text-[1.7rem] leading-tight text-ink">{money(stats.bookedTotal, event.currency)}</p>
+          <p className="text-xs text-quiet">
+            booked of {money(event.totalBudget, event.currency)}
+            {stats.committedTotal > stats.bookedTotal && <>, plus {money(stats.committedTotal - stats.bookedTotal, event.currency)} in quotes you're weighing</>}
+          </p>
+          <BudgetBar className="mt-3 h-1.5" spent={stats.bookedTotal} budget={event.totalBudget} label="Budget booked" />
           {budget?.warnings?.length ? (
             <ul className="mt-3 space-y-1 text-sm text-warn">
               {budget.warnings.map((w: string, i: number) => <li key={i}>{w}</li>)}

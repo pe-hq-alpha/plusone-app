@@ -86,11 +86,13 @@ export function TodayPage() {
         <Link to="budget" className="today__stat today__stat--money">
           <span className="today__stat-label">Budget</span>
           <span className="today__stat-big">
-            {money(stats.committedTotal, event.currency)} <small>committed of {money(event.totalBudget, event.currency)}</small>
+            {money(stats.bookedTotal, event.currency)} <small>booked of {money(event.totalBudget, event.currency)}</small>
           </span>
-          <BudgetBar className="mt-2 h-2" spent={stats.committedTotal} budget={event.totalBudget} label="Budget committed" />
+          <BudgetBar className="mt-2 h-2" spent={stats.bookedTotal} budget={event.totalBudget} label="Budget booked" />
           <span className="today__stat-foot">
-            {money(stats.paidTotal, event.currency)} paid · {money(Math.max(0, event.totalBudget - stats.committedTotal), event.currency)} still free
+            {money(stats.paidTotal, event.currency)} paid
+            {stats.committedTotal > stats.bookedTotal && <> · {money(stats.committedTotal - stats.bookedTotal, event.currency)} more in quotes you're weighing</>}
+            {" · "}{money(Math.max(0, event.totalBudget - stats.committedTotal), event.currency)} still free
           </span>
         </Link>
         <Link to="vendors" className="today__stat">

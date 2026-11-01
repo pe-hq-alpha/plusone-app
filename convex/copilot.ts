@@ -23,6 +23,7 @@ const NOT_WORK = new Set<Doc<"activity">["type"]>(["event_created", "research_st
 
 const lower = inSentence;
 const count = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+const times = (n: number) => (n === 1 ? "once" : n === 2 ? "twice" : `${n} times`);
 
 /** The kinds of work that read as a milestone for one need, rather than one line per vendor. */
 const MILESTONE = new Set<Doc<"activity">["type"]>(["vendor_found", "inquiry_sent", "vendor_replied", "quote_received", "follow_up_sent", "booked"]);
@@ -63,7 +64,6 @@ export const route = query({
   }),
   handler: async (ctx, args) => {
     const { event } = await requireMember(ctx, args.eventId);
-    const today = Date.parse(args.today);
     const [activity, slots, runs, threads, yours] = await Promise.all([
       ctx.db.query("activity").withIndex("by_eventId", (q) => q.eq("eventId", event._id)).order("desc").take(40),
       ctx.db.query("vendorSlots").withIndex("by_eventId", (q) => q.eq("eventId", event._id)).take(100),
@@ -100,11 +100,12 @@ export const route = query({
         a.type === "vendor_found" && slot ? ctx.db.query("vendors").withIndex("by_slotId", (q) => q.eq("slotId", slot._id)).take(100).then((r) => r.length) : Promise.resolve(0),
       ),
     );
+    // A sample event's history was all written when it was made, so no time is shown for it.
     const done = top.map(({ a, slot, n }, i) => ({
       title: milestone(a.type, Math.max(n, found[i]), slot) ?? clip(a.text, 170),
       detail: "",
       href: slot ? `vendors/${slot._id}` : a.refs?.threadId ? `inbox/${a.refs.threadId}` : undefined,
-      at: a._creationTime,
+      at: event.demo ? undefined : a._creationTime,
     }));
 
     // Under way: searches still reading websites, then vendors written to and not yet heard from.
@@ -114,21 +115,31 @@ export const route = query({
       if (!slot) continue;
       now.push({ title: `Looking for ${needPlural(slot.category)} for your ${lower(slot.title)}`, detail: run.step.startsWith("Found ") ? "Reading vendors' websites for prices and contacts" : run.step, href: `vendors/${slot._id}`, at: run.startedAt });
     }
-    const silent = new Map<string, { slot: Doc<"vendorSlots">; n: number; last: number }>();
+    const silent = new Map<string, { slot: Doc<"vendorSlots">; n: number; last: number; chased: number }>();
     for (const t of threads) {
       if (t.status !== "sent" || t.lastInboundAt) continue;
       const slot = slotById.get(t.slotId);
       if (!slot || slot.status === "booked") continue;
-      const entry = silent.get(slot._id) ?? { slot, n: 0, last: 0 };
+      const entry = silent.get(slot._id) ?? { slot, n: 0, last: 0, chased: 0 };
       entry.n += 1;
       entry.last = Math.max(entry.last, t.lastOutboundAt ?? 0);
+      entry.chased = Math.max(entry.chased, t.followUpCount ?? 0);
       silent.set(slot._id, entry);
     }
-    for (const { slot, n, last } of [...silent.values()].sort((a, b) => b.n - a.n).slice(0, 3)) {
-      const days = last && !Number.isNaN(today) ? Math.max(0, Math.floor((today - last) / DAY)) : undefined;
+    for (const { slot, n, last, chased } of [...silent.values()].sort((a, b) => b.n - a.n).slice(0, 3)) {
+      // Counted in whole days from the last letter, the way Compare counts "last written".
+      const days = last ? Math.max(0, Math.floor((Date.now() - last) / DAY)) : undefined;
+      const when = days === undefined ? "" : days === 0 ? "today" : `${count(days, "day")} ago`;
       now.push({
         title: `Waiting on ${n === 1 ? "a reply" : `${n} replies`} for your ${lower(slot.title)}`,
-        detail: days === undefined ? "Replies are read as they arrive." : days === 0 ? "Written to today; replies are read as they arrive." : `Written to ${count(days, "day")} ago; a polite nudge goes after three days of quiet.`,
+        detail:
+          days === undefined
+            ? "Replies are read as they arrive."
+            : chased > 0
+              ? `Followed up ${times(chased)}, last written ${when}; replies are read as they arrive.`
+              : days >= 3
+                ? `Written to ${when}; a polite nudge goes out next.`
+                : `Written to ${when}; a polite nudge goes after three days of quiet.`,
         href: `vendors/${slot._id}`,
       });
     }

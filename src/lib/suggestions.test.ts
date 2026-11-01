@@ -24,9 +24,9 @@ describe("suggestions follow the event, not a fixed list", () => {
     });
     expect(s).toEqual([
       "Which catering quote is the best value?",
-      "Find vendors for flowers & decoration",
-      "We're now 140 people for birthday lunch",
-      "Move morning pooja to 8 am",
+      "Find vendors for your flowers & decoration",
+      "We're now 140 people for Birthday lunch",
+      "Move Morning pooja to 8 am",
     ]);
   });
 
@@ -37,7 +37,7 @@ describe("suggestions follow the event, not a fixed list", () => {
       parts: [{ name: "Diwali party", guestCount: 15, startTime: "19:30" }],
       guests: { pending: 0, yes: 0, total: 0 },
     });
-    expect(s).toEqual(["Find vendors for biryani place", "We're now 20 people", "Move diwali party to 8:30 pm", "Add people to the guest list"]);
+    expect(s).toEqual(["Find vendors for your biryani place", "We're now 20 people", "Move Diwali party to 8:30 pm", "Add people to the guest list"]);
     expect(s.join(" ")).not.toMatch(/quote|140|photographer|lunch/);
   });
 

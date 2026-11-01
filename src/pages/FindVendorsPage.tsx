@@ -168,10 +168,22 @@ export function FindVendorsPage() {
                 )
               )}
               <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {shown.map(({ card, km }) => (
+                {shown.filter(({ card }) => !card.foundOnWeb).map(({ card, km }) => (
                   <li key={card._id}><ListingCard card={card} category={category} km={km} /></li>
                 ))}
               </ul>
+              {/* Found on the web: kept apart from the vendors with prices, and said plainly. */}
+              {shown.some(({ card }) => card.foundOnWeb) && (
+                <div className="mt-8">
+                  <h3 className="text-base font-medium">Also found on the web, not yet verified</h3>
+                  <p className="mt-1 text-sm text-muted">Businesses from public listings. They haven&rsquo;t listed prices on {BRAND.name} yet, so there&rsquo;s nothing to compare until they do.</p>
+                  <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    {shown.filter(({ card }) => card.foundOnWeb).map(({ card, km }) => (
+                      <li key={card._id}><ListingCard card={card} category={category} km={km} /></li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
             </>
           )}

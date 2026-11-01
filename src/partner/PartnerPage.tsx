@@ -15,6 +15,7 @@ import { useAuthActions } from "../lib/session";
 import { useDemoEventId } from "../components/LeaveDemo";
 import { CustomerCompare } from "../pages/DecisionsPage";
 import { partnerHref } from "../lib/hosts";
+import { BRAND } from "../lib/brand";
 import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
 import { readyToUpload } from "../lib/pictures";
 import { placeFor, type Place } from "../../convex/lib/places";
@@ -40,11 +41,15 @@ export function PartnerPage() {
       <Backdrop quiet />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.08] text-balance">PlusOne <em>Partner</em></h1>
-        {me?.isGuest ? (
-          <Link to={partnerHref("/demo")} className="btn-quiet btn-sm bg-cream">Start the demo again</Link>
-        ) : (
-          <button type="button" className="btn-quiet btn-sm bg-cream" onClick={leave}>Sign out</button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The way back to PlusOne itself, for a vendor or a judge who came from the home page. */}
+          <a href={`https://${BRAND.domain}`} className="btn-quiet btn-sm bg-cream">{BRAND.name} home</a>
+          {me?.isGuest ? (
+            <Link to={partnerHref("/demo")} className="btn-quiet btn-sm bg-cream">Start the demo again</Link>
+          ) : (
+            <button type="button" className="btn-quiet btn-sm bg-cream" onClick={leave}>Sign out</button>
+          )}
+        </div>
       </div>
       {me?.isGuest && (
         <p className="card-quiet mt-4 px-5 py-3 text-sm">
@@ -729,7 +734,7 @@ function Dashboard({
       <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
         {tab === "requests" && (
           <>
-            <Briefs verified={profile.status === "verified"} />
+            <Briefs verified={profile.status === "verified"} ownName={profile.name} />
             <SentOffers />
           </>
         )}
@@ -876,7 +881,7 @@ function PhotoItem({ photo, onRemove }: { photo: MinePhoto; onRemove: () => void
 
 // ---------------------------------------------------------------- briefs and offers
 
-function Briefs({ verified }: { verified: boolean }) {
+function Briefs({ verified, ownName }: { verified: boolean; ownName: string }) {
   const briefs = useQuery(api.marketplace.briefs.open);
   const [answering, setAnswering] = useState<Id<"vendorBriefs"> | null>(null);
   // In the vendors' demo the customer is a sample event of the guest's own, so the guest
@@ -917,9 +922,9 @@ function Briefs({ verified }: { verified: boolean }) {
               {demoEventId && b.answered && answering !== b._id && (
                 <div className="mt-6">
                   <h4 className="label">How the customer sees your offer</h4>
-                  <p className="mb-3 mt-1 text-sm text-muted">Their Compare: every quote and offer on the same lines, with what each leaves unsaid.</p>
+                  <p className="mb-3 mt-1 text-sm text-muted">Their Compare: every quote and offer on the same lines, with what each leaves unsaid. Other vendors stay unnamed to you, as you do to them.</p>
                   <div className="min-w-0 overflow-x-auto">
-                    <CustomerCompare eventId={demoEventId} category={b.category} city={b.city} />
+                    <CustomerCompare eventId={demoEventId} category={b.category} city={b.city} ownName={ownName} />
                   </div>
                 </div>
               )}
@@ -1142,7 +1147,7 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
           <p className="mb-1 text-xs text-muted">
             <strong className="font-medium text-ink">In the price</strong>: the main price covers it.{" "}
             <strong className="font-medium text-ink">Added</strong>: a fixed amount, added to the total.{" "}
-            <strong className="font-medium text-ink">At cost</strong>: charged on top, outside the total.
+            <strong className="font-medium text-ink">At cost</strong> (for GST, <strong className="font-medium text-ink">On top</strong>): charged on top, outside the total.
           </p>
           <div>
             {sheet.lines.map((line) => {

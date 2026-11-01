@@ -1,6 +1,6 @@
 import { anOccasion } from "../../convex/lib/occasion";
 import { defaultSearchText, partOfNeed } from "../../convex/lib/searchTerms";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Link, useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
@@ -38,6 +38,14 @@ export function VendorsPage() {
   }, [slotId, slots, navigate, eventId]);
 
   const slot = slots?.find((s) => s._id === slotId);
+  // On a phone the need's detail sits under the list: tapping a need brings its detail into view.
+  const detailRef = useRef<HTMLElement>(null);
+  const tapped = useRef(false);
+  useEffect(() => {
+    if (!tapped.current || !slotId) return;
+    tapped.current = false;
+    if (window.matchMedia("(max-width: 1023px)").matches) detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [slotId]);
   // Where the tour stops: a need with vendors found but nobody contacted yet.
   const explore = slots?.find((s) => s.status === "research" && s.vendorsCount >= 3) ?? slots?.[0];
 
@@ -53,6 +61,7 @@ export function VendorsPage() {
               <Link
                 data-tour={s._id === explore?._id ? "slot-to-explore" : undefined}
                 to={`/e/${eventId}/vendors/${s._id}`}
+                onClick={() => (tapped.current = true)}
                 aria-current={s._id === slotId ? "page" : undefined}
                 className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${s._id === slotId ? "bg-accent-soft text-accent" : "hover:bg-sand"}`}
               >
@@ -65,7 +74,7 @@ export function VendorsPage() {
         {canEdit && <AddSlot eventId={eventId} sessions={sessions} currency={event.currency} />}
       </aside>
 
-      <section className="min-w-0">
+      <section ref={detailRef} className="min-w-0 scroll-mt-20">
         {!slot ? (
           <p className="text-muted">Pick a slot to start.</p>
         ) : (
@@ -197,7 +206,8 @@ function SlotPanel({
   );
   const nearby: Nearby[] = useMemo(
     () => [
-      ...verified.map((v) => ({ id: v._id, name: v.name, kind: "verified" as const, place: v.place ?? null })),
+      // Listed vendors are "verified"; businesses found on the web never are, on the map or anywhere.
+      ...verified.map((v) => ({ id: v._id, name: v.name, kind: v.foundOnWeb ? ("web" as const) : ("verified" as const), place: v.place ?? null })),
       ...(vendors ?? []).map((v) => ({ id: v._id, name: v.name, kind: "web" as const, place: webPlace(v) })),
     ],
     [verified, vendors, webPlace],
@@ -400,7 +410,7 @@ function SlotPanel({
           </>
         ) : inView.length === 0 ? (
           <div className="card mt-3 p-6 text-sm text-muted">
-            None of these are shortlisted yet. Tap the heart on a vendor to keep it here, or{" "}
+            None of these are saved yet. Tap the heart on a vendor to keep it here, or{" "}
             <button type="button" className="text-accent underline underline-offset-2" onClick={() => setOnlyShortlisted(false)}>
               show everyone again
             </button>

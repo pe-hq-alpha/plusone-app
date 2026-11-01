@@ -223,10 +223,18 @@ export function NeedQuotes({ eventId, slotId, city, demo, canEdit, eventName, ev
  * demo, where the sample caterer sees their offer beside the sample customer's quotes;
  * a real vendor never sees a customer's Compare.
  */
-export function CustomerCompare({ eventId, category, city }: { eventId: Id<"events">; category: string; city: string }) {
+export function CustomerCompare({ eventId, category, city, ownName }: { eventId: Id<"events">; category: string; city: string; ownName?: string }) {
   const board = useQuery(api.dashboard.board, { eventId });
-  const need = board?.needs.find((n) => n.category === category);
-  if (!board || !need) return null;
+  const found = board?.needs.find((n) => n.category === category);
+  if (!board || !found) return null;
+  // A vendor sees their own offer by name and everyone else's as "Another vendor", never a rival's name.
+  let other = 0;
+  const unnamed = (name: string) => (ownName && name === ownName ? name : `Another vendor ${String.fromCharCode(65 + other++)}`);
+  const need: Need = {
+    ...found,
+    vendors: found.vendors.map((v) => ({ ...v, name: unnamed(v.name), email: undefined, phone: undefined, website: undefined })),
+    offers: found.offers.map((o) => ({ ...o, name: unnamed(o.name) })),
+  };
   return <NeedBoard need={need} currency={board.currency} city={city} demo={false} canEdit={false} eventId={eventId} compareOnly />;
 }
 
@@ -349,10 +357,16 @@ function NeedBoard({
               <span className="text-ink">{money(need.cheapest, currency)}</span>
               {need.dearest !== null && need.dearest !== need.cheapest && <> – {money(need.dearest, currency)}</>} quoted
             </>
+          ) : need.offers.length > 0 ? (
+            // Only verified vendors' offers so far: say so, with the lowest, never "no prices yet".
+            <>
+              <span className="text-ink">{money(Math.min(...need.offers.map((o) => o.total)), currency)}</span>
+              {need.offers.length > 1 && <> – {money(Math.max(...need.offers.map((o) => o.total)), currency)}</>}
+              {" "}from {need.offers.length === 1 ? "a verified vendor" : `${need.offers.length} verified vendors`}
+              {live.length > 0 && <span className="text-quiet"> · {live.length} more asked</span>}
+            </>
           ) : (
-            need.offers.length > 0 && live.length === 0
-              ? `${need.offers.length} ${need.offers.length === 1 ? "offer" : "offers"} from verified vendors`
-              : `${live.length} ${live.length === 1 ? "vendor" : "vendors"} asked, no prices yet`
+            `${live.length} ${live.length === 1 ? "vendor" : "vendors"} asked, no prices yet`
           )}
         </p>
         {need.market && (
@@ -434,13 +448,15 @@ function NeedBoard({
                       {v.state === "declined" && v.theyDeclined ? "They passed" : STATE[v.state].label}
                     </span>
                     <span className="mt-1 block text-xs text-quiet">
-                      {v.repliedInHours !== null
+                      {v.quote?.addedByYou
+                        ? "added by you"
+                        : v.repliedInHours !== null
                         ? `answered in ${formatHours(v.repliedInHours)}`
                         : v.followUpCount > 0
                           ? `chased ${v.followUpCount}×, last written ${timeAgo(v.lastOutboundAt)}`
                           : v.lastOutboundAt
                             ? `written ${timeAgo(v.lastOutboundAt)}`
-                            : "—"}
+                            : "not written to yet"}
                     </span>
                   </td>
 
@@ -500,7 +516,7 @@ function NeedBoard({
                         {v.quote.includes.slice(0, 3).map((inc, i) => <li key={i}>{inc}</li>)}
                       </ul>
                     ) : (
-                      <span className="text-quiet">—</span>
+                      <span className="text-xs text-quiet">{v.quote ? "Not stated" : "No quote yet"}</span>
                     )}
                     {v.quote && besideGaps(v.quote.excludes, v.quote).length > 0 && (
                       <p className="mt-1 max-w-[18rem] text-xs text-quiet">Not included: {besideGaps(v.quote.excludes, v.quote).slice(0, 2).join(", ")}</p>
@@ -731,8 +747,8 @@ function PastWork({ columns }: { columns: Column[] }) {
         const photos = c.photos ?? [];
         if (!photos.length) {
           return (
-            <td key={c.id} className="px-3 py-2 text-right align-top text-quiet">
-              —
+            <td key={c.id} className="px-3 py-2 text-right align-top text-xs text-quiet">
+              {c.from === "web" ? "Not on PlusOne yet" : "None shared yet"}
             </td>
           );
         }

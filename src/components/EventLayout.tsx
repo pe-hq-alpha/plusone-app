@@ -155,8 +155,8 @@ export function EventLayout() {
   const inboxBadge = waiting > 0 && (
     <span
       className="grid h-[1.15rem] min-w-[1.15rem] place-items-center rounded-full bg-highlight px-1 text-[0.7rem] font-semibold tabular-nums text-on-highlight"
-      aria-label={`${waiting} new in the inbox`}
-      title={`${waiting} new: a reply you haven't opened, or a vendor waiting on you`}
+      aria-label={`${waiting} unread in the inbox`}
+      title={`${waiting} ${waiting === 1 ? "reply" : "replies"} you haven't opened yet`}
     >
       {waiting}
     </span>
@@ -264,7 +264,7 @@ export function EventLayout() {
         </div>
       )}
 
-      <main id="main" className="mx-auto min-w-0 max-w-[1240px] px-4 pb-16 pt-6 md:px-6 md:pb-10 md:pt-8">
+      <main id="main" className="mx-auto min-w-0 max-w-[1240px] px-4 pb-28 pt-6 md:px-6 md:pb-10 md:pt-8">
         <div className="page">
           <Suspense fallback={<p className="py-16 text-center text-sm text-muted">Loading…</p>}>
             <Outlet context={data} />

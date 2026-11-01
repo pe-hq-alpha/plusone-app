@@ -253,7 +253,7 @@ function ThreadView({ threadId, currency, canEdit }: { threadId: Id<"threads">; 
           <h2 className="text-2xl">{vendor.name}</h2>
           <p className="text-sm text-muted">
             {slot.title} · <span className="capitalize">{statusLabel(thread.status)}</span>
-            {thread.nextFollowUpAt && thread.status === "sent" ? ` · follow-up ${new Date(thread.nextFollowUpAt).toLocaleDateString()}` : ""}
+            {thread.nextFollowUpAt && thread.status === "sent" ? ` · follow-up ${new Date(thread.nextFollowUpAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
             {thread.followUpCount ? ` · ${thread.followUpCount}/3 nudges` : ""}
           </p>
           {vendor.email && <p className="font-mono text-[11px] text-muted">{privacy.email(vendor.email)}</p>}

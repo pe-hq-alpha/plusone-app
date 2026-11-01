@@ -4,6 +4,7 @@ import type { QueryCtx } from "./_generated/server";
 import { HELP_WITH } from "./lib/helpWith";
 import { isWedding, partWord, peopleWord } from "./lib/occasion";
 import { isLive } from "./lib/quoteHold";
+import { offersForEvent } from "./marketplace/offers";
 import { clip, formatMoney, inSentence } from "./lib/text";
 import { bookAheadWeeks } from "./lib/vendorNeeds";
 
@@ -70,18 +71,21 @@ export async function weekItems(ctx: QueryCtx, event: Doc<"events">, today: stri
   const whenItIs = `${isWedding(event) ? "The wedding" : event.name} is ${plural(weeksLeft, "week")} away.`;
   const person = peopleWord(event).replace(/s$/, "");
 
-  // Two or more live quotes for something not yet booked: a choice is ready to make.
+  // Two or more prices for something not yet booked (quotes and verified vendors' offers,
+  // counted as Compare counts them): a choice is ready to make.
   const live = quotes.filter(isLive);
   const open = slots.filter((s) => s.status !== "booked");
+  const offers = await offersForEvent(ctx, event._id);
   for (const slot of open) {
     const ins = live.filter((q) => q.slotId === slot._id);
-    if (ins.length < 2) continue;
-    const totals = ins.map((q) => q.total).sort((a, b) => a - b);
+    const offered = offers.filter((o) => o.slotId === slot._id);
+    if (ins.length + offered.length < 2) continue;
+    const totals = [...ins.map((q) => q.total), ...offered.map((o) => o.total)].sort((a, b) => a - b);
     const range = totals[0] === totals[totals.length - 1]
       ? formatMoney(totals[0], event.currency)
       : `${formatMoney(totals[0], event.currency)} to ${formatMoney(totals[totals.length - 1], event.currency)}`;
     add(
-      { kind: "choose", title: `Choose your ${lower(slot.title)}`, detail: `${plural(ins.length, "quote")} in, ${range}.`, href: "decisions", hrefLabel: "Compare" },
+      { kind: "choose", title: `Choose your ${lower(slot.title)}`, detail: `${[ins.length ? plural(ins.length, "quote") : "", offered.length ? plural(offered.length, "offer") : ""].filter(Boolean).join(" and ")} in, ${range}.`, href: "decisions", hrefLabel: "Compare" },
       80 + ins.length,
     );
   }

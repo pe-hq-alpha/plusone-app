@@ -77,6 +77,9 @@ export default function VendorMap({ centre, radiusKm, pins, onPick, onSelect, cl
     layer.current = L.layerGroup().addTo(m);
     map.current = m;
     return () => {
+      // Stop any zoom still animating first: removing a map mid-animation throws (_leaflet_pos).
+      m.stop();
+      m.off();
       m.remove();
       map.current = null;
       fitted.current = "";
@@ -109,10 +112,11 @@ export default function VendorMap({ centre, radiusKm, pins, onPick, onSelect, cl
     const fit = `${centre?.lat},${centre?.lng},${radiusKm},${pins.map((p) => p.id).join(",")}`;
     if (fit === fitted.current) return;
     fitted.current = fit;
-    // The box may have been laid out after the map was made; measure it again first.
-    m.invalidateSize();
-    if (bounds.length > 1) m.fitBounds(L.latLngBounds(bounds), { padding: [24, 24], maxZoom: 14 });
-    else if (bounds.length === 1) m.setView(bounds[0], Math.max(m.getZoom(), 13));
+    // The box may have been laid out after the map was made; measure it again first. The view
+    // jumps rather than animates, so switching needs never removes a map in the middle of a zoom.
+    m.invalidateSize({ animate: false });
+    if (bounds.length > 1) m.fitBounds(L.latLngBounds(bounds), { padding: [24, 24], maxZoom: 14, animate: false });
+    else if (bounds.length === 1) m.setView(bounds[0], Math.max(m.getZoom(), 13), { animate: false });
   }, [centre, radiusKm, pins]);
 
   return <div ref={box} role="region" aria-label={label} className={`vendor-map ${className}`} />;

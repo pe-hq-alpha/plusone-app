@@ -157,14 +157,14 @@ export function SettingsPage() {
       <section className="card mt-5 p-6 md:p-7">
         <h2 className="display text-xl">The emails</h2>
         <p className="mt-1 text-sm text-muted">
-          Once you have confirmed a shortlist, who presses send.
+          Once you have picked the vendors to write to, who presses send.
         </p>
         <div className="mt-4 grid gap-3">
           {([
             {
               value: "auto" as const,
               title: `${BRAND.name} sends them`,
-              body: "You confirm the shortlist once, having seen who is being written to and one letter in full. Everything after that — sending, chasing anyone who goes quiet, reading the replies into quotes — happens without you.",
+              body: "You confirm the vendors to write to once, having seen who is being written to and one letter in full. Everything after that — sending, chasing anyone who goes quiet, reading the replies into quotes — happens without you.",
             },
             {
               value: "review" as const,

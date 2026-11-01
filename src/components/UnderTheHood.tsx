@@ -109,7 +109,7 @@ export function UnderTheHood({ eventId, onClose }: { eventId: Id<"events">; onCl
           ) : calls.length === 0 ? (
             <p className="text-sm text-muted">
               {recorded?.length ? "Nothing from this visit yet; the recorded runs below show each model at work. " : "Nothing yet. "}
-              Ask {BRAND.name} something on Today, such as &ldquo;We&rsquo;re now 140 people&rdquo;, and the step shows up here.
+              Ask {BRAND.name} something on Overview, such as &ldquo;We&rsquo;re now 140 people&rdquo;, and the step shows up here.
             </p>
           ) : (
             <ol className="grid gap-2.5">

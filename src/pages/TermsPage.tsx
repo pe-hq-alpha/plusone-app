@@ -58,6 +58,7 @@ export function TermsPage() {
             <li>show the Service inside another site or app, run a copy of it, or hide or change any statement of who owns it; or</li>
             <li>use our names, marks or logos, or suggest that we endorse or are affiliated with you.</li>
           </ol>
+          <p className="mt-2 text-muted">None of this stops anyone reading the source code that PlusOne Events publishes openly, on the terms it is published under, or hackathon judges and reviewers looking at how the Service works in order to assess it. It still may not be copied into, or used to build, another product.</p>
           <p className="mt-2 text-muted">Written permission means a signed letter, or an email from <a href="mailto:hello@plusoneevents.site" className="text-accent underline underline-offset-2">hello@plusoneevents.site</a>, from PlusOne Events or its authorised representative, that names what is permitted. Nothing else counts: not silence, a demo, a conversation, a video call, or anything said by anyone at PlusOne, including a representative, unless it is confirmed in writing in that way.</p>
         </section>
         <section>

@@ -122,6 +122,11 @@ export const addFromHost = mutation({
     }
     if (!text && !file && !given) throw new ConvexError("Type what they quoted, say it, or add a photo.");
 
+    // The vendor's card shows the price they told the host, when it had none of its own.
+    if (given && vendor.startingPrice === undefined) {
+      await ctx.db.patch(vendor._id, { startingPrice: given.amount, priceUnit: given.unit, priceCurrency: event.currency });
+    }
+
     // Words or a file are read by the model, which spends the allowance; a typed price alone doesn't.
     const reading = Boolean(text || file);
     if (reading) await spend(ctx, "assistant", event, userId);

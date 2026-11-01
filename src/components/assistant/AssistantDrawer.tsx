@@ -39,7 +39,8 @@ export function pageContext(pathname: string, sessions: Ceremony[]): { context: 
 export const ASK_EVENT = "plusone:ask";
 
 /**
- * The assistant on every page: a button in the corner opens it beside
+ * The assistant on every page: on a laptop the solid Ask in the top bar opens it (always in
+ * view, never over the page); on a phone, a labelled button in the corner. Either opens it beside
  * whatever the host is looking at, and their questions carry that page with them.
  */
 export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { eventId: Id<"events">; canEdit: boolean; sessions: Ceremony[]; currency: string }) {
@@ -94,7 +95,7 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
           data-tour="ask"
           aria-label={`Ask ${BRAND.name}`}
           onClick={() => setOpen(true)}
-          className={`no-print fixed bottom-[78px] right-3 z-40 ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent py-3 pl-4 pr-5 text-[0.95rem] font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] ring-4 ring-accent/15 transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep md:bottom-7 md:right-7`}
+          className={`no-print fixed bottom-[78px] right-3 z-40 md:hidden ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent py-3 pl-4 pr-5 text-[0.95rem] font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] ring-4 ring-accent/15 transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep`}
           style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
           <Icon name="heart" size={17} /> <span>Ask {BRAND.name}</span>

@@ -30,6 +30,29 @@ async function dateFor(ctx: MutationCtx, event: Doc<"events">, slot: Doc<"vendor
   return dates.sort()[0] ?? event.startDate;
 }
 
+/**
+ * What a vendor needs to know that the plan already says, when the host wrote no note: the
+ * need's own notes and, for food, the guests' food needs from their RSVPs ("Jain food (3) ·
+ * No onion or garlic (2)"). Never a guest's name.
+ */
+async function notesFromPlan(ctx: MutationCtx, event: Doc<"events">, slot: Doc<"vendorSlots">): Promise<string | undefined> {
+  const parts: string[] = [];
+  if (slot.notes?.trim()) parts.push(slot.notes.trim());
+  if (/cater|food|cake|sweet/i.test(slot.category)) {
+    const guests = await ctx.db.query("guests").withIndex("by_eventId", (q) => q.eq("eventId", event._id)).take(500);
+    const counts = new Map<string, number>();
+    for (const g of guests) {
+      const need = g.dietary?.trim();
+      if (!need || g.rsvp === "no") continue;
+      const key = need.replace(/\s*\(.*\)\s*$/, "");
+      counts.set(key, (counts.get(key) ?? 0) + Math.max(1, g.attendingCount || g.partySize || 1));
+    }
+    const food = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, n]) => `${k} (${n})`);
+    if (food.length) parts.push(`Food needs from the guests' replies: ${food.join(" · ")}`);
+  }
+  return parts.length ? parts.join(". ") : undefined;
+}
+
 /** Opens a brief for a need, or returns the one already open. Callers check access first. */
 export async function openBrief(ctx: MutationCtx, eventId: Id<"events">, slotId: Id<"vendorSlots">, notes?: string): Promise<Id<"vendorBriefs">> {
   const event = await ctx.db.get(eventId);
@@ -54,7 +77,7 @@ export async function openBrief(ctx: MutationCtx, eventId: Id<"events">, slotId:
     date: await dateFor(ctx, event, slot),
     guests: await guestsFor(ctx, event, slot),
     unit: sheet?.unit ?? basisFor(slot.category),
-    notes: notes?.trim().slice(0, 1000) || undefined,
+    notes: (notes?.trim() || (await notesFromPlan(ctx, event, slot)))?.slice(0, 1000) || undefined,
     demo: event.demo === true,
     status: "open",
     openedAt: Date.now(),

@@ -27,7 +27,6 @@
 <td align="center" width="80"><img src="assets/logos/modal.svg" width="26" height="26" alt="Modal"><br><sub><b>Modal</b><br>Muse Glimmer's GPU</sub></td>
 <td align="center" width="80"><img src="assets/logos/baseten.png" width="26" height="26" alt="Baseten"><br><sub><b>Baseten</b><br>Muse Spark Open</sub></td>
 <td align="center" width="80"><img src="assets/logos/convex.svg" width="26" height="26" alt="Convex"><br><sub><b>Convex</b><br>Backend and jobs</sub></td>
-<td align="center" width="80"><img src="assets/logos/claude.svg" width="26" height="26" alt="Claude"><br><sub><b>Claude</b><br>Fallback only</sub></td>
 <td align="center" width="80"><img src="assets/logos/firecrawl.png" width="26" height="26" alt="Firecrawl"><br><sub><b>Firecrawl</b><br>Vendors' websites</sub></td>
 <td align="center" width="80"><img src="assets/logos/agentmail.png" width="26" height="26" alt="AgentMail"><br><sub><b>AgentMail</b><br>Event inboxes</sub></td>
 <td align="center" width="80"><img src="assets/logos/clerk.svg" width="26" height="26" alt="Clerk"><br><sub><b>Clerk</b><br>Sign-in</sub></td>
@@ -55,11 +54,15 @@
 </div>
 
 
-> **We're building a standardised way to plan events, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.**
+> **PlusOne brings the scattered work of planning an event into one place, and puts every vendor's quote on the same lines, so families and event managers know what they're paying for.**
+>
+> We're building a standardised way to plan events, where customers often struggle to compare quotes, understand what's included and coordinate fragmented vendors. AI turns the planning process into a structured, transparent workflow.
+
+Two sides meet on the same lines: families and event managers plan in PlusOne, and verified vendors answer the same brief on PlusOne Partner.
 
 Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
 
-1. **One app instead of many tools.** An all-in-one, AI-powered event planner: the plan and its budget, vendors found and written to, every reply read and chased, guests, RSVPs and the event page, for an event of any size.
+1. **One app instead of many tools.** An all-in-one event planner: the plan and its budget, vendors found and written to, every reply read and chased, guests, RSVPs and the event page, for an event of any size.
 2. **Quotes you can compare, and vendors you can find.** Every quote and every vendor's offer lands on the same lines, so what's included, what's extra and what's missing is plain, along with where each price sits in the market. Vendors with no website or listing get a place to be found, and answer customers on those same lines.
 
 **What it saves.** In the demo's 60th-birthday lunch, the quote that looks cheapest is the dearest once its minimum order, service, transport and GST sit on the same lines; choosing the one that really is cheaper saves the host about 10%. An event hires many vendors (the average wedding, 14), so if the same 10% holds across the package, a ₹5 lakh event keeps about ₹50,000 and a ₹20 lakh wedding about ₹2 lakh. On the founders' own baby shower, ₹29,500, about 10% of what was quoted, came as charges outside the headline prices ([measured](#measured-results)).
@@ -70,11 +73,11 @@ We start where we live: in India, weddings alone are about $130 billion a year (
 
 One platform, with layers that feed each other:
 
-| Layer | For | What it does | Today |
+| Layer | For | What it does | Status |
 |---|---|---|---|
-| **PlusOne Basic** | Families and teams planning their own event, and event managers planning for their clients | Plans with you, finds vendors, writes to them from the event's own inbox, chases them, reads their quotes into one unit and keeps the budget. The host makes every decision | Live, free until launch |
-| **PlusOne Premium** | People who want a person beside them | Everything in Basic, plus a real person from the PlusOne team in real time and on call | Opens after launch |
-| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, live since 28 Oct; the demo's vendors are samples, and real vendors join as the first city opens |
+| **PlusOne Basic** | Families and teams planning their own event, and event managers planning for their clients | Plans with you, finds vendors, writes to them from the event's own inbox, chases them, reads their quotes into one unit and keeps the budget. The host makes every decision | Live, free until launch, then ₹1,000 ($10) a month |
+| **PlusOne Premium** | People who want a person beside them | Everything in Basic, plus a real person from the PlusOne team in real time and on call | Opens after launch, ₹2,500 ($25) a month |
+| **PlusOne Partner** | Vendors, including the many with no website or listing | Register, price packages in the units customers compare, answer a customer's brief, get verified and get found | Built during the hackathon, live since 28 Oct; the demo's vendors are samples, and real vendors join as the first city opens; a listing subscription after launch |
 | **PlusOne Ops** | The PlusOne team | Verifies each vendor with the evidence Muse Wonder gathers, approves vendors' photos and changes to verified listings | Live since 28 Oct, for the founders |
 
 More vendors on Partner widen what customers can compare; more customers bring vendors work; every quote read into the same lines sharpens the market range for the next event. It is built for the events people actually hold: birthdays and sixtieths, housewarmings, naming ceremonies, poojas, baby showers, engagements, office parties, offsites, launches, conferences, college fests and community festivals. Weddings are one of the sixteen types too.
@@ -93,7 +96,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 **In a few words.** The *standard sheet* is the set of lines every quote for a kind of vendor is read into (the unit, what's included, GST, transport, service, extras). *Value*, *Standard*, *Premium* and *Luxury* say where a price sits among the city's listed prices for the same unit (the lowest quarter, the middle half, up to the 90th percentile, above it), and the *typical price* is the middle; none says a price is fair or unfair. *Verified* means a person in Ops checked the vendor; *Sample* marks a made-up vendor or event.
 
-**Money, in one line.** Finding vendors is free. The planner is paid after launch, with a hands-on tier where the PlusOne team plans with you; vendors pay a small fee to be listed; and the end goal is a disclosed commission on each booking paid through PlusOne ([The business](#the-business)).
+**Money.** Finding vendors is free. Basic is free until launch, then ₹1,000 ($10) a month. Premium, with a person from the PlusOne team planning beside you, is ₹2,500 ($25) a month. Vendors pay a listing subscription on Partner. The end goal is a disclosed commission on bookings paid through PlusOne, once the vendor network and trust exist. Full launch is planned for the 2026 holiday season or early 2027 ([The business](#the-business)).
 
 ### The theme: Build for Your World
 
@@ -108,7 +111,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and compared their quotes (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: over 300 commits, the code from about 41,000 lines to 66,000, the backend from 124 files to 219. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: over 330 commits, the code from about 41,000 lines to about 70,000, and the backend from 124 files to 232. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
 
 | What | Meta model | Status |
 |---|---|---|
@@ -151,13 +154,13 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **How does PlusOne make money?** A paid planner (Basic, then Premium with a person), a fee for vendors to be listed, and the end goal: a disclosed commission on every booking paid through PlusOne. Model cost is an estimated $1–2 for a whole event.
 
-**Why wouldn't a customer and vendor take the deal to WhatsApp?** The guarantee, the locked standard price, the staged payments and the vendor's track record only exist for bookings made through PlusOne, the way home-services apps keep theirs. [Why bookings stay](BUSINESS.md#why-bookings-stay-on-plusone)
+**Why wouldn't a customer and vendor take the deal to WhatsApp?** Once booking runs through the app, the guarantee, the locked standard price, the staged payments and the vendor's track record will exist only for bookings made through PlusOne, the way home-services apps keep theirs. [Why bookings stay](BUSINESS.md#why-bookings-stay-on-plusone)
 
 **Is there demand?** Every week there is a birthday, a housewarming, a wedding function or an office party being planned, and 87% of the industry is unorganised. What's missing is one organised place to plan it.
 
 **What was built during the hackathon?** A two-sided platform with Meta's models at its core: the standard sheet, Compare line by line, the market range, Partner and Ops, voice and recorded calls, the venue view, the photo and vendor checks, the open directory and the map, price lists read on open weights, and quote updates on WhatsApp. [Built during the hackathon](#built-during-the-hackathon-27-oct--4-nov-2026)
 
-**Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website. Vendors we have spoken to have said they will sign up on Partner.
+**Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website.
 
 **Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English, Tamil and both. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing.
 
@@ -165,7 +168,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **What if someone copies it?** They will; building is the easy part. PlusOne competes on execution, quality, trust, brand and distribution, which take years, one city and one kind of event at a time. [The longer answer](BUSINESS.md#what-if-someone-copies-it)
 
-**What's real and what's a sample?** Everything you can click works and is live. The demo's event and vendors are made up and marked Sample; the model runs under the hood are real, with their dates and costs.
+**What's real and what's a sample?** Everything shown in the demo is live. The demo's event and vendors are made up and marked Sample; the model runs under the hood are real, with their dates and costs.
 
 **Where are you today, and where does it go?** Two founders, bootstrapped, the product live and free until launch. Next, a first city with real vendors and a paid pilot, then more cities and countries on the same engine. In ten years, the largest and most trusted name for planning events and weddings, with the money moving through PlusOne. [The vision](#the-business)
 
@@ -180,8 +183,10 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **SAM 3.1** | Cuts the stage and the wall behind it out of the hall's own photo, from boxes Muse Spark finds or a tap, so the page can dress them in a look; masks cached (9 s the first time, 1 s after) | Live in production, 29 Oct (`convex/lib/sam.ts`, `convex/venueView.ts`) |
 | **Muse Wonder** | The verification agent in Ops: checks a vendor against their own site and public pages, with links; a person decides | Live in production, 28 Oct (`convex/lib/wonder.ts`, `convex/marketplace/checks.ts`) |
 | **Muse Spark Open** (open weights, on Baseten) | **Bring your price list** on Partner: a vendor pastes or photographs the list they already send customers, and it drafts each package on their trade's sheet to check and save (a printed rate card into three packages, all right, in 8.4 s) | Live in production, 29 Oct (`convex/marketplace/priceList.ts`) |
-| **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Checks each photo a vendor adds: real work or stock, another business's watermark, faces, and up to five tags for the trade; flags go to Ops. One H200 that scales to zero: about 6 s warm, 3.6 minutes cold | Live in production, 29 Oct (`convex/lib/glimmer.ts`, `convex/marketplace/photos.ts`) |
+| **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Checks each photo a vendor adds: real work or stock, another business's watermark, faces, and up to five tags for the trade; flags go to Ops. One H200 that scales to zero: about 4 s warm (median 3.9 s, p95 6.1 s over 36 photos), 3.6 minutes cold | Live in production, 29 Oct (`convex/lib/glimmer.ts`, `convex/marketplace/photos.ts`) |
 | **Muse Code** (Meta's coding agent) | Our pair programmer for building PlusOne | In use since 27 Oct |
+
+Muse Image is the one Meta model we don't use, because Meta's policy keeps it unavailable in India.
 
 **See it at work:** the **Under the hood** button in any event lists every step PlusOne ran, with the Meta model, time and cost. In the demo it opens on recorded real runs of each model on its own material.
 
@@ -222,13 +227,13 @@ Every model step is measured on production against keys marked by hand before an
 | **Commission on bookings** | A disclosed percentage of the money that moves from customer to vendor through PlusOne, paid in stages in the app | The end goal; planned, with booking in the app |
 | **Vendor listing** | A small fee for vendors to be listed and found, with Partner's tools | Planned at launch; listing is free until then |
 
-**The market.** In the 2025 season alone, 46 lakh weddings were expected to spend ₹6.5 lakh crore in 45 days, about a quarter of it on the services PlusOne compares: catering, event management, decor, photography, music, and light and sound (CAIT, Nov 2025). 75–87% of bookings are still made offline and 53% of wedding budgets rise while planning (Kotak Mutual Fund, Nov 2025). Ten years ago home services and travel were just as chaotic; events are one of the few large markets still left like this. Directory sites list vendors and pass enquiries on; planner apps leave the comparing to the customer. PlusOne holds the whole plan and puts every quote on the same lines.
+**The market.** In the 2025 season alone, 46 lakh weddings were expected to spend ₹6.5 lakh crore in 44 days, about a quarter of it on the services PlusOne compares: catering, event management, decor, photography, music, and light and sound (CAIT, Nov 2025). 75–87% of bookings are still made offline (Kotak Mutual Fund, Nov 2025). Ten years ago home services and travel were just as chaotic; events are one of the few large markets still left like this. Directory sites list vendors and pass enquiries on; planner apps leave the comparing to the customer. PlusOne holds the whole plan and puts every quote on the same lines.
 
 **Three ways in, one paid.** *Find vendors* is open to everyone with no sign-in; *the planner* (Basic or Premium) is the paid, end-to-end app; *PlusOne Partner* is where vendors list to be found and answer requests.
 
-**Where the money is.** Subscriptions and listings pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne. Bookings stay on PlusOne because the guarantee (PlusOne Assured: the quote honoured line by line, a no-show replaced), the price locked at booking, payment in stages and the vendor's track record exist only there. At the prices in our evaluation set, a 60th for 120 comes to about ₹2 lakh across hall, catering, decor and photography; an assumed 8% take would be about ₹16,000 an event against about ₹150 of model cost, a rate to test in the pilot. Every fee is disclosed. Fair pricing means informed and comparable, never one price for everyone or the cheapest bid by default.
+**Where the money is.** Subscriptions and listings pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne. Bookings will stay on PlusOne because, once booking runs through the app, the guarantee (PlusOne Assured: the quote honoured line by line, a no-show replaced), the price locked at booking, payment in stages and the vendor's track record will exist only there. At the prices in our evaluation set, a 60th for 120 comes to about ₹2 lakh across hall, catering, decor and photography; an assumed 8% take would be about ₹16,000 an event against about ₹150 of model cost, a rate to test in the pilot. Every fee is disclosed. Fair pricing means informed and comparable, never one price for everyone or the cheapest bid by default.
 
-**The vision, ten years out.** Online shopping brought sellers under one roof, home services gave cleaning a fixed price, travel sites put every hotel and flight in one place; events never made that move. The aim is to be the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the PlusOne team coordinating every vendor end to end, at any size. Even 1% of the weddings market where we start, about $130 billion a year, would be about $1.3 billion in bookings a year. Someone will copy the app; PlusOne wins on execution, trust, its verified network and price data, and brand, built city by city over years.
+**The vision, ten years out.** Online shopping brought sellers under one roof, home services gave cleaning a fixed price, travel sites put every hotel and flight in one place; events never made that move. The aim is to be the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the PlusOne team coordinating every vendor end to end, at any size. About a quarter of wedding spending where we start goes on the services PlusOne compares (event management, catering, photo and video, decoration, music, and light and sound: about 27% in CAIT's split), roughly $35 billion a year. Even 1% of that would be about $350 million in bookings a year. Someone will copy the app; PlusOne wins on execution, trust, its verified network and price data, and brand, built city by city over years.
 
 **The full version**, with the market sources, the gap, why bookings stay, unit economics and how it reaches people: **[BUSINESS.md](BUSINESS.md)**.
 
@@ -239,11 +244,12 @@ One app, two sides working on the same lines: customers plan and compare, vendor
 <img src="assets/screens/landing.jpg" width="100%" alt="The home page: 'Plan it all in one place. Know what you're paying for.' over a gold line drawing of a garden dinner, with the three ways in (Plan an event, Find vendors, List your business), and PlusOne at work for a sample first birthday: done, now, waiting and next, with a link to the demo">
 
 **Planning an event** (families, teams and event managers):
-1. **Talk it through**, typed or spoken; PlusOne asks for what it still needs and reads the plan back (`convex/planningChat.ts`).
-2. **Open on Overview**: the budget (committed, paid, still free), vendors booked and people coming, then PlusOne's route through the event: done, under way, over to you, next, with Notes to self beside it: a sticky note the host jots on, ticks off and folds away. Four lanes (Overview, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page.
-3. **Find vendors** on the open web or among verified Partner vendors, on a map around the venue, and **write from the event's own inbox**; PlusOne follows up and answers simple questions.
-4. **Every quote on the same lines**, from an email, PDF, WhatsApp photo or call, then **Compare line by line** with missing charges flagged, the city's range from Value to Luxury, what each price includes, track records and checked photos.
-5. **See it on your venue**, **keep the budget honest** (a quote moves it, with an undo; one that looks off waits) and **guests and RSVPs** per function.
+Each step says what came before the hackathon and what is new.
+1. **Talk it through**, typed or spoken; PlusOne asks for what it still needs and reads the plan back (`convex/planningChat.ts`). *The chat came before; planner-style questions, the voice brief and the plan taking shape beside the talk are new.*
+2. **Open on Overview**: the budget (committed, paid, still free), vendors booked and people coming, then where things stand as milestones, with Notes to self beside it: a sticky note the host jots on, ticks off and moves. Four lanes (Overview, Plan, Vendors, People) hold the budget, vendors, inbox, guests and the event page. *The route through the event came before; Overview, its milestones and Notes to self are new, 1 Nov.*
+3. **Find vendors** on the open web or among verified Partner vendors, on a map around the venue, and **write from the event's own inbox**; PlusOne follows up and answers simple questions. *Web search, the inbox and follow-ups came before; verified vendors and the map are new.*
+4. **Every quote on the same lines**, from an email, PDF, WhatsApp photo or call, or added by hand on the need's own page, then **Compare line by line** with missing charges flagged, the city's range from Value to Luxury (or a bar across your own quotes until the city has one), what each price includes, track records and checked photos. *Quotes in one unit came before; the standard sheet, missing charges, the range and Compare line by line are new.*
+5. **See it on your venue** (new), **keep the budget honest** (a quote moves it, with an undo; one that looks off waits; before the hackathon), **a vendor booked outside PlusOne** recorded in one step (new, 1 Nov), and **guests and RSVPs** per function (before the hackathon; RSVP links for everyone on the event page are new, 1 Nov).
 
 <table>
 <tr>
@@ -297,7 +303,7 @@ The evaluations' raw results are in `scripts/*-run*.json`, so every number above
 
 ## Status and limits
 
-Planning works end to end: the conversation, the plan, Overview, vendor search, emails, replies, quotes on the same lines, verified vendors' offers, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together.
+Planning works end to end: the conversation, the plan, Overview, vendor search, emails, replies, quotes on the same lines, verified vendors' offers, the budget and dues, guests and RSVPs, the event page, gifts, sharing, imports, Spaces, the weekly update and people planning together. Most of this list predates the hackathon; what is new is in [WHATS-NEW.md](WHATS-NEW.md).
 
 - Vendor search is only as good as vendors' own websites: a vendor with no prices online comes back without one, until it replies.
 - A city's price range shows once eight listed prices sit behind it; until then Compare shows the range across the event's own quotes. A price that can't be put in the unit honestly is shown as quoted, not converted.

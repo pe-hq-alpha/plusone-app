@@ -61,7 +61,7 @@ export const HELP_TOPICS: { topic: string; entries: HelpEntry[] }[] = [
     entries: [
       {
         ask: "Who writes to the vendors?",
-        answer: "PlusOne writes a personal letter to each vendor you choose, built from your dates, headcount, budget and the feel you described. In Settings, choose how much you want to see first: every letter before it goes, or the shortlist once, with one letter in full, after which sending, chasing and reading replies happen without you.",
+        answer: "PlusOne writes a personal letter to each vendor you choose, built from your dates, headcount, budget and the feel you described. In Settings, choose how much you want to see first: every letter before it goes, or the vendors to write to once, with one letter in full, after which sending, chasing and reading replies happen without you.",
       },
       {
         ask: "What address do vendors see?",
