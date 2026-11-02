@@ -2,7 +2,7 @@
 import { convexTest } from "convex-test";
 import rateLimiterTest from "@convex-dev/rate-limiter/test";
 import { describe, expect, test } from "vitest";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { birthdayFor } from "./lib/regions";
 import type { Id } from "./_generated/dataModel";
 import { rateLimiter } from "./rateLimits";
@@ -194,6 +194,8 @@ describe("the American sample", () => {
   test("Dad's 60th has its two parts, needs, quotes, offers and Austin price bands", async () => {
     const t = setup();
     const eventId = await (await guest(t)).mutation(api.demo.start, { kind: "birthday-us" });
+    // The sample vendors' ranges are worked out just after the demo opens, in their own run.
+    await t.mutation(internal.marketplace.bands.recompute, {});
     const { slots, lines, quotes, threads, vendors, sessions, guests, offers, tasks, bands, profiles } = await everything(t, eventId);
 
     expect(sessions.map((s) => [s.name, s.guestCount]).sort()).toEqual([["Backyard afternoon", 40], ["Birthday dinner", 120]]);
@@ -273,6 +275,8 @@ describe("the Chennai sample is unchanged", () => {
     const t = setup();
     const visitor = await guest(t);
     const eventId = await visitor.mutation(api.demo.start, { region: "IN-TN" });
+    // The sample vendors' ranges are worked out just after the demo opens, in their own run.
+    await t.mutation(internal.marketplace.bands.recompute, {});
     const board = await visitor.query(api.dashboard.board, { eventId });
     expect(board.currency).toBe("INR");
     const catering = board.needs.find((n) => n.title === "Catering")!;
@@ -295,6 +299,8 @@ describe("the vendors' demo outside India", () => {
     const userId = await t.run((ctx) => ctx.db.insert("users", { isAnonymous: true }));
     const as = t.withIdentity({ subject: `${userId}|test-session` });
     const profileId = await as.mutation(api.demo.startVendor, { region: "US" });
+    // The sample vendors' ranges are worked out just after the demo opens, in their own run.
+    await t.mutation(internal.marketplace.bands.recompute, {});
     const { profile, offering } = await t.run(async (ctx) => ({
       profile: (await ctx.db.get(profileId))!,
       offering: (await ctx.db.query("vendorOfferings").withIndex("by_profileId", (q) => q.eq("profileId", profileId)).first())!,

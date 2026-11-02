@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
+import { internal } from "../_generated/api";
 import { internalMutation, type MutationCtx } from "../_generated/server";
 import type { Basis } from "../lib/comparable";
 import { offerTotal, type OfferLine } from "../lib/marketplace";
@@ -397,8 +398,13 @@ export const fillSampleCharges = internalMutation({
   },
 });
 
-/** Adds a city's sample vendors that aren't there yet (Chennai's unless another set is named), and works out the ranges again if any were. */
-export async function ensureSampleVendors(ctx: MutationCtx, set: SampleSet = CHENNAI_SAMPLES): Promise<Map<string, Id<"vendorProfiles">>> {
+/**
+ * Adds a city's sample vendors that aren't there yet (Chennai's unless another set is named), and
+ * works out the ranges again if any were. Inside a visitor's request (a demo opening) the ranges
+ * are worked out just after, in their own run: reading every listing in one request is too much
+ * work once production has many vendors.
+ */
+export async function ensureSampleVendors(ctx: MutationCtx, set: SampleSet = CHENNAI_SAMPLES, rangesNow = false): Promise<Map<string, Id<"vendorProfiles">>> {
   const ids = new Map<string, Id<"vendorProfiles">>();
   for await (const p of ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", set.cityKey).eq("status", "verified"))) {
     if (p.sample && !p.ownerUserId) ids.set(p.name, p._id);
@@ -426,7 +432,10 @@ export async function ensureSampleVendors(ctx: MutationCtx, set: SampleSet = CHE
     ids.set(s.name, profileId);
     added++;
   }
-  if (added) await recomputeBands(ctx);
+  if (added) {
+    if (rangesNow) await recomputeBands(ctx);
+    else await ctx.scheduler.runAfter(0, internal.marketplace.bands.recompute, {});
+  }
   return ids;
 }
 
@@ -488,12 +497,12 @@ export const seedForEvent = internalMutation({
 export const ensureVendors = internalMutation({
   args: {},
   returns: v.number(),
-  handler: async (ctx) => (await ensureSampleVendors(ctx)).size,
+  handler: async (ctx) => (await ensureSampleVendors(ctx, CHENNAI_SAMPLES, true)).size,
 });
 
 /** The same for Austin's sample vendors, for the American sample event. */
 export const ensureAustinVendors = internalMutation({
   args: {},
   returns: v.number(),
-  handler: async (ctx) => (await ensureSampleVendors(ctx, AUSTIN_SAMPLES)).size,
+  handler: async (ctx) => (await ensureSampleVendors(ctx, AUSTIN_SAMPLES, true)).size,
 });

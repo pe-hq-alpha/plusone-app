@@ -644,6 +644,8 @@ describe("the guest demo's Partner side", () => {
       }
     });
     expect(await t.mutation(internal.marketplace.samples.seedForEvent, { eventId })).toBe(4);
+    // The sample vendors' ranges are worked out just after the demo opens, in their own run.
+    await t.mutation(internal.marketplace.bands.recompute, {});
 
     const offers = await t.query(internal.marketplace.offers.offersFor, { eventId });
     const byVendor = Object.fromEntries(offers.map((o) => [o.vendor.name, o]));
