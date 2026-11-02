@@ -60,6 +60,8 @@
 
 Two sides meet on the same lines: families and event managers plan in PlusOne, and verified vendors answer the same brief on PlusOne Partner.
 
+**Built during the hackathon (27 Oct – 4 Nov):** Meta's six models at its core, the standard sheet with missing charges flagged, Compare with the market range, PlusOne Partner and Ops, voice and call reading, the venue view, photo and vendor checks, the open directory and map, and Under the hood. Before it, PlusOne was a planner: the planning chat, vendor search, the event's inbox and follow-ups, the budget, guests and RSVPs (tag `pre-hackathon`). Every addition, dated: [WHATS-NEW.md](WHATS-NEW.md).
+
 Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
 
 1. **One app instead of many tools.** An all-in-one event planner: the plan and its budget, vendors found and written to, every reply read and chased, guests, RSVPs and the event page, for an event of any size.
@@ -196,13 +198,13 @@ Every call goes through one wrapper, `convex/lib/models.ts`: retries on 429, 500
 
 ## Agents in PlusOne
 
-Two agents do the legwork; a person makes every decision.
+Two agents do the legwork; a person makes every decision. Neither books a vendor, agrees a price or moves money: those wait for the host's press.
 
 **The vendor agent, for the host.** Search, the first emails and follow-ups came before the hackathon; reading every reply onto the standard sheet with each charge's status, calls and photos as inputs, Partner vendors' offers beside the quotes, and Under the hood are new. Given a need ("a caterer for Amma's 60th, 120 people, Mylapore"), it searches the open web, reads vendors' own sites down to their pricing pages, ranks them with a reason each (Muse Spark) and writes the first emails from the event's inbox, held for approval in review mode. Then it keeps going unasked: it follows up a quiet vendor up to three times, reads every reply (email, PDF, photo or recorded call) into the standard sheet, answers routine questions, brings the host only what is theirs to decide, and lines every quote up in Compare. The host books.
 
 **The vendor checker, for Ops.** Muse Wonder runs a tool loop of up to six turns, with web searches (up to eight) and page reads (up to six) through our own `read_page` tool, and writes six findings (the business exists, the website is theirs, contact details, where they work, prices, complaints), each with sources. A source counts only if the run actually read that page, so an invented URL can't back a finding, and the vendor's own site alone can't prove they exist. It never verifies anyone; the person in Ops does.
 
-Both leave a trail: every call is in Under the hood with its model, time and cost (`convex/research.ts`, `convex/followups.ts`, `convex/modelTasks.ts`, `convex/lib/wonder.ts`).
+Tested against a trap: a made-up caterer's own site hid an instruction telling AI reviewers to approve it; the checker ignored it and confirmed nothing ([evaluation](EVALUATIONS.md#evaluation-checking-a-vendor)). Both leave a trail: every call is in Under the hood with its model, time and cost (`convex/research.ts`, `convex/followups.ts`, `convex/modelTasks.ts`, `convex/lib/wonder.ts`).
 
 ## Measured results
 
