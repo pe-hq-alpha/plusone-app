@@ -13,7 +13,8 @@ import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { BadLink } from "../components/ui/BadLink";
-import { daysAway, mapsLink } from "../lib/eventPage";
+import { daysAway, downloadIcs, mapsLink } from "../lib/eventPage";
+import { partCoverPath } from "../../convex/lib/covers";
 import "../styles/site.css";
 
 type Answer = { coming: boolean | null; count: number };
@@ -119,8 +120,11 @@ export function RsvpPage() {
                   See the event page
                 </Link>
               )}
+              <button type="button" className={inv.sitePath ? "btn-quiet btn-sm" : "btn-primary btn-sm"} onClick={() => downloadIcs(inv)}>
+                Add to calendar
+              </button>
               {place && (
-                <a className={inv.sitePath ? "btn-quiet btn-sm" : "btn-primary btn-sm"} href={mapsLink(place)} target="_blank" rel="noopener noreferrer">
+                <a className="btn-quiet btn-sm" href={mapsLink(place)} target="_blank" rel="noopener noreferrer">
                   Directions
                 </a>
               )}
@@ -161,6 +165,8 @@ export function RsvpPage() {
                 const a = answers[e._id] ?? { coming: null, count: inv.partySize };
                 return (
                   <li key={e._id} className="overflow-hidden rounded-[18px] bg-cream ring-1 ring-line">
+                    {/* Each part of the day with its own drawing: a pooja's, a festival's, or the event's. */}
+                    <img src={partCoverPath(inv.eventType, e.name, inv.name)} alt="" loading="lazy" className="h-28 w-full object-cover object-[50%_82%] opacity-90" />
                     <div className="px-5 py-4">
                       {e.startTime && <p className="text-xs uppercase tracking-[0.14em] text-quiet">{timeChip(e.startTime)}</p>}
                       <h2 className="display mt-1 text-xl">{e.name}</h2>

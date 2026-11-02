@@ -26,3 +26,12 @@ export function coverName(eventType: string | undefined, ...words: Array<string 
 export function coverPath(eventType: string | undefined, ...words: Array<string | undefined>): string {
   return `/covers/${coverName(eventType, ...words)}.jpg`;
 }
+
+/**
+ * The drawing for one part of the day, on an invitation's card: a pooja's when its name says so,
+ * a festival's when it names one, else the event's own.
+ */
+export function partCoverPath(eventType: string | undefined, partName: string, eventName?: string): string {
+  if (/\b(pooja|puja|homam|havan|aarti|satyanarayan)\b/i.test(partName)) return "/covers/pooja.jpg";
+  return coverPath(eventType, partName, eventName);
+}

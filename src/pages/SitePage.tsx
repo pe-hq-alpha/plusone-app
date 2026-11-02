@@ -1,5 +1,4 @@
 import { useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { useSearchParams, useParams } from "react-router-dom";
 import { useConvexAuth } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -11,41 +10,10 @@ import { BRAND } from "../lib/brand";
 import { GiftList } from "../components/GiftList";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { BadLink } from "../components/ui/BadLink";
-import { daysAway, mapsLink } from "../lib/eventPage";
+import { daysAway, downloadIcs, mapsLink } from "../lib/eventPage";
 import "../styles/site.css";
 
-type Site = NonNullable<FunctionReturnType<typeof api.site.bySlug>>;
 
-
-/** A calendar file for the whole event, made in the browser; nothing is sent anywhere. */
-function downloadIcs(site: Site) {
-  const day = (iso: string, add = 0) => {
-    const d = new Date(`${iso}T12:00:00Z`);
-    d.setUTCDate(d.getUTCDate() + add);
-    return d.toISOString().slice(0, 10).replace(/-/g, "");
-  };
-  const esc = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const first = site.sessions[0];
-  const timed = first?.startTime && /^\d{2}:\d{2}$/.test(first.startTime) && site.startDate === site.endDate;
-  const when = timed
-    ? `DTSTART:${day(site.startDate)}T${first!.startTime!.replace(":", "")}00\r\nDTEND:${day(site.startDate)}T${(first!.endTime && /^\d{2}:\d{2}$/.test(first!.endTime) ? first!.endTime : first!.startTime!).replace(":", "")}00`
-    : `DTSTART;VALUE=DATE:${day(site.startDate)}\r\nDTEND;VALUE=DATE:${day(site.endDate, 1)}`;
-  const ics = [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PlusOne//Event//EN", "BEGIN:VEVENT",
-    `UID:${day(site.startDate)}-${Math.random().toString(36).slice(2)}@plusoneevents.site`,
-    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
-    when,
-    `SUMMARY:${esc(site.name)}`,
-    `LOCATION:${esc([site.area, site.city].filter(Boolean).join(", "))}`,
-    `URL:${window.location.href.split("?")[0]}`,
-    "END:VEVENT", "END:VCALENDAR",
-  ].join("\r\n");
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
-  a.download = `${site.name.replace(/[^\w\s-]/g, "").trim().slice(0, 60) || "event"}.ics`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
 
 /**
  * The event's own page: one calm page for the people invited, built from
