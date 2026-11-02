@@ -103,7 +103,7 @@ export function PlanPage() {
         <section className="card p-5" aria-labelledby="guests-h">
           <h2 id="guests-h" className="display text-lg">{PeopleWord(event)}</h2>
           <p className="mt-1.5 text-sm text-muted">
-            {stats.guestCounts?.yes ?? 0} yes · {stats.guestCounts?.no ?? 0} no · {stats.guestCounts?.pending ?? 0} pending
+            {stats.guestCounts?.attending ?? 0} coming · {stats.guestCounts?.pending ?? 0} still to say · {stats.guestCounts?.no ?? 0} can&rsquo;t come
           </p>
           <Link to="../guests" className="btn-quiet btn-sm mt-4">
             Manage {peopleWord(event)} <Icon name="arrow" size={15} />

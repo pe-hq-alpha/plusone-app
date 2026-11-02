@@ -16,6 +16,7 @@ import { ASK_EVENT, AssistantDrawer } from "./assistant/AssistantDrawer";
 import { BRAND } from "../lib/brand";
 import { PartWord, PeopleWord } from "../lib/words";
 import { Backdrop } from "./ui/Backdrop";
+import { ThemeSwitch } from "./ui/ThemeSwitch";
 import { UnderTheHood } from "./UnderTheHood";
 import { hoodSeen, markHoodSeen, onOpenHood } from "../lib/hood";
 
@@ -270,11 +271,13 @@ export function EventLayout() {
             <Outlet context={data} />
           </Suspense>
         </div>
-        <footer className="no-print page mt-16 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-5 text-xs text-quiet">
+        <footer className="no-print page mt-16 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-line pt-5 text-xs text-quiet">
           <Link to="assistant" className="hover:text-accent">Assistant</Link>
           <Link to="history" className="hover:text-accent">History</Link>
           <Link to="print" className="hover:text-accent">Print</Link>
           <button type="button" onClick={() => setFeedback(true)} className="hover:text-accent">Share feedback</button>
+          {/* Light or dark, on every page of the event, not only in the account menu. */}
+          <ThemeSwitch compact className="ml-auto" />
         </footer>
         <Preload eventId={event._id as Id<"events">} />
         <AssistantDrawer eventId={event._id as Id<"events">} canEdit={role !== "viewer"} sessions={data.sessions} currency={event.currency} />

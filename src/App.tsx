@@ -1,3 +1,4 @@
+import { ThemeFooter } from "./components/ui/ThemeFooter";
 import { useAuth } from "@clerk/react";
 import { useConvexAuth } from "convex/react";
 import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
@@ -77,7 +78,7 @@ export default function App() {
         <Route path="/r/:token" element={<RsvpPage />} />
         <Route path="/p/:token" element={<SharedPlanPage />} />
         <Route path="/demo" element={<GuestPage />} />
-        <Route path="/partner/demo" element={<VendorDemoPage />} />
+        <Route path="/partner/demo" element={<><VendorDemoPage /><ThemeFooter className={HOST_THEME} /></>} />
         <Route path="/guest" element={<Navigate to="/demo" replace />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
@@ -103,8 +104,8 @@ export default function App() {
                   <Route path="/new/manual" element={<RequireAccount><OnboardingPage /></RequireAccount>} />
                   <Route path="/account" element={<AccountPage />} />
                   <Route path="/share" element={<SharePage />} />
-                  <Route path="/partner" element={<PartnerHome />} />
-                  <Route path="/ops" element={<OpsPage />} />
+                  <Route path="/partner" element={<><PartnerHome /><ThemeFooter className={HOST_THEME} /></>} />
+                  <Route path="/ops" element={<><OpsPage /><ThemeFooter className={HOST_THEME} /></>} />
                   <Route path="/e/:eventId" element={<EventLayout />}>
                     <Route index element={<TodayPage />} />
                     <Route path="plan" element={<PlanPage />} />
@@ -151,20 +152,24 @@ export default function App() {
  * PlusOne Partner on its own address: the vendor's page at /, its sign-in when signed
  * out, and the vendors' demo at /demo. Customers' pages live on the app's address.
  */
+/** Where the light/dark switch sits on Partner and Ops, which have no app shell of their own. */
+const HOST_THEME = "mx-auto w-full max-w-[72rem] px-5 pb-8 pt-2";
+
 function PartnerRoutes() {
   return (
     <Routes>
-      <Route path="/demo" element={<VendorDemoPage />} />
+      <Route path="/demo" element={<><VendorDemoPage /><ThemeFooter className={HOST_THEME} /></>} />
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route
         path="/*"
         element={
-          <SignedInOrOut signedOut={<VendorSignInPage />}>
+          <SignedInOrOut signedOut={<><VendorSignInPage /><ThemeFooter className={HOST_THEME} /></>}>
             <a href="#main" className="skip-link">Skip to content</a>
             <ErrorBoundary>
               <PartnerHome />
             </ErrorBoundary>
+            <ThemeFooter className={HOST_THEME} />
           </SignedInOrOut>
         }
       />
@@ -223,6 +228,7 @@ function OpsRoutes() {
             <ErrorBoundary>
               <OpsPage />
             </ErrorBoundary>
+            <ThemeFooter className={HOST_THEME} />
           </SignedInOrOut>
         }
       />

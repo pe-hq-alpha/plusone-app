@@ -106,9 +106,12 @@ export function TodayPage() {
         <Link to="guests" className="today__stat">
           <span className="today__stat-label">{PeopleWord(event)}</span>
           <span className="today__stat-big">
-            {stats.guestCounts?.yes ?? 0} <small>coming</small>
+            {stats.guestCounts?.attending ?? 0} <small>coming</small>
           </span>
-          <span className="today__stat-foot">{stats.guestCounts?.pending ?? 0} still to say · {stats.guestCounts?.no ?? 0} not</span>
+          {/* People coming, as People counts them; then the invitations behind the number. */}
+          <span className="today__stat-foot">
+            {stats.guestCounts?.yes ?? 0} said yes · {stats.guestCounts?.pending ?? 0} still to say · {stats.guestCounts?.no ?? 0} can&rsquo;t come
+          </span>
         </Link>
       </section>
 

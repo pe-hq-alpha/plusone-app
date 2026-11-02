@@ -174,7 +174,8 @@ export const get = query({
     const guestCounts = { pending: 0, yes: 0, no: 0, maybe: 0, attending: 0 };
     for (const g of guests) {
       guestCounts[g.rsvp] += 1;
-      if (g.rsvp === "yes") guestCounts.attending += g.attendingCount;
+      // People coming, counted as People counts them: who said yes, with anyone they bring.
+      if (g.rsvp === "yes") guestCounts.attending += g.attendingCount || g.partySize;
     }
 
     return {
