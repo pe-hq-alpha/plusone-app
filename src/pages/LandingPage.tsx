@@ -64,32 +64,72 @@ const KINDS = [
 /** What rises into place as it scrolls into view, and the parent whose children step in one after another. */
 const REVEAL = ".rs-sec .rs-h2, .rs-sec .rs-lede, .rs-fan, .rs-line__stop, .rs-card, .rs-kinds__group, .rs-photo, .rs-compare, .rs-close__inner > *";
 
-/** Sections rise into place as they come into view; nothing is hidden when motion is unwelcome or unsupported. */
+/**
+ * Sections rise into place as they come into view. Nothing is hidden until the visitor scrolls, and
+ * only what is still below the fold then, so a page captured without scrolling (a screenshot, a PDF,
+ * a reader that never scrolls) shows everything; whatever hasn't risen within a few seconds shows
+ * anyway, so a fast scroll never leaves a gap. Nothing moves when motion is unwelcome or unsupported.
+ */
 function useReveal() {
   useEffect(() => {
     const root = document.querySelector(".lp");
     if (!root || !("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const items = [...root.querySelectorAll<HTMLElement>(REVEAL)];
-    items.forEach((el) => {
-      const siblings = [...(el.parentElement?.children ?? [])].filter((c) => c.matches(REVEAL));
-      el.style.setProperty("--rs-d", `${Math.max(0, siblings.indexOf(el)) * 90}ms`);
-      el.classList.add("rs-reveal");
-    });
-    const seen = new IntersectionObserver(
-      (entries) => entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        e.target.classList.add("is-in");
-        seen.unobserve(e.target);
-      }),
-      { threshold: 0.15, rootMargin: "0px 0px -6% 0px" },
-    );
-    root.classList.add("lp-motion");
-    items.forEach((el) => seen.observe(el));
+    let items: HTMLElement[] = [];
+    let seen: IntersectionObserver | null = null;
+    let fallback = 0;
+    const arm = () => {
+      window.removeEventListener("scroll", arm);
+      const fold = window.innerHeight;
+      items = [...root.querySelectorAll<HTMLElement>(REVEAL)].filter((el) => el.getBoundingClientRect().top > fold);
+      if (!items.length) return;
+      items.forEach((el) => {
+        const siblings = [...(el.parentElement?.children ?? [])].filter((c) => c.matches(REVEAL));
+        el.style.setProperty("--rs-d", `${Math.max(0, siblings.indexOf(el)) * 90}ms`);
+        el.classList.add("rs-reveal");
+      });
+      const io = new IntersectionObserver(
+        (entries) => entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          e.target.classList.add("is-in");
+          io.unobserve(e.target);
+        }),
+        { threshold: 0.15, rootMargin: "0px 0px -6% 0px" },
+      );
+      seen = io;
+      root.classList.add("lp-motion");
+      items.forEach((el) => io.observe(el));
+      fallback = window.setTimeout(() => {
+        items.forEach((el) => el.classList.add("is-in"));
+        io.disconnect();
+      }, 3000);
+    };
+    window.addEventListener("scroll", arm, { passive: true });
     return () => {
-      seen.disconnect();
+      window.removeEventListener("scroll", arm);
+      window.clearTimeout(fallback);
+      seen?.disconnect();
       root.classList.remove("lp-motion");
       items.forEach((el) => el.classList.remove("rs-reveal", "is-in"));
     };
+  }, []);
+}
+
+/**
+ * Once the page itself has loaded, the pictures further down load too, so a capture that never
+ * scrolls shows them rather than empty frames; the hero's own picture still comes first.
+ */
+function useLoadPicturesAfterPage() {
+  useEffect(() => {
+    const load = () =>
+      document.querySelectorAll<HTMLImageElement>('.lp img[loading="lazy"]').forEach((img) => {
+        img.loading = "eager";
+      });
+    if (document.readyState === "complete") {
+      const t = window.setTimeout(load, 0);
+      return () => window.clearTimeout(t);
+    }
+    window.addEventListener("load", load, { once: true });
+    return () => window.removeEventListener("load", load);
   }, []);
 }
 
@@ -107,6 +147,7 @@ export function LandingPage() {
   // Marigold on ink at night; by day its own ink-blue drawing, which reads far better on ivory than gold.
   const plate = useTheme() === "dark" ? "backdrop" : "backdrop-light";
   useReveal();
+  useLoadPicturesAfterPage();
 
   return (
     <div className="lp">
