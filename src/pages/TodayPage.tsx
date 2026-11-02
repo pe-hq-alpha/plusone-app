@@ -145,7 +145,8 @@ export function TodayPage() {
         </section>
 
         <aside className="today__side">
-          <Tell eventId={eventId} demo={event.demo === true} prompts={prompts} />
+          {/* The recorded sample brief is about Amma's 60th, so the American sample offers none. */}
+          <Tell eventId={eventId} demo={event.demo === true && event.currency === "INR"} prompts={prompts} />
           {event.demo !== true && <QuoteDrop eventId={eventId} />}
           <TodoNote eventId={eventId} />
         </aside>

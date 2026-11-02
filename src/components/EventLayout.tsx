@@ -248,7 +248,8 @@ export function EventLayout() {
                 </button>
                 , the chip icon at the top, shows the Meta model behind every step.{" "}
               </span>
-              <span className="hidden lg:inline">
+              {/* The other samples are Indian (a griha pravesam, a Diwali office party), so the American one doesn't offer them. */}
+              {event.currency !== "USD" && <span className="hidden lg:inline">
                 Or open{" "}
                 {SAMPLES.filter((x) => x.type !== event.eventType).map((x, i) => (
                   <span key={x.sample}>
@@ -258,7 +259,7 @@ export function EventLayout() {
                   </span>
                 ))}
                 .
-              </span>
+              </span>}
             </p>
             <Link to="/new" className="btn-primary btn-sm shrink-0" data-tour="plan-own">Plan your own</Link>
           </div>

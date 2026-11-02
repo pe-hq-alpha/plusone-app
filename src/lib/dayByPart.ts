@@ -151,14 +151,14 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
     const count = Math.max(1, priced);
     const basis = need && need.basisLabel !== "All in" && need.units > 0 ? `${need.basisLabel.toLowerCase()} for your ${need.units}` : "";
     // The comparison flags a quote that leaves tax out ("GST extra"); the range is then before it.
-    const taxExtra = quoted.flatMap((v) => v.quote?.flags ?? []).map((f) => /^(GST|VAT|tax) extra$/i.exec(f)?.[1]).find(Boolean);
+    const taxExtra = quoted.flatMap((v) => v.quote?.flags ?? []).map((f) => /^(GST|VAT|(?:sales )?tax) extra$/i.exec(f)?.[1]).find(Boolean);
     return {
       ...base,
       state: "compare",
       detail: [`${plural(count, "quote")} in${basis ? `, ${basis}` : ""}`, question].filter(Boolean).join(" · "),
       note: question || undefined,
       price: low !== null ? { low, high: high ?? low } : null,
-      priceNote: taxExtra ? `before ${taxExtra}` : undefined,
+      priceNote: taxExtra ? `before ${/^(GST|VAT)$/.test(taxExtra) ? taxExtra : taxExtra.toLowerCase()}` : undefined,
     };
   }
 

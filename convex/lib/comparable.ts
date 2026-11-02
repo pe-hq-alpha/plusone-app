@@ -18,8 +18,9 @@ export function basisFor(category: string): Basis {
   return "total";
 }
 
-export function basisLabel(basis: Basis, category = ""): string {
-  if (basis === "per_person") return /cater|food|meal|prasad/i.test(category) ? "Per plate" : "Per head";
+export function basisLabel(basis: Basis, category = "", currency?: string): string {
+  // American quotes price food per person; "per plate" is how Indian caterers say it.
+  if (basis === "per_person") return currency === "USD" ? "Per person" : /cater|food|meal|prasad/i.test(category) ? "Per plate" : "Per head";
   if (basis === "per_piece") return "Per piece";
   if (basis === "per_day") return "Per day";
   return "All in";
@@ -50,7 +51,7 @@ const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
  * One quote at the host's numbers. `units` is how many plates, pieces or days the host
  * needs (their headcount for food).
  */
-export function compare(q: QuoteLike, basis: Basis, units: number): Comparison {
+export function compare(q: QuoteLike, basis: Basis, units: number, taxName = "GST"): Comparison {
   const flags: string[] = [];
   const lines = (q.lines ?? []).filter((l) => !l.optional);
   const linesTotal = sum(lines.map((l) => (l.kind === "discount" ? -Math.abs(l.amount) : l.amount)));
@@ -76,9 +77,9 @@ export function compare(q: QuoteLike, basis: Basis, units: number): Comparison {
     // fewer, what they asked for is what you'd pay, so it is never scaled down to look cheaper.
     if (q.headcountAssumed > units) atYourNumbers = Math.max(atYourNumbers, q.total);
   }
-  if (q.taxIncluded === false) flags.push("GST extra");
+  if (q.taxIncluded === false) flags.push(`${taxName} extra`);
   // "GST extra" already says it, so a separate "Leaves out GST" would repeat it.
-  const excludes = (q.excludes ?? []).filter((x) => !(q.taxIncluded === false && /^(gst|tax(es)?)\b/i.test(x.trim())));
+  const excludes = (q.excludes ?? []).filter((x) => !(q.taxIncluded === false && /^(gst|(sales )?tax(es)?)\b/i.test(x.trim())));
   for (const x of excludes.slice(0, 2)) flags.push(`Leaves out ${inSentence(x)}`);
 
   const perUnit = basis === "total" || units <= 0 || !linesCheck ? null : Math.round(atYourNumbers / units);

@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useAction, useConvexAuth, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { packageCharges, priceUnitOf, sheetFor, type PackageCharge } from "../../convex/lib/standardSheet";
+import { packageCharges, priceUnitOf, sheetFor, taxLabel, type PackageCharge } from "../../convex/lib/standardSheet";
+import { sampleFor } from "../../convex/lib/regions";
+import { guessRegion } from "../lib/region";
 import { distanceKm, kmText, placeFor, readSearch, type Asked } from "../../convex/lib/places";
 import { RADII } from "../components/NearVenue";
 import type { MapPin } from "../components/VendorMap";
@@ -28,15 +30,16 @@ function useDirectory(category: string, city: string) {
   return useQuery(api.marketplace.directory.search, { category, city });
 }
 
-const per = (category: string, priceUnit?: string) => {
-  const sheet = sheetFor(category);
+const per = (category: string, priceUnit?: string, currency?: string) => {
+  const sheet = sheetFor(category, currency);
   return sheet ? priceUnitOf(sheet, priceUnit).label : "";
 };
 
 export function FindVendorsPage() {
   const trades = useQuery(api.marketplace.directory.trades, {}) ?? [];
   const [category, setCategory] = useState("Catering");
-  const [city, setCity] = useState("Chennai");
+  // Visitors in India start in Chennai, everyone else in Austin, where the sample vendors are.
+  const [city, setCity] = useState(() => (sampleFor(guessRegion()) === "austin" ? "Austin" : "Chennai"));
   const [area, setArea] = useState<string | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [view, setView] = useState<"list" | "map">("list");
@@ -266,7 +269,7 @@ function PlainSearch({ onRead }: { onRead: (a: Asked) => void }) {
           aria-label="Search vendors"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Caterers in Chennai, photographers near Adyar under 20k…"
+          placeholder={sampleFor(guessRegion()) === "austin" ? "Caterers in Austin, photographers near Zilker under 1,500…" : "Caterers in Chennai, photographers near Adyar under 20k…"}
         />
         <button className="btn-primary shrink-0" disabled={busy || !text.trim()}>{busy ? "Reading…" : "Search"}</button>
       </div>
@@ -365,7 +368,7 @@ function ListingCard({ card, category, km }: { card: Card; category: string; km:
       </div>
       {start && (
         <p className="mt-2 text-sm text-ink">
-          From {money(start.price, start.currency)} <span className="text-muted">{per(category, start.priceUnit)}</span>
+          From {money(start.price, start.currency)} <span className="text-muted">{per(category, start.priceUnit, start.currency)}</span>
         </p>
       )}
       <p className="mt-1 text-[11px] text-quiet">
@@ -490,12 +493,12 @@ export function VendorListingPage() {
                     <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <p className="font-medium text-ink">{p.title}</p>
                       <p className="text-ink">
-                        {money(p.price, p.currency)} <span className="text-sm text-muted">{per(p.category, p.priceUnit)}</span>
+                        {money(p.price, p.currency)} <span className="text-sm text-muted">{per(p.category, p.priceUnit, p.currency)}</span>
                       </p>
                     </div>
                     <p className="mt-1 text-[12px] text-muted">
                       {p.category}
-                      {p.taxIncluded === true ? " · GST included" : p.taxIncluded === false ? " · GST extra" : " · GST not stated"}
+                      {` · ${taxLabel(p.currency)} ${p.taxIncluded === true ? "included" : p.taxIncluded === false ? "extra" : "not stated"}`}
                     </p>
                     {p.includes.length > 0 && <p className="mt-1.5 text-sm text-muted">Includes {p.includes.join(", ")}</p>}
                     <PackageChargeLines category={p.category} currency={p.currency} charges={p.charges} includes={p.includes} />
@@ -533,9 +536,9 @@ export function VendorListingPage() {
 
 /** A package's charges as the vendor stated them: in the price, on top, not provided, and what they haven't said. */
 function PackageChargeLines({ category, currency, charges, includes }: { category: string; currency: string; charges?: PackageCharge[]; includes: string[] }) {
-  const sheet = sheetFor(category);
+  const sheet = sheetFor(category, currency);
   const read = packageCharges(sheet, charges?.filter((c) => c.key !== "gst"), currency, includes);
-  const notSaid = read.notSaid.filter((l) => l !== "GST");
+  const notSaid = read.notSaid.filter((l) => l !== taxLabel(currency));
   const rows: [string, string[], string][] = [
     ["Also in the price", read.inPrice, "text-muted"],
     ["On top", read.onTop, "text-ink"],

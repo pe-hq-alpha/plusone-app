@@ -158,6 +158,8 @@ export const briefCard = v.object({
   openedAt: v.number(),
   /** Whether this vendor has already answered it. */
   answered: v.boolean(),
+  /** The event's currency, which the vendor prices in. */
+  currency: v.string(),
   /** The city's range for this kind of service, from the same prices the customer's Compare shows. */
   range: v.optional(v.object({ p25: v.number(), p50: v.number(), p75: v.number(), count: v.number(), currency: v.string() })),
 });
@@ -201,6 +203,7 @@ export const open = query({
       shown.map(async (b) => {
         // The same band Compare places the customer's quotes in: same trade, unit and city, sample prices on a sample event.
         const band = await bandRow(ctx, b.category, basisFor(b.category), b.city, b.demo === true);
+        const event = await ctx.db.get(b.eventId);
         return {
           _id: b._id,
           category: b.category,
@@ -214,6 +217,7 @@ export const open = query({
           notes: b.notes,
           openedAt: b.openedAt,
           answered: answered.has(b._id),
+          currency: event?.currency ?? "INR",
           ...(band ? { range: { p25: band.p25, p50: band.p50, p75: band.p75, count: band.count, currency: band.currency } } : {}),
         };
       }),

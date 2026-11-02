@@ -21,6 +21,7 @@ import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as demo from "../demo.js";
 import type * as demoBirthday from "../demoBirthday.js";
+import type * as demoBirthdayUS from "../demoBirthdayUS.js";
 import type * as demoHousewarming from "../demoHousewarming.js";
 import type * as demoOfficeParty from "../demoOfficeParty.js";
 import type * as digest from "../digest.js";
@@ -187,6 +188,7 @@ declare const fullApi: ApiFromModules<{
   dashboard: typeof dashboard;
   demo: typeof demo;
   demoBirthday: typeof demoBirthday;
+  demoBirthdayUS: typeof demoBirthdayUS;
   demoHousewarming: typeof demoHousewarming;
   demoOfficeParty: typeof demoOfficeParty;
   digest: typeof digest;

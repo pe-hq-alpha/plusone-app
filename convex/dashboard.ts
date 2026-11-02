@@ -6,7 +6,7 @@ import { slotStatus, threadStatus } from "./lib/validators";
 import type { Infer } from "convex/values";
 import { basisFor, basisLabel, compare, spread, unitsForNeed, offerAtYourNumbers } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
-import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
+import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, taxLabel, type Answer, type Sheet } from "./lib/standardSheet";
 import { tierFor } from "./lib/marketplace";
 import { badge, bandRow, level, tier } from "./marketplace/listings";
 import { offersForEvent } from "./marketplace/offers";
@@ -300,7 +300,7 @@ export const board = query({
       const basis = basisFor(slot.category);
       const served = sessions.filter((e) => slot.sessionIds.includes(e._id));
       const units = unitsForNeed(basis, served, event.guestEstimate);
-      const sheet = sheetFor(slot.category);
+      const sheet = sheetFor(slot.category, event.currency);
       // A sample event sees ranges that count the sample vendors; a real family only real prices.
       const band = await bandRow(ctx, slot.category, basis, event.city, event.demo === true);
       const slotQuotes = vendors.map((vendor) => quoteByVendor.get(vendor._id)).filter((q): q is Doc<"quotes"> => !!q);
@@ -375,7 +375,7 @@ export const board = query({
                 summary: quote.summary,
                 addedByYou,
                 deltaVsBudget: quote.total - slot.budget,
-                ...comparison(quote, basis, units),
+                ...comparison(quote, basis, units, taxLabel(event.currency)),
                 tier: placeInBand(basis === "total" ? quote.total : compare(quote, basis, units).perUnit, quote.currency, band),
                 lines: (quote.lines ?? []).slice(0, 12).map((l) => ({ item: l.item, amount: l.amount, optional: Boolean(l.optional) })),
                 ...againstSheet(quote, sheet, slotQuotes.filter((o) => o._id !== quote._id), offered),
@@ -414,7 +414,7 @@ export const board = query({
         sessionNames: slot.sessionIds.map((id) => sessionName.get(id)).filter((n): n is string => !!n),
         cheapest: totals.length ? Math.min(...totals) : null,
         dearest: totals.length ? Math.max(...totals) : null,
-        basisLabel: basisLabel(basis, slot.category),
+        basisLabel: basisLabel(basis, slot.category, event.currency),
         units,
         spread: spread(rows.filter((r) => r.state !== "declined").map((r) => r.quote?.perUnit ?? null)),
         sheet: sheet && {

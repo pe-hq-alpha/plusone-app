@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Doc, Id } from "../../convex/_generated/dataModel";
 import { basisLabel, type Basis } from "../../convex/lib/comparable";
-import { describeOffer, packageCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, sheetFor, timesFor, type PackageCharge, type Sheet } from "../../convex/lib/standardSheet";
+import { describeOffer, packageCharges, priceUnitOf, quantitiesFor, quantityText, quantityValue, sheetFor, taxLabel, timesFor, type PackageCharge, type Sheet } from "../../convex/lib/standardSheet";
 import { VENDOR_CATEGORIES } from "../../convex/lib/vendorNeeds";
 import { Icon } from "../components/ui/Icon";
 import { EmptyState } from "../components/ui/EmptyState";
@@ -16,9 +16,10 @@ import { useDemoEventId } from "../components/LeaveDemo";
 import { CustomerCompare } from "../pages/DecisionsPage";
 import { partnerHref } from "../lib/hosts";
 import { BRAND } from "../lib/brand";
-import { BadgeRow, dayText, errorText, priceText, unitWord } from "./shared";
+import { BadgeRow, currencyOfCity, dayText, errorText, moneySign, priceText, unitWord } from "./shared";
 import { readyToUpload } from "../lib/pictures";
 import { placeFor, type Place } from "../../convex/lib/places";
+import { settledRegion } from "../lib/region";
 import "../styles/partner.css";
 
 const VendorMap = lazy(() => import("../components/VendorMap"));
@@ -162,7 +163,8 @@ function TryAsGuest({ onAccount }: { onAccount: () => void }) {
             disabled={busy}
             onClick={() => {
               setBusy(true);
-              void start({})
+              void settledRegion()
+                .then((region) => start({ region: region ?? "unknown" }))
                 .catch((err) => setError(errorText(err, "That didn't start. Try again.")))
                 .finally(() => setBusy(false));
             }}
@@ -906,14 +908,14 @@ function Briefs({ verified, ownName, offerings }: { verified: boolean; ownName: 
                   {b.category !== b.title && <p className="label mb-1">{b.category}</p>}
                   <h3 className="display text-xl">{b.title}</h3>
                   <p className="mt-1 text-sm text-muted">
-                    {b.occasion} · {dayText(b.date)} · {b.guests ? `${b.guests} guests · ` : ""}{b.area ? `${b.area}, ` : ""}{b.city}
+                    {b.occasion} · {dayText(b.date, b.currency)} · {b.guests ? `${b.guests} guests · ` : ""}{b.area ? `${b.area}, ` : ""}{b.city}
                   </p>
                   {b.notes && <p className="mt-2 text-sm">{b.notes}</p>}
                   {/* The same range the customer's Compare places every quote in, so both sides read one figure. */}
                   {b.range && (
                     <p className="mt-2 text-sm text-muted">
                       {b.city} prices on {BRAND.name}: <span className="text-ink">{money(b.range.p25, b.range.currency)} – {money(b.range.p75, b.range.currency)}</span>{" "}
-                      {unitWord(b.unit, b.category)}, typical {money(b.range.p50, b.range.currency)}
+                      {unitWord(b.unit, b.category, b.range.currency)}, typical {money(b.range.p50, b.range.currency)}
                       <span className="text-quiet"> · {b.range.count} listed prices</span>
                     </p>
                   )}
@@ -944,7 +946,7 @@ function Briefs({ verified, ownName, offerings }: { verified: boolean; ownName: 
   );
 }
 
-type Brief = { _id: Id<"vendorBriefs">; category: string; guests?: number; unit: Basis };
+type Brief = { _id: Id<"vendorBriefs">; category: string; guests?: number; unit: Basis; currency?: string };
 type LineAnswer = { status: "priced" | "included" | "extra"; amount: string };
 /** What a vendor has typed for each of the sheet's quantities, as typed. */
 type Typed = Record<string, string>;
@@ -1052,11 +1054,11 @@ function WhatsInThePrice({ sheet, unitKey, typed, onChange, counted, idPrefix, t
 }
 
 /** The line customers will read, as the vendor types. */
-function CustomersRead({ sheet, unitKey, price, quantities }: { sheet: Sheet; unitKey: string; price: string; quantities: Record<string, number> }) {
+function CustomersRead({ sheet, unitKey, price, quantities, currency = "INR" }: { sheet: Sheet; unitKey: string; price: string; quantities: Record<string, number>; currency?: string }) {
   if (!(Number(price) > 0)) return null;
   return (
     <p className="text-sm text-muted" aria-live="polite">
-      Customers read: <span className="text-ink">{describeOffer(sheet, unitKey, Number(price), quantities, "INR")}</span>
+      Customers read: <span className="text-ink">{describeOffer(sheet, unitKey, Number(price), quantities, currency)}</span>
     </p>
   );
 }
@@ -1088,7 +1090,10 @@ function addedWithoutAmount(sheet: Sheet | null, answers: Record<string, LineAns
  */
 function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => void; own?: Offering | null }) {
   const submit = useMutation(api.marketplace.offers.submit);
-  const sheet = sheetFor(brief.category);
+  // The customer's currency: an American event is priced in dollars, per person, with sales tax.
+  const currency = brief.currency ?? "INR";
+  const sign = moneySign(currency);
+  const sheet = sheetFor(brief.category, currency);
   const ownUnit = own?.priceUnit && sheet?.units.some((u) => u.key === own.priceUnit) ? own.priceUnit : undefined;
   const [price, setPrice] = useState(own ? String(own.price) : "");
   const [unitKey, setUnitKey] = useState(ownUnit ?? sheet?.units[0].key ?? "");
@@ -1131,6 +1136,7 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
       ...(sheet ? { priceUnit: unitKey, quantities } : {}),
       covers: covers || undefined,
       notes: notes || undefined,
+      currency,
       lines,
     })
       .then(onDone)
@@ -1148,9 +1154,9 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
       <div className="grid gap-4 md:grid-cols-3">
         <div>
           <label className="label" htmlFor="o-price">
-            {unit ? unit.priceLabel : perUnit ? `Price ${unitWord(brief.unit, brief.category)}` : "Price, all in"}
+            {unit ? unit.priceLabel : perUnit ? `Price ${unitWord(brief.unit, brief.category, currency)}` : "Price, all in"}
           </label>
-          <input id="o-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="₹" required />
+          <input id="o-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value)} placeholder={sign} required />
           {sheet && <ChargeDifferently sheet={sheet} unitKey={unitKey} onChange={setUnitKey} />}
         </div>
         {perUnit && (
@@ -1175,7 +1181,7 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
             counted
             idPrefix="o-q"
           />
-          <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={counted} />
+          <CustomersRead sheet={sheet} unitKey={unitKey} price={price} quantities={counted} currency={currency} />
         </div>
       )}
 
@@ -1185,7 +1191,7 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
           <p className="mb-1 text-xs text-muted">
             <strong className="font-medium text-ink">In the price</strong>: the main price covers it.{" "}
             <strong className="font-medium text-ink">Added</strong>: a fixed amount, added to the total.{" "}
-            <strong className="font-medium text-ink">At cost</strong> (for GST, <strong className="font-medium text-ink">On top</strong>): charged on top, outside the total.
+            <strong className="font-medium text-ink">At cost</strong> (for {taxLabel(currency) === "GST" ? "GST" : "sales tax"}, <strong className="font-medium text-ink">On top</strong>): charged on top, outside the total.
           </p>
           <div>
             {sheet.lines.map((line) => {
@@ -1207,10 +1213,10 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
                         <input
                           className="input"
                           inputMode="numeric"
-                          aria-label={`${line.label}, amount in ₹`}
+                          aria-label={`${line.label}, amount in ${sign}`}
                           value={a.amount}
                           onChange={(e) => setAnswers((prev) => ({ ...prev, [line.key]: { ...a, amount: e.target.value.replace(/[^\d.]/g, "") } }))}
-                          placeholder={a.status === "priced" ? "₹" : "₹ if known"}
+                          placeholder={a.status === "priced" ? sign : `${sign} if known`}
                           aria-invalid={a.status === "priced" && !(Number(a.amount) > 0) ? true : undefined}
                           aria-describedby={a.status === "priced" && !(Number(a.amount) > 0) ? `need-${line.key}` : undefined}
                         />
@@ -1240,8 +1246,8 @@ function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => 
         </button>
         <button type="button" className="btn-quiet btn-sm" onClick={onDone}>Cancel</button>
         <p className="text-sm text-muted">
-          The customer sees <strong className="text-ink">{money(total, "INR")}</strong>
-          {multiplied && qty ? ` (${money(Number(price) || 0, "INR")} × ${qty}${priced ? ` + ${money(priced, "INR")}` : ""})` : ""}
+          The customer sees <strong className="text-ink">{money(total, currency)}</strong>
+          {multiplied && qty ? ` (${money(Number(price) || 0, currency)} × ${qty}${priced ? ` + ${money(priced, currency)}` : ""})` : ""}
           {missingAmount ? ` + ${missingAmount.label.toLowerCase()}, amount still to give` : ""}
           {sheet && !answeredAll ? " · answer every line to send" : ""}
         </p>
@@ -1263,7 +1269,7 @@ function SentOffers() {
           <li key={o._id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
             <div>
               <p className="font-medium">{o.briefTitle}</p>
-              <p className="text-sm text-muted">{o.occasion} · {dayText(o.date)} · {money(o.total, o.currency)}</p>
+              <p className="text-sm text-muted">{o.occasion} · {dayText(o.date, o.currency)} · {money(o.total, o.currency)}</p>
             </div>
             <div className="flex items-center gap-2">
               {o.status === "withdrawn" ? (
@@ -1293,7 +1299,7 @@ type PackageDraft = FunctionReturnType<typeof api.marketplace.priceList.read>["p
  * each package comes back drafted on your trade's sheet. Nothing saves until you check a
  * draft in the form below and press Add.
  */
-function PriceListImport({ category, sheet, onUse }: { category: string; sheet: Sheet; onUse: (d: PackageDraft) => void }) {
+function PriceListImport({ category, sheet, onUse, currency = "INR" }: { category: string; sheet: Sheet; onUse: (d: PackageDraft) => void; currency?: string }) {
   const read = useAction(api.marketplace.priceList.read);
   const uploadUrl = useMutation(api.marketplace.photos.generateUploadUrl);
   const [text, setText] = useState("");
@@ -1348,7 +1354,11 @@ function PriceListImport({ category, sheet, onUse }: { category: string; sheet: 
       <textarea
         id="pl-text"
         className="input mt-3 min-h-[6rem]"
-        placeholder={"South Indian lunch on banana leaf, 12 items, Rs.380 per plate. GST extra.\nBuffet with live dosa counter, Rs.450 per head."}
+        placeholder={
+          currency === "USD"
+            ? "Hill Country buffet, two mains and three sides, $38 per person. Tax and 20% service extra.\nPlated three-course dinner, $55 per person."
+            : "South Indian lunch on banana leaf, 12 items, Rs.380 per plate. GST extra.\nBuffet with live dosa counter, Rs.450 per head."
+        }
         value={text}
         onChange={(e) => setText(e.target.value)}
         maxLength={6000}
@@ -1378,8 +1388,8 @@ function PriceListImport({ category, sheet, onUse }: { category: string; sheet: 
                 <div className="min-w-0">
                   <p className="font-medium">{d.title}</p>
                   <p className="text-sm text-muted">
-                    {money(d.price, "INR")} {unitLabel(d.priceUnit)}
-                    {d.taxIncluded === true ? " · GST included" : d.taxIncluded === false ? " · GST extra" : ""}
+                    {money(d.price, currency)} {unitLabel(d.priceUnit)}
+                    {d.taxIncluded === true ? ` · ${taxLabel(currency)} included` : d.taxIncluded === false ? ` · ${taxLabel(currency)} extra` : ""}
                   </p>
                   {quantityLine(d) && <p className="text-sm text-muted">{quantityLine(d)}</p>}
                   {d.includes.length > 0 && <p className="mt-0.5 text-sm">Includes {d.includes.join(", ")}</p>}
@@ -1456,7 +1466,7 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
   const [start, setStart] = useState<PackageStart | null>(null);
   const [importing, setImporting] = useState(false);
   const [sent, setSent] = useState(false);
-  const firstSheet = sheetFor(profile.categories[0] ?? "");
+  const firstSheet = sheetFor(profile.categories[0] ?? "", currencyOfCity(profile.city));
   // Newest first, so a package just added sits where its form was.
   const list = [...offerings].sort((a, b) => b._creationTime - a._creationTime);
   const done = (waiting: boolean) => {
@@ -1500,6 +1510,7 @@ function Prices({ profile, offerings }: { profile: Profile; offerings: Offering[
 
       {importing && firstSheet && (
         <PriceListImport
+          currency={currencyOfCity(profile.city)}
           category={profile.categories[0]}
           sheet={firstSheet}
           onUse={(d) => {
@@ -1616,12 +1627,12 @@ function PackageRow({ offering: o, showCategory, onEdit }: { offering: Offering;
 
 /** A package's facts in four groups, from its includes, GST and charges. */
 function readPackage(o: { category: string; currency?: string; includes: string[]; taxIncluded?: boolean | null; charges?: PackageCharge[] }) {
-  const sheet = sheetFor(o.category);
+  const sheet = sheetFor(o.category, o.currency);
   // GST said the older way (a yes or no) reads as its line.
   const charges = o.charges?.some((c) => c.key === "gst") || o.taxIncluded == null ? o.charges : [{ key: "gst", status: o.taxIncluded ? "included" : "extra" } as PackageCharge, ...(o.charges ?? [])];
   const read = packageCharges(sheet, charges, o.currency ?? "INR", o.includes);
   const gstAsked = sheet?.lines.some((l) => l.key === "gst");
-  if (!gstAsked && !charges?.some((c) => c.key === "gst")) read.notSaid.unshift("GST");
+  if (!gstAsked && !charges?.some((c) => c.key === "gst")) read.notSaid.unshift(taxLabel(o.currency));
   return { ...read, inPrice: [...o.includes, ...read.inPrice] };
 }
 
@@ -1633,7 +1644,10 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
   const save = useMutation(api.marketplace.partner.saveOffering);
   const tidyAction = useAction(api.marketplace.tidy.tidy);
   const [category, setCategory] = useState(start?.category ?? profile.categories[0] ?? "");
-  const sheet = sheetFor(category);
+  // A business prices in its city's money: dollars in Austin, rupees elsewhere.
+  const currency = currencyOfCity(profile.city);
+  const sign = moneySign(currency);
+  const sheet = sheetFor(category, currency);
   const [title, setTitle] = useState(start?.title ?? "");
   const [unit, setUnit] = useState<Basis>(sheet?.unit ?? "total");
   const [unitKey, setUnitKey] = useState(start?.priceUnit ?? sheet?.units[0].key ?? "");
@@ -1655,7 +1669,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
   const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState<TidyResult[] | null>(null);
   const quantities = sheet ? quantitiesTyped(sheet, unitKey, typed) : {};
-  const lines = [{ key: "gst", label: "GST" }, ...(sheet?.lines.filter((l) => l.key !== "gst") ?? [])];
+  const lines = [{ key: "gst", label: taxLabel(currency) }, ...(sheet?.lines.filter((l) => l.key !== "gst") ?? [])];
 
   const charges = (): PackageCharge[] => [
     ...lines.flatMap((l) => {
@@ -1667,7 +1681,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
       .filter((c) => c.label.trim())
       .map((c) => ({ label: c.label.trim(), status: c.status, ...(c.status === "priced" && c.amount.trim() ? { amount: Number(c.amount) } : {}) })),
   ];
-  const draft = { category, currency: "INR", includes: includes.split("\n").map((s) => s.trim()).filter(Boolean), charges: charges() };
+  const draft = { category, currency, includes: includes.split("\n").map((s) => s.trim()).filter(Boolean), charges: charges() };
   const read = readPackage(draft);
   const answeredAll = lines.every((l) => answers[l.key]);
   // An added charge with no amount yet isn't said; the preview says so rather than calling it done.
@@ -1686,6 +1700,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
       unit: sheet?.unit ?? unit,
       ...(sheet ? { priceUnit: unitKey, quantities } : {}),
       price: Number(price),
+      currency,
       includes: nextIncludes,
       charges: charges(),
     })
@@ -1734,7 +1749,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
                   className="input"
                   value={category}
                   onChange={(e) => {
-                    const next = sheetFor(e.target.value);
+                    const next = sheetFor(e.target.value, currency);
                     setCategory(e.target.value);
                     setUnit(next?.unit ?? "total");
                     setUnitKey(next?.units[0].key ?? "");
@@ -1774,13 +1789,13 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
             <div className="md:col-span-2">
               <label className="label" htmlFor="pr-price">{sheet ? priceUnitOf(sheet, unitKey).priceLabel : "Price"}</label>
               <div className="pked__price">
-                <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ""))} placeholder="₹" required />
+                <input id="pr-price" className="input" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^\d.]/g, ""))} placeholder={sign} required />
                 {sheet ? (
                   <span className="pked__per">{perLabel}</span>
                 ) : (
                   <select className="input w-44" value={unit} onChange={(e) => setUnit(e.target.value as Basis)} aria-label="Priced">
                     {(["per_person", "per_piece", "per_day", "total"] as const).map((u) => (
-                      <option key={u} value={u}>{basisLabel(u, category)}</option>
+                      <option key={u} value={u}>{basisLabel(u, category, currency)}</option>
                     ))}
                   </select>
                 )}
@@ -1831,10 +1846,10 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
                         <input
                           className="input"
                           inputMode="numeric"
-                          aria-label={`${l.label}, amount in ₹`}
+                          aria-label={`${l.label}, amount in ${sign}`}
                           value={a.amount}
                           onChange={(e) => setAnswer(l.key, { amount: e.target.value.replace(/[^\d.]/g, "") })}
-                          placeholder="₹"
+                          placeholder={sign}
                           autoFocus
                         />
                       </span>
@@ -1866,10 +1881,10 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
                       <input
                         className="input"
                         inputMode="numeric"
-                        aria-label={`${c.label || "This charge"}, amount in ₹`}
+                        aria-label={`${c.label || "This charge"}, amount in ${sign}`}
                         value={c.amount}
                         onChange={(e) => setOwn((prev) => prev.map((x) => (x.id === c.id ? { ...x, amount: e.target.value.replace(/[^\d.]/g, "") } : x)))}
-                        placeholder="₹"
+                        placeholder={sign}
                       />
                     </span>
                   )}
@@ -1928,7 +1943,7 @@ function PackageEditor({ profile, start, onDone, onCancel }: { profile: Profile;
         <div className="pkread mt-2" aria-live="polite">
           <p className="pkread__title">{title.trim() || "Your package"}</p>
           <p className="pkread__price">
-            {Number(price) > 0 ? (sheet ? describeOffer(sheet, unitKey, Number(price), quantities, "INR") : `${money(Number(price), "INR")} ${unitWord(unit, category)}`) : "Add a price"}
+            {Number(price) > 0 ? (sheet ? describeOffer(sheet, unitKey, Number(price), quantities, currency) : `${money(Number(price), currency)} ${unitWord(unit, category, currency)}`) : "Add a price"}
           </p>
           {read.inPrice.length > 0 && (
             <div className="pkread__group">

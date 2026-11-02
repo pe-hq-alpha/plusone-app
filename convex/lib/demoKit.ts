@@ -129,6 +129,11 @@ export function longDateIN(iso: string): string {
   return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
+/** "February 6, 2027": a date the way an American email would write it. */
+export function longDateUS(iso: string): string {
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 /** The slots of a new event, looked up by title. */
 export async function slotsOf(ctx: MutationCtx, eventId: Id<"events">) {
   const slots = await ctx.db.query("vendorSlots").withIndex("by_eventId", (q) => q.eq("eventId", eventId)).take(40);

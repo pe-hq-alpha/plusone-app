@@ -7,6 +7,7 @@ import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { onPartnerHost, partnerHref } from "../lib/hosts";
 import { useAuthActions } from "../lib/session";
+import { settledRegion } from "../lib/region";
 
 /**
  * The vendors' demo, on Partner's own address: straight in as a sample caterer, no
@@ -54,7 +55,9 @@ export function VendorDemoPage() {
     }
     if (isAuthenticated && isGuest) {
       opened.current = true;
-      void start({})
+      // Outside India the customer and the sample caterer are in Austin, in dollars.
+      void settledRegion()
+        .then((region) => start({ region: region ?? "unknown" }))
         .then(() => {
           record(EVENTS.vendorDemoOpened);
           // The page knows it was opened from the demo, so the sample business stays.

@@ -15,15 +15,29 @@ export const errorText = (e: unknown, fallback: string) => {
 };
 
 /** "Sat 12 Dec 2026" from "2026-12-12". */
-export function dayText(iso: string): string {
+export function dayText(iso: string, currency = "INR"): string {
   const d = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+  // An American customer's date reads month first ("Sat, Feb 6, 2027").
+  return d.toLocaleDateString(currency === "USD" ? "en-US" : "en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
 /** "per plate", "per piece", "all in": the unit as it reads after a price. */
-export function unitWord(unit: Basis, category: string): string {
-  return unit === "total" ? "all in" : basisLabel(unit, category).toLowerCase();
+export function unitWord(unit: Basis, category: string, currency?: string): string {
+  return unit === "total" ? "all in" : basisLabel(unit, category, currency).toLowerCase();
+}
+
+/** The symbol typed beside a price field: "$" for dollars, "₹" for rupees, else the code. */
+export function moneySign(currency: string): string {
+  return currency === "INR" ? "₹" : currency === "USD" ? "$" : currency;
+}
+
+/**
+ * The currency a business prices in, from its city: the sample businesses in Austin price in
+ * dollars, everyone else (Chennai first) in rupees.
+ */
+export function currencyOfCity(city: string | undefined): string {
+  return /\baustin\b/i.test(city ?? "") ? "USD" : "INR";
 }
 
 type PricedOffering = { price: number; currency: string; unit: Basis; category: string; priceUnit?: string; quantities?: Record<string, number> };
@@ -34,9 +48,9 @@ type PricedOffering = { price: number; currency: string; unit: Basis; category: 
  * with no sheet. One saved in another unit than its sheet's reads as it was saved.
  */
 export function priceText(o: PricedOffering): string {
-  const sheet = sheetFor(o.category);
+  const sheet = sheetFor(o.category, o.currency);
   if (sheet && o.unit === sheet.unit) return describeOffer(sheet, o.priceUnit, o.price, o.quantities ?? {}, o.currency);
-  return `${money(o.price, o.currency)} ${unitWord(o.unit, o.category)}`;
+  return `${money(o.price, o.currency)} ${unitWord(o.unit, o.category, o.currency)}`;
 }
 
 const BADGE_TEXT: Record<string, string> = {

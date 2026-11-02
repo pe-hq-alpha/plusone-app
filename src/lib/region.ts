@@ -113,6 +113,18 @@ function askCloudflare(): Promise<string | undefined> {
   return asked;
 }
 
+/**
+ * The region to act on once, such as which sample to open: a hand pick at once, otherwise
+ * Cloudflare's answer if it comes within `waitMs`, otherwise the best guess.
+ */
+export async function settledRegion(waitMs = 1500): Promise<string | undefined> {
+  const guess = guessRegion();
+  if (stored(CHOSEN_KEY)) return guess;
+  const answer = await Promise.race([askCloudflare(), new Promise<undefined>((done) => setTimeout(() => done(undefined), waitMs))]);
+  if (answer) store(KEY, answer);
+  return answer ?? guess;
+}
+
 /** The visitor's region ("IN-DL", "IN", "US"), or undefined while nothing is known. */
 export function useRegion(): string | undefined {
   const [region, setRegion] = useState(guessRegion);

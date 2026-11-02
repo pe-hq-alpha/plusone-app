@@ -7,6 +7,7 @@ import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { DEMO_PAGES } from "./PlanLinkPage";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
+import { settledRegion } from "../lib/region";
 
 /**
  * /demo: straight into a fresh demo event, no sign-up.
@@ -14,8 +15,11 @@ import { EVENTS } from "../lib/analytics/events";
  * A guest arriving again gets a clean sample rather than whatever the last visitor
  * left behind, so the link can be handed to several people in a row. Someone with a
  * real account keeps theirs: they are only shown the sample, never signed out of it.
- * The birthday opens by default; a link can pick another: /demo?sample=housewarming
- * or /demo?sample=office.
+ * The birthday opens by default, in the visitor's own money and customs: Amma's 60th in
+ * Chennai for visitors in India, Dad's 60th in Austin for everyone else (src/lib/region.ts;
+ * `?region=US` or `?region=IN` picks one by hand). A link can pick another sample:
+ * /demo?sample=housewarming, /demo?sample=office, or either birthday with
+ * ?sample=birthday or ?sample=birthday-us.
  */
 export function GuestPage() {
   const { isLoading, isAuthenticated } = useConvexAuth();
@@ -54,7 +58,9 @@ export function GuestPage() {
     }
     if (isAuthenticated && me !== undefined) {
       opened.current = true;
-      void start({ kind })
+      // The region only matters for the birthday; a link's own sample wins.
+      void settledRegion()
+        .then((region) => start({ kind, region: region ?? "unknown" }))
         .then((eventId) => {
           record(EVENTS.demoOpened);
           navigate(`/e/${eventId}${page}`, { replace: true });

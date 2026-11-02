@@ -56,6 +56,38 @@ export const CHENNAI_AREAS: Known[] = [
   { name: "West Mambalam", aliases: ["mambalam"], lat: 13.0383, lng: 80.2209 },
 ];
 
+/**
+ * Austin's neighbourhoods, for the American sample event and its sample vendors: each one's
+ * middle, from the city's own neighbourhood map, rounded like Chennai's.
+ */
+export const AUSTIN_AREAS: Known[] = [
+  { name: "Allandale", lat: 30.34, lng: -97.745 },
+  { name: "Barton Hills", lat: 30.253, lng: -97.785 },
+  { name: "Bouldin Creek", aliases: ["bouldin"], lat: 30.254, lng: -97.758 },
+  { name: "Brentwood", lat: 30.332, lng: -97.74 },
+  { name: "Cherrywood", lat: 30.29, lng: -97.713 },
+  { name: "Clarksville", lat: 30.281, lng: -97.76 },
+  { name: "Crestview", lat: 30.348, lng: -97.731 },
+  { name: "Downtown Austin", aliases: ["downtown"], lat: 30.2672, lng: -97.7431 },
+  { name: "East Austin", aliases: ["east side", "eastside"], lat: 30.264, lng: -97.72 },
+  { name: "Holly", lat: 30.255, lng: -97.727 },
+  { name: "Hyde Park", lat: 30.306, lng: -97.729 },
+  { name: "Montopolis", lat: 30.233, lng: -97.7 },
+  { name: "Mueller", lat: 30.298, lng: -97.705 },
+  { name: "North Loop", lat: 30.318, lng: -97.724 },
+  { name: "Rainey Street", aliases: ["rainey"], lat: 30.2585, lng: -97.7385 },
+  { name: "Rosedale", lat: 30.317, lng: -97.747 },
+  { name: "South Congress", aliases: ["soco"], lat: 30.2489, lng: -97.7501 },
+  { name: "South Lamar", aliases: ["south lamar boulevard"], lat: 30.245, lng: -97.779 },
+  { name: "Tarrytown", lat: 30.296, lng: -97.772 },
+  { name: "Travis Heights", lat: 30.247, lng: -97.742 },
+  { name: "Windsor Park", lat: 30.315, lng: -97.695 },
+  { name: "Zilker", lat: 30.262, lng: -97.77 },
+];
+
+/** Cities whose areas are known here by name. */
+const AREAS_OF: Record<string, Known[]> = { Chennai: CHENNAI_AREAS, Austin: AUSTIN_AREAS };
+
 /** Each city's middle, for centring the map when nothing nearer is known. */
 export const CITIES: Known[] = [
   { name: "Chennai", aliases: ["madras"], lat: 13.0827, lng: 80.2707 },
@@ -67,6 +99,7 @@ export const CITIES: Known[] = [
   { name: "Madurai", lat: 9.9252, lng: 78.1198 },
   { name: "Kolkata", aliases: ["calcutta"], lat: 22.5726, lng: 88.3639 },
   { name: "Pune", lat: 18.5204, lng: 73.8567 },
+  { name: "Austin", lat: 30.2672, lng: -97.7431 },
 ];
 
 /** Lower case, dots and commas as spaces, single spaces: "R.A. Puram," reads as "r a puram". */
@@ -93,12 +126,13 @@ export function cityPlace(city: string | undefined): Place | null {
 }
 
 /**
- * Where a text about a place points: a known area, else the city's middle. Areas are
- * only Chennai's for now, so an area is matched only when the city is Chennai or not given.
+ * Where a text about a place points: a known area, else the city's middle. Areas are known
+ * for Chennai and Austin, so an area is matched only in its own city; with no city given,
+ * Chennai's are read.
  */
 export function placeFor(text: string | undefined, city?: string): Place | null {
-  const inChennai = !city || named(city, CITIES)?.name === "Chennai";
-  const area = text && inChennai ? named(text, CHENNAI_AREAS) : null;
+  const areas = city ? AREAS_OF[named(city, CITIES)?.name ?? ""] : CHENNAI_AREAS;
+  const area = text && areas ? named(text, areas) : null;
   if (area) return { lat: area.lat, lng: area.lng, label: area.name, precision: "area" };
   return cityPlace(city) ?? (text ? cityPlace(text) : null);
 }
@@ -165,7 +199,7 @@ export function readSearch(text: string): Asked {
     }
   }
   const city = named(text, CITIES)?.name;
-  const area = !city || city === "Chennai" ? named(text, CHENNAI_AREAS)?.name : undefined;
+  const area = !city || city === "Chennai" ? named(text, CHENNAI_AREAS)?.name : city === "Austin" ? named(text, AUSTIN_AREAS)?.name : undefined;
   const price = /(?:under|below|within|upto|up to|less than|max)\s*(?:rs\.?|₹|inr)?\s*([\d,]+)\s*(k|thousand|lakh|lakhs|l)?\b/i.exec(text);
   let maxPrice: number | undefined;
   if (price) {

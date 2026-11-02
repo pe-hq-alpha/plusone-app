@@ -18,3 +18,12 @@ export function sampleFor(region: string | undefined): Sample {
 
 /** A region that picks a given sample, for links such as /demo?sample=delhi. */
 export const REGION_OF: Record<Sample, string> = { chennai: "IN-TN", delhi: "IN-DL", austin: "US" };
+
+/**
+ * Which sample birthday a visitor opens: Amma's 60th in Chennai for anyone in India, Dad's
+ * 60th in Austin for everyone else. Without a region (an older page, a test) it stays Chennai.
+ */
+export function birthdayFor(region: string | undefined): "birthday" | "birthday-us" {
+  if (!region?.trim()) return "birthday";
+  return region.trim().toUpperCase().split("-")[0] === "IN" ? "birthday" : "birthday-us";
+}

@@ -160,7 +160,7 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         kind: "fee",
         usually: "extra",
         // "Service" alone counts only as an item of its own ("includes service and GST"), never inside "banana leaf service".
-        match: /\b(service staff|serving staff|catering staff|waiters?|servers?|service boys|service charges?)\b|^\s*service\b(?!\s*tax)/i,
+        match: /\b(service staff|serving staff|catering staff|waiters?|servers?|service boys|service charges?|gratuity)\b|^\s*service\b(?!\s*tax)/i,
       },
       TRANSPORT,
       {
@@ -168,7 +168,7 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
         label: "Crockery and serving ware",
         kind: "fee",
         usually: "included",
-        match: /\b(crocker\w*|cutlery|serving ware|serving vessels?|banana[- ]leaf|leaf plates?|disposables?|tableware|(?<!per )plates|glass(es)?|tumblers?)\b/i,
+        match: /\b(crocker\w*|cutlery|serving ware|serving vessels?|banana[- ]leaf|leaf plates?|disposables?|tableware|(?<!per )plates|glass(es)?|glassware|linens?|tumblers?)\b/i,
       },
       { key: "water", label: "Water", kind: "extra", usually: "included", match: /\bwater\b/i },
     ],
@@ -305,13 +305,65 @@ export const STANDARD_SHEETS: Partial<Record<VendorNeedKey, Sheet>> = {
   },
 };
 
-/** The sheet for a need ("catering") or for the category a slot carries ("Decor & Florals"); null when there is none. */
-export function sheetFor(needOrCategory: string): Sheet | null {
+/**
+ * The sheet for a need ("catering") or for the category a slot carries ("Decor & Florals"); null
+ * when there is none. With the event's currency, it reads in that country's words (localSheet).
+ */
+export function sheetFor(needOrCategory: string, currency?: string): Sheet | null {
   const wanted = needOrCategory.trim().toLowerCase();
   const need = (Object.keys(VENDOR_NEEDS) as VendorNeedKey[]).find(
     (k) => k === wanted || VENDOR_NEEDS[k].category.toLowerCase() === wanted,
   );
-  return (need && STANDARD_SHEETS[need]) || null;
+  const sheet = (need && STANDARD_SHEETS[need]) || null;
+  return sheet && localSheet(sheet, currency);
+}
+
+/** The tax a quote in this currency names: sales tax on an American quote, GST on an Indian one. */
+export function taxLabel(currency?: string): string {
+  return currency === "USD" ? "Sales tax" : "GST";
+}
+
+/** Lines that an American quote names in other words. The keys stay, so offers and readings still line up. */
+const US_LINE_LABELS: Record<string, string> = {
+  gst: "Sales tax",
+  crockery: "Plates, glassware and linens",
+  dining: "Dining room and kitchen",
+  parking: "Parking",
+  transport: "Delivery",
+  samagri: "Ceremony items",
+  draping: "Draping",
+  early_access: "Early access for setup",
+};
+
+/** Lines an American room doesn't charge apart: power and air conditioning come with the rental. */
+const US_DROPPED = new Set(["electricity", "ac"]);
+
+/**
+ * A sheet in the words quotes use where the event is: an American caterer charges per
+ * person, with sales tax, where an Indian one charges per plate, with GST. Only the labels
+ * change; keys, units and rules are the same, so a sheet's answers compare everywhere.
+ */
+export function localSheet(sheet: Sheet, currency?: string): Sheet {
+  if (currency !== "USD") return sheet;
+  return {
+    ...sheet,
+    covers: sheet.covers
+      .replace("per plate", "per person")
+      .replace("The hall for the hours agreed, with its chairs", "The room for the hours agreed, with its tables and chairs")
+      .replace("dakshina", "fee"),
+    lines: sheet.lines
+      .filter((l) => !US_DROPPED.has(l.key))
+      .map((l) => {
+        const label = US_LINE_LABELS[l.key];
+        if (!label) return l;
+        const ask = l.ask?.replace(/car parking/, "parking").replace("when decorators can get in", "when vendors can get in to set up");
+        return { ...l, label, ...(ask ? { ask } : {}) };
+      }),
+    units: sheet.units.map((u) => (u.key === "per_plate" ? { ...u, label: "per person", priceLabel: "Price per person" } : u)),
+    quantities: sheet.quantities.map((q) =>
+      q.key === "count" && q.label === "Plates" ? { ...q, label: "Guests" } : q.key === "sweets" ? { ...q, label: "Desserts" } : q,
+    ),
+  };
 }
 
 // ---------------------------------------------------------------- how a price is charged
@@ -493,7 +545,7 @@ export function missingCharges(q: QuoteLike, sheet: Sheet, others: QuoteLike[], 
   if (sheet.unit === "per_person" || sheet.unit === "per_piece") {
     const perUnit = (q.lines ?? []).some((l) => l.kind === "core" && l.unit === sheet.unit);
     if (!perUnit && !q.headcountAssumed) {
-      const what = sheet.unit === "per_person" ? "plates" : "pieces";
+      const what = sheet.unit === "per_person" ? (q.currency === "USD" ? "guests" : "plates") : "pieces";
       flags.push({ key: "unit", label: `Number of ${what}`, message: `Doesn't say how many ${what} the price is for` });
     }
   }
@@ -571,7 +623,7 @@ export function packageCharges(
     if (c.status === "included") out.inPrice.push(label);
     else if (c.status === "none") out.notProvided.push(label);
     else if (c.status === "priced" && c.amount !== undefined) out.onTop.push(`${label} ${formatMoney(c.amount, currency)}`);
-    else out.onTop.push(c.key === "gst" ? "GST" : `${label}, at cost`);
+    else out.onTop.push(c.key === "gst" ? label : `${label}, at cost`);
   }
   for (const l of sheet?.lines ?? []) if (!said.has(l.key)) out.notSaid.push(l.label);
   return out;

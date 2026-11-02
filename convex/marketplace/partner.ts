@@ -291,13 +291,20 @@ export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">
   const room = await rateLimiter.limit(ctx, "partnerSignUps");
   if (!room.ok) throw new ConvexError("A lot of people are trying this right now. Try again in a few minutes.");
   const now = Date.now();
+  // The business is in the same city as the guest's sample event: Austin for the American one, Chennai otherwise.
+  const membership = await ctx.db
+    .query("members")
+    .withIndex("by_userId", (q) => q.eq("userId", userId))
+    .first();
+  const event = membership ? await ctx.db.get(membership.eventId) : null;
+  const sample = event?.demo === true && event.currency === "USD" ? SAMPLE_BUSINESS_US : SAMPLE_BUSINESS_IN;
   const profileId = await ctx.db.insert("vendorProfiles", {
     name: "Your catering business",
     categories: ["Catering"],
-    city: "Chennai",
-    cityKey: "chennai",
-    serviceArea: ["Mylapore"],
-    languages: ["Tamil", "English"],
+    city: sample.city,
+    cityKey: sample.cityKey,
+    serviceArea: [sample.area],
+    languages: sample.languages,
     about: "A sample business for trying PlusOne Partner.",
     source: "vendor_signup",
     ownerUserId: userId,
@@ -307,19 +314,39 @@ export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">
     completedEvents: 0,
     sample: true,
   });
-  await ctx.db.insert("vendorOfferings", {
-    profileId,
-    category: "Catering",
+  await ctx.db.insert("vendorOfferings", { profileId, category: "Catering", unit: "per_person", priceUnit: "per_plate", ...sample.offering });
+  return profileId;
+}
+
+/** The guest's sample caterer in Chennai, for the Indian sample event. */
+const SAMPLE_BUSINESS_IN = {
+  city: "Chennai",
+  cityKey: "chennai",
+  area: "Mylapore",
+  languages: ["Tamil", "English"],
+  offering: {
     title: "Veg lunch on banana leaf",
-    unit: "per_person",
-    priceUnit: "per_plate",
     quantities: { dishes: 8, sweets: 2 },
     price: 360,
     currency: "INR",
     includes: ["Sweet, two curries, kootu, sambar, rasam, payasam, appalam", "Banana leaf", "Serving staff"],
-  });
-  return profileId;
-}
+  },
+};
+
+/** The guest's sample caterer in Austin, for the American sample event: a buffet near the middle of the city's sample range. */
+const SAMPLE_BUSINESS_US = {
+  city: "Austin",
+  cityKey: "austin",
+  area: "South Congress",
+  languages: ["English", "Spanish"],
+  offering: {
+    title: "Dinner buffet",
+    quantities: { dishes: 8, sweets: 1 },
+    price: 40,
+    currency: "USD",
+    includes: ["Two mains, three sides, salad, rolls and dessert", "Serving staff", "Delivery and setup"],
+  },
+};
 
 /** Work on another of the account's own businesses. */
 export const switchBusiness = mutation({

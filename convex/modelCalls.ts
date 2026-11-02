@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery, query } from "./_generated/server";
 import { requireMember } from "./lib/auth";
-import { RECORDED_RUNS } from "./lib/recordedRun";
+import { RECORDED_RUNS, RECORDED_RUNS_ELSEWHERE } from "./lib/recordedRun";
 import { modelCallFields } from "./schema";
 
 /**
@@ -85,7 +85,8 @@ export const recorded = query({
     await requireMember(ctx, args.eventId, "viewer");
     const event = await ctx.db.get(args.eventId);
     if (event?.demo !== true) return [];
-    return RECORDED_RUNS;
+    // The American sample is told the same real runs without the Indian material's names.
+    return event.currency === "USD" ? RECORDED_RUNS_ELSEWHERE : RECORDED_RUNS;
   },
 });
 
