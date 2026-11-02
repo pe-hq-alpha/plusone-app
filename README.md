@@ -90,7 +90,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ## For the judges
 
-**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens Amma's 60th with no sign-up (also a griha pravesam, `/demo?sample=housewarming`, and an office Diwali party, `/demo?sample=office`; their vendors are made up, so nothing is really sent).
+**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens a sample 60th birthday with no sign-up, in the visitor's own money: Dad's 60th in Austin, in dollars (`/demo?region=US`), or Amma's 60th in rupees (`/demo?region=IN`) (also a griha pravesam, `/demo?sample=housewarming`, and an office Diwali party, `/demo?sample=office`; their vendors are made up, so nothing is really sent).
 1. Start on **Overview**, then **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them.
 2. Press **Under the hood** in the top bar for each step's Meta model, time and cost; type "We're now 140 people" on Overview to watch one run.
 3. Open [PlusOne Partner's demo](https://partner.plusoneevents.site/demo) as a sample caterer, answer the customer's request on the same sheet, and see the offer as the customer does.
