@@ -17,10 +17,10 @@
 - **AI models (build):** Claude Code with claude-opus-5-5 (and its subagents); Muse Code (Everyday plan, from 27 Oct), every session logged under Muse Code below
 - **Track:** Startup ("open to technical founders building a product"): the rules let a startup build on its existing product, provided what is new during the event is clearly identified, which this log and the cutoff above do
 - **Meta models used:** Muse Spark 1.3 (live); Muse Voice Transcribe (live in production 28 Oct: speak the plan or a change in Tamil, English or both); SAM 3.1 (adapter built 27 Oct; the venue view live in production 29 Oct); Muse Wonder (the vendor check in Ops, built and wired in 28 Oct; first live runs 29 Oct); Muse Spark Open (open weights on Baseten, $100 of Baseten credit; live 29 Oct, reading vendors' price lists into packages); Muse Glimmer 30B (open weights on our own Modal Dedicated Endpoint, one H200, $100 of Modal credit; photo checks live in production 29 Oct); Muse Code for building
-- **Credits spent:** about $3.70 of the $150 Meta credit by the evening of 29 Oct, adding the day's logged runs: $0.98 in 129 calls by the morning (`evalsCost:perEvent`), about $2.30 in the afternoon's evaluations and vendor checks, and about $0.43 in the evening (the planted-page check, the photo evaluation's Muse Spark half, the demo's charge reading). Modal: the Glimmer GPU on credits ($3.79 metered by 13:20, plus $0.22 for the photo evaluation). Baseten: a few cents of $100. ElevenLabs: six 1K images for the photo evaluation. On 30 Oct, a few more small runs: two held-out evaluation runs on Muse Spark (about 20 calls each) and five price-list reads on Muse Spark Open (Baseten's credits). On 31 Oct, the baby shower's three quotes were read on production (`evals:chargesFor`). Spending after 29 Oct is small, and 1 Nov had no new paid runs; the full total is read with `evalsCost` before submitting.
+- **Credits spent:** about $9.60 of model calls recorded on production by the morning of 2 Nov at list price (`evalsCost:perEvent`): $8.92 in evaluations, vendor checks and directory searches, and well under $1 across real and sample events; the founders' own Diwali party, planned end to end, came to $0.43 in 44 calls. GPU time for Muse Glimmer (Modal) and Muse Spark Open (Baseten) is billed on those platforms' credits. Earlier detail: about $3.70 by the evening of 29 Oct.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-11-02T09:05:00+05:30
+- **Last updated:** 2026-11-02T10:05:00+05:30
 
 ## Evidence
 
@@ -64,7 +64,7 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-11-02 - 54203eb..5cd0021 (the last refining day before the video)
+### 2026-11-02 - 54203eb..0068ef1 (the last refining day before the video)
 
 Fixes and checks before the video is recorded, by Claude Code (claude-opus-5-5).
 
@@ -79,7 +79,9 @@ Fixes and checks before the video is recorded, by Claude Code (claude-opus-5-5).
   - **Home page** (`481a3f8`): every section visible without scrolling (a full-page capture had blank bands); the demo link is a visible button. **Directory** (`6412160`): web finds' page titles trimmed to the business name; astrology sites never listed for priests.
 - **A judge on Meta's own models** (`c3371b5`): `evalsJudge:judge` scores the form, the video's narration and the README per surface and per section, several runs, so the parts that hold at 9 are kept and only the rest rewritten. Not run yet: the dev deployment's Meta key is rejected (401).
 - **Docs** (`7f8e664`, `6852681`, `d4e0fee`): ten trades; how every evaluation can be checked; Meta's settings first in SETUP; the build in the quick check; savings lead with the founders' real event; test addresses on reserved example domains.
-- **Checked:** `npm test` 832 passed (87 files), `npm run typecheck` clean; every change seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll, no console errors. **Credits:** about $0.01 (one "140 people" change in the judge walk).
+- **The cost of a whole real event, measured** (field notes, 09:59): the founders' Diwali party, planned end to end in PlusOne, took 44 model calls and **$0.43** at list price; it replaces "an estimated $1–2" in the README, BUSINESS and the submission text.
+- **After the deploy** (about 09:55 IST): the live walk passed 15 of 15 steps; the founder's Budget now names the ₹500 still to pay (a cost he added for return gifts, ₹2,500 agreed, ₹2,000 paid). Then the remaining walk items (`73cc6dc`, `6a098a8`, `81e2058`, `0068ef1`): milestones read once ("Found 8 options for your biriyani"), "6 days away" instead of "0 weeks away", the sticky note kept below the top bar, the light/dark switch on every page, guests counted the same everywhere, the inbox opening on what needs the host, a non-wedding event page headed by its own name, Print showing booked amounts and food needs once with counts.
+- **Checked:** `npm test` 832 passed (87 files), `npm run typecheck` clean; every change seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll, no console errors; live walk 15/15 after the deploy. **Credits:** about $0.01 (one "140 people" change in the judge walk).
 
 ### 2026-11-01 - d7d6ff7..fcd8646 (the founder's walk through his own event)
 

@@ -152,7 +152,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **Event prices can't be standardised like a cleaning job. So what is standard?** The lines, not the price. Every quote for a trade is read into the same sheet, and prices are placed in the city's range by tier, Value to Luxury, the way a mid-range and a luxury brand each have their own. The customer chooses; PlusOne never picks the cheapest for them.
 
-**How does PlusOne make money?** A paid planner (Basic, then Premium with a person), a fee for vendors to be listed, and the end goal: a disclosed commission on every booking paid through PlusOne. Model cost is an estimated $1–2 for a whole event.
+**How does PlusOne make money?** A paid planner (Basic, then Premium with a person), a fee for vendors to be listed, and the end goal: a disclosed commission on every booking paid through PlusOne. Model cost is small: the founders' own Diwali party, planned end to end in PlusOne, took 44 model calls and $0.43 in all.
 
 **Why wouldn't a customer and vendor take the deal to WhatsApp?** Once booking runs through the app, the guarantee, the locked standard price, the staged payments and the vendor's track record will exist only for bookings made through PlusOne, the way home-services apps keep theirs. [Why bookings stay](BUSINESS.md#why-bookings-stay-on-plusone)
 
@@ -216,7 +216,7 @@ Every model step is measured on production against keys marked by hand before an
 | [Finding the stage](EVALUATIONS.md#evaluation-finding-the-stage) in a hall photo | Found and cut out in 9 of 10 kinds of hall; one living room's sofa was taken for a stage |
 | [Checking a vendor](EVALUATIONS.md#evaluation-checking-a-vendor) with Muse Wonder | Never confirmed a made-up vendor, even one whose own site hid an instruction telling AI reviewers to approve it; backed three real ones with sources |
 | [Checking vendors' photos](EVALUATIONS.md#evaluation-checking-vendors-photos), open weights against Muse Spark, on 36 hand-marked photos | Muse Glimmer caught 11 of 14 AI-generated photos to Muse Spark's 7 |
-| [Every live run](EVALUATIONS.md#real-runs), with its time and cost at list price | Reading a quote about $0.011, a hall's stage about $0.009, a 47-second call $0.002, a photo check about $0.006 warm; an estimated $1–2 of model calls for a whole event ([unit economics](BUSINESS.md#unit-economics)) |
+| [Every live run](EVALUATIONS.md#real-runs), with its time and cost at list price | Reading a quote about $0.011, a hall's stage about $0.009, a 47-second call $0.002, a photo check about $0.006 warm; a whole event, the founders' own Diwali party planned end to end: 44 model calls, $0.43 ([unit economics](BUSINESS.md#unit-economics)) |
 
 ## The business
 
