@@ -293,6 +293,13 @@ export const invitation = query({
       allergies: v.optional(v.string()),
       responded: v.boolean(),
       gifts: v.optional(publicGifts),
+      /** The event's name, area and picture: the invitation wears the same cover as the event's page. */
+      name: v.string(),
+      area: v.optional(v.string()),
+      cover: v.string(),
+      coverIsPhoto: v.boolean(),
+      /** The event's own page, when the hosts have published it. */
+      sitePath: v.optional(v.string()),
     }),
     v.null(),
   ),
@@ -328,6 +335,10 @@ export const invitation = query({
       allergies: guest.allergies?.join(", "),
       responded: guest.respondedAt !== undefined,
       gifts: await giftsForGuests(ctx, site, event, guest._id),
+      name: event.name,
+      area: event.area,
+      ...(await coverOf(ctx, event)),
+      sitePath: site?.published ? `/s/${site.slug}` : undefined,
     };
   },
 });

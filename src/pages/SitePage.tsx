@@ -11,24 +11,11 @@ import { BRAND } from "../lib/brand";
 import { GiftList } from "../components/GiftList";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { BadLink } from "../components/ui/BadLink";
+import { daysAway, mapsLink } from "../lib/eventPage";
 import "../styles/site.css";
 
 type Site = NonNullable<FunctionReturnType<typeof api.site.bySlug>>;
 
-/** "In 8 days", "Tomorrow", "Today"; nothing once it's past. */
-function daysAway(date: string): string | null {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-  const now = new Date();
-  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const [y, m, d] = date.split("-").map(Number);
-  const days = Math.round((Date.UTC(y, m - 1, d) - today) / 86_400_000);
-  if (days < 0) return null;
-  return days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
-}
-
-function mapsLink(place: string): string {
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
-}
 
 /** A calendar file for the whole event, made in the browser; nothing is sent anywhere. */
 function downloadIcs(site: Site) {
@@ -168,7 +155,7 @@ export function SitePage() {
           <section className="site__rsvp">
             <h2 className="display text-2xl">RSVP</h2>
             <p className="mx-auto mt-2 max-w-[28rem] text-sm text-muted">
-              Please reply with the personal link we sent you. It knows which {partWord(site, true)} you're invited to.
+              Please reply with the personal link we sent you, which opens your own invitation. It knows which {partWord(site, true)} you're invited to.
             </p>
           </section>
         )}

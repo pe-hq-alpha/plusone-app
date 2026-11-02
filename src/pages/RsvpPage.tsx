@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { longDate } from "../lib/format";
@@ -13,6 +13,8 @@ import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { ThemeFooter } from "../components/ui/ThemeFooter";
 import { BadLink } from "../components/ui/BadLink";
+import { daysAway, mapsLink } from "../lib/eventPage";
+import "../styles/site.css";
 
 type Answer = { coming: boolean | null; count: number };
 
@@ -20,6 +22,7 @@ type Answer = { coming: boolean | null; count: number };
  * A guest's own RSVP page: reached by the personal link the
  * hosts sent, no account needed. For each part they're invited to, coming or
  * not and how many, plus food needs. They can come back and change it.
+ * It wears the event page's cover and invitation card, and links to that page once it's published.
  */
 export function RsvpPage() {
   const { token = "" } = useParams<{ token: string }>();
@@ -84,26 +87,72 @@ export function RsvpPage() {
     }
   }
 
-  return (
-    <main className="min-h-screen bg-paper px-5 py-10 text-ink">
-      <div className="mx-auto max-w-[36rem]">
-        <p className="text-xs uppercase tracking-[0.22em] text-quiet">You're invited</p>
-        <h1 className="mt-2 text-[2.2rem] leading-tight">
-          Dear {inv.firstName},
-        </h1>
-        <p className="mt-2 text-muted">
-          {hosts} would love you to join them for {inv.occasion}{inv.startDate === inv.endDate ? ` on ${longDate(inv.startDate)}` : ` from ${longDate(inv.startDate)} to ${longDate(inv.endDate)}`}, in {inv.city}.
-        </p>
+  const place = [inv.area, inv.city].filter(Boolean).join(", ");
+  const days = daysAway(inv.startDate);
 
+  return (
+    <main className="site min-h-screen bg-paper text-ink">
+      <header className="site__hero">
+        <div className={`site__cover${inv.coverIsPhoto ? " site__cover--photo" : ""}`}>
+          <img src={inv.cover} alt="" decoding="async" fetchPriority="high" />
+        </div>
+        <div className="relative z-10 mx-auto max-w-[44rem] px-5">
+          <div className="site__card">
+            <p className="text-xs uppercase tracking-[0.22em] text-quiet">You're invited to {inv.occasion}</p>
+            <h1 className="mt-3 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.05]">Dear {inv.firstName},</h1>
+            <span className="site__rule" aria-hidden="true" />
+            <p className="text-muted">
+              {hosts} would love you to join them.
+              <br />
+              {inv.startDate === inv.endDate ? longDate(inv.startDate) : `${longDate(inv.startDate)} to ${longDate(inv.endDate)}`}
+              {place && (
+                <>
+                  <br />
+                  {place}
+                </>
+              )}
+            </p>
+            {days !== null && <p className="site__countdown">{days}</p>}
+            <div className="mt-6 flex flex-wrap justify-center gap-2">
+              {inv.sitePath && (
+                <Link to={inv.sitePath} className="btn-primary btn-sm">
+                  See the event page
+                </Link>
+              )}
+              {place && (
+                <a className={inv.sitePath ? "btn-quiet btn-sm" : "btn-primary btn-sm"} href={mapsLink(place)} target="_blank" rel="noopener noreferrer">
+                  Directions
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="mx-auto grid max-w-[44rem] gap-12 px-5 py-14">
+        <section aria-labelledby="rsvp-h">
+        <h2 id="rsvp-h" className="site__h">
+          {/* One piece of text, so the heading's rule doesn't space out the question mark. */}
+          <span>
+            Will you <em>come</em>?
+          </span>
+        </h2>
         {state === "sent" ? (
-          <div className="mt-8 rounded-[18px] bg-accent-soft/60 px-6 py-6">
+          <div className="site__rsvp mt-5">
             <p className="display text-2xl">Thank you</p>
-            <p className="mt-2 text-sm text-muted">Your answer is with {hosts}. You can come back to this link to change it.</p>
-            <button type="button" className="btn-quiet btn-sm mt-4 bg-cream" onClick={() => setState("idle")}>Change my answer</button>
+            <p className="mx-auto mt-2 max-w-[28rem] text-sm text-muted">Your answer is with {hosts}. You can come back to this link to change it.</p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <button type="button" className="btn-quiet btn-sm bg-cream" onClick={() => setState("idle")}>Change my answer</button>
+              {inv.sitePath && (
+                <Link to={inv.sitePath} className="btn-primary btn-sm">
+                  See the event page
+                </Link>
+              )}
+            </div>
           </div>
         ) : (
           <>
-            <div className="mt-8 grid gap-6">
+            <div className="mt-5 grid gap-6">
               {groupByDay(inv.sessions).map((day) => (
               <div key={day.date}>
               <p className="display text-lg text-ink">{dayHeading(day.date)}</p>
@@ -156,14 +205,15 @@ export function RsvpPage() {
             </button>
           </>
         )}
+        </section>
         {inv.gifts && (
-          <div className="mt-12">
+          <div>
             <GiftList gifts={inv.gifts} onChoose={(id, choose) => void chooseGift(id, choose)} busy={giftBusy} />
             {giftError && <p role="alert" className="mt-3 text-sm text-bad">{giftError}</p>}
           </div>
         )}
-        <p className="mt-10 text-center text-xs text-quiet">Made with {BRAND.name}</p>
-        <ThemeFooter className="mt-6" />
+        <p className="text-center text-xs text-quiet">Made with {BRAND.name}</p>
+        <ThemeFooter />
       </div>
     </main>
   );
