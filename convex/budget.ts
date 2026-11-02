@@ -97,7 +97,7 @@ export const summary = query({
       const overCommitted = line.planned > 0 && line.committed > line.planned * OVER_COMMIT_RATIO;
       if (overCommitted) {
         warnings.push(
-          `${line.label}: ${formatMoney(Math.round(line.committed), event.currency)} committed is more than 15% over the ` +
+          `${line.label}: ${formatMoney(Math.round(line.committed), event.currency)} is more than 15% over the ` +
             `${formatMoney(Math.round(line.planned), event.currency)} planned.`,
         );
       }
@@ -118,7 +118,7 @@ export const summary = query({
     const sums = tally(lines.map((l) => ({ committed: l.committed, paid: l.paid, slotStatus: l.slotId ? slotById.get(l.slotId)?.status : undefined })));
     if (event.totalBudget > 0 && committedTotal > event.totalBudget) {
       warnings.push(
-        `Committed spend is ${formatMoney(Math.round(committedTotal - event.totalBudget), event.currency)} over your total budget.`,
+        `Booked and quoted together come to ${formatMoney(Math.round(committedTotal - event.totalBudget), event.currency)} over your total budget.`,
       );
     }
     return {
