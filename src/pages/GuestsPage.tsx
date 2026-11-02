@@ -8,6 +8,7 @@ import { timeAgo } from "../lib/format";
 import { PageHeader } from "../components/ui/PageHeader";
 import { EmptyState } from "../components/ui/EmptyState";
 import { Icon } from "../components/ui/Icon";
+import { useConfirm } from "../components/ui/ConfirmDialog";
 import { usePrivacy } from "../lib/privacy";
 import { removeGuest } from "../lib/optimistic";
 import { answersOf } from "../../convex/lib/rsvp";
@@ -35,6 +36,7 @@ function comingTo(g: Guest): string {
 
 export function GuestsPage() {
   const privacy = usePrivacy();
+  const confirm = useConfirm();
   const { event, role, sessions } = useOutletContext<EventData>();
   const eventId = event._id as Id<"events">;
   const guests = useQuery(api.guests.list, { eventId });
@@ -246,8 +248,14 @@ export function GuestsPage() {
                     <button
                       className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-accent-soft hover:text-bad"
                       aria-label={`Remove ${g.name}`}
-                      onClick={() => {
-                        if (window.confirm(`Remove ${g.name} from the list?`)) void remove({ guestId: g._id });
+                      onClick={async () => {
+                        const yes = await confirm({
+                          title: `Are you sure you want to remove ${g.name}?`,
+                          body: "They come off the guest list, with their answers.",
+                          confirmLabel: "Remove",
+                          danger: true,
+                        });
+                        if (yes) void remove({ guestId: g._id });
                       }}
                     >
                       <Icon name="close" size={15} />

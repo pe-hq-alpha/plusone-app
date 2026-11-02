@@ -331,8 +331,9 @@ function NeedBoard({
             {compareOnly || onNeedPage ? (
               need.title
             ) : (
-              <Link to={`/e/${eventId}/vendors/${need.slotId}`} className="hover:text-accent" title={`Open ${need.title}: add a quote, find more vendors`}>
-                {need.title} <Icon name="arrow" size={15} />
+              <Link to={`/e/${eventId}/vendors/${need.slotId}`} className="inline-flex items-center gap-1.5 hover:text-accent" title={`Open ${need.title}: add a quote, find more vendors`}>
+                {need.title}
+                <Icon name="arrow" size={15} className="shrink-0" />
               </Link>
             )}
           </h2>

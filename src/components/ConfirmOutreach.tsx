@@ -4,6 +4,7 @@ import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { Icon } from "./ui/Icon";
+import { useConfirm } from "./ui/ConfirmDialog";
 import { usePrivacy } from "../lib/privacy";
 import { BRAND } from "../lib/brand";
 
@@ -33,6 +34,7 @@ export function ConfirmOutreach({
   onSent: (queued: number) => void;
 }) {
   const privacy = usePrivacy();
+  const confirm = useConfirm();
   const sendAll = useMutation(api.outreach.sendAllForSlot);
   const discard = useMutation(api.outreach.discardDraftsForSlot);
   const updateDraft = useMutation(api.outreach.updateDraft);
@@ -60,7 +62,13 @@ export function ConfirmOutreach({
   }
 
   async function throwAway() {
-    if (!window.confirm(`Throw away ${drafts.length === 1 ? "this email" : `these ${drafts.length} emails`}? Nothing has been sent.`)) return;
+    const yes = await confirm({
+      title: `Throw away ${drafts.length === 1 ? "this email" : `these ${drafts.length} emails`}?`,
+      body: "Nothing has been sent.",
+      confirmLabel: "Throw away",
+      danger: true,
+    });
+    if (!yes) return;
     setBusy("discard");
     setError(null);
     try {

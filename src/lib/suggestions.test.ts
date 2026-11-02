@@ -23,9 +23,9 @@ describe("suggestions follow the event, not a fixed list", () => {
       totalBudget: 450000,
     });
     expect(s).toEqual([
-      "Which catering quote is the best value?",
+      "Which catering quote is best?",
       "Find vendors for your flowers & decoration",
-      "We're now 140 people for Birthday lunch",
+      "We're now 140 for Birthday lunch",
       "Move Morning pooja to 8 am",
     ]);
   });
@@ -39,6 +39,19 @@ describe("suggestions follow the event, not a fixed list", () => {
     });
     expect(s).toEqual(["Find vendors for your biryani place", "We're now 20 people", "Move Diwali party to 8:30 pm", "Add people to the guest list"]);
     expect(s.join(" ")).not.toMatch(/quote|140|photographer|lunch/);
+  });
+
+  test("a Diwali gala with long names: each line short enough for one line under Tell PlusOne", () => {
+    const s = suggestionsFor({
+      ...base,
+      needs: [
+        { title: "Sound & lighting", status: "quoted", quoted: true },
+        { title: "Biryani place", status: "research", quoted: false },
+      ],
+      parts: [{ name: "Afternoon puja", guestCount: 12 }, { name: "Evening Diwali Gala", guestCount: 25, startTime: "19:30" }],
+    });
+    expect(s).toEqual(["Which sound & lighting quote is best?", "Find vendors for your biryani place", "We're now 30 for Evening Diwali Gala", "Move Evening Diwali Gala to 8:30 pm"]);
+    for (const line of s) expect(line.length).toBeLessThanOrEqual(40);
   });
 
   test("everything booked: what's left before the day", () => {

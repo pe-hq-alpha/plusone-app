@@ -10,6 +10,7 @@ import { ConvexError } from "convex/values";
 import { flattenSlots, money, statusLabel, timeAgo, type FlatSlot } from "../lib/format";
 import { SUGGESTED_CATEGORIES } from "../../convex/lib/templates";
 import { Icon } from "../components/ui/Icon";
+import { useConfirm } from "../components/ui/ConfirmDialog";
 import { RenameTitle } from "../components/ui/RenameTitle";
 import { VendorCard } from "../components/VendorCard";
 import { awayKm, NearVenue, venueSpot, type BookedHall, type Nearby } from "../components/NearVenue";
@@ -1083,11 +1084,18 @@ function AddSlot({ eventId, sessions, currency }: { eventId: Id<"events">; sessi
 function RemoveSlot({ slot, eventId }: { slot: Slot; eventId: Id<"events"> }) {
   const remove = useMutation(api.slots.remove);
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function submit() {
-    if (!window.confirm(`Remove ${slot.title} from your plan? Its budget goes back to the rest.`)) return;
+    const yes = await confirm({
+      title: "Are you sure you want to remove this need?",
+      body: `${slot.title} comes off your plan, and its budget goes back to the rest.`,
+      confirmLabel: "Remove need",
+      danger: true,
+    });
+    if (!yes) return;
     setBusy(true);
     setError(null);
     try {

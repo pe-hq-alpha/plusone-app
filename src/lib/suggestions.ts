@@ -33,7 +33,7 @@ export function suggestionsFor(s: SuggestionState, max = 4): string[] {
 
   // A choice waiting: quotes in for a need that isn't booked.
   const deciding = s.needs.find((n) => n.status !== "booked" && n.quoted);
-  if (deciding) add(`Which ${lower(deciding.title)} quote is the best value?`);
+  if (deciding) add(`Which ${lower(deciding.title)} quote is best?`);
 
   // The next need nobody has started on.
   const fresh = s.needs.find((n) => n.status === "research");
@@ -44,7 +44,8 @@ export function suggestionsFor(s: SuggestionState, max = 4): string[] {
   if (biggest && biggest.guestCount > 0) {
     const more = biggest.guestCount + (biggest.guestCount >= 100 ? 20 : biggest.guestCount >= 30 ? 10 : 5);
     // A part's name is the host's own (often a proper name: "Diwali party"), so its case is kept.
-    add(s.parts.length > 1 ? `We're now ${more} people for ${biggest.name}` : `We're now ${more} people`);
+    // Short enough to sit on one line under Tell PlusOne.
+    add(s.parts.length > 1 ? `We're now ${more} for ${biggest.name}` : `We're now ${more} people`);
   }
   const timed = s.parts.find((p) => p.startTime && laterBy(p.startTime, 60));
   if (timed?.startTime) add(`Move ${timed.name} to ${laterBy(timed.startTime, 60)}`);

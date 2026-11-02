@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { AnalyticsProvider } from "./components/AnalyticsProvider";
 import { SessionProvider } from "./lib/session";
+import { ConfirmProvider } from "./components/ui/ConfirmDialog";
 import "@fontsource-variable/eb-garamond";
 import "@fontsource-variable/eb-garamond/wght-italic.css";
 import "@fontsource-variable/work-sans";
@@ -23,7 +24,9 @@ if (!convexUrl) {
       <BrowserRouter>
         <SessionProvider client={convex} convexUrl={convexUrl}>
           <AnalyticsProvider>
-            <App />
+            <ConfirmProvider>
+              <App />
+            </ConfirmProvider>
           </AnalyticsProvider>
         </SessionProvider>
       </BrowserRouter>

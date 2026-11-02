@@ -257,8 +257,8 @@ function Tell({ eventId, demo = false, prompts }: { eventId: Id<"events">; demo?
       </form>
       <ul className="mt-4 flex flex-wrap gap-2" aria-label="Things to try">
         {prompts.map((p) => (
-          <li key={p}>
-            <button type="button" className="today__prompt" disabled={busy} onClick={() => void send(p)}>
+          <li key={p} className="min-w-0 max-w-full">
+            <button type="button" className="today__prompt" title={p} disabled={busy} onClick={() => void send(p)}>
               {p}
             </button>
           </li>

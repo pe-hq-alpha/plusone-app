@@ -9,6 +9,7 @@ import { flattenSlots, longDate, money } from "../lib/format";
 import { clock } from "../lib/dayByPart";
 import { StatusChip } from "../components/ui/StatusChip";
 import { Icon } from "../components/ui/Icon";
+import { useConfirm } from "../components/ui/ConfirmDialog";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { SpaceView } from "../components/spaces/SpaceView";
@@ -70,6 +71,7 @@ export function CeremonyPage() {
   const { event, role, sessions } = useOutletContext<EventData>();
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const canEdit = role !== "viewer";
   const eventId = event._id as Id<"events">;
   const c = sessions.find((e) => e._id === sessionId);
@@ -97,7 +99,13 @@ export function CeremonyPage() {
   const mine = (slots ?? []).filter((s) => s.sessionIds.includes(ceremony._id));
 
   async function removeCeremony() {
-    if (!window.confirm(`Remove ${ceremony.name} from your plan? Any vendor you've already contacted moves to another ${part}.`)) return;
+    const yes = await confirm({
+      title: `Are you sure you want to remove ${ceremony.name}?`,
+      body: `It comes off your plan. Any vendor you've already contacted moves to another ${part}.`,
+      confirmLabel: "Remove",
+      danger: true,
+    });
+    if (!yes) return;
     await remove({ sessionId: ceremony._id });
     navigate("../../plan", { relative: "path" });
   }

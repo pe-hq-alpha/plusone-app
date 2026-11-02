@@ -22,6 +22,7 @@ import {
 } from "../../lib/board";
 import { picturesIn, readyToUpload } from "../../lib/pictures";
 import { money } from "../../lib/format";
+import { useConfirm } from "../ui/ConfirmDialog";
 import { PaletteMoment } from "../spaces/SpaceView";
 import { keptPalette } from "../../lib/spaces";
 
@@ -60,6 +61,7 @@ export function Board({
   /** Open on this part's zone instead of the whole board. */
   focus?: string;
 }) {
+  const confirm = useConfirm();
   const eventId = event._id as Id<"events">;
   const viewRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<HTMLDivElement>(null);
@@ -460,7 +462,7 @@ export function Board({
 
   async function removeSelected() {
     const ids = [...selected];
-    if (ids.length > 1 && !window.confirm(`Take these ${ids.length} things off the board?`)) return;
+    if (ids.length > 1 && !(await confirm({ title: `Take these ${ids.length} things off the board?`, confirmLabel: "Take off", danger: true }))) return;
     setSelected(new Set());
     for (const id of ids) await remove({ itemId: id as Id<"spaceItems"> }).catch((e) => setError(say(e)));
   }

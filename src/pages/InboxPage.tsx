@@ -8,6 +8,7 @@ import type { FunctionReturnType } from "convex/server";
 import { money, statusLabel, timeAgo } from "../lib/format";
 import { BookButton } from "../components/BookButton";
 import { Icon } from "../components/ui/Icon";
+import { useConfirm } from "../components/ui/ConfirmDialog";
 import { EmptyState } from "../components/ui/EmptyState";
 import { usePrivacy } from "../lib/privacy";
 import { BRAND } from "../lib/brand";
@@ -227,6 +228,7 @@ function ThreadView({ threadId, currency, canEdit }: { threadId: Id<"threads">; 
   const resolve = useMutation(api.threads.resolveAttention);
   const followUp = useMutation(api.outreach.sendFollowUpNow);
   const block = useMutation(api.doNotContact.block);
+  const confirm = useConfirm();
   const markBooked = useMutation(api.slots.markBooked);
   const answer = useMutation(api.agent.answerForCouple);
   const send = useMutation(api.outreach.send);
@@ -275,8 +277,14 @@ function ThreadView({ threadId, currency, canEdit }: { threadId: Id<"threads">; 
               <button
                 className="btn-quiet btn-sm"
                 title={`For a vendor who has asked not to be emailed. ${BRAND.name} will never write to this address again, for any event.`}
-                onClick={() => {
-                  if (window.confirm(`Stop all email to ${vendor.name}? ${BRAND.name} will never write to this address again.`)) void block({ threadId });
+                onClick={async () => {
+                  const yes = await confirm({
+                    title: `Stop all email to ${vendor.name}?`,
+                    body: `${BRAND.name} will never write to this address again, for any event.`,
+                    confirmLabel: "Stop email",
+                    danger: true,
+                  });
+                  if (yes) void block({ threadId });
                 }}
               >
                 Don't contact again
