@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Link, useLocation, useOutletContext } from "react-router-dom";
 import type { FunctionReturnType } from "convex/server";
@@ -325,7 +325,7 @@ function NeedBoard({
   return (
     // On a phone the vendor cards come before the wide line-by-line table, which needs swiping.
     <section className="card overflow-hidden max-md:flex max-md:flex-col" aria-labelledby={`need-${need.slotId}`} data-tour="decision">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1 border-b border-line px-6 py-4">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1 border-b border-line px-4 py-4 sm:px-6">
         <div className="min-w-0">
           <h2 id={`need-${need.slotId}`} className={onNeedPage ? "sr-only" : "display text-[1.3rem] leading-tight"}>
             {compareOnly || onNeedPage ? (
@@ -379,7 +379,7 @@ function NeedBoard({
         </div>
       </div>
 
-      {error && <p role="alert" className="border-b border-line px-6 py-2.5 text-sm text-bad">{error}</p>}
+      {error && <p role="alert" className="border-b border-line px-4 py-2.5 text-sm text-bad sm:px-6">{error}</p>}
 
       {rangePoints && (
         <div className="border-b border-line">
@@ -602,7 +602,7 @@ function LineByLine({
   contact: { demo: boolean; need: string; event: { name: string; date?: string; city?: string } } | null;
 }) {
   return (
-    <div className="px-6 pb-5 pt-4">
+    <div className="px-4 pb-5 pt-4 sm:px-6">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-quiet">Line by line</h3>
         {vendorSide && (
@@ -620,15 +620,19 @@ function LineByLine({
       )}
       {/* On a phone the table scrolls in its own frame, so the vendors' names stay above every line. */}
       <div className="relative mt-3 overflow-x-auto max-md:max-h-[75vh] max-md:overflow-y-auto">
-        <table className="w-full text-sm" style={{ minWidth: `${10 + columns.length * 8.5}rem` }}>
+        {/* Two vendors fit beside the lines on a phone; a laptop shows them all. */}
+        <table
+          className="w-full text-sm max-md:min-w-[calc(6.5rem_+_var(--cols)_*_6.75rem)] md:min-w-[calc(10rem_+_var(--cols)_*_8.5rem)]"
+          style={{ "--cols": columns.length } as CSSProperties}
+        >
           <caption className="sr-only">Each quote and offer against the same lines</caption>
           <thead>
             <tr className="border-b border-line text-left text-xs text-muted">
-              <th scope="col" className="sticky left-0 z-[1] bg-cream py-2 pr-4 font-normal max-md:top-0 max-md:z-[3]">
+              <th scope="col" className="sticky left-0 z-[1] bg-cream py-2 pr-4 font-normal max-md:top-0 max-md:z-[3] max-md:w-[6.5rem] max-md:pr-2">
                 <span className="sr-only">Line</span>
               </th>
               {columns.map((c) => (
-                <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink max-md:sticky max-md:top-0 max-md:z-[2] max-md:bg-cream">
+                <th key={c.id} scope="col" className="px-3 py-2 text-right align-bottom font-medium text-ink max-md:sticky max-md:top-0 max-md:z-[2] max-md:w-[6.75rem] max-md:bg-cream">
                   {c.name}
                   <span className={`block text-[11px] font-normal ${c.from === "web" ? "text-quiet" : "text-accent"}`}>
                     {c.from === "sample" ? "Sample vendor" : c.from === "verified" ? `Verified on ${BRAND.name}` : c.addedByYou ? "Added by you" : "Quote by email"}
@@ -648,7 +652,7 @@ function LineByLine({
           </thead>
           <tbody className="divide-y divide-line">
             <tr>
-              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Total</th>
+              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted">Total</th>
               {columns.map((c) => (
                 <td key={c.id} className="px-3 py-2 text-right font-medium">
                   {money(c.total, c.currency)}
@@ -662,7 +666,7 @@ function LineByLine({
             </tr>
             {city && (
               <tr>
-                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted" title={TIER_NOTE}>
+                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted" title={TIER_NOTE}>
                   In the {city} range
                 </th>
                 {columns.map((c) => (
@@ -677,7 +681,7 @@ function LineByLine({
             <WhatsInIt sheet={sheet} columns={columns} />
             {sheet.lines.map((line) => (
               <tr key={line.key}>
-                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">{line.label}</th>
+                <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted">{line.label}</th>
                 {columns.map((c) => (
                   <td key={c.id} className="px-3 py-2 text-right">
                     <LineCell
@@ -690,7 +694,7 @@ function LineByLine({
               </tr>
             ))}
             <tr>
-              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Gaps to ask about</th>
+              <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted">Gaps to ask about</th>
               {columns.map((c) => (
                 <td key={c.id} className={`px-3 py-2 text-right ${c.missing.length ? "text-warn" : "text-ok"}`}>
                   {c.missing.length ? c.missing.length : "None"}
@@ -713,7 +717,7 @@ function TrackRecord({ columns }: { columns: Column[] }) {
   if (!columns.some((c) => c.level)) return null;
   return (
     <tr>
-      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted" title="Set by events done through PlusOne: New, then Trusted, then Top. It can't be bought.">
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted" title="Set by events done through PlusOne: New, then Trusted, then Top. It can't be bought.">
         Track record
       </th>
       {columns.map((c) => (
@@ -742,7 +746,7 @@ function PastWork({ columns }: { columns: Column[] }) {
   if (!columns.some((c) => c.photos?.length)) return null;
   return (
     <tr>
-      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left align-top font-normal text-muted">Past work</th>
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 align-top font-normal text-muted">Past work</th>
       {columns.map((c) => {
         const photos = c.photos ?? [];
         if (!photos.length) {
@@ -756,13 +760,15 @@ function PastWork({ columns }: { columns: Column[] }) {
         return (
           <td key={c.id} className="px-3 py-2 text-right align-top">
             <span className="inline-flex justify-end gap-1">
-              {photos.slice(0, 3).map((p) => (
-                <a key={p.url} href={p.url} target="_blank" rel="noreferrer" className="block shrink-0">
-                  <img src={p.url} alt={p.shows ?? `Past work by ${c.name}`} loading="lazy" className="h-12 w-12 rounded object-cover" />
+              {photos.slice(0, 3).map((p, i) => (
+                <a key={p.url} href={p.url} target="_blank" rel="noreferrer" className={`block shrink-0${i === 2 ? " max-md:hidden" : ""}`}>
+                  <img src={p.url} alt={p.shows ?? `Past work by ${c.name}`} loading="lazy" className="h-9 w-9 rounded object-cover md:h-12 md:w-12" />
                 </a>
               ))}
             </span>
-            {photos.length > 3 && <span className="block text-[11px] text-quiet">{photos.length - 3} more</span>}
+            {/* A phone's narrower column shows two photos, a laptop's three. */}
+            {photos.length > 2 && <span className="block text-[11px] text-quiet md:hidden">{photos.length - 2} more</span>}
+            {photos.length > 3 && <span className="block text-[11px] text-quiet max-md:hidden">{photos.length - 3} more</span>}
             {tags.length > 0 && <span className="mt-1 block text-[11px] leading-snug text-muted">{tags.join(" · ")}</span>}
           </td>
         );
@@ -799,7 +805,7 @@ function WhatsInIt({ sheet, columns }: { sheet: NonNullable<Need["sheet"]>; colu
       <GroupRow label="What's in it" span={span} />
       {mixed && (
         <tr>
-          <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">Priced</th>
+          <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted">Priced</th>
           {columns.map((c) => (
             <td key={c.id} className="px-3 py-2 text-right">
               {c.priceUnit ? sheet.units.find((u) => u.key === c.priceUnit)?.label ?? "—" : <span className="text-quiet">—</span>}
@@ -821,7 +827,7 @@ function QuantityRow({ q, columns }: { q: SheetQuantity; columns: Column[] }) {
   const differ = new Set(stated).size > 1;
   return (
     <tr>
-      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left font-normal text-muted">{q.label}</th>
+      <th scope="row" className="sticky left-0 z-[1] bg-cream py-2 pr-4 text-left max-md:w-[6.5rem] max-md:pr-2 font-normal text-muted">{q.label}</th>
       {columns.map((c) => {
         const n = c.quantities?.[q.key];
         if (n === undefined) {
