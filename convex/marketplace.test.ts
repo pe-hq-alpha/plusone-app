@@ -486,6 +486,12 @@ describe("briefs and offers", () => {
         briefId, price: 550, lines: cateringAnswers.map((l) => (l.key === "transport" ? { key: "transport", status: "priced" as const } : l)),
       }),
     ).rejects.toThrow(/amount for transport/);
+    // An Added charge of nothing is still a charge left out of the customer's total.
+    await expect(
+      as(t, vendor).mutation(api.marketplace.offers.submit, {
+        briefId, price: 550, lines: cateringAnswers.map((l) => (l.key === "transport" ? { key: "transport", status: "priced" as const, amount: 0 } : l)),
+      }),
+    ).rejects.toThrow(/amount for transport/);
 
     const offerId = await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, covers: "Veg lunch on banana leaf", lines: cateringAnswers });
     expect((await as(t, vendor).query(api.marketplace.briefs.open, {}))[0].answered).toBe(true);
@@ -507,6 +513,25 @@ describe("briefs and offers", () => {
     // Answering again changes the offer rather than adding a second.
     await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 530, quantity: 150, lines: cateringAnswers });
     expect((await t.query(internal.marketplace.offers.offersFor, { eventId })).map((o) => [o.price, o.quantity])).toEqual([[530, 150]]);
+  });
+
+  test("a request reads the host's note once, without a doubled stop, and shows the city range the customer's Compare uses", async () => {
+    const t = setup();
+    const { familyId, eventId, slotId } = await familyEvent(t);
+    await t.run(async (ctx) => {
+      await ctx.db.patch(slotId, { notes: "A banana-leaf lunch, all vegetarian." });
+      await ctx.db.insert("guests", { eventId, name: "Prakash", partySize: 2, rsvp: "yes", attendingCount: 2, sessionIds: [], dietary: "Jain" });
+      await ctx.db.insert("priceBands", {
+        category: "Catering", unit: "per_person", city: "chennai", currency: "INR", count: 10, p25: 305, p50: 360, p75: 443, p90: 520, sample: false, computedAt: Date.now(),
+      });
+    });
+    const vendor = await user(t, "owner@anjalicaterers.example");
+    await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor, prices: [520] });
+    await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
+
+    const [brief] = await as(t, vendor).query(api.marketplace.briefs.open, {});
+    expect(brief.notes).toBe("A banana-leaf lunch, all vegetarian. Food needs from the guests' replies: Jain (2)");
+    expect(brief.range).toEqual({ p25: 305, p50: 360, p75: 443, count: 10, currency: "INR" });
   });
 
   test("a photographer answers in their own terms, and the total is worked out from the price and the hours", async () => {

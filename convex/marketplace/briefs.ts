@@ -9,6 +9,7 @@ import { sheetFor } from "../lib/standardSheet";
 import { rateLimiter } from "../rateLimits";
 import { offeringUnit } from "../schema";
 import { currentBusiness, eventIdsOf } from "./vendors";
+import { bandRow } from "./listings";
 
 /**
  * Briefs: a family's need, sent to PlusOne Partner so verified vendors answer it on the
@@ -50,7 +51,8 @@ async function notesFromPlan(ctx: MutationCtx, event: Doc<"events">, slot: Doc<"
     const food = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, n]) => `${k} (${n})`);
     if (food.length) parts.push(`Food needs from the guests' replies: ${food.join(" · ")}`);
   }
-  return parts.length ? parts.join(". ") : undefined;
+  // Each part's own closing stop comes off before they're joined, so a note never ends "lunch.."
+  return parts.length ? parts.map((p) => p.replace(/[.\s]+$/, "")).join(". ") : undefined;
 }
 
 /** Opens a brief for a need, or returns the one already open. Callers check access first. */
@@ -156,6 +158,8 @@ export const briefCard = v.object({
   openedAt: v.number(),
   /** Whether this vendor has already answered it. */
   answered: v.boolean(),
+  /** The city's range for this kind of service, from the same prices the customer's Compare shows. */
+  range: v.optional(v.object({ p25: v.number(), p50: v.number(), p75: v.number(), count: v.number(), currency: v.string() })),
 });
 
 /** Open briefs a vendor can answer: their categories, their city, newest first. */
@@ -192,22 +196,27 @@ export const open = query({
       .order("desc")
       .take(200);
     const answered = new Set(mine.filter((o) => o.status === "sent").map((o) => o.briefId));
-    return briefs
-      .sort((a, b) => b.openedAt - a.openedAt)
-      .slice(0, MAX_BRIEFS_SHOWN)
-      .map((b) => ({
-        _id: b._id,
-        category: b.category,
-        title: b.title,
-        occasion: b.occasion,
-        city: b.city,
-        area: b.area,
-        date: b.date,
-        guests: b.guests,
-        unit: b.unit,
-        notes: b.notes,
-        openedAt: b.openedAt,
-        answered: answered.has(b._id),
-      }));
+    const shown = briefs.sort((a, b) => b.openedAt - a.openedAt).slice(0, MAX_BRIEFS_SHOWN);
+    return await Promise.all(
+      shown.map(async (b) => {
+        // The same band Compare places the customer's quotes in: same trade, unit and city, sample prices on a sample event.
+        const band = await bandRow(ctx, b.category, basisFor(b.category), b.city, b.demo === true);
+        return {
+          _id: b._id,
+          category: b.category,
+          title: b.title,
+          occasion: b.occasion,
+          city: b.city,
+          area: b.area,
+          date: b.date,
+          guests: b.guests,
+          unit: b.unit,
+          notes: b.notes,
+          openedAt: b.openedAt,
+          answered: answered.has(b._id),
+          ...(band ? { range: { p25: band.p25, p50: band.p50, p75: band.p75, count: band.count, currency: band.currency } } : {}),
+        };
+      }),
+    );
   },
 });

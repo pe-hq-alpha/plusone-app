@@ -172,7 +172,8 @@ export async function seedBirthday(ctx: MutationCtx, userId: Id<"users">): Promi
 
   // ---- Catering: three replies, priced three different ways, lined up. -----------
   await researched(ctx, eventId, catering, "Caterer in Mylapore for a banana-leaf lunch, 120 guests, Jain and no onion-garlic", 4, now - 9 * DAY);
-  await ctx.db.patch(catering._id, { notes: "Chennai caterers mostly charge about ₹400 to ₹520 a plate for a banana-leaf lunch." });
+  // The host's own words for the need; the city's range comes from listed prices, on both sides, never from a note.
+  await ctx.db.patch(catering._id, { notes: "A banana-leaf lunch, all vegetarian, with payasam." });
   const annam = await add(catering, {
     name: "Annam Caterers", handle: "annam-caterers", city: "Mandaveli, Chennai", startingPrice: 380, priceUnit: "per_person",
     priceNotes: "A plate, minimum 150 plates", highlights: ["Traditional banana-leaf meals", "Jain and no onion-garlic on request", "Family functions in Mylapore for 30 years"],

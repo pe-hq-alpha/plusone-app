@@ -734,7 +734,7 @@ function Dashboard({
       <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
         {tab === "requests" && (
           <>
-            <Briefs verified={profile.status === "verified"} ownName={profile.name} />
+            <Briefs verified={profile.status === "verified"} ownName={profile.name} offerings={offerings} />
             <SentOffers />
           </>
         )}
@@ -881,7 +881,7 @@ function PhotoItem({ photo, onRemove }: { photo: MinePhoto; onRemove: () => void
 
 // ---------------------------------------------------------------- briefs and offers
 
-function Briefs({ verified, ownName }: { verified: boolean; ownName: string }) {
+function Briefs({ verified, ownName, offerings }: { verified: boolean; ownName: string; offerings: Offering[] }) {
   const briefs = useQuery(api.marketplace.briefs.open);
   const [answering, setAnswering] = useState<Id<"vendorBriefs"> | null>(null);
   // In the vendors' demo the customer is a sample event of the guest's own, so the guest
@@ -909,11 +909,19 @@ function Briefs({ verified, ownName }: { verified: boolean; ownName: string }) {
                     {b.occasion} · {dayText(b.date)} · {b.guests ? `${b.guests} guests · ` : ""}{b.area ? `${b.area}, ` : ""}{b.city}
                   </p>
                   {b.notes && <p className="mt-2 text-sm">{b.notes}</p>}
+                  {/* The same range the customer's Compare places every quote in, so both sides read one figure. */}
+                  {b.range && (
+                    <p className="mt-2 text-sm text-muted">
+                      {b.city} prices on {BRAND.name}: <span className="text-ink">{money(b.range.p25, b.range.currency)} – {money(b.range.p75, b.range.currency)}</span>{" "}
+                      {unitWord(b.unit, b.category)}, typical {money(b.range.p50, b.range.currency)}
+                      <span className="text-quiet"> · {b.range.count} listed prices</span>
+                    </p>
+                  )}
                 </div>
                 {b.answered && <span className="chip-ok">Offer sent</span>}
               </div>
               {answering === b._id ? (
-                <OfferForm brief={b} onDone={() => setAnswering(null)} />
+                <OfferForm brief={b} onDone={() => setAnswering(null)} own={startingPackage(offerings, b.category, b.unit)} />
               ) : (
                 <button type="button" className="btn-primary btn-sm mt-4" onClick={() => setAnswering(b._id)}>
                   {b.answered ? "Change your offer" : "Answer on the sheet"}
@@ -1053,17 +1061,42 @@ function CustomersRead({ sheet, unitKey, price, quantities }: { sheet: Sheet; un
   );
 }
 
-/** The standard sheet for the brief's category: the main price in the trade's own terms, what it includes, then every charge, each answered. */
-function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
+/** The vendor's cheapest package for the request's trade and unit: where an answer starts. */
+function startingPackage(offerings: Offering[], category: string, unit: Basis): Offering | null {
+  return [...offerings].filter((o) => o.category === category && o.unit === unit).sort((a, b) => a.price - b.price)[0] ?? null;
+}
+
+/** A package's charges as the request sheet's answers; "not provided" is left for the vendor to answer. */
+function answersFromPackage(sheet: Sheet | null, own: Offering | null): Record<string, LineAnswer> {
+  const out: Record<string, LineAnswer> = {};
+  if (!sheet || !own) return out;
+  for (const c of own.charges ?? []) {
+    if (!c.key || c.status === "none" || !sheet.lines.some((l) => l.key === c.key)) continue;
+    out[c.key] = { status: c.status, amount: c.status !== "included" && c.amount !== undefined ? String(c.amount) : "" };
+  }
+  return out;
+}
+
+/** The first line marked Added with no amount: it can't be sent, since the customer's total would leave it out. */
+function addedWithoutAmount(sheet: Sheet | null, answers: Record<string, LineAnswer>) {
+  return sheet?.lines.find((l) => answers[l.key]?.status === "priced" && !(Number(answers[l.key].amount) > 0)) ?? null;
+}
+
+/**
+ * The standard sheet for the brief's category: the main price in the trade's own terms, what it includes, then every charge, each answered.
+ * `own`: the vendor's package for this trade, which the answer starts from; every figure stays editable for this customer.
+ */
+function OfferForm({ brief, onDone, own = null }: { brief: Brief; onDone: () => void; own?: Offering | null }) {
   const submit = useMutation(api.marketplace.offers.submit);
   const sheet = sheetFor(brief.category);
-  const [price, setPrice] = useState("");
-  const [unitKey, setUnitKey] = useState(sheet?.units[0].key ?? "");
-  const [typed, setTyped] = useState<Typed>({});
+  const ownUnit = own?.priceUnit && sheet?.units.some((u) => u.key === own.priceUnit) ? own.priceUnit : undefined;
+  const [price, setPrice] = useState(own ? String(own.price) : "");
+  const [unitKey, setUnitKey] = useState(ownUnit ?? sheet?.units[0].key ?? "");
+  const [typed, setTyped] = useState<Typed>(() => Object.fromEntries(Object.entries(own?.quantities ?? {}).filter(([k]) => k !== "count").map(([k, n]) => [k, String(n)])));
   const [quantity, setQuantity] = useState(String(brief.guests ?? ""));
-  const [covers, setCovers] = useState("");
+  const [covers, setCovers] = useState(own?.title ?? "");
   const [notes, setNotes] = useState("");
-  const [answers, setAnswers] = useState<Record<string, LineAnswer>>({});
+  const [answers, setAnswers] = useState<Record<string, LineAnswer>>(() => answersFromPackage(sheet, own));
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const unit = sheet ? priceUnitOf(sheet, unitKey) : null;
@@ -1076,12 +1109,12 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
   const total = (Number(price) || 0) * qty + priced;
   const answeredAll = !sheet || sheet.lines.every((l) => answers[l.key]);
   const multiplied = unit ? unit.times.length > 0 : perUnit;
+  const missingAmount = addedWithoutAmount(sheet, answers);
 
   const send = (e: FormEvent) => {
     e.preventDefault();
-    const noAmount = sheet?.lines.find((l) => answers[l.key]?.status === "priced" && !answers[l.key].amount.trim());
-    if (noAmount) {
-      setError(`Say what ${noAmount.label.toLowerCase()} costs, or mark it At cost.`);
+    if (missingAmount) {
+      setError(`Say how much ${missingAmount.label.toLowerCase()} adds, or mark it At cost.`);
       return;
     }
     setSending(true);
@@ -1107,6 +1140,11 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
 
   return (
     <form className="mt-5 grid gap-5 border-t border-line pt-5" onSubmit={send}>
+      {own && (
+        <p className="text-sm text-muted">
+          Started from your package &ldquo;{own.title}&rdquo;. Change anything for this customer.
+        </p>
+      )}
       <div className="grid gap-4 md:grid-cols-3">
         <div>
           <label className="label" htmlFor="o-price">
@@ -1173,10 +1211,17 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
                           value={a.amount}
                           onChange={(e) => setAnswers((prev) => ({ ...prev, [line.key]: { ...a, amount: e.target.value.replace(/[^\d.]/g, "") } }))}
                           placeholder={a.status === "priced" ? "₹" : "₹ if known"}
+                          aria-invalid={a.status === "priced" && !(Number(a.amount) > 0) ? true : undefined}
+                          aria-describedby={a.status === "priced" && !(Number(a.amount) > 0) ? `need-${line.key}` : undefined}
                         />
                       </span>
                     )}
                   </div>
+                  {a?.status === "priced" && !(Number(a.amount) > 0) && (
+                    <p id={`need-${line.key}`} className="charge__need text-xs text-warn">
+                      Say how much {line.label.toLowerCase()} adds
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -1190,13 +1235,14 @@ function OfferForm({ brief, onDone }: { brief: Brief; onDone: () => void }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <button type="submit" className="btn-primary" disabled={sending || !price || !answeredAll}>
+        <button type="submit" className="btn-primary" disabled={sending || !price || !answeredAll || missingAmount !== null}>
           {sending ? "Sending…" : "Send offer"}
         </button>
         <button type="button" className="btn-quiet btn-sm" onClick={onDone}>Cancel</button>
         <p className="text-sm text-muted">
           The customer sees <strong className="text-ink">{money(total, "INR")}</strong>
           {multiplied && qty ? ` (${money(Number(price) || 0, "INR")} × ${qty}${priced ? ` + ${money(priced, "INR")}` : ""})` : ""}
+          {missingAmount ? ` + ${missingAmount.label.toLowerCase()}, amount still to give` : ""}
           {sheet && !answeredAll ? " · answer every line to send" : ""}
         </p>
       </div>
