@@ -231,7 +231,7 @@ Every model step is measured on production against keys marked by hand before an
 
 **Three ways in, one paid.** *Find vendors* is open to everyone with no sign-in; *the planner* (Basic or Premium) is the paid, end-to-end app; *PlusOne Partner* is where vendors list to be found and answer requests.
 
-**Where the money is.** Subscriptions and listings pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne. Bookings will stay on PlusOne because, once booking runs through the app, the guarantee (PlusOne Assured: the quote honoured line by line, a no-show replaced), the price locked at booking, payment in stages and the vendor's track record will exist only there. At the prices in our evaluation set, a 60th for 120 comes to about ₹2 lakh across hall, catering, decor and photography; an assumed 8% take would be about ₹16,000 an event against about ₹150 of model cost, a rate to test in the pilot. Every fee is disclosed. Fair pricing means informed and comparable, never one price for everyone or the cheapest bid by default.
+**Where the money is.** Subscriptions and listings pay for the start. The end goal is the commission: once PlusOne has the brand, a verified vendor network and customers' trust, events are booked and paid through PlusOne. Bookings will stay on PlusOne because, once booking runs through the app, the guarantee (PlusOne Assured: the quote honoured line by line, a no-show replaced), the price locked at booking, payment in stages and the vendor's track record will exist only there. At the prices in our evaluation set, a 60th for 120 comes to about ₹2 lakh across hall, catering, decor and photography; an assumed 8% take would be about ₹16,000 an event against well under ₹100 of model cost (our own Diwali party, planned end to end, took $0.43), a rate to test in the pilot. Every fee is disclosed. Fair pricing means informed and comparable, never one price for everyone or the cheapest bid by default.
 
 **The vision, ten years out.** Online shopping brought sellers under one roof, home services gave cleaning a fixed price, travel sites put every hotel and flight in one place; events never made that move. The aim is to be the largest and most trusted name for planning events and weddings, with the money moving through PlusOne and the PlusOne team coordinating every vendor end to end, at any size. About a quarter of wedding spending where we start goes on the services PlusOne compares (event management, catering, photo and video, decoration, music, and light and sound: about 27% in CAIT's split), roughly $35 billion a year. Even 1% of that would be about $350 million in bookings a year. Someone will copy the app; PlusOne wins on execution, trust, its verified network and price data, and brand, built city by city over years.
 
@@ -311,14 +311,12 @@ Planning works end to end: the conversation, the plan, Overview, vendor search, 
 
 ## Coming next
 
-In this order, each feeding the comparison customers already use:
+The first 90 days, in one city, measured as we go:
 
-- **One city first, with real customers and vendors:** real quotations collected and their hidden charges mapped, then a hand-run pilot with paying customers, measuring cost per event, booking conversion, vendor response and referrals.
-- **Verified ratings from real bookings only:** on time or not, the final bill against the quote, cancellations and quality. Levels stay earned, never bought, and ranking is never for sale.
-- **A range for each segment**, so a luxury decorator is compared with luxury decorators.
-- **PlusOne Assured and booking in the app:** the quote honoured line by line, payments in stages against milestones, a no-show replaced, and a final reconciliation, for a small disclosed fee.
-- **PlusOne on WhatsApp under its own name:** quote updates are built on Meta's test number; next, PlusOne's own verified number, then booking updates and vendor follow-ups.
-- **PlusOne Premium**, **billing** (local payments first, cards abroad), then **more cities and countries** on the same engine.
+- **Days 1–30: vendors in, with a hand from the PlusOne team.** 20–30 vendors across the trades events hire most, helped onto Partner in person and on WhatsApp; 25–30 hosts, families and event managers, interviewed; their real quotations collected and every hidden charge mapped onto the standard sheets.
+- **Days 31–60: a paid pilot.** 15–20 paying customers plan real events on PlusOne, with the team alongside where needed. Measured for every event: model cost (our own Diwali party: $0.43), charges caught before booking, the saving against the first quote, vendor response time and booking conversion.
+- **Days 61–90: the numbers that decide the business.** Acquisition cost, revenue per event, margin after coordination, cancellations and referrals, and the commission tested on the first bookings paid through the app, disclosed on every one.
+- **Built alongside, from what vendors and hosts tell us:** verified ratings from real bookings only (levels earned, never bought; ranking never for sale), a range for each segment, PlusOne Assured (the quote honoured line by line, payment in stages, a no-show replaced), PlusOne's own verified WhatsApp number, then more cities and countries on the same engine.
 
 ## Repository
 
