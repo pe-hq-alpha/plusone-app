@@ -290,7 +290,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 
 ## Run it yourself
 
-**Check the build in two minutes, with no accounts and no keys.** The tests fake every model and service, so they run offline:
+**Check the build in two minutes, with Node 20 or later and no accounts or keys.** The tests fake every model and service, so they run offline:
 
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
