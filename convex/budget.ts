@@ -6,6 +6,8 @@ import { budgetLineDoc } from "./lib/docs";
 import { slotStatus } from "./lib/validators";
 import { formatMoney } from "./lib/text";
 import { byDayThenOrder } from "./lib/sessionOrder";
+import { tally, tallyLine } from "./lib/tally";
+import { recountPaid } from "./dues";
 
 const OVER_COMMIT_RATIO = 1.15;
 
@@ -17,6 +19,14 @@ export const summary = query({
     plannedTotal: v.number(),
     committedTotal: v.number(),
     paidTotal: v.number(),
+    /** Agreed: booked needs and costs that aren't vendors. */
+    agreedTotal: v.number(),
+    /** Quotes on needs not booked yet. */
+    weighingTotal: v.number(),
+    /** Agreed and not yet paid, line by line. */
+    toPayTotal: v.number(),
+    /** Paid on needs that aren't marked booked. */
+    paidNotBookedTotal: v.number(),
     sessions: v.array(
       v.object({
         sessionId: v.id("sessions"),
@@ -37,6 +47,9 @@ export const summary = query({
         ),
         sessionName: v.union(v.string(), v.null()),
         overCommitted: v.boolean(),
+        state: v.union(v.literal("booked"), v.literal("weighing"), v.literal("cost")),
+        toPay: v.number(),
+        overpaid: v.number(),
       }),
     ),
     warnings: v.array(v.string()),
@@ -88,16 +101,21 @@ export const summary = query({
             `${formatMoney(Math.round(line.planned), event.currency)} planned.`,
         );
       }
+      const t = tallyLine({ committed: line.committed, paid: line.paid, slotStatus: slot?.status });
       outLines.push({
         line,
         slot: slot ? { _id: slot._id, title: slot.title, category: slot.category, status: slot.status } : null,
         sessionName: line.sessionId ? (sessionById.get(line.sessionId)?.name ?? null) : null,
         overCommitted,
+        state: t.state,
+        toPay: t.toPay,
+        overpaid: t.overpaid,
       });
     }
     const plannedTotal = lines.reduce((a, l) => a + l.planned, 0);
     const committedTotal = lines.reduce((a, l) => a + l.committed, 0);
     const paidTotal = lines.reduce((a, l) => a + l.paid, 0);
+    const sums = tally(lines.map((l) => ({ committed: l.committed, paid: l.paid, slotStatus: l.slotId ? slotById.get(l.slotId)?.status : undefined })));
     if (event.totalBudget > 0 && committedTotal > event.totalBudget) {
       warnings.push(
         `Committed spend is ${formatMoney(Math.round(committedTotal - event.totalBudget), event.currency)} over your total budget.`,
@@ -109,6 +127,10 @@ export const summary = query({
       plannedTotal,
       committedTotal,
       paidTotal,
+      agreedTotal: sums.agreed,
+      weighingTotal: sums.weighing,
+      toPayTotal: sums.toPay,
+      paidNotBookedTotal: sums.paidNotBooked,
       sessions: sessions.map((e) => {
         const acc = perSession.get(e._id)!;
         return {
@@ -194,6 +216,35 @@ export const setCommittedForSlot = internalMutation({
   handler: async (ctx, args) => {
     if (!Number.isFinite(args.committed) || args.committed < 0) return null;
     await setCommittedForSlotHelper(ctx, args.slotId, args.committed);
+    return null;
+  },
+});
+
+/**
+ * "Mark paid" on a line that still has money owing: the vendor's payments due are ticked
+ * off, and the line's paid figure becomes what was agreed.
+ */
+export const markPaid = mutation({
+  args: { lineId: v.id("budgetLines") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const line = await ctx.db.get(args.lineId);
+    if (!line) throw new ConvexError("Budget line not found.");
+    const { userId } = await requireMember(ctx, line.eventId, "planner");
+    if (line.slotId) {
+      const slot = await ctx.db.get(line.slotId);
+      if (slot && slot.status !== "booked") throw new ConvexError("Mark the vendor booked first, then what's paid.");
+      const dues = await ctx.db
+        .query("dues")
+        .withIndex("by_slotId", (q) => q.eq("slotId", line.slotId!))
+        .take(100);
+      const now = Date.now();
+      for (const d of dues) if (d.kind === "payment" && d.doneAt === undefined) await ctx.db.patch(d._id, { doneAt: now });
+      await recountPaid(ctx, line.slotId);
+    }
+    const after = await ctx.db.get(args.lineId);
+    if (after && after.paid < after.committed) await ctx.db.patch(args.lineId, { paid: after.committed });
+    await logActivity(ctx, { eventId: line.eventId, actorUserId: userId, type: "note", text: `marked ${line.label} paid.` });
     return null;
   },
 });

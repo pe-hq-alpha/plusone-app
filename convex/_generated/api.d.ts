@@ -96,6 +96,7 @@ import type * as lib_sessionOrder from "../lib/sessionOrder.js";
 import type * as lib_sparkOpen from "../lib/sparkOpen.js";
 import type * as lib_standardSheet from "../lib/standardSheet.js";
 import type * as lib_svix from "../lib/svix.js";
+import type * as lib_tally from "../lib/tally.js";
 import type * as lib_templates from "../lib/templates.js";
 import type * as lib_terms from "../lib/terms.js";
 import type * as lib_text from "../lib/text.js";
@@ -259,6 +260,7 @@ declare const fullApi: ApiFromModules<{
   "lib/sparkOpen": typeof lib_sparkOpen;
   "lib/standardSheet": typeof lib_standardSheet;
   "lib/svix": typeof lib_svix;
+  "lib/tally": typeof lib_tally;
   "lib/templates": typeof lib_templates;
   "lib/terms": typeof lib_terms;
   "lib/text": typeof lib_text;

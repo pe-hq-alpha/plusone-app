@@ -27,6 +27,7 @@ import { workflow } from "./workflows";
 import { HELP_WITH_KEYS } from "./lib/helpWith";
 import { track } from "./analytics";
 import { claimUpload } from "./lib/uploads";
+import { tally } from "./lib/tally";
 
 export const listMine = query({
   args: {},
@@ -118,9 +119,11 @@ export const get = query({
     stats: v.object({
       plannedTotal: v.number(),
       committedTotal: v.number(),
-      /** What's committed on needs that are booked: the money actually agreed with a vendor. */
+      /** What's agreed: committed on booked needs, and costs that aren't vendors. */
       bookedTotal: v.number(),
       paidTotal: v.number(),
+      /** Agreed and not yet paid, counted line by line (never a quote still being weighed). */
+      toPayTotal: v.number(),
       slotCounts: v.object({
         research: v.number(),
         contacted: v.number(),
@@ -158,7 +161,8 @@ export const get = query({
       .withIndex("by_eventId", (q) => q.eq("eventId", args.eventId))
       .take(200);
 
-    const bookedSlots = new Set(slots.filter((s) => s.status === "booked").map((s) => s._id));
+    const statusOf = new Map(slots.map((s) => [s._id, s.status]));
+    const sums = tally(lines.map((l) => ({ committed: l.committed, paid: l.paid, slotStatus: l.slotId ? statusOf.get(l.slotId) : undefined })));
     const slotCounts = { research: 0, contacted: 0, quoted: 0, booked: 0 };
     for (const s of slots) slotCounts[s.status] += 1;
     const guestCounts = { pending: 0, yes: 0, no: 0, maybe: 0, attending: 0 };
@@ -174,8 +178,9 @@ export const get = query({
       stats: {
         plannedTotal: lines.reduce((a, l) => a + l.planned, 0),
         committedTotal: lines.reduce((a, l) => a + l.committed, 0),
-        bookedTotal: lines.filter((l) => l.slotId && bookedSlots.has(l.slotId)).reduce((a, l) => a + l.committed, 0),
-        paidTotal: lines.reduce((a, l) => a + l.paid, 0),
+        bookedTotal: sums.agreed,
+        paidTotal: sums.paid,
+        toPayTotal: sums.toPay,
         slotCounts,
         guestCounts,
       },

@@ -91,6 +91,7 @@ export function TodayPage() {
           <BudgetBar className="mt-2 h-2" spent={stats.bookedTotal} budget={event.totalBudget} label="Budget booked" />
           <span className="today__stat-foot">
             {money(stats.paidTotal, event.currency)} paid
+            {stats.toPayTotal > 0 && <> · {money(stats.toPayTotal, event.currency)} still to pay</>}
             {stats.committedTotal > stats.bookedTotal && <> · {money(stats.committedTotal - stats.bookedTotal, event.currency)} more in quotes you're weighing</>}
             {" · "}{money(Math.max(0, event.totalBudget - stats.committedTotal), event.currency)} still free
           </span>

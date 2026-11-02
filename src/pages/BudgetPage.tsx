@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { useOutletContext } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { partWord } from "../../convex/lib/occasion";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
@@ -44,7 +44,7 @@ function Breakdown({ title, rows, currency }: { title: string; rows: Row[]; curr
       <ul className="mt-4 grid gap-3.5">
         {shown.map((r) => {
           const over = r.committed > r.planned && r.planned > 0;
-          const detail = `${r.label}: ${money(r.planned, currency)} planned, ${money(r.committed, currency)} committed, ${money(r.paid, currency)} paid`;
+          const detail = `${r.label}: ${money(r.planned, currency)} planned, ${money(r.committed, currency)} booked or quoted, ${money(r.paid, currency)} paid`;
           return (
             <li key={r.key} title={detail}>
               <div className="flex items-baseline justify-between gap-3 text-sm">
@@ -65,7 +65,7 @@ function Breakdown({ title, rows, currency }: { title: string; rows: Row[]; curr
         })}
       </ul>
       <p className="mt-4 flex items-center gap-4 text-xs text-quiet" aria-hidden="true">
-        <span className="flex items-center gap-1.5"><span className="budget-fill h-2 w-4 rounded-full" /> Committed</span>
+        <span className="flex items-center gap-1.5"><span className="budget-fill h-2 w-4 rounded-full" /> Booked or quoted</span>
         <span className="flex items-center gap-1.5"><span className="budget-over h-2 w-4 rounded-full" /> Over</span>
         <span className="flex items-center gap-1.5"><span className="budget-planned h-2 w-4 rounded-full" /> Planned</span>
       </p>
@@ -101,13 +101,14 @@ function AmountCell({ value, disabled, onSave, label }: { value: number; disable
  * vendors, all in the event's own currency.
  */
 export function BudgetPage() {
-  const { event, role, sessions, stats } = useOutletContext<EventData>();
+  const { event, role, sessions } = useOutletContext<EventData>();
   const eventId = event._id as Id<"events">;
   const canEdit = role !== "viewer";
   const summary = useQuery(api.budget.summary, { eventId });
   const updateLine = useMutation(api.budget.updateLine);
   const addCost = useMutation(api.budget.addCost);
   const removeCost = useMutation(api.budget.removeCost);
+  const markPaid = useMutation(api.budget.markPaid);
   const [label, setLabel] = useState("");
   const [planned, setPlanned] = useState("");
   const [sessionId, setSessionId] = useState("");
@@ -116,7 +117,12 @@ export function BudgetPage() {
   if (!summary) return <p className="text-sm text-muted">Loading your budget…</p>;
   const cur = summary.currency;
   const left = summary.totalBudget - summary.committedTotal;
-  const committedPct = summary.totalBudget > 0 ? Math.round((summary.committedTotal / summary.totalBudget) * 100) : 0;
+  const agreedPct = summary.totalBudget > 0 ? Math.round((summary.agreedTotal / summary.totalBudget) * 100) : 0;
+  // What needs a hand: money still owed on what's agreed, and money paid on a need never marked booked.
+  const owing = summary.lines.filter((l) => l.toPay > 0);
+  const paidUnbooked = summary.lines.filter((l) => l.state === "weighing" && l.line.paid > 0);
+  const overpaid = summary.lines.filter((l) => l.overpaid > 0);
+  const needHref = (slotId: string) => `/e/${eventId}/vendors/${slotId}`;
 
   const byCeremony: Row[] = summary.sessions.map((e) => ({ key: e.sessionId, label: e.name, planned: e.planned, committed: e.committed, paid: e.paid }));
   const kinds = new Map<string, Row>();
@@ -143,12 +149,27 @@ export function BudgetPage() {
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Totals">
         <Tile label="Budget" value={money(summary.totalBudget, cur)} />
         <Tile
-          label="Committed"
-          value={money(summary.committedTotal, cur)}
-          note={summary.committedTotal > stats.bookedTotal ? `${money(stats.bookedTotal, cur)} booked; the rest is quotes you're weighing` : `${committedPct}% of the budget, all booked`}
+          label="Booked"
+          value={money(summary.agreedTotal, cur)}
+          note={summary.weighingTotal > 0 ? `plus ${money(summary.weighingTotal, cur)} in quotes you're weighing` : `${agreedPct}% of the budget`}
         />
-        <Tile label="Paid" value={money(summary.paidTotal, cur)} note={summary.committedTotal > 0 ? `${money(Math.max(0, summary.committedTotal - summary.paidTotal), cur)} still to pay` : undefined} />
-        <Tile label={left < 0 ? "Over" : "Left"} value={money(Math.abs(left), cur)} tone={left < 0 ? "bad" : "ink"} note="Budget less what's committed" />
+        <Tile
+          label="Paid"
+          value={money(summary.paidTotal, cur)}
+          note={
+            summary.toPayTotal > 0
+              ? `${money(summary.toPayTotal, cur)} still to pay, listed below`
+              : summary.agreedTotal > 0
+                ? "Everything booked is paid"
+                : undefined
+          }
+        />
+        <Tile
+          label={left < 0 ? "Over" : "Left"}
+          value={money(Math.abs(left), cur)}
+          tone={left < 0 ? "bad" : "ink"}
+          note={summary.weighingTotal > 0 ? "After what's booked and the quotes you're weighing" : "Budget less what's booked"}
+        />
       </section>
       <BudgetBar className="-mt-3 h-2.5" spent={summary.committedTotal} budget={summary.totalBudget} label="Budget committed" />
       {summary.warnings.length > 0 && (
@@ -162,26 +183,88 @@ export function BudgetPage() {
         <Breakdown title="By kind of vendor" rows={[...kinds.values()]} currency={cur} />
       </div>
 
+      {(owing.length > 0 || paidUnbooked.length > 0 || overpaid.length > 0) && (
+        <section className="card px-6 py-5" aria-labelledby="owing-h">
+          <h2 id="owing-h" className="display text-xl">Still to pay</h2>
+          <p className="mt-1 text-sm text-muted">
+            {summary.toPayTotal > 0
+              ? `${money(summary.toPayTotal, cur)} in all, vendor by vendor. Mark one paid once the money has gone.`
+              : "Nothing is owed on what's booked. One thing to tidy up:"}
+          </p>
+          <ul className="mt-3 divide-y divide-line">
+            {owing.map(({ line }) => (
+              <li key={line._id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5">
+                <span className="min-w-0">
+                  <span className="block font-medium">{line.label}</span>
+                  <span className="text-xs text-quiet">
+                    {money(line.committed, cur)} agreed · {money(line.paid, cur)} paid
+                  </span>
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className="display text-lg tabular-nums">{money(line.committed - line.paid, cur)}</span>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className="btn-quiet btn-sm"
+                      aria-label={`Mark ${line.label} paid`}
+                      onClick={() => void markPaid({ lineId: line._id }).catch(() => setError("That didn't save. Try again."))}
+                    >
+                      Mark paid
+                    </button>
+                  )}
+                </span>
+              </li>
+            ))}
+            {paidUnbooked.map(({ line, slot }) => (
+              <li key={line._id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5">
+                <span className="min-w-0">
+                  <span className="block font-medium">{line.label}</span>
+                  <span className="text-xs text-warn">
+                    {money(line.paid, cur)} paid on a quote of {money(line.committed, cur)}, but not marked booked, so nothing is counted as owed
+                  </span>
+                </span>
+                {slot && canEdit && (
+                  <Link to={needHref(slot._id)} className="btn-quiet btn-sm">
+                    Mark it booked
+                  </Link>
+                )}
+              </li>
+            ))}
+            {overpaid.map(({ line, overpaid: extra }) => (
+              <li key={`${line._id}-over`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2.5">
+                <span className="min-w-0">
+                  <span className="block font-medium">{line.label}</span>
+                  <span className="text-xs text-warn">
+                    {money(line.paid, cur)} paid against {money(line.committed, cur)} agreed: {money(extra, cur)} more than the agreed price
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <WhatsDue eventId={eventId} eventName={event.name} currency={event.currency} canEdit={canEdit} sessions={sessions} />
 
       <section className="card overflow-hidden" aria-labelledby="lines-h">
         <div className="flex flex-wrap items-baseline justify-between gap-3 px-6 pt-5">
           <h2 id="lines-h" className="display text-xl">Every cost</h2>
-          <p className="text-xs text-quiet">A vendor's committed amount comes from its quote when you book it.</p>
+          <p className="text-xs text-quiet">A vendor's agreed amount comes from the quote you book. Until then it's a quote you're weighing.</p>
         </div>
         <div className="relative mt-3 overflow-x-auto">
-          <table className="w-full min-w-[40rem] text-sm">
+          <table className="w-full min-w-[46rem] text-sm">
             <thead>
               <tr className="border-b border-line text-left text-xs uppercase tracking-[0.08em] text-quiet">
                 <th className="px-6 py-2 font-semibold">For</th>
                 <th className="px-2 py-2 text-right font-semibold">Planned</th>
-                <th className="px-2 py-2 text-right font-semibold">Committed</th>
+                <th className="px-2 py-2 text-right font-semibold">Agreed</th>
                 <th className="px-2 py-2 text-right font-semibold">Paid</th>
+                <th className="px-2 py-2 text-right font-semibold">To pay</th>
                 <th className="px-6 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
-              {lines.map(({ line, slot, sessionName }: Summary["lines"][number]) => (
+              {lines.map(({ line, slot, sessionName, state, toPay }: Summary["lines"][number]) => (
                 <tr key={line._id}>
                   <td className="px-6 py-2.5">
                     <span className="block">{line.label}</span>
@@ -192,13 +275,27 @@ export function BudgetPage() {
                   </td>
                   <td className="px-2 py-2 text-right tabular-nums">
                     {slot ? (
-                      money(line.committed, cur)
+                      state === "weighing" ? (
+                        line.committed > 0 ? (
+                          <span className="text-quiet" title="A quote on a need that isn't booked yet">
+                            {money(line.committed, cur)}
+                            <span className="block text-[11px]">quote, not booked</span>
+                          </span>
+                        ) : (
+                          <span className="text-quiet">—</span>
+                        )
+                      ) : (
+                        money(line.committed, cur)
+                      )
                     ) : (
                       <AmountCell label={`Committed for ${line.label}`} value={line.committed} disabled={!canEdit} onSave={(n) => updateLine({ lineId: line._id, committed: n })} />
                     )}
                   </td>
                   <td className="px-2 py-2 text-right">
                     <AmountCell label={`Paid for ${line.label}`} value={line.paid} disabled={!canEdit} onSave={(n) => updateLine({ lineId: line._id, paid: n })} />
+                  </td>
+                  <td className={`px-2 py-2 text-right tabular-nums ${toPay > 0 ? "font-medium text-ink" : "text-quiet"}`}>
+                    {state === "weighing" ? "—" : toPay > 0 ? money(toPay, cur) : "Paid"}
                   </td>
                   <td className="px-6 py-2 text-right">
                     {slot ? (
@@ -214,6 +311,20 @@ export function BudgetPage() {
                 </tr>
               ))}
             </tbody>
+            {/* The totals, so the table adds up to the figures at the top. */}
+            <tfoot>
+              <tr className="border-t-2 border-line font-medium">
+                <th scope="row" className="px-6 py-3 text-left">
+                  Total
+                  {summary.weighingTotal > 0 && <span className="block text-xs font-normal text-quiet">plus {money(summary.weighingTotal, cur)} in quotes not booked</span>}
+                </th>
+                <td className="px-2 py-3 text-right tabular-nums">{money(summary.plannedTotal, cur)}</td>
+                <td className="px-2 py-3 text-right tabular-nums">{money(summary.agreedTotal, cur)}</td>
+                <td className="px-2 py-3 text-right tabular-nums">{money(summary.paidTotal, cur)}</td>
+                <td className="px-2 py-3 text-right tabular-nums">{money(summary.toPayTotal, cur)}</td>
+                <td className="px-6 py-3" />
+              </tr>
+            </tfoot>
           </table>
         </div>
         {canEdit && (
