@@ -225,11 +225,11 @@ export function RsvpPage() {
               <div className="mt-6 grid gap-3">
                 <label className="grid gap-1 text-sm">
                   <span className="label">Food preferences</span>
-                  <input className="input" value={dietary} maxLength={200} placeholder="Vegetarian, no pork, halal…" onChange={(e) => { setTouched(true); setDietary(e.target.value); }} />
+                  <input className="input" value={dietary} maxLength={200} placeholder="Vegetarian, non-vegetarian, Jain…" onChange={(e) => { setTouched(true); setDietary(e.target.value); }} />
                 </label>
                 <label className="grid gap-1 text-sm">
                   <span className="label">Allergies</span>
-                  <input className="input" value={allergies} maxLength={300} placeholder="Peanuts, severe; shellfish" onChange={(e) => { setTouched(true); setAllergies(e.target.value); }} />
+                  <input className="input" value={allergies} maxLength={300} placeholder="Nuts, gluten, dairy…" onChange={(e) => { setTouched(true); setAllergies(e.target.value); }} />
                 </label>
               </div>
             )}
