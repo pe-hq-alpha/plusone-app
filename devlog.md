@@ -20,7 +20,7 @@
 - **Credits spent:** about $3.70 of the $150 Meta credit by the evening of 29 Oct, adding the day's logged runs: $0.98 in 129 calls by the morning (`evalsCost:perEvent`), about $2.30 in the afternoon's evaluations and vendor checks, and about $0.43 in the evening (the planted-page check, the photo evaluation's Muse Spark half, the demo's charge reading). Modal: the Glimmer GPU on credits ($3.79 metered by 13:20, plus $0.22 for the photo evaluation). Baseten: a few cents of $100. ElevenLabs: six 1K images for the photo evaluation. On 30 Oct, a few more small runs: two held-out evaluation runs on Muse Spark (about 20 calls each) and five price-list reads on Muse Spark Open (Baseten's credits). On 31 Oct, the baby shower's three quotes were read on production (`evals:chargesFor`). Spending after 29 Oct is small, and 1 Nov had no new paid runs; the full total is read with `evalsCost` before submitting.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-11-02T08:10:00+05:30
+- **Last updated:** 2026-11-02T09:05:00+05:30
 
 ## Evidence
 
@@ -64,12 +64,22 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-11-02 - 54203eb.. (the last refining day before the video)
+### 2026-11-02 - 54203eb..5cd0021 (the last refining day before the video)
 
 Fixes and checks before the video is recorded, by Claude Code (claude-opus-5-5).
 
 - **Compare on a phone** (`54203eb`): at 390 px the line names took two fifths of the width, so one vendor showed at a time. Narrower line names and columns on phones (two past-work photos instead of three) put two vendors beside the lines, with the rest a swipe away; laptop widths unchanged (measured: columns 104 + 108 px in a 324 px frame; at 1280 px the table still fills its 1,130 px).
-- **Checked:** `npm test` 812 passed (84 files), `npm run typecheck` clean; the guest demo's Compare seen at 390 and 1280 px against the dev backend, no sideways scroll. **Credits:** none.
+- **From the founder's finished Diwali event** (he planned it end to end in PlusOne: bookings through the app and outside it, quotes from WhatsApp screenshots, one vendor written to by the automatic email):
+  - **The budget adds up line by line** (`3465afa`): Booked, Paid and Still to pay per vendor with Mark paid; money paid on a need not marked booked is flagged; a totals row matches the tiles. It had said "₹500 still to pay" with no line to find it on.
+  - **PlusOne's own "Are you sure?" dialog** in place of the browser's in all seven places; **one-line suggestions** under Tell PlusOne; the arrow after a need's name on Compare stays beside it (`7fef486`).
+  - **A guest's RSVP page** wears the event page's cover and invitation card, with Add to calendar, Directions, a link to the published event page and a drawing for each part of the day (`da6a6ea`, `4c7328a`).
+- **From today's live walk as a first-time judge** (0 console errors and no overflow on every page at both sizes):
+  - **A new headcount moves every price** (`ffe033b`): after "we're now 140 people", Compare's line-by-line totals, verified vendors' offers, the plan's range and Overview's "Choose your catering" all move together, with the quoted figure shown beside the new one.
+  - **Partner** (`c18df54`): the request shows the same city range as Compare (the old figure was a sample note); a charge marked "Added" with no amount blocks the offer; the sheet starts from the vendor's own package.
+  - **Home page** (`481a3f8`): every section visible without scrolling (a full-page capture had blank bands); the demo link is a visible button. **Directory** (`6412160`): web finds' page titles trimmed to the business name; astrology sites never listed for priests.
+- **A judge on Meta's own models** (`c3371b5`): `evalsJudge:judge` scores the form, the video's narration and the README per surface and per section, several runs, so the parts that hold at 9 are kept and only the rest rewritten. Not run yet: the dev deployment's Meta key is rejected (401).
+- **Docs** (`7f8e664`, `6852681`, `d4e0fee`): ten trades; how every evaluation can be checked; Meta's settings first in SETUP; the build in the quick check; savings lead with the founders' real event; test addresses on reserved example domains.
+- **Checked:** `npm test` 832 passed (87 files), `npm run typecheck` clean; every change seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll, no console errors. **Credits:** about $0.01 (one "140 people" change in the judge walk).
 
 ### 2026-11-01 - d7d6ff7..fcd8646 (the founder's walk through his own event)
 
