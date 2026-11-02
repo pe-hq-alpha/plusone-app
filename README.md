@@ -206,7 +206,7 @@ Both leave a trail: every call is in Under the hood with its model, time and cos
 
 ## Measured results
 
-Every model step is measured on production against keys marked by hand before any run; raw results are in `scripts/*-run*.json`, and the write-ups, every live run with its time and cost, and the tech part by part are in [EVALUATIONS.md](EVALUATIONS.md).
+Every model step is measured on production against keys marked by hand before any run; raw results are in `scripts/*-run*.json`, and the write-ups, every live run with its time and cost, and the tech part by part are in [EVALUATIONS.md](EVALUATIONS.md). The sets are small and marked by hand (8 to 37 items each): enough to show each step works and where it fails, not an accuracy for every quote in the market; the pilot measures that on real events.
 
 | What was tested | Result |
 |---|---|
