@@ -104,10 +104,10 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 | The theme asks | PlusOne's answer |
 |---|---|
-| **Bring Meta's models into your domain** | Event planning on six Meta models. Muse Spark reads replies, quotes, PDFs and photos that mix Tamil and English into the same lines; Muse Voice Transcribe hears a plan spoken in Tamil, English or both, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the customer's own hall photo to dress it; Muse Wonder checks a vendor's evidence in Ops; and two open-weights models, Muse Spark Open on Baseten and Muse Glimmer on our own Modal GPU, read vendors' price lists and check photos of their work. All live in production |
-| **A problem you know firsthand** | We just lived it, planning a half-day baby shower (Seemantham) for 120 in Chennai. Other halls quoted about ₹2 to ₹3.5 lakh with AC, parking and rooms on top; the hall we booked at ₹75,000 cost ₹20,000 more because the decorators needed it from 11 pm the night before. Decorators priced a design from a photo on WhatsApp, each differently, and delivered late with fewer of the lilies we'd asked for. The caterer's transport was about four times what we'd have paid ourselves, with serving and cleaning outside the per-plate price. Every price came as a WhatsApp message, a call or a scribbled note, never in one place. That was one small morning; a wedding runs for days. PlusOne is the app we wished we'd had |
+| **Bring Meta's models into your domain** | Event planning on six Meta models. Muse Spark reads replies, quotes, PDFs and photos, in English or mixed with a local language, into the same lines; Muse Voice Transcribe hears a spoken plan, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the customer's own hall photo to dress it; Muse Wonder checks a vendor's evidence in Ops; and two open-weights models, Muse Spark Open on Baseten and Muse Glimmer on our own Modal GPU, read vendors' price lists and check photos of their work. All live in production |
+| **A problem you know firsthand** | We just lived it, planning a half-day baby shower (Seemantham) for 120. Other halls quoted about ₹2 to ₹3.5 lakh with AC, parking and rooms on top; the hall we booked at ₹75,000 cost ₹20,000 more because the decorators needed it from 11 pm the night before. Decorators priced a design from a photo on WhatsApp, each differently, and delivered late with fewer of the lilies we'd asked for. The caterer's transport was about four times what we'd have paid ourselves, with serving and cleaning outside the per-plate price. Every price came as a WhatsApp message, a call or a scribbled note, never in one place. That was one small morning; a wedding runs for days. PlusOne is the app we wished we'd had |
 | **Free up time and mental space** | PlusOne does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
-| **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers on the same lines, missing charges flagged and the market range. An event manager gets it for every client's event. A vendor with no website gets found and answers briefs. A plan can be spoken in Tamil, and the decor seen on the real hall before anyone pays |
+| **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers on the same lines, missing charges flagged and the market range. An event manager gets it for every client's event. A vendor with no website gets found and answers briefs. A plan can be spoken instead of typed, and the decor seen on the real hall before anyone pays |
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
@@ -117,9 +117,9 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | Muse Spark at the core, through one wrapper with retries, a logged fallback and a cost row per call; the assistant changes the plan when told ("we're now 140 people") | Muse Spark 1.3 | Live, 27 Oct |
 | **Under the hood:** every step with its model, time and cost, and recorded real runs of each model in the demo (Muse Spark reading three catering quotes in 7–14 s each, $0.033 in all; the hall's stage found and cut out in 4.3 s and 4.0 s; a photo checked in 5.6 s) | All six | Live, 27 Oct; recorded runs 28–30 Oct |
-| **The standard sheet** for eleven trades, from venue, catering and decor to makeup and the priest; **missing charges flagged** and **Compare line by line** with the city's market range | Muse Spark reads; fixed, tested rules decide | Live, 28 Oct |
+| **The standard sheet** for ten trades, from venue, catering and decor to makeup and the priest; **missing charges flagged** and **Compare line by line** with the city's market range | Muse Spark reads; fixed, tested rules decide | Live, 28 Oct |
 | **Any quote, any form:** an email, a PDF, a WhatsApp photo or pasted message, or a recorded phone call heard speaker by speaker, all read into the same lines | Muse Spark, Muse Voice Transcribe | Live, 28–29 Oct |
-| **The voice brief:** speak the plan in Tamil, English or both | Muse Voice Transcribe, Muse Spark | Live, 28 Oct |
+| **The voice brief:** speak the plan instead of typing it | Muse Voice Transcribe, Muse Spark | Live, 28 Oct |
 | **See it on your venue:** the hall's own photo with its stage found, cut out and dressed in a look | Muse Spark, SAM 3.1 | Live, 29 Oct |
 | **PlusOne Partner:** vendors join or claim a listing, price on the standard sheet, bring their own price list, answer briefs into the customer's Compare; wording tidied, photos checked; a vendors' demo of its own | Muse Spark, Muse Spark Open, Muse Glimmer | Live, 28–29 Oct |
 | **PlusOne Ops:** a verification agent gathers evidence with links, a person decides; photos flagged; changes to verified listings wait for approval | Muse Wonder, Muse Glimmer | Live, 28–29 Oct |
@@ -162,7 +162,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 
 **Why would vendors join?** Customers who arrive with a clear brief, a fair comparison instead of a race to the bottom, and a place to be found for the many with no website.
 
-**Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English, Tamil and both. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing.
+**Why AI, and why Meta's models?** Quotes arrive as emails, PDFs, WhatsApp photos, voice notes and calls, in English or mixed with a local language. Meta's models read all of them into one sheet cheaply enough that a first birthday gets what only a wedding with a planner got before. The model reads; tested rules decide what's missing.
 
 **Can the AI be trusted with prices?** It is measured, not assumed, with every run's raw results in the repository, and a person verifies every vendor. [Measured results](#measured-results)
 
@@ -179,14 +179,14 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | Model | Where it works in PlusOne | Status |
 |---|---|---|
 | **Muse Spark 1.3** (Meta Model API) | Every reading and writing step: the planning conversation, search plans and vendor ranking, inquiries and follow-ups, quotes in replies, PDFs and photos, RSVPs, guest-list imports and the "Tell PlusOne" box. Structured answers come back as JSON Schema, checked against Zod schemas | Live in production since 27 Oct |
-| **Muse Voice Transcribe** | The voice brief, spoken in Tamil, English or both (the demo's Overview box can play a recorded sample brief, heard the same way); and a recorded call with a vendor, heard speaker by speaker (diarization) and read into the standard sheet (the demo's 47-second call in 10.9 s, every figure right: ₹460 a plate, GST ₹2,760, transport ₹2,500, water flagged) | Live in production since 28 Oct |
+| **Muse Voice Transcribe** | The voice brief, spoken instead of typed (the demo's Overview box can play a recorded sample brief, heard the same way); and a recorded call with a vendor, heard speaker by speaker (diarization) and read into the standard sheet (the demo's 47-second call in 10.9 s, every figure right: ₹460 a plate, GST ₹2,760, transport ₹2,500, water flagged) | Live in production since 28 Oct |
 | **SAM 3.1** | Cuts the stage and the wall behind it out of the hall's own photo, from boxes Muse Spark finds or a tap, so the page can dress them in a look; masks cached (9 s the first time, 1 s after) | Live in production, 29 Oct (`convex/lib/sam.ts`, `convex/venueView.ts`) |
 | **Muse Wonder** | The verification agent in Ops: checks a vendor against their own site and public pages, with links; a person decides | Live in production, 28 Oct (`convex/lib/wonder.ts`, `convex/marketplace/checks.ts`) |
 | **Muse Spark Open** (open weights, on Baseten) | **Bring your price list** on Partner: a vendor pastes or photographs the list they already send customers, and it drafts each package on their trade's sheet to check and save (a printed rate card into three packages, all right, in 8.4 s) | Live in production, 29 Oct (`convex/marketplace/priceList.ts`) |
 | **Muse Glimmer 30B** (open weights, on our own Modal endpoint) | Checks each photo a vendor adds: real work or stock, another business's watermark, faces, and up to five tags for the trade; flags go to Ops. One H200 that scales to zero: about 4 s warm (median 3.9 s, p95 6.1 s over 36 photos), 3.6 minutes cold | Live in production, 29 Oct (`convex/lib/glimmer.ts`, `convex/marketplace/photos.ts`) |
 | **Muse Code** (Meta's coding agent) | Our pair programmer for building PlusOne | In use since 27 Oct |
 
-Muse Image is the one Meta model we don't use, because Meta's policy keeps it unavailable in India.
+Muse Image is the one Meta model we don't use, because Meta's policy keeps it unavailable in our region.
 
 **See it at work:** the **Under the hood** button in any event lists every step PlusOne ran, with the Meta model, time and cost. In the demo it opens on recorded real runs of each model on its own material.
 
@@ -212,9 +212,9 @@ Every model step is measured on production against keys marked by hand before an
 |---|---|
 | [On a real event](EVALUATIONS.md#evaluation-on-a-real-event-the-founders-own-baby-shower): the founders' own baby shower for 120, its real quotes against what was paid | ₹41,400 paid over ₹2,96,500 quoted; ₹29,500 of it, about 10% of the quoted total, in charges outside the headline prices. On the original quotes PlusOne flags the hall's unstated extra hours and the decorator's unstated set-up, where the ₹20,000 added at the end came from |
 | [Missing charges](EVALUATIONS.md#evaluation-missing-charges): what a planner would still have to ask each vendor | 36 of 37 found at 100% precision on 18 realistic quotes; 35 of 37 at 97% on 20 held-out quotes in new shapes, the same in three runs |
-| [Quotes in any form](EVALUATIONS.md#evaluation-reading-quotes-in-any-form): the same quote as an email, a PDF and a phone photo | Read right 18 of 18 times; Tamil and Tanglish quotes 7 of 8 |
+| [Quotes in any form](EVALUATIONS.md#evaluation-reading-quotes-in-any-form): the same quote as an email, a PDF and a phone photo | Read right 18 of 18 times; quotes in a local language or mixed with English, 7 of 8 |
 | [Finding the stage](EVALUATIONS.md#evaluation-finding-the-stage) in a hall photo | Found and cut out in 9 of 10 kinds of hall; one living room's sofa was taken for a stage |
-| [Checking a vendor](EVALUATIONS.md#evaluation-checking-a-vendor) with Muse Wonder | Never confirmed a made-up vendor; backed three real ones with sources |
+| [Checking a vendor](EVALUATIONS.md#evaluation-checking-a-vendor) with Muse Wonder | Never confirmed a made-up vendor, even one whose own site hid an instruction telling AI reviewers to approve it; backed three real ones with sources |
 | [Checking vendors' photos](EVALUATIONS.md#evaluation-checking-vendors-photos), open weights against Muse Spark, on 36 hand-marked photos | Muse Glimmer caught 11 of 14 AI-generated photos to Muse Spark's 7 |
 | [Every live run](EVALUATIONS.md#real-runs), with its time and cost at list price | Reading a quote about $0.011, a hall's stage about $0.009, a 47-second call $0.002, a photo check about $0.006 warm; an estimated $1–2 of model calls for a whole event ([unit economics](BUSINESS.md#unit-economics)) |
 
@@ -261,7 +261,7 @@ Each step says what came before the hackathon and what is new.
 <img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering: the Chennai range from Value to Luxury with the five quotes pinned on it by number, then line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
 
 <img src="assets/screens/venue.jpg" width="100%" alt="The sample hall with its bare stage dressed in the marigold and mango leaf look: a red pleated drape with marigold swags and hanging strands behind the stage, and a gold skirt along the stage's front, with the chairs in front left as they are">
-<sub>See it on your venue: the stage found by Muse Spark and cut out by SAM 3.1 in the hall's own photo, then dressed in a look, to judge decorators' quotes against. The look is drawn by the app on SAM's masks, since Muse Image isn't available in India.</sub>
+<sub>See it on your venue: the stage found by Muse Spark and cut out by SAM 3.1 in the hall's own photo, then dressed in a look, to judge decorators' quotes against. The look is drawn by the app on SAM's masks, since Muse Image isn't available in our region.</sub>
 
 **Finding vendors, free.** At [/vendors](https://app.plusoneevents.site/vendors), anyone can search in their own words, on a list or a map, with no sign-in: each listed vendor's packages on the standard sheet, checked photos and track record, plus vendors' own sites on the open web. Until real vendors join, the directory holds 26 sample vendors, marked Sample.
 
@@ -297,9 +297,10 @@ git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
 npm test              # 812 tests, no network, no keys
 npm run typecheck     # the app and the backend
+npm run build         # the production build, offline
 ```
 
-The evaluations' raw results are in `scripts/*-run*.json`, so every number above can be checked without calling a model. Every push runs typecheck, tests and a build in CI, and a browser walks the live demo on a phone and a laptop after every push and every three hours; the site is checked every five minutes, with the last day at [`/uptime`](https://trustworthy-ram-180.eu-west-1.convex.site/uptime). **To run the whole app** (Node 20+, a Convex account and a Clerk application), deploy it, and see every environment variable: **[SETUP.md](SETUP.md)**.
+The evaluations' raw results are in `scripts/*-run*.json`, `scripts/compare-run1/` and `scripts/vendor-check-run1/`, so every number above can be checked without calling a model, except the founders' own event and the three real vendors' checks, kept private to protect the businesses. Every push runs typecheck, tests and a build in CI, and a browser walks the live demo on a phone and a laptop after every push and every three hours; the site is checked every five minutes, with the last day at [`/uptime`](https://trustworthy-ram-180.eu-west-1.convex.site/uptime). **To run the whole app** (Node 20+, a Convex account and a Clerk application), deploy it, and see every environment variable: **[SETUP.md](SETUP.md)**.
 
 ## Status and limits
 
@@ -317,7 +318,7 @@ In this order, each feeding the comparison customers already use:
 - **A range for each segment**, so a luxury decorator is compared with luxury decorators.
 - **PlusOne Assured and booking in the app:** the quote honoured line by line, payments in stages against milestones, a no-show replaced, and a final reconciliation, for a small disclosed fee.
 - **PlusOne on WhatsApp under its own name:** quote updates are built on Meta's test number; next, PlusOne's own verified number, then booking updates and vendor follow-ups.
-- **PlusOne Premium**, **billing** (Razorpay in India, Stripe outside it), then **more cities and countries** on the same engine.
+- **PlusOne Premium**, **billing** (local payments first, cards abroad), then **more cities and countries** on the same engine.
 
 ## Repository
 

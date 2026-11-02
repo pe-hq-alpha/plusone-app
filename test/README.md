@@ -23,7 +23,7 @@ or any page or console error. Screenshots land in `test/shots/` for a look by ey
 somewhere else.
 
 The evaluations that measure the models (`convex/evals.ts`, `scripts/eval-reading.mjs`) are run by hand on
-production and cost Meta credit; their results are in the main README.
+production and cost Meta credit; their results are in [EVALUATIONS.md](../EVALUATIONS.md).
 
 ## 3. A person on the live site
 

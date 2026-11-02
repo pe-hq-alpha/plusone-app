@@ -9,6 +9,7 @@ git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
 npm test              # 812 tests, no network, no keys
 npm run typecheck     # the app and the backend
+npm run build         # the production build, offline
 ```
 
 The evaluations' raw results are in `scripts/*-run*.json` beside the scripts that made them, so every number in [Evaluations](EVALUATIONS.md#evaluation-missing-charges) can be checked without calling a model.
@@ -48,15 +49,17 @@ Every push to `main` runs typecheck, tests and a build in CI, and a second workf
 
 | Variable | For |
 |---|---|
-| `ANTHROPIC_API_KEY` | Claude: the fallback for every model call, and the provider when `MODEL_PROVIDER` is `claude` or no Meta key is set |
-| `ANTHROPIC_MODEL_SMART`, `ANTHROPIC_MODEL_FAST` | Optional. Override `claude-sonnet-5-5` and `claude-haiku-5-5` |
-| `MODEL_PROVIDER` | Optional. Model calls run on Meta's models by default; `claude` runs them on Claude instead |
 | `MODEL_API_KEY` | Meta Model API key. Without it, calls fall back to Claude |
 | `META_MODEL_SMART`, `META_MODEL_FAST` | Optional. Override `muse-spark-1.3` per tier (Contributor ids are refused) |
 | `META_BASE_URL` | Optional. The Model API address, `https://api.meta.ai/v1` by default |
+| `META_MODEL_AGENT` | Optional. The model for the vendor check in Ops, `muse-wonder-1.0` by default |
 | `BASETEN_API_KEY` | Optional. Baseten key for Muse Spark Open; without it, calls that ask for Spark Open run on Muse Spark |
+| `BASETEN_BASE_URL`, `SPARK_OPEN_MODEL` | Optional. Baseten's address and the Muse Spark Open model id, `meta-models/muse-spark-open-1026` by default |
 | `GLIMMER_BASE_URL`, `MODAL_PROXY_TOKEN` | Optional. Our Muse Glimmer endpoint on Modal and its proxy token (`wk-….ws-…`); without them, photo checks run on Muse Spark |
 | `GLIMMER_MODEL` | Optional. The endpoint's model name, `inference-1` by default |
+| `MODEL_PROVIDER` | Optional. Model calls run on Meta's models by default; `claude` runs them on Claude instead |
+| `ANTHROPIC_API_KEY` | Optional fallback only. Claude answers when a Meta model can't, and the provider when `MODEL_PROVIDER` is `claude` or no Meta key is set |
+| `ANTHROPIC_MODEL_SMART`, `ANTHROPIC_MODEL_FAST` | Optional fallback only. Override `claude-sonnet-5-5` and `claude-haiku-5-5` |
 | `FIRECRAWL_API_KEY` | Vendor search |
 | `AGENTMAIL_API_KEY`, `AGENTMAIL_WEBHOOK_SECRET`, `AGENTMAIL_INBOX_DOMAIN` | The event inboxes and their incoming mail |
 | `AGENTMAIL_FALLBACK_INBOX_ID` | Optional. An inbox to use when an event can't get its own |
@@ -69,6 +72,7 @@ Every push to `main` runs typecheck, tests and a build in CI, and a second workf
 | `CLERK_JWT_ISSUER_DOMAIN` | The Clerk instance whose sign-ins the backend accepts, such as `https://clerk.<home>` |
 | `CLERK_SECRET_KEY` | Optional. Deletes the person at Clerk too when an account is deleted |
 | `VISIT_LOG_SECRET` | Optional. Shared with the Cloudflare middleware, which sends each visit for the security log |
+| `CONVEX_SITE_URL`, `CLERK_ISSUER` | Optional, set on Cloudflare Pages (not Convex) for the visit log: the deployment's `.convex.site` address, and the same Clerk issuer as `CLERK_JWT_ISSUER_DOMAIN` |
 | `JWT_PRIVATE_KEY`, `JWKS` | Keys for the demo's guest tokens (Convex Auth), made by `node scripts/auth-keys.mjs` |
 | `RESEND_API_KEY`, `EMAIL_FROM` | The app's own emails |
 | `EMAIL_LIVE` | Optional. `1` to send app emails; anything else keeps them in test mode |
