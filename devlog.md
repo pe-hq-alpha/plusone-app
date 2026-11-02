@@ -20,7 +20,7 @@
 - **Credits spent:** about $3.70 of the $150 Meta credit by the evening of 29 Oct, adding the day's logged runs: $0.98 in 129 calls by the morning (`evalsCost:perEvent`), about $2.30 in the afternoon's evaluations and vendor checks, and about $0.43 in the evening (the planted-page check, the photo evaluation's Muse Spark half, the demo's charge reading). Modal: the Glimmer GPU on credits ($3.79 metered by 13:20, plus $0.22 for the photo evaluation). Baseten: a few cents of $100. ElevenLabs: six 1K images for the photo evaluation. On 30 Oct, a few more small runs: two held-out evaluation runs on Muse Spark (about 20 calls each) and five price-list reads on Muse Spark Open (Baseten's credits). On 31 Oct, the baby shower's three quotes were read on production (`evals:chargesFor`). Spending after 29 Oct is small, and 1 Nov had no new paid runs; the full total is read with `evalsCost` before submitting.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-11-01T11:10:00+05:30
+- **Last updated:** 2026-11-02T08:10:00+05:30
 
 ## Evidence
 
@@ -64,7 +64,14 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ## Log
 
-### 2026-11-01 - d7d6ff7..HEAD (the founder's walk through his own event)
+### 2026-11-02 - 54203eb.. (the last refining day before the video)
+
+Fixes and checks before the video is recorded, by Claude Code (claude-opus-5-5).
+
+- **Compare on a phone** (`54203eb`): at 390 px the line names took two fifths of the width, so one vendor showed at a time. Narrower line names and columns on phones (two past-work photos instead of three) put two vendors beside the lines, with the rest a swipe away; laptop widths unchanged (measured: columns 104 + 108 px in a 324 px frame; at 1280 px the table still fills its 1,130 px).
+- **Checked:** `npm test` 812 passed (84 files), `npm run typecheck` clean; the guest demo's Compare seen at 390 and 1280 px against the dev backend, no sideways scroll. **Credits:** none.
+
+### 2026-11-01 - d7d6ff7..fcd8646 (the founder's walk through his own event)
 
 Paddy planned his own Diwali event in the app and said what got in the way; each item below is a fix for one of them, built by Claude Code (claude-opus-5-5) in this session.
 
@@ -80,13 +87,16 @@ Paddy planned his own Diwali event in the app and said what got in the way; each
 - **The sign-in card appears once, at full size** (`2ecf5c2`): it used to grow as Clerk added the password box, dropping the links below it about 180 px.
 - **The same top links everywhere** (Muse Code, brief 16): the other public pages' links are now the home page's buttons.
 - **The sign-in form appears all at once** (`1605405`): the heading, agreement, card with its password box and links stay hidden until Clerk's card is complete, then fade in together; the connection to Clerk opens from the page's head, so it starts sooner.
-- **The inbox count** (`6f709fc`): the number on Inbox, on the phone's Vendors icon and in the browser tab counts every conversation with a reply not yet opened, plus any vendor waiting on the host's answer; opening one clears it for that person only.
+- **The inbox count** (`6f709fc`): the number on Inbox, on the phone's Vendors icon and in the browser tab counts every conversation with a reply not yet opened; opening one clears it for that person only. (At first it also counted vendors waiting on the host's answer; after the daily review it counts unread only, the same as the Unread filter, `5d1e24a`.)
 - **Add a quote a vendor told you, on the need's own page** (`111d65f`): a need opens on its quotes; "Add a quote" takes who quoted it, what they said (typed, spoken, a call recording, a photo or PDF) and, if known, the price per plate or for everything. A typed price goes straight in; words are read into the same lines as an emailed quote. Emailed and added quotes sit side by side ("Added by you"), with Book; a quote the host added is never held for review. Vendor cards are compact, saved only when the host hearts one; the lane's pages are tabs; Notes to self became a real sticky note that drags by its tape on a wide screen and stays where it's left.
 - **Suggestions from the event** (`53231d8`): the lines under "Tell PlusOne" and the assistant's openers come from where the event stands (quotes to choose between, the next need nobody has started, who hasn't replied, the money), so a small Diwali party no longer sees "We're now 140 people".
 - **The price bar across your own quotes** (`dfce0f1`): with no city range yet for a kind of need (sound and lighting at Paddy's event), two or more quotes now get a bar, cheapest to dearest, the middle marked, each labelled lowest, highest or how far over the lowest; it moves to the city's range once vendors there list prices.
 - **README and docs** (`06a2d42`, `d5c2965`, `176cf5d`, then this session's pass): Overview, booking outside PlusOne, milestones, RSVP links, Notes to self and Add a quote in the README, WHATS-NEW and HOW-IT-WORKS. After the daily review (11:00 IST, a fresh judge at 8.3), the text pass: the pitch now leads with one place for the whole plan and every quote on the same lines; prices, the commission end goal and the launch date in the form's first answer; every step in HOW-IT-WORKS marked before the hackathon or new; one set of numbers everywhere (812 tests, Glimmer about 4 s warm, about 70,000 lines and 232 backend files); the market's 1% based on the services share (about $350 million) and an unverified Kotak figure dropped; the guarantee described as future; the video plan labelling every feature before or during the hackathon.
 - **A full footer on the home page**: brand line, PlusOne Events' own Instagram, X, LinkedIn, Facebook and YouTube, then Plan, Vendors and Company links, with the theme switch at the base. A brief for it went to Muse Code (`14-home-footer.txt`); the run was stopped part way, so Claude Code finished it from its own draft and Muse wasn't used for it.
-- **Checked:** `npm test` 812 passed (84 files) at `dfce0f1`, `npm run typecheck` clean; each screen seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll. Everything up to `240a45b` deployed at about 09:00 IST and walked live: 15 of 15 steps. **Credits:** none (no live model calls).
+- **Fixes from the daily review** (`5d1e24a`): every number in the guest demo agrees: Overview and Plan show what's booked (₹80,000), with quotes still being weighed said apart, as Compare does; "Choose your catering" counts quotes and verified vendors' offers alike; a need with only an offer shows its price; a chased vendor reads "followed up once, last written 2 days ago". The public directory lists vendors with prices first and web finds apart, as "not yet verified", only under their own trade, and web finds are never "Verified" on a need's map. A quote you add shows its price on the vendor's card and "Not stated" instead of blanks. On a phone, tapping a need scrolls to it; switching needs no longer trips the map mid-zoom. Partner: the request carries the guests' food needs from their RSVPs, a vendor sees rivals as "Another vendor A/B", and a link home. The Terms allow reading the published source and judges assessing how it works.
+- **Fresh screenshots** (`790f0ca`): all eleven README and HOW-IT-WORKS screenshots and the banner retaken from the live demo after the deploy, captions matched to what each now shows.
+- **Housekeeping** (`aafd40c`, `fcd8646`): `package.json` states Node 20 or later, as SETUP does; the web-search library now shares the app's patched zod (it already supported it), so `npm audit` reports no known vulnerabilities.
+- **Checked:** `npm test` 812 passed (84 files) and `npm run typecheck` clean at `fcd8646`; each screen seen in a browser at 1440 and 390 px against the dev backend, no sideways scroll. Deployed twice (about 09:00 and 11:20 IST), each walked live: 15 of 15 steps. PlusOne Partner's demo showed its sheet in about 2.5 s on three cold loads. **Credits:** none (no live model calls).
 
 ### 2026-10-31 - ca5e6ab..8042db0 (founder review: polish, Partner onboarding, the README halved)
 
