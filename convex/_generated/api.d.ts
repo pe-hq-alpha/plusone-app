@@ -71,6 +71,7 @@ import type * as lib_glimmerEval from "../lib/glimmerEval.js";
 import type * as lib_helpWith from "../lib/helpWith.js";
 import type * as lib_inboxName from "../lib/inboxName.js";
 import type * as lib_kinds from "../lib/kinds.js";
+import type * as lib_leadName from "../lib/leadName.js";
 import type * as lib_leads from "../lib/leads.js";
 import type * as lib_links from "../lib/links.js";
 import type * as lib_marketplace from "../lib/marketplace.js";
@@ -235,6 +236,7 @@ declare const fullApi: ApiFromModules<{
   "lib/helpWith": typeof lib_helpWith;
   "lib/inboxName": typeof lib_inboxName;
   "lib/kinds": typeof lib_kinds;
+  "lib/leadName": typeof lib_leadName;
   "lib/leads": typeof lib_leads;
   "lib/links": typeof lib_links;
   "lib/marketplace": typeof lib_marketplace;
