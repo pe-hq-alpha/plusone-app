@@ -17,7 +17,7 @@
 ![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
 ![Tests](https://img.shields.io/badge/tests-832_passing-c4dfbc?style=flat-square&labelColor=11141c)
-[![License](https://img.shields.io/badge/license-FSL--1.1--ALv2-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE.md)
+[![License](https://img.shields.io/badge/license-Apache--2.0-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE)
 
 <table align="center">
 <tr>
@@ -343,4 +343,4 @@ In this order, each feeding the comparison customers already use:
 
 ## License
 
-[FSL-1.1-ALv2](LICENSE.md), the Functional Source License. You can read, run and change it for anything except offering a competing commercial product. Each version becomes Apache 2.0 two years after it's published.
+[Apache-2.0](LICENSE): open source. Use it, change it and build on it, with the copyright and [NOTICE](NOTICE) kept.
