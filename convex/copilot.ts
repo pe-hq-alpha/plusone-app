@@ -87,7 +87,12 @@ export const route = query({
       return id ? slotById.get(id) : undefined;
     };
     const groups = new Map<string, { a: Doc<"activity">; slot?: Doc<"vendorSlots">; n: number }>();
-    for (const a of work) {
+    // Older events logged a finished search as a note ("Research finished for Catering: 1 vendors found");
+    // it reads as the same milestone as the finds themselves, once.
+    const asMilestone = (a: Doc<"activity">): Doc<"activity"> =>
+      a.type === "note" && a.refs?.slotId && /^Research finished for /.test(a.text) ? { ...a, type: "vendor_found" } : a;
+    for (const raw of work) {
+      const a = asMilestone(raw);
       const slot = slotOf(a);
       const key = MILESTONE.has(a.type) ? `${a.type}:${slot?._id ?? "any"}` : a._id;
       const g = groups.get(key);

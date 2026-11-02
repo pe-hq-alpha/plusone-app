@@ -68,8 +68,11 @@ export async function weekItems(ctx: QueryCtx, event: Doc<"events">, today: stri
     );
   }
 
-  // "The wedding is 6 weeks away", or "Amma's 60th is 6 weeks away".
-  const whenItIs = `${isWedding(event) ? "The wedding" : event.name} is ${plural(weeksLeft, "week")} away.`;
+  // "The wedding is 6 weeks away", "Amma's 60th is 6 days away", "… is tomorrow": never "0 weeks away".
+  const daysLeft = Math.max(0, Math.round((Date.parse(event.startDate) - Date.parse(today)) / DAY));
+  const whenItIs = `${isWedding(event) ? "The wedding" : event.name} is ${
+    daysLeft === 0 ? "today" : daysLeft === 1 ? "tomorrow" : daysLeft < 14 ? `${daysLeft} days away` : `${plural(weeksLeft, "week")} away`
+  }.`;
   const person = peopleWord(event).replace(/s$/, "");
 
   // Two or more prices for something not yet booked (quotes and verified vendors' offers,

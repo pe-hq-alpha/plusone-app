@@ -247,8 +247,9 @@ export const finish = internalMutation({
       const slot = await ctx.db.get(run.slotId);
       await logActivity(ctx, {
         eventId: run.eventId,
-        type: "note",
-        text: `Research finished for ${slot?.title ?? "a slot"}: ${args.foundCount ?? run.foundCount} vendors found.`,
+        // A milestone ("Found 6 options for your catering" on Overview), not a free-text note.
+        type: "vendor_found",
+        text: `Research finished for ${slot?.title ?? "a need"}: ${args.foundCount ?? run.foundCount} ${(args.foundCount ?? run.foundCount) === 1 ? "vendor" : "vendors"} found.`,
         refs: { slotId: run.slotId },
       });
     }

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useLayoutEffect } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Link, useNavigate, useOutletContext } from "react-router-dom";
@@ -281,7 +281,7 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
   const remove = useMutation(api.tasks.remove).withOptimisticUpdate(removeTask);
   const [text, setText] = useState("");
   const [showDone, setShowDone] = useState(false);
-  const { offset, dragging, handle, putBack } = useMovable(`plusone.note.${eventId}`);
+  const { offset, dragging, handle, putBack, ref: noteRef } = useMovable(`plusone.note.${eventId}`);
   // Newest first: a note is what was on the host's mind most recently.
   const open = (tasks ?? []).filter((t) => !t.done).sort((a, b) => b._creationTime - a._creationTime);
   const done = (tasks ?? []).filter((t) => t.done);
@@ -303,6 +303,7 @@ function TodoNote({ eventId }: { eventId: Id<"events"> }) {
   );
   return (
     <section
+      ref={noteRef}
       aria-labelledby="note-h"
       className={`note ${dragging ? "is-dragging" : ""}`}
       data-tour="notes"
@@ -361,6 +362,31 @@ function useMovable(key: string) {
   const [offset, setOffset] = useState(() => (wide() ? read() : { x: 0, y: 0 }));
   const [dragging, setDragging] = useState(false);
   const start = useRef<{ px: number; py: number; x: number; y: number } | null>(null);
+  const ref = useRef<HTMLElement | null>(null);
+  // Never under the top bar or off the page's sides: an offset that would put it there is pulled back in.
+  const contain = (v: { x: number; y: number }) => {
+    const el = ref.current;
+    if (!el) return v;
+    const r = el.getBoundingClientRect();
+    const naturalTop = r.top + window.scrollY - v.y;
+    const naturalLeft = r.left - v.x;
+    const bar = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+    const minY = bar + 12 - naturalTop;
+    const minX = 8 - naturalLeft;
+    const maxX = document.documentElement.clientWidth - 8 - r.width - naturalLeft;
+    return { x: Math.round(Math.min(Math.max(v.x, minX), Math.max(minX, maxX))), y: Math.round(Math.max(v.y, minY)) };
+  };
+  // A position saved before this rule (or on a wider screen) is brought back into view once.
+  useLayoutEffect(() => {
+    if (offset.x === 0 && offset.y === 0) return;
+    const fixed = contain(offset);
+    if (fixed.x !== offset.x || fixed.y !== offset.y) {
+      setOffset(fixed);
+      save(fixed);
+    }
+    // Once, on arrival; dragging handles the rest.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const save = (v: { x: number; y: number }) => {
     try {
       if (v.x === 0 && v.y === 0) localStorage.removeItem(key);
@@ -386,8 +412,9 @@ function useMovable(key: string) {
       start.current = null;
       setDragging(false);
       setOffset((v) => {
-        save(v);
-        return v;
+        const kept = contain(v);
+        save(kept);
+        return kept;
       });
     },
   };
@@ -395,5 +422,5 @@ function useMovable(key: string) {
     setOffset({ x: 0, y: 0 });
     save({ x: 0, y: 0 });
   };
-  return { offset, dragging, handle, putBack };
+  return { offset, dragging, handle, putBack, ref };
 }
