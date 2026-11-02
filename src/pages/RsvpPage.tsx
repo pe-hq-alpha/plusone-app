@@ -41,14 +41,20 @@ export function RsvpPage() {
   const [state, setState] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState<string | null>(null);
 
+  // What's saved for them (from this page, an email reply or the hosts), as one key: when it changes,
+  // the form follows it, unless they have started changing it themselves.
+  const [touched, setTouched] = useState(false);
+  const saved = inv
+    ? JSON.stringify([inv.sessions.map((e) => [e._id, e.coming ?? null, e.count ?? 0]), inv.dietary ?? "", inv.allergies ?? "", inv.answeredAt ?? 0])
+    : "";
   useEffect(() => {
-    if (!inv) return;
+    if (!inv || touched) return;
     setAnswers(Object.fromEntries(inv.sessions.map((e) => [e._id, { coming: e.coming ?? null, count: e.count || inv.partySize }])));
     setDietary(inv.dietary ?? "");
     setAllergies(inv.allergies ?? "");
-    // Only when the invitation first arrives; later updates are their own answers.
+    // Keyed on what's saved, not on every render of the invitation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inv === undefined || inv === null]);
+  }, [saved, touched]);
 
   if (inv === undefined) return <main className="grid min-h-screen place-items-center bg-paper text-sm text-muted">Loading…</main>;
   if (inv === null) {
@@ -56,7 +62,15 @@ export function RsvpPage() {
   }
 
   const ready = inv.sessions.every((e) => answers[e._id]?.coming !== null && answers[e._id] !== undefined);
-  const set = (id: string, patch: Partial<Answer>) => setAnswers((a) => ({ ...a, [id]: { ...a[id], ...patch } }));
+  const set = (id: string, patch: Partial<Answer>) => {
+    setTouched(true);
+    setAnswers((a) => ({ ...a, [id]: { ...a[id], ...patch } }));
+  };
+  // Food questions only matter to someone who is coming to at least one part.
+  const anyComing = inv.sessions.some((e) => answers[e._id]?.coming === true);
+  const noneComing = inv.sessions.length > 0 && inv.sessions.every((e) => answers[e._id]?.coming === false);
+  const how = inv.answeredBy === "email" ? "replied by email" : inv.answeredBy === "couple" ? `told ${hosts} your answer` : "answered";
+  const when = inv.answeredAt ? new Date(inv.answeredAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
 
   async function submit() {
     setError(null);
@@ -69,6 +83,7 @@ export function RsvpPage() {
         allergies,
       });
       setState("sent");
+      setTouched(false);
     } catch (e) {
       setError(e instanceof ConvexError && typeof e.data === "string" ? e.data : "That didn't send. Try again.");
       setState("idle");
@@ -144,7 +159,11 @@ export function RsvpPage() {
         {state === "sent" ? (
           <div className="site__rsvp mt-5">
             <p className="display text-2xl">Thank you</p>
-            <p className="mx-auto mt-2 max-w-[28rem] text-sm text-muted">Your answer is with {hosts}. You can come back to this link to change it.</p>
+            <p className="mx-auto mt-2 max-w-[28rem] text-sm text-muted">
+              {noneComing
+                ? `${hosts} will miss you. If your plans change, come back to this link.`
+                : `Your answer is with ${hosts}. You can come back to this link to change it.`}
+            </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <button type="button" className="btn-quiet btn-sm bg-cream" onClick={() => setState("idle")}>Change my answer</button>
               {inv.sitePath && (
@@ -156,6 +175,12 @@ export function RsvpPage() {
           </div>
         ) : (
           <>
+            {inv.responded && when && !touched && (
+              // An answer that came by email shows here too, so the page never looks unanswered.
+              <p className="mt-4 rounded-[12px] bg-accent-soft/50 px-4 py-2.5 text-sm text-muted">
+                You {how} on {when}; it&rsquo;s below. Change anything and send it again.
+              </p>
+            )}
             <div className="mt-5 grid gap-6">
               {groupByDay(inv.sessions).map((day) => (
               <div key={day.date}>
@@ -195,16 +220,19 @@ export function RsvpPage() {
               </div>
               ))}
             </div>
-            <div className="mt-6 grid gap-3">
-              <label className="grid gap-1 text-sm">
-                <span className="label">Food preferences</span>
-                <input className="input" value={dietary} maxLength={200} placeholder="Vegetarian, no pork, halal…" onChange={(e) => setDietary(e.target.value)} />
-              </label>
-              <label className="grid gap-1 text-sm">
-                <span className="label">Allergies</span>
-                <input className="input" value={allergies} maxLength={300} placeholder="Peanuts, severe; shellfish" onChange={(e) => setAllergies(e.target.value)} />
-              </label>
-            </div>
+            {/* Shown once they're coming to something; hidden again if they switch every part to "can't make it". */}
+            {anyComing && (
+              <div className="mt-6 grid gap-3">
+                <label className="grid gap-1 text-sm">
+                  <span className="label">Food preferences</span>
+                  <input className="input" value={dietary} maxLength={200} placeholder="Vegetarian, no pork, halal…" onChange={(e) => { setTouched(true); setDietary(e.target.value); }} />
+                </label>
+                <label className="grid gap-1 text-sm">
+                  <span className="label">Allergies</span>
+                  <input className="input" value={allergies} maxLength={300} placeholder="Peanuts, severe; shellfish" onChange={(e) => { setTouched(true); setAllergies(e.target.value); }} />
+                </label>
+              </div>
+            )}
             {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
             <button type="button" className="btn-primary mt-6 w-full justify-center sm:w-auto" disabled={!ready || state === "sending"} onClick={() => void submit()}>
               {state === "sending" ? "Sending…" : inv.responded ? "Update my answer" : "Send my RSVP"}

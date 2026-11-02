@@ -8,7 +8,7 @@ import { eventSiteFields } from "./schema";
 import { byDayThenOrder } from "./lib/sessionOrder";
 import { answersOf } from "./lib/rsvp";
 import { anOccasion, eventTypeOf, hostsLabel, isWedding } from "./lib/occasion";
-import { eventType } from "./lib/validators";
+import { eventType, rsvpSource } from "./lib/validators";
 import { ensureRsvpToken, recordAnswers } from "./guests";
 import { giftsForGuests, publicGifts } from "./gifts";
 
@@ -276,6 +276,13 @@ export const preview = query({
 });
 
 /** One guest's invitation, from their own link: the ceremonies they're invited to and what they've answered. */
+/** The route and time of a guest's latest answer, so their page can say "You replied by email on 2 Nov". */
+function latestAnswer(answers: { source?: "link" | "email" | "couple"; at?: number }[], respondedAt?: number) {
+  const last = [...answers].filter((a) => a.at !== undefined).sort((a, b) => (b.at ?? 0) - (a.at ?? 0))[0];
+  const at = last?.at ?? respondedAt;
+  return { ...(last?.source ? { answeredBy: last.source } : {}), ...(at !== undefined ? { answeredAt: at } : {}) };
+}
+
 export const invitation = query({
   args: { token: v.string() },
   returns: v.union(
@@ -300,6 +307,9 @@ export const invitation = query({
       coverIsPhoto: v.boolean(),
       /** The event's own page, when the hosts have published it. */
       sitePath: v.optional(v.string()),
+      /** How their latest answer came (their link, an email reply, or the hosts setting it), and when. */
+      answeredBy: v.optional(rsvpSource),
+      answeredAt: v.optional(v.number()),
     }),
     v.null(),
   ),
@@ -339,6 +349,7 @@ export const invitation = query({
       area: event.area,
       ...(await coverOf(ctx, event)),
       sitePath: site?.published ? `/s/${site.slug}` : undefined,
+      ...latestAnswer(answersOf(guest), guest.respondedAt),
     };
   },
 });
