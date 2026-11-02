@@ -108,7 +108,8 @@ export async function requireStaff(
 /** Human label for the acting user, used in the activity feed. */
 export async function actorLabelFor(ctx: QueryCtx | MutationCtx, userId: Id<"users">): Promise<string> {
   const user = await ctx.db.get(userId);
-  return user?.name?.trim() || nameFromEmail(user?.email) || "Someone";
+  // A visitor trying a sample event has no name; they are the only one who sees its history.
+  return user?.name?.trim() || nameFromEmail(user?.email) || (user?.isAnonymous ? "You" : "Someone");
 }
 
 /** "olivia.carter@…" becomes "Olivia Carter": a name to show, never the address itself. */

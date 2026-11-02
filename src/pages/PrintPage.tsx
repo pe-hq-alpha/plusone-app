@@ -18,6 +18,20 @@ type EventData = NonNullable<FunctionReturnType<typeof api.events.get>>;
  * venue, printed or saved as a PDF from the browser. Money and contact details can be
  * left out before printing. Owners can also send it as a read-only link.
  */
+/** The same words said by several guests, once, with a count: ["Jain", "jain ", "No onion"] → ["Jain (2)", "No onion"]. */
+function tallied(items: string[]): string[] {
+  const seen = new Map<string, { text: string; n: number }>();
+  for (const raw of items) {
+    const text = raw.trim().replace(/[.;]+$/, "");
+    if (!text) continue;
+    const key = text.toLowerCase();
+    const row = seen.get(key) ?? { text, n: 0 };
+    row.n += 1;
+    seen.set(key, row);
+  }
+  return [...seen.values()].sort((a, b) => b.n - a.n).map(({ text, n }) => (n > 1 ? `${text} (${n})` : text));
+}
+
 export function PrintPage() {
   const { event, sessions, role } = useOutletContext<EventData>();
   const eventId = event._id as Id<"events">;
@@ -58,16 +72,18 @@ export function PrintPage() {
       status: s.status,
       bookedName: s.bookedVendor?.name,
       contact: showContacts ? [s.bookedVendor?.email, s.bookedVendor?.phone].filter(Boolean).join(" · ") || undefined : undefined,
-      budget: s.budget,
+      // A booked need prints what was agreed; one still open prints what's planned for it.
+      budget: s.status === "booked" ? (budget?.lines.find((l) => l.slot?._id === s._id)?.line.committed ?? s.budget) : s.budget,
     })),
-    budget: showMoney && budget ? { total: budget.totalBudget, committed: budget.committedTotal, paid: budget.paidTotal } : null,
+    budget: showMoney && budget ? { total: budget.totalBudget, committed: budget.agreedTotal, paid: budget.paidTotal } : null,
     dues: (dues ?? []).filter((d) => !d.doneAt),
     guests: {
       invited: guests?.length ?? 0,
       coming: (guests ?? []).filter((g) => g.rsvp === "yes").reduce((a, g) => a + (g.attendingCount || g.partySize), 0),
     },
-    diets: (guests ?? []).map((g) => g.dietary).filter((d): d is string => Boolean(d)),
-    allergies: (guests ?? []).flatMap((g) => g.allergies ?? []),
+    // Each need once, with how many asked for it: "No onion or garlic (2)".
+    diets: tallied((guests ?? []).map((g) => g.dietary).filter((d): d is string => Boolean(d))),
+    allergies: tallied((guests ?? []).flatMap((g) => g.allergies ?? [])),
   };
 
   return (

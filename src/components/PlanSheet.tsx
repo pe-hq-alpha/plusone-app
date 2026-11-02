@@ -91,7 +91,7 @@ export function PlanSheet({ plan, footer }: { plan: PlanSheetData; footer: strin
         <section className="break-inside-avoid">
           <h2 className="display border-b border-line pb-1.5 text-xl">Budget</h2>
           <p className="mt-2 text-sm">
-            {money(plan.budget.total, cur)} in all · {money(plan.budget.committed, cur)} committed · {money(plan.budget.paid, cur)} paid ·{" "}
+            {money(plan.budget.total, cur)} in all · {money(plan.budget.committed, cur)} booked · {money(plan.budget.paid, cur)} paid ·{" "}
             {money(plan.budget.total - plan.budget.committed, cur)} left
           </p>
         </section>
@@ -114,7 +114,7 @@ export function PlanSheet({ plan, footer }: { plan: PlanSheetData; footer: strin
       {plan.guests.invited > 0 && (
         <section className="break-inside-avoid">
           <h2 className="display border-b border-line pb-1.5 text-xl">Who's coming</h2>
-          <p className="mt-2 text-sm">{plan.guests.invited} invited · {plan.guests.coming} coming so far</p>
+          <p className="mt-2 text-sm">{plan.guests.invited} {plan.guests.invited === 1 ? "invitation" : "invitations"} · {plan.guests.coming} coming so far</p>
           {plan.diets && plan.diets.length > 0 && <p className="mt-1 text-sm">Food preferences: {plan.diets.join("; ")}</p>}
           {plan.allergies && plan.allergies.length > 0 && <p className="mt-1 text-sm">Allergies: {plan.allergies.join("; ")}</p>}
         </section>

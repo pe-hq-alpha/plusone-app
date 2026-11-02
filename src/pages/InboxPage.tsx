@@ -84,7 +84,9 @@ export function InboxPage() {
   const visible = (threads ?? []).filter(matches);
 
   useEffect(() => {
-    if (!threadId && visible.length > 0) navigate(`/e/${eventId}/inbox/${visible[0]._id}`, { replace: true });
+    // Open on what needs the host first, then anything unread, then the newest.
+    const first = visible.find(needsYou) ?? visible.find((t) => t.unread) ?? visible[0];
+    if (!threadId && first) navigate(`/e/${eventId}/inbox/${first._id}`, { replace: true });
   }, [threadId, visible, navigate, eventId]);
 
   const all = (threads ?? []).filter((t) => t.status !== "draft");

@@ -46,9 +46,12 @@ export function SitePage() {
         </div>
         <div className="relative z-10 mx-auto max-w-[44rem] px-5">
           <div className="site__card">
-            <p className="text-xs uppercase tracking-[0.22em] text-quiet">You're invited to {site.occasion}</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-quiet">{site.eventType === "wedding" ? `You're invited to ${site.occasion}` : "You're invited"}</p>
+            {/* A wedding is headed by the couple; any other event by its own name, with its hosts beneath. */}
             <h1 className="mt-3 text-[clamp(2.1rem,3.6vw,3.2rem)] leading-[1.05]">
-              {site.host.trim() && site.coHost.trim() ? (
+              {site.eventType !== "wedding" ? (
+                site.name
+              ) : site.host.trim() && site.coHost.trim() ? (
                 <>
                   {site.host} <em>&amp;</em> {site.coHost}
                 </>
@@ -57,6 +60,7 @@ export function SitePage() {
               )}
             </h1>
             <span className="site__rule" aria-hidden="true" />
+            {site.eventType !== "wedding" && <p className="mb-1 text-sm text-quiet">Hosted by {hostsLabel(site)}</p>}
             <p className="text-muted">
               {sameDay ? longDate(site.startDate) : `${longDate(site.startDate)} to ${longDate(site.endDate)}`}
               <br />

@@ -726,7 +726,8 @@ function AddQuote({ eventId, slot, vendors, headcount, currency, demo }: {
   const [text, setText] = useState("");
   const [amount, setAmount] = useState("");
   // Food is priced by the plate; most other needs (decor, a photographer, a hall) for the whole event.
-  const byPlate = /cater|food|biryani|cake|sweet|lunch|dinner|breakfast|snack|bar|drink/i.test(`${slot.category} ${slot.title}`);
+  // Food served by the plate; a cake, a bar or anything else is priced for the whole.
+  const byPlate = /\b(cater\w*|food|biryani|biriyani|meals?|lunch|dinner|breakfast|snacks?)\b/i.test(`${slot.category} ${slot.title}`);
   const [unit, setUnit] = useState<"per_person" | "total">(byPlate ? "per_person" : "total");
   const [people, setPeople] = useState(headcount > 0 ? String(headcount) : "");
   const [file, setFile] = useState<File | null>(null);

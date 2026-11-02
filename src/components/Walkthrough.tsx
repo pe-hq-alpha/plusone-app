@@ -144,7 +144,8 @@ const stepsFor = ({ part, people }: Words): Step[] => [
   },
   {
     path: "print",
-    target: "ask",
+    // The top bar's Ask on a laptop, the floating button on a phone: whichever is on screen.
+    target: "ask-top|ask",
     title: "Ask, from any page",
     body: "Questions are answered from your plan, starting with the page you're on. It can add a vendor or a guest for you once you say yes.",
     place: "bottom",
@@ -183,6 +184,15 @@ function markSeen() {
   }
 }
 
+/** A step's element: the first of its "a|b" targets that is actually on screen. */
+function tourTarget(target: string): HTMLElement | null {
+  for (const t of target.split("|")) {
+    const el = document.querySelector<HTMLElement>(`[data-tour="${t}"]`);
+    if (el && el.getClientRects().length > 0) return el;
+  }
+  return null;
+}
+
 export function shouldOfferWalkthrough() {
   return !seen();
 }
@@ -219,7 +229,7 @@ export function Walkthrough({ base, onClose, eventType }: { base: string; onClos
 
   const rectOf = useCallback((): Box | null => {
     if (!step) return null;
-    const el = document.querySelector(`[data-tour="${step.target}"]`);
+    const el = tourTarget(step.target);
     if (!el) return null;
     const r = el.getBoundingClientRect();
     return { top: r.top, left: r.left, width: r.width, height: r.height };
@@ -279,7 +289,7 @@ export function Walkthrough({ base, onClose, eventType }: { base: string; onClos
         }
         if (tries < 25) return;
       }
-      const el = document.querySelector(`[data-tour="${step.target}"]`);
+      const el = tourTarget(step.target);
       if (el) {
         clearInterval(timer);
         const r = el.getBoundingClientRect();
@@ -316,7 +326,7 @@ export function Walkthrough({ base, onClose, eventType }: { base: string; onClos
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
     // The element itself can change size too: a list filling in, a card opening.
-    const el = step && document.querySelector(`[data-tour="${step.target}"]`);
+    const el = step && tourTarget(step.target);
     const watch = el ? new ResizeObserver(measure) : undefined;
     if (el) watch?.observe(el);
     return () => {
