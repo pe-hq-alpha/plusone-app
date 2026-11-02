@@ -143,9 +143,9 @@ describe("what Events reads", () => {
 
   test("a website a search found links to its listing, however it was written", async () => {
     const t = setup();
-    const profileId = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.in" });
+    const profileId = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.example" });
     await listing(t, { name: "Gone", website: "https://gone.in", status: "suspended" });
-    expect(await t.query(internal.marketplace.listings.profileByWebsite, { website: "www.AnjaliCaterers.in/menu" })).toBe(profileId);
+    expect(await t.query(internal.marketplace.listings.profileByWebsite, { website: "www.AnjaliCaterers.example/menu" })).toBe(profileId);
     expect(await t.query(internal.marketplace.listings.profileByWebsite, { website: "https://gone.in" })).toBeNull();
   });
 });
@@ -223,17 +223,17 @@ describe("a vendor joining", () => {
 
   test("an email at the listing's own website claims it at once", async () => {
     const t = setup();
-    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.in" });
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.example" });
+    const vendor = await user(t, "owner@anjalicaterers.example");
     expect((await as(t, vendor).mutation(api.marketplace.partner.claim, { profileId: added })).status).toBe("approved");
     expect((await as(t, vendor).query(api.marketplace.partner.mine, {})).profile?._id).toBe(added);
-    const other = await user(t, "other@anjalicaterers.in");
+    const other = await user(t, "other@anjalicaterers.example");
     await expect(as(t, other).mutation(api.marketplace.partner.claim, { profileId: added })).rejects.toThrow(/already been claimed/);
   });
 
   test("any other claim waits for a person, and only the PlusOne team can decide it", async () => {
     const t = setup();
-    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.in" });
+    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.example" });
     const vendor = await user(t, "anjali.caterers@gmail.com");
     const rival = await user(t, "rival@gmail.com");
     const reviewer = await user(t, "ops@plusoneevents.site", "reviewer");
@@ -255,7 +255,7 @@ describe("a vendor joining", () => {
 describe("a vendor's prices", () => {
   test("offerings are priced in the units families compare, by their owner only", async () => {
     const t = setup();
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     const stranger = await user(t, "stranger@example.com");
     await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Anjali Caterers", categories: ["Catering"], city: "Chennai" });
     const offeringId = await as(t, vendor).mutation(api.marketplace.partner.saveOffering, {
@@ -280,7 +280,7 @@ describe("a vendor's prices", () => {
 
   test("a package states every charge, in the price or on top, and customers read them", async () => {
     const t = setup();
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     const { profileId } = await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Anjali Caterers", categories: ["Catering"], city: "Chennai" });
     const save = (charges: object[]) =>
       as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Catering", title: "Veg lunch", unit: "per_person", price: 380, includes: ["Banana leaf"], charges } as never);
@@ -321,7 +321,7 @@ describe("a vendor's prices", () => {
 
   test("a photographer prices the way photographers do, with what the price includes", async () => {
     const t = setup();
-    const vendor = await user(t, "hello@thinnai.in");
+    const vendor = await user(t, "hello@thinnai.example");
     await as(t, vendor).mutation(api.marketplace.partner.register, { name: "Thinnai Photography", categories: ["Photographer", "Mehndi artist"], city: "Chennai" });
     const save = (more: object) =>
       as(t, vendor).mutation(api.marketplace.partner.saveOffering, { category: "Photographer", title: "Candid photos", unit: "per_person", price: 2_000, includes: ["Edited photos online"], ...more });
@@ -347,13 +347,13 @@ describe("a vendor's prices", () => {
 describe("Ops verifying", () => {
   test("a person verifies with checks and evidence, the record is kept, and the vendor appears to families", async () => {
     const t = setup();
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     const reviewer = await user(t, "ops@plusoneevents.site", "reviewer");
     const { profileId } = (await as(t, vendor).mutation(api.marketplace.partner.register, {
       name: "Anjali Caterers",
       categories: ["Catering"],
       city: "Chennai",
-      website: "anjalicaterers.in",
+      website: "anjalicaterers.example",
     })) as { profileId: Id<"vendorProfiles"> };
 
     const queue = await as(t, reviewer).query(api.marketplace.ops.queue, {});
@@ -366,7 +366,7 @@ describe("Ops verifying", () => {
       outcome: "verified",
       checks: [{ label: "Website is theirs", passed: true }],
       evidence: [
-        { label: "Contact page", url: "https://anjalicaterers.in/contact" },
+        { label: "Contact page", url: "https://anjalicaterers.example/contact" },
         { label: "Not a link", url: "javascript:alert(1)" },
       ],
     });
@@ -374,13 +374,13 @@ describe("Ops verifying", () => {
     const detail = await as(t, reviewer).query(api.marketplace.ops.profile, { profileId });
     expect(detail?.profile.status).toBe("verified");
     expect(detail?.reviews).toHaveLength(1);
-    expect(detail?.reviews[0].evidence).toEqual([{ label: "Contact page", url: "https://anjalicaterers.in/contact" }]);
+    expect(detail?.reviews[0].evidence).toEqual([{ label: "Contact page", url: "https://anjalicaterers.example/contact" }]);
     expect((await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai" })).map((c) => c._id)).toEqual([profileId]);
   });
 
   test("a verified vendor who changes name goes back for a fresh check", async () => {
     const t = setup();
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor });
     await as(t, vendor).mutation(api.marketplace.partner.update, { name: "Anjali Caterers", categories: ["Catering"], city: "Chennai", about: "Since 1998" });
     expect((await as(t, vendor).query(api.marketplace.partner.mine, {})).profile?.status).toBe("verified");
@@ -462,7 +462,7 @@ describe("briefs and offers", () => {
   test("a family's need reaches verified caterers in the city, and their offer comes back on the sheet's lines", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t);
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     const profileId = await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor, prices: [520] });
     const unverified = await user(t, "new@caterer.in");
     await listing(t, { name: "New caterer", source: "vendor_signup", status: "pending", ownerUserId: unverified });
@@ -516,7 +516,7 @@ describe("briefs and offers", () => {
       const lunch = (await ctx.db.query("sessions").collect())[0];
       return await ctx.db.insert("vendorSlots", { eventId, sessionIds: [lunch._id], category: "Photographer", title: "Photos of the lunch", budget: 30000, status: "research" });
     });
-    const vendor = await user(t, "hello@thinnai.in");
+    const vendor = await user(t, "hello@thinnai.example");
     await listing(t, { name: "Thinnai Photography", categories: ["Photographer"], source: "vendor_signup", status: "verified", ownerUserId: vendor });
     const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
     const lines = [
@@ -546,7 +546,7 @@ describe("briefs and offers", () => {
   test("a caterer's plates come from 'For how many', or from the quantities, or from the brief's guests", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t);
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor });
     const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
     const send = (more: object) => as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 400, lines: cateringAnswers, ...more });
@@ -563,7 +563,7 @@ describe("briefs and offers", () => {
   test("a withdrawn offer, or one from a vendor since suspended, leaves Compare", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t);
-    const vendor = await user(t, "owner@anjalicaterers.in");
+    const vendor = await user(t, "owner@anjalicaterers.example");
     const profileId = await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: vendor });
     const briefId = await as(t, familyId).mutation(api.marketplace.briefs.ask, { eventId, slotId });
     const offerId = await as(t, vendor).mutation(api.marketplace.offers.submit, { briefId, price: 550, lines: cateringAnswers });
@@ -590,7 +590,7 @@ describe("briefs and offers", () => {
   test("a sample event's brief never reaches a real vendor, and a viewer can't send one", async () => {
     const t = setup();
     const { familyId, eventId, slotId } = await familyEvent(t, { demo: true });
-    const real = await user(t, "owner@anjalicaterers.in");
+    const real = await user(t, "owner@anjalicaterers.example");
     await listing(t, { name: "Anjali Caterers", source: "vendor_signup", status: "verified", ownerUserId: real });
     const sampleOwner = await user(t, "sample@plusoneevents.site");
     await listing(t, { name: "Sample caterer", source: "vendor_signup", status: "verified", ownerUserId: sampleOwner, sample: true });
@@ -687,7 +687,7 @@ describe("a demo guest trying Partner", () => {
     expect(await t.query(internal.marketplace.listings.searchProfiles, { category: "Catering", city: "Chennai", samples: true })).toEqual([]);
 
     // A real account can't take a sample business.
-    const real = await user(t, "owner@anjalicaterers.in");
+    const real = await user(t, "owner@anjalicaterers.example");
     await expect(as(t, real).mutation(api.marketplace.partner.trySample, {})).rejects.toThrow(/for the demo/);
   });
 
@@ -699,8 +699,8 @@ describe("a demo guest trying Partner", () => {
     await as(t, familyId).mutation(api.marketplace.partner.trySample, {});
     await as(t, familyId).mutation(api.marketplace.offers.submit, { briefId, price: 360, lines: cateringAnswers });
 
-    const vendor = await user(t, "owner@anjalicaterers.in");
-    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.in", prices: [500] });
+    const vendor = await user(t, "owner@anjalicaterers.example");
+    const added = await listing(t, { name: "Anjali Caterers", website: "https://anjalicaterers.example", prices: [500] });
     await as(t, vendor).mutation(api.marketplace.partner.claim, { profileId: added });
 
     await t.run(async (ctx) => {

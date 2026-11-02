@@ -12,6 +12,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Skips itself (with a notice) until the staging secrets are set; production is deployed by hand.
+    name: Staging deploy (skipped until its keys are set)
     runs-on: ubuntu-latest
     env:
       CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_STAGING }}

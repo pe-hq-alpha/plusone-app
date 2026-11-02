@@ -137,7 +137,7 @@ export function startingOffering<T extends OfferingLike & { category: string; pr
 
 /**
  * Whether an email address is at a listing's own website, so a claim can be approved
- * without a person checking: owner@anjalicaterers.in claims anjalicaterers.in.
+ * without a person checking: owner@anjalicaterers.example claims anjalicaterers.example.
  * Free mail domains never match, whatever the website says.
  */
 const FREE_MAIL = new Set(["gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "outlook.com", "hotmail.com", "live.com", "icloud.com", "rediffmail.com", "proton.me", "protonmail.com"]);

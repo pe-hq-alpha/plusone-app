@@ -87,16 +87,16 @@ describe("badges and listing", () => {
 
 describe("emailMatchesWebsite", () => {
   test("an address at the listing's own site proves the claim", () => {
-    expect(emailMatchesWebsite("owner@anjalicaterers.in", "https://anjalicaterers.in")).toBe(true);
-    expect(emailMatchesWebsite("Owner@Mail.AnjaliCaterers.in", "https://anjalicaterers.in")).toBe(true);
-    expect(emailMatchesWebsite("owner@anjali.in", "https://www.anjali.in/menu")).toBe(true);
+    expect(emailMatchesWebsite("owner@anjalicaterers.example", "https://anjalicaterers.example")).toBe(true);
+    expect(emailMatchesWebsite("Owner@Mail.AnjaliCaterers.example", "https://anjalicaterers.example")).toBe(true);
+    expect(emailMatchesWebsite("owner@anjali.example", "https://www.anjali.example/menu")).toBe(true);
   });
 
   test("free mail and other sites never do", () => {
-    expect(emailMatchesWebsite("anjalicaterers@gmail.com", "https://anjalicaterers.in")).toBe(false);
+    expect(emailMatchesWebsite("anjalicaterers@gmail.com", "https://anjalicaterers.example")).toBe(false);
     expect(emailMatchesWebsite("someone@gmail.com", "https://gmail.com")).toBe(false);
-    expect(emailMatchesWebsite("owner@other.in", "https://anjalicaterers.in")).toBe(false);
-    expect(emailMatchesWebsite(undefined, "https://anjalicaterers.in")).toBe(false);
+    expect(emailMatchesWebsite("owner@other.example", "https://anjalicaterers.example")).toBe(false);
+    expect(emailMatchesWebsite(undefined, "https://anjalicaterers.example")).toBe(false);
   });
 });
 

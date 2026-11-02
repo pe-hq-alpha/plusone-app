@@ -130,7 +130,7 @@ describe("the vendors' demo", () => {
 
   test("is only for visitors without an account", async () => {
     const t = setup();
-    const { as } = await visitor(t, { email: "owner@anjalicaterers.in" });
+    const { as } = await visitor(t, { email: "owner@anjalicaterers.example" });
     await expect(as.mutation(api.demo.startVendor, {})).rejects.toThrow("without an account");
   });
 });
