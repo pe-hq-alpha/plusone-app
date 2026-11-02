@@ -113,3 +113,32 @@ describe("find vendors", () => {
     await expect(as(t, guest).action(api.marketplace.directory.searchWeb, { category: "Jugglers", city: "Chennai" })).rejects.toThrow(/kind of vendor/);
   });
 });
+
+describe("businesses found on the web", () => {
+  async function webLead(t: T, name: string, category: string) {
+    await t.run((ctx) =>
+      ctx.db.insert("vendorProfiles", {
+        name,
+        categories: [category],
+        leadCategory: category,
+        city: "Chennai",
+        cityKey: "chennai",
+        source: "plusone_added",
+        status: "pending",
+        statusAt: Date.now(),
+        joinedAt: Date.now(),
+        completedEvents: 0,
+        foundVia: { urls: ["https://example.com"], at: Date.now() },
+      }),
+    );
+  }
+
+  test("show under their own name, never an astrology site for a priest", async () => {
+    const t = setup();
+    await webLead(t, "AstroVed: Vedic Astrology, Free Horoscope & Daily Panchang", "Officiant");
+    await webLead(t, "Sri Vedic Purohit - Priest Services In Chennai", "Officiant");
+    const res = await t.query(api.marketplace.directory.search, { category: "Officiant", city: "Chennai" });
+    const names = res.vendors.filter((v) => v.foundOnWeb).map((v) => v.name);
+    expect(names).toEqual(["Sri Vedic Purohit"]);
+  });
+});

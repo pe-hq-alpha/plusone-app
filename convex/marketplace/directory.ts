@@ -11,6 +11,7 @@ import { isListed, isTrial } from "../lib/marketplace";
 import { VENDOR_CATEGORIES } from "../lib/vendorNeeds";
 import { cardFor, listedVendors, listingCard, offeringsOf } from "./listings";
 import { packageCharge } from "../schema";
+import { leadDisplayName } from "../lib/leadName";
 
 /**
  * Find vendors: PlusOne's vendor directory, open to anyone, with no plan bought and no
@@ -23,7 +24,17 @@ import { packageCharge } from "../schema";
 const publicCard = v.object({ ...listingCard.fields });
 
 type Card = Awaited<ReturnType<typeof cardFor>>;
-const withoutContact = (c: Card): Card => ({ ...c, phone: undefined, whatsapp: undefined });
+/**
+ * A card as the public sees it: a Partner vendor's phone and WhatsApp kept back, and a business
+ * found on the web named without its page title's tagline ("CM Caterers", not "CM Caterers - Veg
+ * Caterers In Chennai"). The trade check reads the full title first, so its tagline still counts.
+ */
+const withoutContact = (c: Card): Card => ({
+  ...c,
+  ...(c.foundOnWeb ? { name: leadDisplayName(c.name) } : {}),
+  phone: undefined,
+  whatsapp: undefined,
+});
 
 export const trades = query({
   args: {},
@@ -38,9 +49,12 @@ const FULL_TRADE = 5;
  * Businesses found on the web are only kept under a trade they plausibly do: a web search for
  * caterers also turns up ice-cream parlours and tea chains, which aren't caterers.
  */
+const ASTROLOGY = /horoscope|panchang|astrolog|jyotish/i;
 const NOT_THIS_TRADE: Record<string, RegExp> = {
   Catering: /ice ?cream|baskin|gelato|\bchai\b|\btea\b|caf[eé]\b|coffee|bakery|bakes|juice|pizza|burger/i,
-  Priest: /horoscope|panchang|astrolog/i,
+  // A need for a priest is the Officiant trade; astrology sites turn up in its searches.
+  Officiant: ASTROLOGY,
+  Priest: ASTROLOGY,
 };
 export function fitsTrade(name: string, category: string): boolean {
   const wrong = NOT_THIS_TRADE[category];

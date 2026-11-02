@@ -127,9 +127,9 @@ export function FindVendorsPage() {
               )}
             </h2>
             <div className="flex gap-1 rounded-full bg-cream p-1 ring-1 ring-line" role="group" aria-label="Show as">
-              {(["list", "map"] as const).map((v) => (
-                <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`rounded-full px-3 py-1 text-xs capitalize ${view === v ? "bg-accent text-paper" : "text-muted hover:text-accent"}`}>
-                  {v}
+              {([["list", "List"], ["map", "Map"]] as const).map(([v, label]) => (
+                <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={`rounded-full px-3 py-1 text-xs ${view === v ? "bg-accent text-paper" : "text-muted hover:text-accent"}`}>
+                  {label}
                 </button>
               ))}
             </div>
@@ -163,7 +163,7 @@ export function FindVendorsPage() {
               ) : (
                 found.vendors.some((v) => v.sample) && (
                   <p className="mt-2 text-sm text-muted">
-                    Real vendors come first. Those marked Sample are made up, to show how listings look while {city} opens.
+                    Vendors who list their prices come first. Those marked Sample are made up, to show how listings look until real vendors join.
                   </p>
                 )
               )}
