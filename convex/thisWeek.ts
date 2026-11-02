@@ -7,6 +7,7 @@ import { isLive } from "./lib/quoteHold";
 import { offersForEvent } from "./marketplace/offers";
 import { clip, formatMoney, inSentence } from "./lib/text";
 import { bookAheadWeeks } from "./lib/vendorNeeds";
+import { basisFor, compare, offerAtYourNumbers, unitsForNeed } from "./lib/comparable";
 
 /**
  * What is waiting on the hosts, read straight from the plan: the "Over to you" items in
@@ -80,7 +81,10 @@ export async function weekItems(ctx: QueryCtx, event: Doc<"events">, today: stri
     const ins = live.filter((q) => q.slotId === slot._id);
     const offered = offers.filter((o) => o.slotId === slot._id);
     if (ins.length + offered.length < 2) continue;
-    const totals = [...ins.map((q) => q.total), ...offered.map((o) => o.total)].sort((a, b) => a - b);
+    // At the host's current numbers, as Compare shows them, so a new headcount moves this range too.
+    const basis = basisFor(slot.category);
+    const units = unitsForNeed(basis, sessions.filter((e: Doc<"sessions">) => slot.sessionIds.includes(e._id)), event.guestEstimate);
+    const totals = [...ins.map((q) => compare(q, basis, units).atYourNumbers), ...offered.map((o) => offerAtYourNumbers(o, basis, units))].sort((a, b) => a - b);
     const range = totals[0] === totals[totals.length - 1]
       ? formatMoney(totals[0], event.currency)
       : `${formatMoney(totals[0], event.currency)} to ${formatMoney(totals[totals.length - 1], event.currency)}`;

@@ -97,6 +97,8 @@ export type BoardNeedLike = {
   basisLabel: string;
   units: number;
   vendors: { name: string; state: VendorState; followUpCount: number; quote: { total: number; flags: string[] } | null }[];
+  /** Verified vendors' offers for the need: prices in, the same as quotes. */
+  offers?: unknown[];
 };
 
 export type NeedRow = {
@@ -127,7 +129,9 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
   const quoted = live.filter((v) => v.quote);
   const asking = live.find((v) => v.state === "needs_attention");
   const question = asking ? `${asking.name} has a question for you` : "";
-  const base = { slotId: slot._id, title: slot.title, quotes: quoted.length, planned: slot.budget };
+  // A verified vendor's offer is a price in, the same as an emailed quote, as Compare counts it.
+  const priced = quoted.length + (need?.offers?.length ?? 0);
+  const base = { slotId: slot._id, title: slot.title, quotes: priced, planned: slot.budget };
 
   if (slot.status === "booked") {
     const booked = vendors.find((v) => v.state === "booked");
@@ -141,10 +145,10 @@ export function needRow(slot: SlotLike, need?: BoardNeedLike): NeedRow {
     };
   }
 
-  if (quoted.length > 0 || slot.status === "quoted") {
+  if (priced > 0 || slot.status === "quoted") {
     const low = need?.cheapest ?? slot.bestQuote?.total ?? null;
     const high = need?.dearest ?? low;
-    const count = Math.max(1, quoted.length);
+    const count = Math.max(1, priced);
     const basis = need && need.basisLabel !== "All in" && need.units > 0 ? `${need.basisLabel.toLowerCase()} for your ${need.units}` : "";
     // The comparison flags a quote that leaves tax out ("GST extra"); the range is then before it.
     const taxExtra = quoted.flatMap((v) => v.quote?.flags ?? []).map((f) => /^(GST|VAT|tax) extra$/i.exec(f)?.[1]).find(Boolean);

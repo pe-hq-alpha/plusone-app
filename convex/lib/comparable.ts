@@ -95,3 +95,22 @@ export function spread(values: (number | null)[]): { low: number; high: number }
   if (xs.length < 2) return null;
   return { low: Math.min(...xs), high: Math.max(...xs) };
 }
+
+/**
+ * How many of a need's unit the host needs: plates for the most people at the parts it serves
+ * (or the event's guess before any part has a headcount), days for stays and transport.
+ */
+export function unitsForNeed(basis: Basis, served: Array<{ guestCount: number; date: string }>, guestEstimate?: number): number {
+  if (basis === "per_day") return Math.max(1, new Set(served.map((e) => e.date)).size);
+  return Math.max(0, ...served.map((e) => e.guestCount), served.length ? 0 : guestEstimate ?? 0);
+}
+
+/**
+ * A verified vendor's offer at the host's numbers. Offers answer the brief per plate or piece for
+ * the brief's quantity; when the headcount changes, the same rate is applied to the new one, so
+ * Compare's totals, its range and the plan all move together.
+ */
+export function offerAtYourNumbers(o: { total: number; unit: string; quantity: number }, basis: Basis, units: number): number {
+  if (basis === "total" || o.unit !== basis || o.quantity <= 0 || units <= 0 || o.quantity === units) return o.total;
+  return Math.round((o.total / o.quantity) * units);
+}

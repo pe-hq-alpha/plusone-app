@@ -124,6 +124,8 @@ export const get = query({
       paidTotal: v.number(),
       /** Agreed and not yet paid, counted line by line (never a quote still being weighed). */
       toPayTotal: v.number(),
+      /** Needs not booked that have a price in to weigh: a quote or a verified vendor's offer, as Compare counts them. */
+      needsToCompare: v.number(),
       slotCounts: v.object({
         research: v.number(),
         contacted: v.number(),
@@ -162,6 +164,10 @@ export const get = query({
       .take(200);
 
     const statusOf = new Map(slots.map((s) => [s._id, s.status]));
+    const offeredSlots = new Set(
+      (await ctx.db.query("vendorOffers").withIndex("by_eventId", (q) => q.eq("eventId", args.eventId)).take(200)).map((o) => o.slotId),
+    );
+    const needsToCompare = slots.filter((s) => s.status !== "booked" && (s.status === "quoted" || offeredSlots.has(s._id))).length;
     const sums = tally(lines.map((l) => ({ committed: l.committed, paid: l.paid, slotStatus: l.slotId ? statusOf.get(l.slotId) : undefined })));
     const slotCounts = { research: 0, contacted: 0, quoted: 0, booked: 0 };
     for (const s of slots) slotCounts[s.status] += 1;
@@ -181,6 +187,7 @@ export const get = query({
         bookedTotal: sums.agreed,
         paidTotal: sums.paid,
         toPayTotal: sums.toPay,
+        needsToCompare,
         slotCounts,
         guestCounts,
       },

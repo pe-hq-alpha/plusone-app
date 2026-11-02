@@ -102,3 +102,22 @@ describe("a quote priced for more than you need", () => {
     expect(c.perUnit).toBe(500);
   });
 });
+
+describe("a new headcount moves every price for a need", () => {
+  test("an offer per plate for 120 is the same rate at 140; an all-in or other-unit offer stays as it is", async () => {
+    const { offerAtYourNumbers } = await import("./comparable");
+    expect(offerAtYourNumbers({ total: 44_340, unit: "per_person", quantity: 120 }, "per_person", 140)).toBe(51_730);
+    expect(offerAtYourNumbers({ total: 44_340, unit: "per_person", quantity: 120 }, "per_person", 120)).toBe(44_340);
+    expect(offerAtYourNumbers({ total: 25_700, unit: "total", quantity: 1 }, "total", 140)).toBe(25_700);
+    expect(offerAtYourNumbers({ total: 12_500, unit: "per_hour", quantity: 5 }, "per_person", 140)).toBe(12_500);
+  });
+
+  test("plates for the most people at the parts a need serves; days for stays", async () => {
+    const { unitsForNeed } = await import("./comparable");
+    const lunch = { guestCount: 140, date: "2027-02-06" };
+    const pooja = { guestCount: 40, date: "2027-02-06" };
+    expect(unitsForNeed("per_person", [lunch, pooja])).toBe(140);
+    expect(unitsForNeed("per_person", [], 60)).toBe(60);
+    expect(unitsForNeed("per_day", [lunch, { guestCount: 10, date: "2027-02-07" }])).toBe(2);
+  });
+});

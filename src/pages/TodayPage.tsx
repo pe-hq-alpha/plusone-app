@@ -101,7 +101,7 @@ export function TodayPage() {
           <span className="today__stat-big">
             {stats.slotCounts.booked} <small>of {stats.slotCounts.research + stats.slotCounts.contacted + stats.slotCounts.quoted + stats.slotCounts.booked} booked</small>
           </span>
-          <span className="today__stat-foot">{stats.slotCounts.quoted} with quotes to compare</span>
+          <span className="today__stat-foot">{stats.needsToCompare} with prices to compare</span>
         </Link>
         <Link to="guests" className="today__stat">
           <span className="today__stat-label">{PeopleWord(event)}</span>

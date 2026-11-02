@@ -37,6 +37,8 @@ type Column = Pick<Quote, "total" | "currency" | "perUnit" | "tier" | "readings"
     name: string;
     from: "web" | "verified" | "sample";
     addedByYou?: boolean;
+    /** What the vendor quoted, when the total shown is at a different headcount. */
+    quoted?: number;
   };
 
 /** What a quote's place in its city's range means. It places a price; it never calls one fair. */
@@ -277,8 +279,24 @@ function NeedBoard({
   const rangePrice = (c: Column) => c.perUnit ?? (unitWord === "all in" ? c.total : null);
   const quoted = live.filter((v): v is QuotedRow => v.quote !== null && v.state !== "declined");
   const columns: Column[] = [
-    ...quoted.map((v) => ({ id: v.vendorId, from: "web" as const, name: v.name, phone: v.phone, ...v.quote })),
-    ...need.offers.map((o) => ({ id: o.offerId, from: o.sample ? ("sample" as const) : ("verified" as const), ...o })),
+    // Every total at the host's current numbers, with what was quoted beside it when that differs,
+    // so the line-by-line, the range and the vendors' rows all say the same.
+    ...quoted.map((v) => ({
+      id: v.vendorId,
+      from: "web" as const,
+      name: v.name,
+      phone: v.phone,
+      ...v.quote,
+      total: v.quote.atYourNumbers,
+      ...(v.quote.atYourNumbers !== v.quote.total ? { quoted: v.quote.total } : {}),
+    })),
+    ...need.offers.map((o) => ({
+      id: o.offerId,
+      from: o.sample ? ("sample" as const) : ("verified" as const),
+      ...o,
+      total: o.atYourNumbers,
+      ...(o.atYourNumbers !== o.total ? { quoted: o.total } : {}),
+    })),
   ];
   // Quotes and verified vendors' offers are weighed together: "best per plate" and the
   // spread in the header count every price on the sheet, not only the emailed quotes.
@@ -356,13 +374,14 @@ function NeedBoard({
           ) : need.cheapest !== null ? (
             <>
               <span className="text-ink">{money(need.cheapest, currency)}</span>
-              {need.dearest !== null && need.dearest !== need.cheapest && <> – {money(need.dearest, currency)}</>} quoted
+              {need.dearest !== null && need.dearest !== need.cheapest && <> – {money(need.dearest, currency)}</>}
+              {need.units > 0 && need.basisLabel !== "All in" ? <span className="text-quiet"> · for {need.units}</span> : " quoted"}
             </>
           ) : need.offers.length > 0 ? (
             // Only verified vendors' offers so far: say so, with the lowest, never "no prices yet".
             <>
-              <span className="text-ink">{money(Math.min(...need.offers.map((o) => o.total)), currency)}</span>
-              {need.offers.length > 1 && <> – {money(Math.max(...need.offers.map((o) => o.total)), currency)}</>}
+              <span className="text-ink">{money(Math.min(...need.offers.map((o) => o.atYourNumbers)), currency)}</span>
+              {need.offers.length > 1 && <> – {money(Math.max(...need.offers.map((o) => o.atYourNumbers)), currency)}</>}
               {" "}from {need.offers.length === 1 ? "a verified vendor" : `${need.offers.length} verified vendors`}
               {live.length > 0 && <span className="text-quiet"> · {live.length} more asked</span>}
             </>
@@ -422,7 +441,7 @@ function NeedBoard({
           </thead>
           <tbody className="divide-y divide-line max-md:block">
             {live.map((v) => {
-              const isCheapest = v.quote !== null && cheapest !== null && v.quote.total === cheapest && live.length > 1 && bestPerUnit === null;
+              const isCheapest = v.quote !== null && cheapest !== null && v.quote.atYourNumbers === cheapest && live.length > 1 && bestPerUnit === null;
               const isBestValue = v.quote !== null && bestPerUnit !== null && v.quote.perUnit === bestPerUnit;
               return (
                 <tr
@@ -657,6 +676,9 @@ function LineByLine({
               {columns.map((c) => (
                 <td key={c.id} className="px-3 py-2 text-right font-medium">
                   {money(c.total, c.currency)}
+                  {c.quoted !== undefined && (
+                    <span className="block text-[11px] font-normal text-quiet">quoted {money(c.quoted, c.currency)}</span>
+                  )}
                   {c.perUnit !== null && (
                     <span className="block text-xs font-normal text-muted">
                       {money(c.perUnit, c.currency)} per {unitWord}

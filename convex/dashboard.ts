@@ -4,7 +4,7 @@ import { requireMember } from "./lib/auth";
 import type { Doc, Id } from "./_generated/dataModel";
 import { slotStatus, threadStatus } from "./lib/validators";
 import type { Infer } from "convex/values";
-import { basisFor, basisLabel, compare, spread } from "./lib/comparable";
+import { basisFor, basisLabel, compare, spread, unitsForNeed, offerAtYourNumbers } from "./lib/comparable";
 import { isLive } from "./lib/quoteHold";
 import { gapsIn, missingCharges, priceUnitOf, readQuote, sheetFor, type Answer, type Sheet } from "./lib/standardSheet";
 import { tierFor } from "./lib/marketplace";
@@ -38,6 +38,8 @@ const offerRow = v.object({
   /** A sample vendor on a sample event, labelled as one. */
   sample: v.boolean(),
   total: v.number(),
+  /** The offer at the host's current numbers: the same rate at today's headcount (lib/comparable). */
+  atYourNumbers: v.number(),
   currency: v.string(),
   /** The total per plate or piece; null for an "all in" need. */
   perUnit: v.union(v.number(), v.null()),
@@ -297,8 +299,7 @@ export const board = query({
       // functions this need serves, pieces for gifts, days for stays and transport.
       const basis = basisFor(slot.category);
       const served = sessions.filter((e) => slot.sessionIds.includes(e._id));
-      const people = Math.max(0, ...served.map((e) => e.guestCount), served.length ? 0 : event.guestEstimate ?? 0);
-      const units = basis === "per_day" ? Math.max(1, new Set(served.map((e) => e.date)).size) : people;
+      const units = unitsForNeed(basis, served, event.guestEstimate);
       const sheet = sheetFor(slot.category);
       // A sample event sees ranges that count the sample vendors; a real family only real prices.
       const band = await bandRow(ctx, slot.category, basis, event.city, event.demo === true);
@@ -389,12 +390,17 @@ export const board = query({
       // A booked vendor first, then whoever quoted, cheapest first, then the rest.
       const rank = (r: VendorRow) =>
         r.state === "booked" ? 0 : r.quote ? 1 : r.state === "replied" ? 2 : r.state === "declined" ? 4 : 3;
-      rows.sort((a, b) => rank(a) - rank(b) || (a.quote?.total ?? Infinity) - (b.quote?.total ?? Infinity));
+      rows.sort((a, b) => rank(a) - rank(b) || (a.quote?.atYourNumbers ?? Infinity) - (b.quote?.atYourNumbers ?? Infinity));
 
-      const totals = rows
-        .filter((r) => r.state !== "declined")
-        .map((r) => r.quote?.total)
-        .filter((t): t is number => t !== undefined);
+      // Every price for the need at the host's current numbers, quotes and verified vendors' offers alike,
+      // so the range here, on the plan and on Overview moves when the headcount does.
+      const totals = [
+        ...rows
+          .filter((r) => r.state !== "declined")
+          .map((r) => r.quote?.atYourNumbers)
+          .filter((t): t is number => t !== undefined),
+        ...slotOffers.map((o) => offerAtYourNumbers(o, basis, units)),
+      ];
       const bookedHere = slot.status === "booked" ? (committedBySlot.get(slot._id) ?? 0) : 0;
       committed += bookedHere;
       cheapestSoFar += bookedHere > 0 ? bookedHere : totals.length ? Math.min(...totals) : 0;
@@ -430,6 +436,7 @@ export const board = query({
             badges: o.vendor.badges,
             sample: o.vendor.sample,
             total: o.total,
+            atYourNumbers: offerAtYourNumbers(o, basis, units),
             currency: o.currency,
             perUnit,
             covers: o.covers,
