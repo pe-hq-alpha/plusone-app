@@ -199,7 +199,9 @@ export async function seedBirthdayUS(ctx: MutationCtx, userId: Id<"users">): Pro
   const brisketMail = await conversation(ctx, eventId, catering, brisket, "hello@brisket-bloom.example", cateringSubject, [
     { dir: "out", kind: "inquiry", at: now - 8 * DAY, body: cateringAsk },
     { dir: "in", kind: "vendor_reply", at: now - 6 * DAY, body: `Hi Sam,\n\nHowdy, and thanks for thinking of us! We're free on ${dateText} and we know The Cypress Room well.\n\nOur smokehouse buffet is $32 per person: brisket, smoked chicken, mac and cheese, slaw, beans, salad, rolls and peach cobbler. Our minimum is 150 guests.\n\n150 guests at $32: $4,800\nService charge (18%): $864\nDelivery and setup: $150\nSales tax (8.25%): $480\nTotal: $6,294\n\nGluten-free and vegetarian plates are the same price. A $1,500 deposit locks in the date.\n\nCheers,\nTravis\nBrisket & Bloom Catering, East Austin` },
-  ], { status: "quoted" });
+    // Over the catering budget, so PlusOne asked them to come closer to it.
+    { dir: "out", kind: "negotiation", at: now - 5 * DAY, body: `Hi Travis,\n\nThank you for the quick and detailed quote, and it's good to hear you know The Cypress Room.\n\nWe've set aside about $6,000 for catering, and we're expecting about 120 guests rather than 150. Could you price the smokehouse buffet for 120, or suggest a way to bring the total closer to our budget? We'd love to make it work with you.${SIGN}` },
+  ], { status: "quoted", negotiatedAt: now - 5 * DAY });
   await ctx.db.insert("quotes", {
     eventId, slotId: catering._id, vendorId: brisket, threadId: brisketMail.threadId, messageId: brisketMail.messageIds[1],
     total: 6_294, deposit: 1_500, currency: "USD",
@@ -408,6 +410,7 @@ export async function seedBirthdayUS(ctx: MutationCtx, userId: Id<"users">): Pro
   await logActivity(ctx, { ...app, text: `${BRAND.name} wrote to 6 vendors from the event's own inbox: the event room, 3 caterers, a photographer and a DJ.` });
   await logActivity(ctx, { eventId, actorLabel: "Sam", actorKind: "person", type: "booked", text: "booked The Cypress Room for $4,200, and Priya paid the $1,000 deposit.", refs: { vendorId: cypress, slotId: room._id } });
   await logActivity(ctx, { ...app, type: "quote_received", text: "Brisket & Bloom Catering quoted $6,294, priced for 150 guests though you expect 120.", refs: { vendorId: brisket, threadId: brisketMail.threadId } });
+  await logActivity(ctx, { ...app, text: `${BRAND.name} asked Brisket & Bloom Catering whether they can come closer to your budget.`, refs: { vendorId: brisket, threadId: brisketMail.threadId } });
   await logActivity(ctx, { ...app, type: "quote_received", text: "Mockingbird Kitchen quoted $5,400 all in for 120, about $45 per person.", refs: { vendorId: mockingbird, threadId: mockingbirdMail.threadId } });
   await logActivity(ctx, { ...app, type: "quote_received", text: "Juniper & Sage Catering quoted $4,760 for 120 before tax, and asked a question only you can answer.", refs: { vendorId: juniper, threadId: juniperMail.threadId } });
   await logActivity(ctx, { ...app, text: `${BRAND.name} lined up the three catering quotes per person, for your 120 guests.`, refs: { slotId: catering._id } });
