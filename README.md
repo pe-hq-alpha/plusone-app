@@ -208,6 +208,11 @@ Tested against a trap: a made-up caterer's own site hid an instruction telling A
 
 ## Measured results
 
+**In real use.** We planned our own Diwali party on PlusOne, 31 Oct – 2 Nov: quotes from vendors' WhatsApp screenshots, some bookings through the app and some outside it, one vendor written to by the event's own inbox; 44 model calls, $0.43 at list price.
+
+> "It was incredibly helpful to see everything in one place and also compare the prices… Putting in the WhatsApp screenshots directly, and then the app capturing them all… gave me a clear picture of what the fair price was and what I paid."
+> — Padmanabhan Rajendrakumar, Founder
+
 Every model step is measured on production against keys marked by hand before any run; raw results are in `scripts/*-run*.json`, and the write-ups, every live run with its time and cost, and the tech part by part are in [EVALUATIONS.md](EVALUATIONS.md). The sets are small and marked by hand (8 to 37 items each): enough to show each step works and where it fails, not an accuracy for every quote in the market; the pilot measures that on real events.
 
 | What was tested | Result |
