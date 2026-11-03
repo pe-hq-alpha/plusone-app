@@ -154,3 +154,98 @@ describe("reading a vendor search", () => {
     expect(await as(t, ownerId).action(api.marketplace.directory.read, { text: "someone nice for amma" })).toEqual({});
   });
 });
+
+async function vendor() {
+  const t = setup();
+  const userId = await t.run((ctx) => ctx.db.insert("users", { email: "v@example.com", name: "V" }));
+  return t.withIdentity({ subject: `${userId}|s` });
+}
+
+/** A stand-in for the web: Google's short links answer with redirects, Nominatim with what `found` holds. */
+function web(redirects: Record<string, string>, found: Record<string, { lat: string; lon: string; display_name: string }> = {}) {
+  const asked: string[] = [];
+  const fetchFn = vi.fn(async (input: string | URL | Request) => {
+    const url = String(input instanceof Request ? input.url : input);
+    asked.push(url);
+    if (url.startsWith("https://nominatim.openstreetmap.org/")) {
+      const q = new URL(url).searchParams.get("q") ?? "";
+      return Response.json(found[q] ? [found[q]] : []);
+    }
+    const to = redirects[url];
+    return to ? new Response(null, { status: 302, headers: { location: to } }) : new Response("<html></html>", { status: 200 });
+  });
+  vi.stubGlobal("fetch", fetchFn);
+  return asked;
+}
+
+const SHORT = "https://maps.app.goo.gl/PinkBridles1?g_st=ic";
+const SHOP_PLACE =
+  "https://www.google.com/maps/place/16,+1st+floor,+Shingar+Bridal+Makeup+And+Mehandi+Studio,+CTA+Garden+Main+Rd,+Manali+Saravana+Nagar,+Kamatchiamman+Nagar,+Poonamallee,+Chennai,+Tamil+Nadu+600056,+India/data=!4m2!3m1!1s0x3a5261dba56e2713:0x766115f5356c17fd?utm_source=mstt_1&entry=gps";
+
+describe("finding a pasted Google Maps link", () => {
+  test("a short link to a marked place pins the marker, with the shop's name, and never opens the map page", async () => {
+    const full = "https://www.google.com/maps/place/Pink+Bridles/@13.0,80.2,17z/data=!4m6!3m5!1s0x0:0x0!8m2!3d12.9801!4d80.2209?entry=ttu";
+    const asked = web({ [SHORT]: full });
+    const me = await vendor();
+    const place = await me.action(api.places.find, { text: `Pink Bridles\n${SHORT}`, city: "Chennai" });
+    expect(place).toEqual({ lat: 12.9801, lng: 80.2209, label: "Pink Bridles", precision: "address" });
+    expect(asked).toEqual([SHORT]);
+  });
+
+  test("a short link that only carries the shop's address is looked up, and its locality is marked as an area", async () => {
+    const asked = web(
+      { [SHORT]: SHOP_PLACE },
+      { "Poonamallee, Chennai, Tamil Nadu 600056": { lat: "13.0417404", lon: "80.1006863", display_name: "Poonamallee, Chennai Metropolitan Area, Tamil Nadu, India" } },
+    );
+    const me = await vendor();
+    const place = await me.action(api.places.find, { text: SHORT, city: "Chennai" });
+    expect(place).toEqual({ lat: 13.0417404, lng: 80.1006863, label: "Poonamallee, Chennai Metropolitan Area", precision: "area" });
+    // The short link, then the whole address, its last four parts and its last three: no Google map page.
+    expect(asked.filter((u) => u.includes("google.com/maps"))).toEqual([]);
+    expect(asked.filter((u) => u.includes("nominatim"))).toHaveLength(3);
+  }, 15_000);
+
+  test("an address found whole is the place itself", async () => {
+    const q = "MUA Trend, 5911 Edsall Rd, Alexandria, VA 22304, United States";
+    web({ [SHORT]: `https://maps.google.com?q=${encodeURIComponent(q)}&ftid=0x1:0x2&entry=gps` }, { [q]: { lat: "38.8", lon: "-77.15", display_name: "5911, Edsall Road, Alexandria" } });
+    const me = await vendor();
+    expect(await me.action(api.places.find, { text: SHORT })).toEqual({ lat: 38.8, lng: -77.15, label: "5911, Edsall Road", precision: "address" });
+  });
+
+  test("steps past Google's consent page", async () => {
+    const full = "https://www.google.com/maps/place/Pink+Bridles/data=!3d13.0102!4d80.2157";
+    web({ [SHORT]: `https://consent.google.com/ml?continue=${encodeURIComponent(full)}&gl=IE&hl=en` });
+    const me = await vendor();
+    expect(await me.action(api.places.find, { text: SHORT })).toMatchObject({ lat: 13.0102, lng: 80.2157 });
+  });
+
+  test("where the runtime follows the redirects itself, reads the address it ended on", async () => {
+    const full = "https://www.google.com/maps/place/Pink+Bridles/data=!3d13.0102!4d80.2157";
+    vi.stubGlobal("fetch", async () => {
+      const res = new Response("<html></html>", { status: 200 });
+      Object.defineProperty(res, "url", { value: full });
+      return res;
+    });
+    const me = await vendor();
+    expect(await me.action(api.places.find, { text: SHORT })).toMatchObject({ lat: 13.0102, lng: 80.2157 });
+  });
+
+  test("a short link that leads nowhere says so, instead of guessing", async () => {
+    web({});
+    const me = await vendor();
+    await expect(me.action(api.places.find, { text: SHORT })).rejects.toThrow("We couldn't read a place from that link");
+  });
+
+  test("an address nobody can find says what the link said", async () => {
+    web({ [SHORT]: "https://www.google.com/maps/place/Pink+Bridles/data=!4m2!3m1!1s0x1:0x2" });
+    const me = await vendor();
+    await expect(me.action(api.places.find, { text: SHORT, city: "Chennai" })).rejects.toThrow('That link says "Pink Bridles"');
+  });
+
+  test("a short link never leads off Google's own addresses", async () => {
+    const asked = web({ [SHORT]: "https://evil.example/maps/place/x/data=!3d1.5!4d2.5" });
+    const me = await vendor();
+    await expect(me.action(api.places.find, { text: SHORT })).rejects.toThrow("We couldn't read a place from that link");
+    expect(asked).toEqual([SHORT]);
+  });
+});

@@ -527,12 +527,15 @@ function PlacePicker({
     setNote(null);
     try {
       const found = await find({ text: said, city });
+      const isLink = /https?:\/\//i.test(said);
       if (!found || found.precision === "city") {
         setNote("Couldn't find that. Try your area's name, or tap the map where you are.");
       } else {
         onPlace(found);
         // A typed area name is also the area customers read; a link's place name isn't.
-        if (!/^https?:\/\//i.test(said) && !area.trim() && found.precision === "area") onArea(found.label);
+        if (!isLink && !area.trim() && found.precision === "area") onArea(found.label);
+        // A link that only had an address got us to the road or locality, not the door: say so.
+        if (isLink && found.precision === "area") setNote(`Your link got us as far as ${found.label}. Tap the map on your door to put the pin exactly.`);
         setText("");
       }
     } catch (e) {

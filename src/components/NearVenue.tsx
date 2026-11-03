@@ -106,7 +106,9 @@ export function NearVenue({
       else {
         await setVenue({ eventId: event._id, place: found });
         setText("");
-        setPlacing(false);
+        // A link that only had an address got as far as the road or locality: keep the map open to tap the door.
+        if (/https?:\/\//i.test(text) && found.precision === "area") setNote(`The link got us as far as ${found.label}. Tap the map on the venue to put the pin exactly.`);
+        else setPlacing(false);
       }
     } catch (e) {
       const data = (e as { data?: unknown }).data;
@@ -177,6 +179,7 @@ export function NearVenue({
               placing && canEdit
                 ? (at) => {
                     void setVenue({ eventId: event._id, place: { ...at, label: "Your venue", precision: "address" } });
+                    setNote(null);
                     setPlacing(false);
                   }
                 : undefined

@@ -2,7 +2,20 @@ import { ConvexError, v } from "convex/values";
 import { internal } from "./_generated/api";
 import { action, internalMutation, internalQuery, mutation, type ActionCtx } from "./_generated/server";
 import { requireActionUserId, requireMember } from "./lib/auth";
-import { isGoogleMapsHost, isShortMapLink, placeFor, placeFromLink, plain, type Place } from "./lib/places";
+import {
+  addressTries,
+  cityPlace,
+  isGoogleMapsHost,
+  isShortLinkHost,
+  isShortMapLink,
+  linkIn,
+  pastConsent,
+  placeFor,
+  placeFromLink,
+  placeWordsFromLink,
+  plain,
+  type Place,
+} from "./lib/places";
 import { placeValidator } from "./schema";
 import { rateLimiter } from "./rateLimits";
 
@@ -17,6 +30,7 @@ const NOMINATIM = "https://nominatim.openstreetmap.org/search";
 const UA = "PlusOne/1.0 (hello@plusoneevents.site)";
 
 const BUSY = "That's as many places as we can look up for now. Drop the pin on the map instead.";
+const UNREAD = "We couldn't read a place from that link. Type your area, or tap the map where you are.";
 
 export const cached = internalQuery({
   args: { query: v.string() },
@@ -51,56 +65,71 @@ export const find = action({
   returns: v.union(v.null(), placeValidator),
   handler: async (ctx, args): Promise<Place | null> => {
     const userId = await requireActionUserId(ctx);
-    // Full map links run long; anything else is a place name and is cut short.
-    const text = /^https?:\/\//i.test(args.text.trim()) ? args.text.trim().slice(0, 2000) : args.text.trim().slice(0, 160);
+    const said = args.text.trim();
     const city = args.city?.trim().slice(0, 60);
-    if (!text) return null;
-    // A Google Maps link or plain coordinates, as a vendor copies them from their Google profile.
-    let link = text;
+    const near = cityPlace(city);
+    // A Google Maps link, as a vendor copies it from their Google profile, even with their shop's name pasted before it.
+    const url = linkIn(said);
+    if (!url) {
+      // Plain coordinates, a dropped pin's degrees or a Plus Code; else a place name, cut short.
+      const text = said.slice(0, 160);
+      if (!text) return null;
+      const pinned = placeFromLink(text, near);
+      if (pinned) return { lat: pinned.lat, lng: pinned.lng, label: "Your pin", precision: "address" };
+      return lookUp(ctx, userId, text, city);
+    }
+    let link = url.slice(0, 2000);
     if (isShortMapLink(link)) {
       const mine = await rateLimiter.limit(ctx, "placeLookup", { key: userId });
       if (!mine.ok) throw new ConvexError(BUSY);
-      link = (await followMapLink(link)) ?? link;
+      const full = await followMapLink(link);
+      if (!full) throw new ConvexError(UNREAD);
+      link = full;
     }
-    const pinned = placeFromLink(link);
+    const pinned = placeFromLink(link, near);
     if (pinned) return { lat: pinned.lat, lng: pinned.lng, label: pinned.name ?? "Your pin", precision: "address" };
-    const named = /^https?:\/\//i.test(link) ? /\/maps\/place\/([^/@?]+)/.exec(decodeURIComponent(link))?.[1]?.replace(/\+/g, " ") : undefined;
-    if (/^https?:\/\//i.test(text) && !named) return null;
-    return lookUp(ctx, userId, named ?? text, city);
+    // Many share links carry no point, only the shop's name and address: look the address up.
+    const words = placeWordsFromLink(link);
+    if (!words) throw new ConvexError(UNREAD);
+    const found = await fromAddress(ctx, userId, words, city);
+    if (!found) {
+      throw new ConvexError(`That link says "${shortLabel(words)}", but we couldn't find it on the map. Type your area, or tap the map where you are.`);
+    }
+    return found;
   },
 });
 
-/** Follows a short map link to its full address, through Google's own addresses only, in at most four steps. */
-async function followMapLink(url: string): Promise<string | null> {
+/**
+ * Follows a short map link to the full address it stands for, through Google's own
+ * addresses only, one step at a time. It stops at the first full map address and never
+ * opens the map page itself: everything the link says about the place is in that address.
+ * Null when the link leads nowhere readable.
+ */
+export async function followMapLink(url: string): Promise<string | null> {
   let at = url;
-  for (let hop = 0; hop < 4; hop++) {
-    if (!isGoogleMapsHost(at)) return null;
+  for (let hop = 0; hop < 5; hop++) {
+    let res: Response;
     try {
-      const res = await fetch(at, { redirect: "manual", headers: { "user-agent": UA }, signal: AbortSignal.timeout(6000) });
-      const next = res.headers.get("location");
-      if (!next) return at;
-      const full = new URL(next, at).toString();
-      // Google's consent page carries the real address in its continue parameter.
-      const cont = new URL(full).searchParams.get("continue");
-      at = /^consent\./.test(new URL(full).hostname) && cont ? cont : full;
-      if (placeFromLink(at)) return at;
+      res = await fetch(at, { redirect: "manual", headers: { "user-agent": UA }, signal: AbortSignal.timeout(6000) });
     } catch {
       return null;
     }
+    const location = res.headers.get("location");
+    // Where a runtime follows redirects itself, the address it ended on is the answer.
+    const next = location ? new URL(location, at).toString() : res.url && res.url !== at ? res.url : null;
+    if (!next) return null;
+    at = pastConsent(next);
+    if (!isGoogleMapsHost(at)) return null;
+    if (!isShortLinkHost(at)) return at;
   }
-  return at;
+  return null;
 }
 
-async function lookUp(ctx: ActionCtx, userId: string, raw: string, city: string | undefined): Promise<Place | null> {
-  const text = raw.trim().slice(0, 160);
-  // A bare area name is answered here, without anything leaving PlusOne.
-  const known = placeFor(text, city);
-  if (known?.precision === "area" && plain(text).trim().split(" ").length <= 3) return known;
-
-  const words = city && !plain(text).includes(plain(city)) ? `${text}, ${city}` : text;
+/** OpenStreetMap's answer for some words, asked once: found or not, the answer is kept. `asked` says it went out. */
+async function nominatim(ctx: ActionCtx, userId: string, words: string): Promise<{ place?: Place; asked: boolean }> {
   const query = plain(words).trim();
   const seen = await ctx.runQuery(internal.places.cached, { query });
-  if (seen) return seen.place ?? known;
+  if (seen) return { ...(seen.place ? { place: seen.place } : {}), asked: false };
 
   const mine = await rateLimiter.limit(ctx, "placeLookup", { key: userId });
   if (!mine.ok) throw new ConvexError(BUSY);
@@ -116,15 +145,44 @@ async function lookUp(ctx: ActionCtx, userId: string, raw: string, city: string 
       const lat = Number(hit?.lat);
       const lng = Number(hit?.lon);
       if (hit && Number.isFinite(lat) && Number.isFinite(lng)) {
-        place = { lat, lng, label: shortLabel(hit.display_name ?? text), precision: "address" };
+        place = { lat, lng, label: shortLabel(hit.display_name ?? words), precision: "address" };
       }
     }
   } catch {
-    // A slow or failed lookup reads as not found; the area's middle or a dropped pin still works.
-    return known;
+    // A slow or failed lookup reads as not found, and isn't kept, so it can be asked again.
+    return { asked: true };
   }
   await ctx.runMutation(internal.places.remember, { query, ...(place ? { place } : {}) });
+  return { ...(place ? { place } : {}), asked: true };
+}
+
+async function lookUp(ctx: ActionCtx, userId: string, raw: string, city: string | undefined): Promise<Place | null> {
+  const text = raw.trim().slice(0, 160);
+  // A bare area name is answered here, without anything leaving PlusOne.
+  const known = placeFor(text, city);
+  if (known?.precision === "area" && plain(text).trim().split(" ").length <= 3) return known;
+
+  const words = city && !plain(text).includes(plain(city)) ? `${text}, ${city}` : text;
+  const { place } = await nominatim(ctx, userId, words);
   return place ?? known;
+}
+
+/**
+ * Where a link's address is: the whole address first, then its road or locality. Only the
+ * whole address counts as the place itself; a road or locality is marked "area", so the
+ * vendor is told to tap their door on the map. Null when even the city is all that's known.
+ */
+async function fromAddress(ctx: ActionCtx, userId: string, words: string, city: string | undefined): Promise<Place | null> {
+  let asked = false;
+  for (const [i, q] of addressTries(words).entries()) {
+    // Nominatim's terms allow one request a second.
+    if (asked) await new Promise((r) => setTimeout(r, 1100));
+    const found = await nominatim(ctx, userId, q);
+    asked = found.asked;
+    if (found.place) return i === 0 ? found.place : { ...found.place, precision: "area" };
+  }
+  const known = placeFor(words, city);
+  return known?.precision === "area" ? known : null;
 }
 
 /** Pins the event's venue on the map, or takes the pin away (the area's middle stands in again). */
