@@ -174,22 +174,22 @@ export async function seedBirthdayUS(ctx: MutationCtx, userId: Id<"users">): Pro
   // The host's own words for the need; the city's range comes from listed prices, on both sides, never from a note.
   await ctx.db.patch(catering._id, { notes: "A buffet dinner with brisket, a vegetarian main and a gluten-free dessert." });
   const brisket = await add(catering, {
-    name: "Brisket & Bloom Catering", handle: "brisket-bloom", city: "East Austin, Austin", startingPrice: 32, priceUnit: "per_person",
+    name: "Brisket & Bloom Catering", imageUrl: "/photos/sample-work-us-11.jpg", handle: "brisket-bloom", city: "East Austin, Austin", startingPrice: 32, priceUnit: "per_person",
     priceNotes: "Per person, minimum 150 guests", highlights: ["Smoked brisket and chicken buffets", "Gluten-free and vegetarian plates on request", "Family parties across Austin for 20 years"],
     summary: "A long-standing barbecue caterer for weddings and family parties.", score: 84, rankReason: "Lowest rate per person, but their minimum is 150 guests against your 120.", rating: 4.5, reviewCount: 318,
   });
   const mockingbird = await add(catering, {
-    name: "Mockingbird Kitchen", handle: "mockingbird-kitchen", city: "South Lamar, Austin", startingPrice: 45, priceUnit: "per_person",
+    name: "Mockingbird Kitchen", imageUrl: "/photos/sample-work-us-12.jpg", handle: "mockingbird-kitchen", city: "South Lamar, Austin", startingPrice: 45, priceUnit: "per_person",
     priceNotes: "Packages for 80 to 200 guests, all in", highlights: ["One price, tax and gratuity included", "Lemonade and iced tea station", "Real plates and glassware"],
     summary: "A newer caterer with all-in packages for family parties.", score: 83, rankReason: "Simple all-in pricing for parties your size.", rating: 4.7, reviewCount: 146,
   });
   const juniper = await add(catering, {
-    name: "Juniper & Sage Catering", handle: "juniper-sage", city: "Bouldin Creek, Austin", startingPrice: 38, priceUnit: "per_person",
+    name: "Juniper & Sage Catering", imageUrl: "/photos/sample-work-us-13.jpg", handle: "juniper-sage", city: "Bouldin Creek, Austin", startingPrice: 38, priceUnit: "per_person",
     priceNotes: "Per person, tax extra", highlights: ["Hill Country menus", "Gluten-free dishes made in a separate kitchen", "Plated or buffet"],
     summary: "A caterer known for seasonal Hill Country dinners, plated or as a buffet.", score: 90, rankReason: "Seasonal food in the middle of the city's range, and gluten-free dishes from a separate kitchen.", isTopPick: true, rating: 4.8, reviewCount: 97,
   });
   await add(catering, {
-    name: "Hill Country Smokehouse Catering", handle: "hc-smokehouse", city: "Mueller, Austin", startingPrice: 55, priceUnit: "per_person",
+    name: "Hill Country Smokehouse Catering", imageUrl: "/photos/sample-work-us-14.jpg", handle: "hc-smokehouse", city: "Mueller, Austin", startingPrice: 55, priceUnit: "per_person",
     priceNotes: "Per person, minimum 200 guests", highlights: ["Whole-hog and brisket pits on site"],
     summary: "A caterer for large weddings, with a 200-guest minimum.", score: 70, rankReason: "Well liked, but a 200-guest minimum is far above your 120, so it wasn't written to.", rating: 4.6, reviewCount: 224,
   });

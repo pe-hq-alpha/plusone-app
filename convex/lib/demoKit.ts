@@ -25,9 +25,11 @@ export type SeedVendor = {
   isTopPick?: boolean;
   rating?: number;
   reviewCount?: number;
+  /** A picture for the card: one of our own sample photos on the site (`/photos/…`). */
+  imageUrl?: string;
 };
 
-/** A vendor on a need, in the event's own currency. Demo vendors have no pictures: the card shows their initials. */
+/** A vendor on a need, in the event's own currency. A demo vendor's picture is one of our own sample photos. */
 export async function addVendor(
   ctx: MutationCtx,
   eventId: Id<"events">,
@@ -55,6 +57,7 @@ export async function addVendor(
     scrapedAt: now - 12 * DAY,
     rating: seed.rating,
     reviewCount: seed.reviewCount,
+    imageUrl: seed.imageUrl,
     reviewSource: seed.rating ? "Sample reviews" : undefined,
     reviewHighlights: [],
     score: seed.score,

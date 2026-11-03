@@ -466,7 +466,7 @@ export const run = internalAction({
  * labelled as samples wherever the vendor is. Each goes through the same check as a real
  * vendor's photo, so a photo Glimmer flags stays hidden until Ops approves it.
  */
-const SAMPLE_WORK: { vendor: string; key: string }[] = [
+const SAMPLE_WORK: { vendor: string; key: string; cityKey?: string }[] = [
   { vendor: "Kalyana Saapadu Co.", key: "sample-work-1" },
   { vendor: "Kalyana Saapadu Co.", key: "sample-work-3" },
   { vendor: "Komalam Caterers", key: "sample-work-2" },
@@ -498,17 +498,30 @@ const SAMPLE_WORK: { vendor: string; key: string }[] = [
   { vendor: "Marina Light Photography", key: "sample-work-28" },
   { vendor: "Pattu Pavadai Pictures", key: "sample-work-29" },
   { vendor: "Rangam Studios", key: "sample-work-30" },
+  // Austin, for the American sample: our own generated pictures (Pollinations, 3 Nov), one for each caterer.
+  { vendor: "Pecan Smoke BBQ Catering", key: "sample-work-us-1", cityKey: "austin" },
+  { vendor: "Lone Star Taco Bar Co.", key: "sample-work-us-2", cityKey: "austin" },
+  { vendor: "Barton Creek Kitchen", key: "sample-work-us-3", cityKey: "austin" },
+  { vendor: "Cedar & Salt Catering", key: "sample-work-us-4", cityKey: "austin" },
+  { vendor: "Bluebonnet Supper Co.", key: "sample-work-us-5", cityKey: "austin" },
+  { vendor: "Rio Verde Table", key: "sample-work-us-6", cityKey: "austin" },
+  { vendor: "Live Oak Provisions", key: "sample-work-us-7", cityKey: "austin" },
+  { vendor: "Rainey Street Kitchen", key: "sample-work-us-8", cityKey: "austin" },
+  { vendor: "Mesquite & Rye", key: "sample-work-us-9", cityKey: "austin" },
+  { vendor: "Tarrytown Table", key: "sample-work-us-10", cityKey: "austin" },
 ];
 const SAMPLE_WORK_BASE = "https://plusoneevents.site/photos";
+/** Photos added after the first set live with the app (public/photos). */
+const SAMPLE_WORK_APP_BASE = "https://app.plusoneevents.site/photos";
 
 /** The sample vendor's listing, when it exists and doesn't have this photo yet. */
 export const sampleTarget = internalQuery({
-  args: { vendor: v.string(), key: v.string() },
+  args: { vendor: v.string(), key: v.string(), cityKey: v.optional(v.string()) },
   returns: v.union(v.null(), v.id("vendorProfiles")),
   handler: async (ctx, args) => {
     const profiles = await ctx.db
       .query("vendorProfiles")
-      .withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified"))
+      .withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", args.cityKey ?? "chennai").eq("status", "verified"))
       .take(500);
     const profile = profiles.find((p) => p.sample === true && !p.ownerUserId && p.name === args.vendor);
     if (!profile) return null;
@@ -533,20 +546,23 @@ export const addSample = internalMutation({
   },
 });
 
-/** Give the sample vendors their photos, once (`npx convex run marketplace/photos:seedSamples`). */
+/**
+ * Give the sample vendors their photos, once (`npx convex run marketplace/photos:seedSamples`).
+ * `urls` fetches named photos from somewhere else (by key), for a deployment whose photos aren't on the public site yet.
+ */
 export const seedSamples = internalAction({
-  args: {},
+  args: { urls: v.optional(v.record(v.string(), v.string())) },
   returns: v.object({ added: v.number(), skipped: v.number() }),
-  handler: async (ctx): Promise<{ added: number; skipped: number }> => {
+  handler: async (ctx, args): Promise<{ added: number; skipped: number }> => {
     let added = 0;
     let skipped = 0;
     for (const s of SAMPLE_WORK) {
-      const profileId = await ctx.runQuery(internal.marketplace.photos.sampleTarget, { vendor: s.vendor, key: s.key });
+      const profileId = await ctx.runQuery(internal.marketplace.photos.sampleTarget, { vendor: s.vendor, key: s.key, cityKey: s.cityKey });
       if (!profileId) {
         skipped++;
         continue;
       }
-      const res = await fetch(`${SAMPLE_WORK_BASE}/${s.key}.jpg`);
+      const res = await fetch(args.urls?.[s.key] ?? `${s.cityKey ? SAMPLE_WORK_APP_BASE : SAMPLE_WORK_BASE}/${s.key}.jpg`);
       if (!res.ok || !(res.headers.get("content-type") ?? "").startsWith("image/jpeg")) throw new Error(`Couldn't fetch ${s.key} (${res.status})`);
       const storageId = await ctx.storage.store(new Blob([await res.arrayBuffer()], { type: "image/jpeg" }));
       await ctx.runMutation(internal.marketplace.photos.addSample, { profileId, storageId, key: s.key });
@@ -563,7 +579,7 @@ export const sampleReport = internalQuery({
   handler: async (ctx) => {
     const out = [];
     for (const s of SAMPLE_WORK) {
-      const profiles = await ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", "chennai").eq("status", "verified")).take(500);
+      const profiles = await ctx.db.query("vendorProfiles").withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", s.cityKey ?? "chennai").eq("status", "verified")).take(500);
       const profile = profiles.find((p) => p.sample === true && !p.ownerUserId && p.name === s.vendor);
       if (!profile) continue;
       const photos = await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profile._id)).take(MAX_PHOTOS + 1);

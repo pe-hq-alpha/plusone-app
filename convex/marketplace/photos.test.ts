@@ -629,9 +629,9 @@ describe("photos customers see", () => {
     const t = setup();
     await t.mutation(internal.marketplace.samples.ensureVendors, {});
 
-    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 30, skipped: 0 });
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 30, skipped: 10 });
     await t.finishAllScheduledFunctions(vi.runAllTimers);
-    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 0, skipped: 30 });
+    expect(await t.action(internal.marketplace.photos.seedSamples, {})).toEqual({ added: 0, skipped: 40 });
 
     const photos = await t.run((ctx) => ctx.db.query("vendorPhotos").take(40));
     expect(photos).toHaveLength(30);
