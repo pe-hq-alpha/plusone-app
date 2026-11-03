@@ -51,7 +51,7 @@ export function NewEventPage() {
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
-  }, [messages.length, pending]);
+  }, [messages.length, pending, chat?.choose, chat?.ready, lastIsReadBack]);
 
   async function submit(words: string) {
     const content = words.trim();
@@ -141,7 +141,6 @@ export function NewEventPage() {
               </li>
             )}
           </ol>
-          <div ref={endRef} />
 
           {error && <p role="alert" className="mt-3 text-sm text-bad">{error}</p>}
 
@@ -163,6 +162,10 @@ export function NewEventPage() {
               </div>
             )
           )}
+
+          {/* The end of the talk, below the choices: scrolled to sit just above the reply box, so the
+              box pinned to the bottom never covers the latest choices. */}
+          <div ref={endRef} className="pc__end" />
 
           <form
             className="pc__compose"
