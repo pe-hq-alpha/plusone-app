@@ -7,8 +7,8 @@
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable. On the other side, many good vendors have no website or listing to be found by, and prices are opaque: there is no fair, transparent place for a vendor without an online identity to register, show what they charge and be found.
 - **Status:** deployed
 - **Live app:** https://plusoneevents.site (the app at app.plusoneevents.site, PlusOne Partner for vendors at partner.plusoneevents.site)
-- **Demo:** guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo; video to come
-- **Repo:** github.com/pe-hq-alpha/plusone-app, public at submission
+- **Demo:** the 3-minute video, https://youtu.be/oRbL2LFGy8c (public, 4 Nov); the guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo
+- **Repo:** https://github.com/pe-hq-alpha/plusone-app (public since 4 Nov)
 - **Stack:** TypeScript, React 19, React Router 7, Vite 8, Tailwind CSS 4, Convex 1.45 (database, functions, crons, workflow, workpool, rate-limiter and action-cache components)
 - **Hosting:** Cloudflare Pages for the app; Convex (Ireland) for the backend
 - **Auth:** Clerk; Convex Auth guest sessions for the sample events
@@ -20,7 +20,7 @@
 - **Credits spent:** about $9.60 of model calls recorded on production by the morning of 2 Nov at list price (`evalsCost:perEvent`): $8.92 in evaluations, vendor checks and directory searches, and well under $1 across real and sample events; the founders' own Diwali party, planned end to end, came to $0.43 in 44 calls. GPU time for Muse Glimmer (Modal) and Muse Spark Open (Baseten) is billed on those platforms' credits. Earlier detail: about $3.70 by the evening of 29 Oct.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-11-02T10:05:00+05:30
+- **Last updated:** 2026-11-04T13:20:00+05:30
 
 ## Evidence
 
@@ -63,6 +63,41 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 | 1 Nov, about 09:30–09:38 IST | The launch badge and smaller hero buttons (brief `17-launch-badge.txt`): "Early access · Full launch in the 2026 holiday season or early 2027" as a marigold pill above the home page's headline (a shorter form on phones), the same date on Pricing, and the three hero buttons about 20% smaller | `src/pages/LandingPage.tsx`, `src/pages/PricingPage.tsx`, `src/styles/running-status.css` | muse-spark-1.3 | 1, run by Paddy. Contributor mode on | Edited: Claude Code measured ten widths and found the badge never wrapping, which pushed the phone layout past the screen (buttons ending at 422 px on a 390 px phone); it now wraps below 1100 px. The see-through badge was hard to read over the drawing, so it got a solid tint and slightly larger type. Checked from 360 to 2560 px: buttons on one line on desktop, no sideways scroll |
 
 ## Log
+
+### 2026-11-04 - 6071cfd (the video locked and published; the repository public)
+
+The demo video, locked by the founder and published, by Claude Code (claude-opus-5-5); the founder made the repositories public.
+
+- **The video** (local video project, commits v12 to v16, then "Final"):
+  - **The cut:** 2:59.92 at 2560×1440, -14 LUFS, Lauren's voice (ElevenLabs, eleven_v4) at its natural pace.
+  - **The founder's notes on v11 (3:15), all applied:**
+    - The plan is circled where its times, places and guests show.
+    - One line for verified and web vendors, the ranking line cut, and "PlusOne's own agent".
+    - One line for the sheet, the market range and Compare, with the Compare scroll at reading pace.
+    - Partner opens on its own sign-in (a sample business, never submitted), and the vendor's photo upload is held.
+    - Zoom-through transitions between the apps.
+    - The Meta section is voiced over the whole stack, the under-the-hood shot is cut, and Muse Code is on the flow page.
+    - The numbers count up as they're said.
+    - The vision as Phase 1 to 3, each building on the one before, with stick figures.
+    - The close: "PlusOne Events. Start planning your event today."
+    - Vendor icons gather into PlusOne, and "Built for this" is off the end card.
+  - **Music:** a new bed made to the final length.
+- **Published:** https://youtu.be/oRbL2LFGy8c, public, with chapters, a thumbnail and YouTube's AI-content label on. The README opens with a "Watch the demo" button (`6071cfd`).
+- **Deployed** (about 12:55 IST): the logo's One and EVENTS in marigold in both themes, and the planner's choices clear of the reply box (`76d81b1`).
+- **Public:** the founder made `pe-hq-alpha/plusone-app` and `pe-hq-alpha/plusone-partner` public.
+- **Checked:** `npm run typecheck` clean; `npm test` 858 passed (87 files); after the deploy, the live walk (`node scripts/e2e-live.mjs`) passed 15 of 15 steps.
+- **Credits:** no Meta calls. About 3,900 ElevenLabs characters for narration across v12 to v16, plus one music bed; about 850 of those were a planner take in the founder's voice that wasn't used.
+
+### 2026-11-02 (afternoon) to 2026-11-03 - a01e7f5..efda55e (the US demo, Partner fixes, the recording)
+
+- **A whole real event's model cost** (`a01e7f5`): the founders' Diwali party, 44 calls, $0.43, measured on production. **Open source under Apache-2.0** (`046ef62`), and README sections on the first 90 days, what the evaluation sets show, and what was built during the hackathon (`1f63d78`, `236aeed`, `26d7f2f`).
+- **RSVP page** (`c8fc3f5`, `fbeb996`, `12a7b4f`): it shows answers that came by email, and asks about food only when a guest is coming.
+- **The demo:**
+  - Dad's 60th in Austin, in dollars, for visitors outside India (`5406be7`, `a78f91e`).
+  - The over-budget caterer gets PlusOne's ask for a better price (`a11c8be`), and the Austin caterers have photos (`3f84f97`).
+- **Partner** (`10cd909`): the place is read from every kind of Google Maps share link.
+- **For the video** (3 Nov): every app shot re-recorded at a true 2560×1440 on the dev backend. The logo's One and EVENTS in marigold in both themes, and the planner's choices kept above the reply box (`76d81b1`). The README gives the founders' Diwali party in real use, in the founder's words (`efda55e`).
+- **Checked:** `npm test` 858 passed and `npm run typecheck` clean, on 3 Nov.
 
 ### 2026-11-02 - 54203eb..0068ef1 (the last refining day before the video)
 
