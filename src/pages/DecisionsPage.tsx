@@ -391,9 +391,10 @@ function NeedBoard({
         </p>
         {need.market && (
           <p className="mt-0.5 text-xs text-muted" title={`The middle half of ${need.market.count} prices listed by ${city} vendors for the same unit`}>
-            {city} range: <span className="text-ink">{money(need.market.p25, need.market.currency)}</span> – {money(need.market.p75, need.market.currency)}
+            {/* The middle half of the city's prices; the bar below runs on through Premium and Luxury. */}
+            Most {city} prices: <span className="text-ink">{money(need.market.p25, need.market.currency)}</span> – {money(need.market.p75, need.market.currency)}
             {unitWord !== "all in" && <> per {unitWord}</>}
-            <span className="text-quiet"> · {need.market.count} listed prices</span>
+            <span className="text-quiet"> · the middle half of {need.market.count} listed prices</span>
           </p>
         )}
         </div>

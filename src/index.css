@@ -144,6 +144,9 @@ a { text-underline-offset: 0.2em; }
 @utility skip-link { @apply sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-cream focus:px-3 focus:py-2 focus:shadow; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+/* The demo setup screen's bar: a short stripe moving across while the sample event is made. */
+@keyframes demo-load { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
+@media (prefers-reduced-motion: reduce) { .animate-\[demo-load_1\.4s_ease-in-out_infinite\] { animation: none; } }
 .rise { animation: rise .35s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 /* The illustrations arrive as if being drawn, left to right, then drift very slowly.

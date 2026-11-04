@@ -81,7 +81,14 @@ export function GuestPage() {
             <Link to="/signin" className="btn-quiet mt-5">Back to sign in</Link>
           </>
         ) : (
-          <p className="mt-4 text-muted">Setting up the demo…</p>
+          <>
+            {/* Making a fresh sample event takes a few seconds: say what is being made, so the wait reads as work. */}
+            <p className="mt-4 text-muted">Setting up a sample event for you…</p>
+            <p className="mt-1.5 text-sm text-quiet">Its plan and budget, vendors, quotes on one sheet, and guests. A few seconds.</p>
+            <div className="mx-auto mt-5 h-1 w-40 overflow-hidden rounded-full bg-line" aria-hidden="true">
+              <div className="h-full w-1/3 animate-[demo-load_1.4s_ease-in-out_infinite] rounded-full bg-accent" />
+            </div>
+          </>
         )}
       </div>
     </main>
