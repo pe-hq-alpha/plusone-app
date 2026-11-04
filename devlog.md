@@ -66,7 +66,7 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 ### 2026-11-04 - 6071cfd..HEAD (the video locked and published; the repository public)
 
-The demo video, locked by the founder and published, by Claude Code (claude-opus-5-5); the founder made the repositories public.
+The demo video, locked by the founder and published, by Claude Code (claude-opus-5-5); the founder made the repository public.
 
 - **The demo video:** https://youtu.be/rlMwQiZfW2g, 2:59.6 at 2560×1440, -14 LUFS, narrated in Lauren's voice (ElevenLabs, eleven_v4). Every app beat is tagged on screen as new in the hackathon, rebuilt in the hackathon, or from the earlier planner; the Meta section shows each model on the step it does; the roadmap runs from the AI co-pilot (live today) to a human assistant alongside the AI, then PlusOne running the whole event. Public, with chapters, a thumbnail and YouTube's AI-content label; the README opens with a "Watch the demo" button.
 - **Deployed** (about 12:55 IST): the logo's One and EVENTS in marigold in both themes, and the planner's choices clear of the reply box (`76d81b1`).
