@@ -5,7 +5,7 @@ import { Link, useNavigate, useOutletContext } from "react-router-dom";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
-import { longDate, money, timeAgo } from "../lib/format";
+import { localToday, longDate, money, timeAgo } from "../lib/format";
 import { BudgetBar } from "../components/ui/BudgetBar";
 import { Icon } from "../components/ui/Icon";
 import { VoiceButton } from "../components/VoiceButton";
@@ -26,11 +26,6 @@ type Row = { state: State; title: string; detail: string; href?: string; action?
 
 const STATE_WORD: Record<State, string> = { done: "Done", now: "Under way", yours: "Over to you", next: "Up next" };
 
-/** Today in the host's own time zone, as YYYY-MM-DD. */
-function localToday(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 function daysUntil(date: string, today: string): number {
   return Math.round((Date.parse(date) - Date.parse(today)) / 86_400_000);

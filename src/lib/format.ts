@@ -73,3 +73,9 @@ export function daysBetweenIso(from: string, to: string) {
   if (Number.isNaN(a) || Number.isNaN(b)) return 0;
   return Math.round((b - a) / 86400000);
 }
+
+/** Today in the host's own time zone, as YYYY-MM-DD. */
+export function localToday(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}

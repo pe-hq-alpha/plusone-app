@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useConvexAuth, useMutation, useQuery } from "convex/react";
-import { useAuthActions } from "../lib/session";
+import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { likelySignedOut, useAuthActions } from "../lib/session";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
 import { PlusOneLockup } from "../components/brand/Wordmarks";
@@ -8,6 +8,8 @@ import { DEMO_PAGES } from "./PlanLinkPage";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { settledRegion } from "../lib/region";
+import { localToday } from "../lib/format";
+import type { Id } from "../../convex/_generated/dataModel";
 
 /**
  * /demo: straight into a fresh demo event, no sign-up.
@@ -30,6 +32,13 @@ export function GuestPage() {
   // A shared demo link reopens the same page in a fresh copy ("?to=decisions").
   const to = new URLSearchParams(window.location.search).get("to") ?? "";
   const page = DEMO_PAGES.has(to) ? `/${to}` : "";
+  const convex = useConvex();
+  // Started at once rather than after sign-in: where the visitor is (for which sample), and
+  // the Overview's own code, so neither is waited on later.
+  const [region] = useState(() => settledRegion());
+  useEffect(() => {
+    if (!page) void import("./TodayPage").catch(() => {});
+  }, [page]);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   // Each step happens once per visit, whatever React does with re-renders.
@@ -38,7 +47,11 @@ export function GuestPage() {
   const opened = useRef(false);
 
   useEffect(() => {
-    if (isLoading || opened.current) return;
+    if (opened.current) return;
+    // A browser with no account and no demo yet needn't wait for Clerk to load: the guest
+    // is signed in straight away (the branch below). Anyone else waits as before.
+    const early = isLoading && !isAuthenticated && likelySignedOut();
+    if (isLoading && !early) return;
     const failed = () => setError("We couldn't open the demo. Try again in a moment.");
     // Someone with a real account keeps it; only a leftover guest is cleared out.
     const isGuest = me !== null && me !== undefined && !me.email && !me.name;
@@ -56,18 +69,27 @@ export function GuestPage() {
       void signIn("anonymous").catch(failed);
       return;
     }
-    if (isAuthenticated && me !== undefined) {
+    // A guest made on this visit is known to be fresh, so it needn't wait for `me`.
+    if (isAuthenticated && (signedIn.current || me !== undefined)) {
       opened.current = true;
       // The region only matters for the birthday; a link's own sample wins.
-      void settledRegion()
-        .then((region) => start({ kind, region: region ?? "unknown" }))
+      void region
+        .then((code) => start({ kind, region: code ?? "unknown" }))
         .then((eventId) => {
+          // The event's first screen asks for these; asking now means they arrive together.
+          const id = eventId as Id<"events">;
+          convex.prewarmQuery({ query: api.events.get, args: { eventId: id } });
+          convex.prewarmQuery({ query: api.threads.inboxCount, args: { eventId: id } });
+          if (!page) {
+            convex.prewarmQuery({ query: api.copilot.route, args: { eventId: id, today: localToday() } });
+            convex.prewarmQuery({ query: api.tasks.list, args: { eventId: id } });
+          }
           record(EVENTS.demoOpened);
           navigate(`/e/${eventId}${page}`, { replace: true });
         })
         .catch(failed);
     }
-  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate, kind, page]);
+  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate, kind, page, region, convex]);
 
   return (
     <main id="main" className="grid min-h-screen place-items-center px-5 text-center">

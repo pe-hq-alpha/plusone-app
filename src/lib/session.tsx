@@ -59,9 +59,24 @@ function writeDemo(tokens: DemoTokens | null) {
  */
 export function likelySignedOut(): boolean {
   if (readDemo()) return false;
+  return clerkSignedOutCookie();
+}
+
+/** Clerk's own marker cookie says no account is signed in in this browser (known at once). */
+export function clerkSignedOutCookie(): boolean {
   try {
     const marks = document.cookie.split(/;\s*/).filter((c) => /^__client_uat(_[^=]*)?=/.test(c));
     return marks.every((c) => c.slice(c.indexOf("=") + 1) === "0");
+  } catch {
+    return false;
+  }
+}
+
+/** A token issued in the last 20 seconds, which a forced refresh would only replace with its twin. */
+function issuedJustNow(jwt: string): boolean {
+  try {
+    const body = JSON.parse(atob(jwt.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))) as { iat?: number };
+    return typeof body.iat === "number" && Date.now() - body.iat * 1000 < 20_000;
   } catch {
     return false;
   }
@@ -151,6 +166,9 @@ function Sessions({ client, convexUrl, children }: { client: ConvexReactClient; 
   const refreshing = useRef<Promise<string | null> | null>(null);
   const [synced, setSynced] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Read once: when Clerk's cookie says no account is signed in here, a demo guest's own
+  // session is good to use at once, without waiting a second or more for Clerk to load.
+  const [noAccountHere] = useState(clerkSignedOutCookie);
   // Clerk's getToken is read through a ref so a new function each render never
   // makes Convex sign in again.
   const getTokenRef = useRef(clerk.getToken);
@@ -166,7 +184,9 @@ function Sessions({ client, convexUrl, children }: { client: ConvexReactClient; 
     async (force: boolean): Promise<string | null> => {
       const current = demoRef.current;
       if (!current) return null;
-      if (!force && !expiresSoon(current.token)) return current.token;
+      // A token made moments ago is fresh: Convex asks for a forced refresh right after its
+      // first sign-in, and that needn't cost the guest another round trip.
+      if (!expiresSoon(current.token) && (!force || issuedJustNow(current.token))) return current.token;
       refreshing.current ??= http
         .action(api.auth.signIn, { refreshToken: current.refreshToken })
         .then(
@@ -255,11 +275,14 @@ function Sessions({ client, convexUrl, children }: { client: ConvexReactClient; 
 
   const auth = useMemo<AuthState>(
     () => ({
-      isLoading: !clerk.isLoaded || (signedIn && !clerkReady),
+      // Waits for Clerk only where an account may be signed in. With none here, the visitor
+      // is a guest or signed out straight away, so the connection opens at once; if Clerk
+      // then finds an account after all, it takes over as before.
+      isLoading: (!clerk.isLoaded && !noAccountHere) || (signedIn && !clerkReady),
       isAuthenticated: clerkReady || (!signedIn && hasDemo),
       fetchAccessToken,
     }),
-    [clerk.isLoaded, signedIn, clerkReady, hasDemo, fetchAccessToken],
+    [clerk.isLoaded, signedIn, clerkReady, hasDemo, noAccountHere, fetchAccessToken],
   );
 
   const actions = useMemo<Actions>(

@@ -6,7 +6,7 @@ import { PlusOneLockup } from "../components/brand/Wordmarks";
 import { record } from "../lib/analytics/client";
 import { EVENTS } from "../lib/analytics/events";
 import { onPartnerHost, partnerHref } from "../lib/hosts";
-import { useAuthActions } from "../lib/session";
+import { likelySignedOut, useAuthActions } from "../lib/session";
 import { settledRegion } from "../lib/region";
 
 /**
@@ -20,6 +20,8 @@ export function VendorDemoPage() {
   const { signIn, signOut } = useAuthActions();
   const me = useQuery(api.users.me, isAuthenticated ? {} : "skip");
   const start = useMutation(api.demo.startVendor);
+  // Asked at once rather than after sign-in, so it is never waited on later.
+  const [region] = useState(() => settledRegion());
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   // Each step happens once per visit, whatever React does with re-renders.
@@ -28,10 +30,16 @@ export function VendorDemoPage() {
   const opened = useRef(false);
 
   useEffect(() => {
-    if (isLoading || opened.current) return;
+    if (opened.current) return;
+    // A browser with no account and no demo yet needn't wait for Clerk to load: the guest
+    // is signed in straight away (below). Anyone else waits as before.
+    const early = isLoading && !isAuthenticated && likelySignedOut();
+    if (isLoading && !early) return;
     const failed = () => setError("We couldn't open the demo. Try again in a moment.");
-    if (isAuthenticated && me === undefined) return;
-    const isGuest = Boolean(me?.isGuest);
+    // A guest made on this visit is known to be one, so it needn't wait for `me`.
+    const fresh = signedIn.current;
+    if (isAuthenticated && me === undefined && !fresh) return;
+    const isGuest = fresh || Boolean(me?.isGuest);
 
     if (isAuthenticated && !isGuest) {
       // A real account keeps it: their own Partner page, not a sample.
@@ -56,8 +64,8 @@ export function VendorDemoPage() {
     if (isAuthenticated && isGuest) {
       opened.current = true;
       // Outside India the customer and the sample caterer are in Austin, in dollars.
-      void settledRegion()
-        .then((region) => start({ region: region ?? "unknown" }))
+      void region
+        .then((code) => start({ region: code ?? "unknown" }))
         .then(() => {
           record(EVENTS.vendorDemoOpened);
           // The page knows it was opened from the demo, so the sample business stays.
@@ -65,7 +73,7 @@ export function VendorDemoPage() {
         })
         .catch(failed);
     }
-  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate]);
+  }, [isLoading, isAuthenticated, me, signIn, signOut, start, navigate, region]);
 
   return (
     <main id="main" className="grid min-h-screen place-items-center px-5 text-center">
