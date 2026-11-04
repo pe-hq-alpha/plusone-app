@@ -1,7 +1,8 @@
 name: Demo path
 
 # The live demo walked end to end in a real browser, on a phone and a laptop
-# (scripts/e2e-live.mjs): after every push, every three hours through judging
+# (scripts/e2e-live.mjs): after every push, and on a three-hour schedule that
+# GitHub runs a few times a day, through judging
 # (to 10 Nov 2026), and by hand. A failed run emails the repository's owner.
 on:
   push:
