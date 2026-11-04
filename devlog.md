@@ -7,7 +7,7 @@
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable. On the other side, many good vendors have no website or listing to be found by, and prices are opaque: there is no fair, transparent place for a vendor without an online identity to register, show what they charge and be found.
 - **Status:** deployed
 - **Live app:** https://plusoneevents.site (the app at app.plusoneevents.site, PlusOne Partner for vendors at partner.plusoneevents.site)
-- **Demo:** the 3-minute video, https://youtu.be/oRbL2LFGy8c (public, 4 Nov); the guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo
+- **Demo:** the 3-minute video, https://youtu.be/OFMK86MvU8I (public, 4 Nov); the guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo
 - **Repo:** https://github.com/pe-hq-alpha/plusone-app (public since 4 Nov)
 - **Stack:** TypeScript, React 19, React Router 7, Vite 8, Tailwind CSS 4, Convex 1.45 (database, functions, crons, workflow, workpool, rate-limiter and action-cache components)
 - **Hosting:** Cloudflare Pages for the app; Convex (Ireland) for the backend
@@ -32,7 +32,7 @@
 | Muse Wonder checks a vendor before Ops verifies | `convex/lib/wonder.ts` (`3fd6b59`): web search and page reads in a tool loop, six checks with sources this run actually saw; 16 offline tests | done: live in Ops on production (`807f727`, "Check this vendor", the findings beside the reviewer's checklist); measured live: a made-up caterer whose own site hid an instruction to approve it was never confirmed, and three real caterers were backed with sources ([EVALUATIONS](EVALUATIONS.md#evaluation-checking-a-vendor)) |
 | Credits spent per run | `modelCalls` records feature, model, tokens and list-price cost for every call; `evalsCost:perEvent` totals them per event: $0.98 in 129 calls on production (29 Oct) | done: a whole real event, the founders' Diwali party, 44 calls, $0.43 (`a01e7f5`, 2 Nov) |
 | Screenshots of the Meta features | `assets/screens/compare.jpg`, `venue.jpg`, `venue-eval.jpg`, `venue-eval-2.jpg`, `partner-offer.jpg`, and `assets/meta-models.jpg` | done |
-| Demo video | https://youtu.be/oRbL2LFGy8c, 2:59.9, public 4 Nov | done |
+| Demo video | https://youtu.be/OFMK86MvU8I, 2:59.9, public 4 Nov | done |
 | Live URL with the Meta features | app.plusoneevents.site and partner.plusoneevents.site run every Meta model above in production; an uptime check every five minutes on the backend (`/uptime`) and the demo walked in a browser every three hours, through judging | done |
 | Quotes comparable line by line, gaps flagged, market range | The standard sheet (`convex/lib/standardSheet.ts`), Compare line by line and the city's range, live 28 Oct; the gap rules pinned on the demo's real quotes in `convex/dashboard.test.ts` | done |
 | Vendors answer the same brief | PlusOne Partner live 28 Oct, on its own address (partner.plusoneevents.site) with a vendors' demo: a sample caterer answers a customer's request and sees the offer the way the customer does (checked in a headless walk on production, 17:35) | done |
@@ -82,7 +82,7 @@ The demo video, locked by the founder and published, by Claude Code (claude-opus
     - The close: "PlusOne Events. Start planning your event today."
     - Vendor icons gather into PlusOne, and "Built for this" is off the end card.
   - **Music:** a new bed made to the final length.
-- **Published:** https://youtu.be/oRbL2LFGy8c, public, with chapters, a thumbnail and YouTube's AI-content label on. The README opens with a "Watch the demo" button (`6071cfd`).
+- **Published:** https://youtu.be/OFMK86MvU8I, public, with chapters, a thumbnail and YouTube's AI-content label on. The README opens with a "Watch the demo" button (`6071cfd`).
 - **Deployed** (about 12:55 IST): the logo's One and EVENTS in marigold in both themes, and the planner's choices clear of the reply box (`76d81b1`).
 - **Public:** the founder made `pe-hq-alpha/plusone-app` public.
 - **Polish after the final review:** the form and the YouTube description say which demo beats are new and which build on the earlier planner; the city and language names are out of the public docs; on a phone the sample banner is one short block and Ask is a round button (`a854315`); the founders are named on the site and in Privacy and Terms.
