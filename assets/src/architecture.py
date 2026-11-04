@@ -53,11 +53,11 @@ def card(x, y, w, h, fill=CARD, stroke=LINE, dash=None, r=12):
     return f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{r}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"{d}/>'
 
 
-def chip(x, y, ic, title, sub, w=230, h=64):
+def chip(x, y, ic, title, sub, w=258, h=64):
     out.append(card(x, y, w, h))
     out.append(icon(ic, x + 16, y + h / 2 - 11))
     out.append(text(x + 52, y + 28, title, 16, weight=600))
-    out.append(text(x + 52, y + 47, sub, 12.5, MUTED))
+    out.append(text(x + 52, y + 47, sub, 12, MUTED))
 
 
 flows: list[tuple[str, float, str]] = []  # path d, start delay, colour
@@ -75,15 +75,15 @@ def curve(x1, y1, x2, y2):
 W, H = 1600, 900
 out.append(f'<rect width="{W}" height="{H}" fill="{INK}"/>')
 out.append(text(40, 52, "PlusOne, end to end", 30, family=SERIF))
-out.append(text(340, 52, "how a quote, a call or a photo becomes something a family can compare", 15, MUTED))
+out.append(text(340, 52, "how a quote, a call or a photo becomes something you can compare", 15, MUTED))
 
 for x, label in [(40, "1  WHAT ARRIVES"), (330, "2  APP AND BACKEND"), (720, "3  META'S MODELS"), (1110, "4  FIXED, TESTED RULES"), (1390, "5  WHAT PEOPLE SEE")]:
     out.append(text(x, 98, label, 12, GOLD, 600))
 
 # 1. What arrives
 inputs = [
-    ("mic", "A spoken brief", "Tamil, English or both"),
-    ("mail", "Vendors' quotes", "email, PDF, WhatsApp photo"),
+    ("mic", "A spoken brief", "in your own words, any mix"),
+    ("mail", "Vendors' quotes", "email, PDF, a WhatsApp screenshot"),
     ("phone", "A vendor's call", "recorded, two speakers"),
     ("list", "A price list", "typed or photographed"),
     ("image", "The hall's photo", "the host's own venue"),
@@ -93,7 +93,7 @@ WRAP_IN = (350, 392)
 for i, (ic, t, s) in enumerate(inputs):
     y = 120 + i * 86
     chip(40, y, ic, t, s)
-    flow(curve(270, y + 32, WRAP_IN[0], WRAP_IN[1]), i * 0.25)
+    flow(curve(298, y + 32, WRAP_IN[0], WRAP_IN[1]), i * 0.25)
 
 # 2. App and backend
 out.append(card(330, 120, 320, 80))
@@ -107,20 +107,22 @@ out.append(logo("convex.svg", 348, 248, 26))
 out.append(text(384, 268, "Convex backend", 16, weight=600))
 out.append(f'<path d="M490 200 V230" stroke="{LINE}" stroke-width="1.5"/>')
 
-out.append(card(350, 296, 280, 192, fill=CARD2, stroke=GOLD))
-out.append(text(370, 326, "One model wrapper", 17, weight=600))
-out.append(text(370, 346, "convex/lib/models.ts", 12, MUTED, family=MONO))
+out.append(card(350, 296, 280, 198, fill=CARD2, stroke=GOLD))
+out.append(text(370, 326, "One model layer", 17, weight=600))
+out.append(text(370, 346, "convex/lib/: models.ts", 12, MUTED, family=MONO))
+out.append(text(370, 362, "+ one adapter per model", 12, MUTED, family=MONO))
 for j, pill in enumerate(["schema-checked JSON", "retries, Retry-After", "fallback, logged", "a cost row per call"]):
-    px, py = 370 + (j % 2) * 128, 366 + (j // 2) * 40
-    out.append(f'<rect x="{px}" y="{py}" width="120" height="28" rx="14" fill="none" stroke="{LINE}" stroke-width="1.2"/>')
-    out.append(text(px + 60, py + 18, pill, 11, TEXT, anchor="middle"))
-out.append(text(370, 470, "same request code for Meta, Baseten, Modal", 11.5, MUTED))
+    px, py = 366 + (j % 2) * 130, 376 + (j // 2) * 36
+    out.append(f'<rect x="{px}" y="{py}" width="126" height="28" rx="14" fill="none" stroke="{LINE}" stroke-width="1.2"/>')
+    out.append(text(px + 63, py + 18, pill, 12, TEXT, anchor="middle"))
+out.append(text(370, 464, "shared retries and cost rows", 12, MUTED))
+out.append(text(370, 481, "for Meta, Baseten, Modal", 12, MUTED))
 
 out.append(card(350, 508, 280, 172, fill=CARD2))
-out.append(text(370, 536, "Durable jobs", 16, weight=600))
-out.append(text(370, 556, "workflows · crons · webhooks · rate limits", 11.5, MUTED))
+out.append(text(370, 536, "Jobs and services", 16, weight=600))
+out.append(text(370, 556, "workflows · crons · webhooks · rate limits", 12, MUTED))
 out.append(logo("firecrawl.png", 370, 576, 24))
-out.append(text(404, 593, "reads vendors' own sites", 12.5, TEXT))
+out.append(text(404, 593, "finds vendors, reads their sites", 12.5, TEXT))
 out.append(logo("agentmail.png", 370, 612, 24))
 out.append(text(404, 629, "each event's own inbox, chased", 12.5, TEXT))
 out.append(icon("receipt", 371, 646, 22, MUTED))
@@ -131,10 +133,10 @@ out.append(card(720, 120, 330, 590, fill="#141b2b", stroke="#2c3f66"))
 out.append(logo("meta.svg", 740, 136, 30))
 out.append(text(780, 158, "Meta's models", 17, weight=600))
 models = [
-    ("Muse Spark 1.3", "reads and writes every step", None),
-    ("Muse Voice Transcribe", "hears briefs and calls", None),
+    ("Muse Spark 1.3", "plans, reads quotes, writes replies", None),
+    ("Muse Voice Transcribe", "hears briefs and calls, for Spark to read", None),
     ("Muse Spark Open", "reads price lists, open weights", "baseten.png"),
-    ("SAM 3.1", "cuts out the stage", None),
+    ("SAM 3.1", "cuts out the stage Spark finds", None),
     ("Muse Glimmer 30B", "checks work photos, our GPU", "modal.svg"),
     ("Muse Wonder", "gathers a vendor's evidence", None),
 ]
@@ -150,11 +152,12 @@ for i, (name, job, host) in enumerate(models):
         out.append(logo(host, 994, y + 22, 24))
     flow(curve(630, WRAP_IN[1], 740, y + 34), 1.4 + i * 0.12)
 
-out.append(card(740, 740, 290, 60, fill="none", stroke=MUTED, dash="6 6"))
-out.append(logo("claude.svg", 756, 756, 28))
-out.append(text(796, 768, "Claude, as fallback", 14.5, weight=600))
-out.append(text(796, 787, "only when a Meta model can't answer", 12, MUTED))
-out.append(f'<path d="M630 470 C690 470 680 770 740 770" fill="none" stroke="{MUTED}" stroke-width="1.5" stroke-dasharray="5 6"/>')
+out.append(card(740, 736, 290, 78, fill="none", stroke=MUTED, dash="6 6"))
+out.append(logo("claude.svg", 756, 761, 28))
+out.append(text(796, 762, "Claude, as fallback", 14.5, weight=600))
+out.append(text(796, 781, "only for Muse Spark text steps,", 12, MUTED))
+out.append(text(796, 798, "if Meta can't answer", 12, MUTED))
+out.append(f'<path d="M630 470 C690 470 680 775 740 775" fill="none" stroke="{MUTED}" stroke-width="1.5" stroke-dasharray="5 6"/>')
 
 # 4. Fixed, tested rules
 out.append(card(1110, 170, 230, 120, fill=CARD2, stroke=GOLD))
@@ -169,8 +172,10 @@ out.append(text(1160, 366, "Rules, not the model", 16, weight=600))
 for k, line in enumerate(["missing charges flagged", "the city's market range", "when a quote moves the budget"]):
     out.append(text(1128, 394 + k * 18, "· " + line, 12.5, MUTED))
 out.append(f'<path d="M1225 290 V330" stroke="{LINE}" stroke-width="1.5"/>')
-for i in range(3):
-    flow(curve(1030, MODEL_Y[i], 1110, 230), 2.6 + i * 0.15)
+for i in (0, 2):  # Muse Spark and Muse Spark Open read quotes onto the sheet
+    flow(curve(1030, MODEL_Y[i], 1110, 230), 2.6 + i * 0.1)
+# Voice transcribes; Muse Spark reads the transcript
+flow(f"M1030 {MODEL_Y[1]} C1074 {MODEL_Y[1]} 1074 {MODEL_Y[0] + 16} 1030 {MODEL_Y[0] + 16}", 2.5)
 flow("M1225 290 V330", 3.3)
 
 # 5. What people see
@@ -187,19 +192,21 @@ for y, ic, t, s in outputs:
     out.append(text(1438, y + 34, t, 15, weight=600))
     out.append(text(1406, y + 66, s, 12, MUTED))
 flow(curve(1340, 386, 1390, 376), 3.7)
-flow(curve(1030, MODEL_Y[3], 1390, 506), 2.8)
+# Spark finds the stage and wall; SAM 3.1 cuts them out (convex/venueView.ts)
+flow(f"M1030 {MODEL_Y[0] - 12} C1078 {MODEL_Y[0] - 12} 1078 {MODEL_Y[0] + 40} 1078 {MODEL_Y[0] + 90} L1078 446 C1078 470 1094 478 1124 478 L1390 478", 2.7)
+flow(curve(1030, MODEL_Y[3], 1390, 524), 2.8)
 flow(curve(1030, MODEL_Y[4], 1390, 626), 2.9)
 flow(curve(1030, MODEL_Y[5], 1390, 650), 3.0)
 flow(curve(1390, 196, 1340, 214), 3.2)
-out.append(text(1365, 240, "offers", 11, MUTED, anchor="middle"))
+out.append(text(1365, 240, "offers", 12, MUTED, anchor="middle"))
 flow("M1570 636 C1600 636 1600 196 1570 196", 4.0)
 flow(curve(1340, 266, 1390, 766), 3.5)
-out.append(text(1588, 420, "verified only", 11, MUTED, anchor="middle", family=SANS).replace("<text", '<text transform="rotate(90 1588 420)"'))
+out.append(text(1572, 292, "verified only", 12, MUTED, anchor="end"))
 
 # Footer: the rest of the stack and a legend
 out.append(f'<line x1="40" y1="836" x2="1560" y2="836" stroke="{LINE}"/>')
 fx = 40
-for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("whatsapp.svg", "quote updates to the host"), ("openstreetmap.svg", "vendor map"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "761 tests")]:
+for name, label in [("clerk.svg", "sign-in"), ("resend.svg", "app emails"), ("whatsapp.svg", "quote updates to the host"), ("openstreetmap.svg", "vendor map"), ("posthog.svg", "usage, with consent"), ("vitest.svg", "859 tests")]:
     out.append(logo(name, fx, 852, 20))
     out.append(text(fx + 28, 867, label, 12.5, MUTED))
     fx += 40 + len(label) * 7.5
@@ -221,7 +228,7 @@ for n, (d, delay, color) in enumerate(flows):
         f'<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.1;.85;1" dur="1.1s" begin="{delay}s;f{n}a.begin" /></circle>'
     )
 
-svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model wrapper on Convex to the Meta model suited to each; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet; a WhatsApp message tells the host when a quote lands">
+svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="PlusOne end to end: briefs, quotes, calls, price lists and photos go through one model layer on Convex to the Meta model suited to each; Muse Voice Transcribe hears briefs and calls for Muse Spark to read; Muse Spark and Muse Spark Open put quotes on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; Muse Spark finds the stage and SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet; a WhatsApp message tells the host when a quote lands">
 <style>.dash{{animation:run 1.2s linear infinite}}@keyframes run{{to{{stroke-dashoffset:-18}}}}@media (prefers-reduced-motion:reduce){{.dash{{animation:none}}}}</style>
 <defs><marker id="head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a6378"/></marker></defs>
 {"".join(out[:1])}
