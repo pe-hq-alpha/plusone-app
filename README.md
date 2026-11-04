@@ -4,6 +4,7 @@
 
 # PlusOne Events
 
+[![Watch the demo](https://img.shields.io/badge/Watch_the-demo_(3_min)-ff0033?style=for-the-badge&logo=youtube&logoColor=white&labelColor=11141c)](https://youtu.be/oRbL2LFGy8c)
 [![Live site](https://img.shields.io/badge/Live-plusoneevents.site-f4b53a?style=for-the-badge&labelColor=11141c)](https://plusoneevents.site)
 [![For the judges](https://img.shields.io/badge/For_the-judges-1f2a5c?style=for-the-badge)](#for-the-judges)
 [![Try the demo](https://img.shields.io/badge/Try_the-demo-f4b53a?style=for-the-badge&labelColor=11141c)](https://app.plusoneevents.site/demo)
