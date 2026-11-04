@@ -36,9 +36,14 @@ Signed out, Partner opens the vendors' own sign-in page (`VendorSignInPage` in `
 | `checks.ts` | The vendor check for Ops: start one (staff only, with daily limits), run it in the background on Muse Wonder with pages read through Firecrawl, keep its report and cost, and show the newest |
 | `bands.ts` | Each city's price ranges, recomputed on a schedule |
 | `samples.ts` | The sample vendors and their offers for the demo events |
+| `directory.ts` | Find vendors: the open directory, with no sign-in, by trade and city, a search in plain words and a search of the web; a Partner vendor's phone kept back until a booking |
+| `tidy.ts` | Tidying what a vendor writes before it is saved: Muse Spark fixes the writing, and fixed rules drop a tidy that changed a number |
+| `changes.ts` | Changes to a verified listing waiting for a person in Ops; customers keep seeing the approved version until then |
+| `photos.ts` | Photos of a vendor's past work, checked in the background (Muse Glimmer, or Muse Spark otherwise) and shown once clean or approved in Ops |
+| `priceList.ts` | Bring your price list: a pasted list or a photo of one drafted into packages on the trade's sheet by Muse Spark Open, for the vendor to check |
 | `vendors.ts` | Shared helpers: a vendor's identity and cleaning up their records |
 
-The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `vendorChecks`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names (an older name like "Bombay" counts as Mumbai), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
+The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingReviews`, `vendorChecks`, `priceBands`, `vendorBriefs` and `vendorOffers`, in `convex/schema.ts`. The pure rules that Events, Partner and Ops all share are in `convex/lib/marketplace.ts`: city names (older city names count as the current one), where a price sits in its range (Value, Standard, Premium, Luxury), a vendor's level (New, then Trusted after 3 events, Top after 10), and the badges.
 
 ## Rules it keeps
 
@@ -52,7 +57,7 @@ The tables are `vendorProfiles`, `vendorOfferings`, `vendorClaims`, `vettingRevi
 
 | What | Meta model | Status |
 |---|---|---|
-| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live runs 29 Oct, in the main README's evaluation |
+| The verification agent in Ops: checks a vendor against their own site and public pages and lists the evidence with links, then a person decides | Muse Wonder | Built into Ops, 28 Oct (`convex/marketplace/checks.ts`); first live runs 29 Oct, in [EVALUATIONS.md](../../EVALUATIONS.md#evaluation-checking-a-vendor) |
 | A vendor's phone call with a customer (the customer adds the recording), transcribed with who said what told apart, read into the standard sheet | Muse Voice Transcribe, Muse Spark | Live, 29 Oct (`convex/voiceBrief.ts`, `src/lib/audio.ts`): the demo's sample call lands as Kaveri Feast Co.'s column in Compare |
 | Changes to a verified listing (packages, prices, details, contact numbers) wait for a person in Ops before customers see them | — | Live, 29 Oct (`convex/marketplace/changes.ts`) |
 | Bring your price list: a vendor pastes or photographs the list they already send customers, and each package is drafted on their trade's sheet for them to check and save | Muse Spark Open (open weights, on Baseten) | Live, 29 Oct (`convex/marketplace/priceList.ts`) |
@@ -67,7 +72,7 @@ npx convex run marketplace/ops:setStaffRole '{"email":"you@example.com","role":"
 ```
 
 ```bash
-npx vitest run convex/marketplace.test.ts convex/lib/marketplace.test.ts
+npx vitest run convex/marketplace convex/marketplace.test.ts convex/lib/marketplace.test.ts
 ```
 
 Partner can move into its own repository later with its history intact: every commit that touches `src/partner/` or `convex/marketplace/` is also copied, one for one, into a repository that holds only Partner.

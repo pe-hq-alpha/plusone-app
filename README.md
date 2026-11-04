@@ -15,9 +15,9 @@
 [![Coming next](https://img.shields.io/badge/Coming-next-f4b53a?style=for-the-badge&labelColor=11141c)](#coming-next)
 
 ![Event](https://img.shields.io/badge/event-Meta_Global_AI_Developer_Hackathon-f4b53a?style=flat-square&labelColor=11141c)
-![Track](https://img.shields.io/badge/track-Startups-f4b53a?style=flat-square&labelColor=11141c)
+![Track](https://img.shields.io/badge/track-Startup-f4b53a?style=flat-square&labelColor=11141c)
 ![Status](https://img.shields.io/badge/status-working_end_to_end-c4dfbc?style=flat-square&labelColor=11141c)
-![Tests](https://img.shields.io/badge/tests-858_passing-c4dfbc?style=flat-square&labelColor=11141c)
+![Tests](https://img.shields.io/badge/tests-859_passing-c4dfbc?style=flat-square&labelColor=11141c)
 [![License](https://img.shields.io/badge/license-Apache--2.0-b3b7c3?style=flat-square&labelColor=11141c)](LICENSE)
 
 <table align="center">
@@ -91,7 +91,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ## For the judges
 
-**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens a sample 60th birthday with no sign-up, in the visitor's own money: Dad's 60th in Austin, in dollars (`/demo?region=US`), or Amma's 60th in rupees (`/demo?region=IN`) (also a griha pravesam, `/demo?sample=housewarming`, and an office Diwali party, `/demo?sample=office`; their vendors are made up, so nothing is really sent).
+**Try it in two minutes.** [The demo](https://app.plusoneevents.site/demo) opens a sample 60th birthday with no sign-up, in the visitor's own money: Dad's 60th in Austin, in dollars (`/demo?region=US`), or Amma's 60th in rupees (`/demo?region=IN`) (also a housewarming, `/demo?sample=housewarming`, and an office Diwali party, `/demo?sample=office`; their vendors are made up, so nothing is really sent).
 1. Start on **Overview**, then **Vendors → Compare**: three caterers' emailed quotes and two sample Partner vendors' offers sit line by line on the same sheet, with what each leaves out flagged ("No water line, and one other charges ₹600") and the city's price range beside them.
 2. Press **Under the hood** in the top bar for each step's Meta model, time and cost; type "We're now 140 people" on Overview to watch one run.
 3. Open [PlusOne Partner's demo](https://partner.plusoneevents.site/demo) as a sample caterer, answer the customer's request on the same sheet, and see the offer as the customer does.
@@ -99,7 +99,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 **In a few words.** The *standard sheet* is the set of lines every quote for a kind of vendor is read into (the unit, what's included, GST, transport, service, extras). *Value*, *Standard*, *Premium* and *Luxury* say where a price sits among the city's listed prices for the same unit (the lowest quarter, the middle half, up to the 90th percentile, above it), and the *typical price* is the middle; none says a price is fair or unfair. *Verified* means a person in Ops checked the vendor; *Sample* marks a made-up vendor or event.
 
-**Money.** Finding vendors is free. Basic is free until launch, then ₹1,000 ($10) a month. Premium, with a person from the PlusOne team planning beside you, is ₹2,500 ($25) a month. Vendors pay a listing subscription on Partner. The end goal is a disclosed commission on bookings paid through PlusOne, once the vendor network and trust exist. Full launch is planned for the 2026 holiday season or early 2027 ([The business](#the-business)).
+**Money.** Finding vendors is free. Basic is free until launch, then ₹1,000 ($10) a month. Premium, with a person from the PlusOne team planning beside you, is ₹2,500 ($25) a month. Vendors will pay a listing subscription on Partner after launch; listing is free until then. The end goal is a disclosed commission on bookings paid through PlusOne, once the vendor network and trust exist. Full launch is planned for the 2026 holiday season or early 2027 ([The business](#the-business)).
 
 ### The theme: Build for Your World
 
@@ -108,13 +108,13 @@ More vendors on Partner widen what customers can compare; more customers bring v
 | The theme asks | PlusOne's answer |
 |---|---|
 | **Bring Meta's models into your domain** | Event planning on six Meta models. Muse Spark reads replies, quotes, PDFs and photos, in English or mixed with a local language, into the same lines; Muse Voice Transcribe hears a spoken plan, and a vendor's call speaker by speaker; SAM 3.1 cuts the stage out of the customer's own hall photo to dress it; Muse Wonder checks a vendor's evidence in Ops; and two open-weights models, Muse Spark Open on Baseten and Muse Glimmer on our own Modal GPU, read vendors' price lists and check photos of their work. All live in production |
-| **A problem you know firsthand** | We just lived it, planning a half-day baby shower (Seemantham) for 120. Other halls quoted about ₹2 to ₹3.5 lakh with AC, parking and rooms on top; the hall we booked at ₹75,000 cost ₹20,000 more because the decorators needed it from 11 pm the night before. Decorators priced a design from a photo on WhatsApp, each differently, and delivered late with fewer of the lilies we'd asked for. The caterer's transport was about four times what we'd have paid ourselves, with serving and cleaning outside the per-plate price. Every price came as a WhatsApp message, a call or a scribbled note, never in one place. That was one small morning; a wedding runs for days. PlusOne is the app we wished we'd had |
+| **A problem you know firsthand** | We just lived it, planning a half-day baby shower for 120. Other halls quoted about ₹2 to ₹3.5 lakh with AC, parking and rooms on top; the hall we booked at ₹75,000 cost ₹20,000 more because the decorators needed it from 11 pm the night before. Decorators priced a design from a photo on WhatsApp, each differently, and delivered late with fewer of the lilies we'd asked for. The caterer's transport was about four times what we'd have paid ourselves, with serving and cleaning outside the per-plate price. Every price came as a WhatsApp message, a call or a scribbled note, never in one place. That was one small morning; a wedding runs for days. PlusOne is the app we wished we'd had |
 | **Free up time and mental space** | PlusOne does the legwork: it searches, writes from the event's own inbox, chases vendors up to three times, reads every reply and PDF into one unit and says what each quote leaves out. The host only decides |
 | **Make something possible that wasn't before** | A family planning a birthday gets what only a wedding with a planner got before: offers on the same lines, missing charges flagged and the market range. An event manager gets it for every client's event. A vendor with no website gets found and answers briefs. A plan can be spoken instead of typed, and the decor seen on the real hall before anyone pays |
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 385 commits, the code from about 41,000 lines to about 70,000, and the backend from 124 files to 232. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 385 commits, the code from about 41,000 lines to about 72,000, and the backend from 124 files to 238. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
 
 | What | Meta model | Status |
 |---|---|---|
@@ -146,7 +146,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 |---|---|---|
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, charges outside the headline prices came to about 10% of the quoted total. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
-| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One wrapper: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 858 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
+| **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One model layer: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 859 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
 | **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The video](https://youtu.be/oRbL2LFGy8c), [the demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
@@ -195,7 +195,7 @@ Muse Image is the one Meta model we don't use, because Meta's policy keeps it un
 
 <img src="assets/screens/under-the-hood.jpg" width="100%" alt="Under the hood open beside Overview in the sample event: recorded real runs of Muse Spark 1.3 reading three caterers' replies (7 to 14 seconds, about a cent each) and Muse Spark with SAM 3.1 finding the stage in the sample hall, each with its time, tokens and cost">
 
-Every call goes through one wrapper, `convex/lib/models.ts`: retries on 429, 500 and 503 honouring `Retry-After`; a call Meta can't answer moves to Claude, with the switch logged; Muse Spark Open and Muse Glimmer step down to Muse Spark. A malformed request is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and cost.
+Every Muse Spark and Muse Spark Open call goes through one wrapper, `convex/lib/models.ts`, and each other model has its own adapter in `convex/lib/` (`voice.ts`, `sam.ts`, `glimmer.ts`, `wonder.ts`) sharing its rules: retries on 429, 500 and 503 honouring `Retry-After`; a Muse Spark text call Meta can't answer moves to Claude, with the switch logged; Muse Spark Open and Muse Glimmer step down to Muse Spark. A malformed request is raised, not hidden. Every call writes a row to `modelCalls` with its feature, model, tokens and cost.
 
 ## Agents in PlusOne
 
@@ -271,7 +271,7 @@ Each step says what came before the hackathon and what is new.
 <img src="assets/screens/venue.jpg" width="100%" alt="The sample hall with its bare stage dressed in the marigold and mango leaf look: a red pleated drape with marigold swags and hanging strands behind the stage, and a gold skirt along the stage's front, with the chairs in front left as they are">
 <sub>See it on your venue: the stage found by Muse Spark and cut out by SAM 3.1 in the hall's own photo, then dressed in a look, to judge decorators' quotes against. The look is drawn by the app on SAM's masks, since Muse Image isn't available in our region.</sub>
 
-**Finding vendors, free.** At [/vendors](https://app.plusoneevents.site/vendors), anyone can search in their own words, on a list or a map, with no sign-in: each listed vendor's packages on the standard sheet, checked photos and track record, plus vendors' own sites on the open web. Until real vendors join, the directory holds 26 sample vendors, marked Sample.
+**Finding vendors, free.** At [/vendors](https://app.plusoneevents.site/vendors), anyone can search in their own words, on a list or a map, with no sign-in: each listed vendor's packages on the standard sheet, checked photos and track record, plus vendors' own sites on the open web. Until real vendors join, the directory holds 26 sample vendors in each demo city, marked Sample.
 
 <img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and the caterers numbered on a map inside a 5 km circle around Mylapore">
 
@@ -290,11 +290,11 @@ Each step says what came before the hackathon and what is new.
 
 ## Architecture
 
-<img src="assets/architecture.svg" width="100%" alt="PlusOne end to end: a spoken brief, vendors' quotes, a recorded call, a price list, the hall's photo and photos of work go through one model wrapper on Convex to the Meta model suited to each (Muse Spark 1.3, Muse Voice Transcribe, Muse Spark Open on Baseten, SAM 3.1, Muse Glimmer 30B on our Modal GPU, Muse Wonder), with Claude only as a fallback; quotes land on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet; a WhatsApp message tells the host when a quote lands">
+<img src="assets/architecture.svg" width="100%" alt="PlusOne end to end: a spoken brief, vendors' quotes, a recorded call, a price list, the hall's photo and photos of work go through one model layer on Convex (models.ts plus one adapter per model, with shared retries and cost rows) to the Meta model suited to each: Muse Spark 1.3, Muse Voice Transcribe, Muse Spark Open on Baseten, SAM 3.1, Muse Glimmer 30B on our Modal GPU and Muse Wonder, with Claude as a fallback only for Muse Spark text steps; Muse Voice Transcribe hears briefs and calls for Muse Spark to read; Muse Spark and Muse Spark Open put quotes on the standard sheet, where fixed rules flag missing charges and place prices in the market range for Compare; Muse Spark finds the stage and SAM 3.1 dresses the venue; Muse Glimmer and Muse Wonder feed PlusOne Ops, where a person verifies vendors before they answer briefs on PlusOne Partner; Find vendors lists every vendor openly, priced on the same sheet; a WhatsApp message tells the host when a quote lands">
 
 <sub>Drawn by <code>assets/src/architecture.py</code>; the dots move along each path a request takes.</sub>
 
-Whatever arrives goes through the one wrapper to the Meta model suited to it and comes back as structured output checked against a schema. Quotes, calls and price lists land on the standard sheet, beside Partner vendors' offers to the same brief. From there the decisions are fixed, tested rules, not the model: what a quote leaves out, where a price sits in the city's range, and whether a quote may move the budget. Every call writes a cost row, which is what **Under the hood** shows. Each part, what it runs on and why, with file paths: [the tech, part by part](EVALUATIONS.md#the-tech-part-by-part).
+Whatever arrives goes through one model layer to the Meta model suited to it and comes back as structured output checked against a schema. Quotes, calls and price lists land on the standard sheet, beside Partner vendors' offers to the same brief. From there the decisions are fixed, tested rules, not the model: what a quote leaves out, where a price sits in the city's range, and whether a quote may move the budget. Every call writes a cost row, which is what **Under the hood** shows. Each part, what it runs on and why, with file paths: [the tech, part by part](EVALUATIONS.md#the-tech-part-by-part).
 
 ## Run it yourself
 
@@ -303,7 +303,7 @@ Whatever arrives goes through the one wrapper to the Meta model suited to it and
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 858 tests, no network, no keys
+npm test              # 859 tests, no network, no keys
 npm run typecheck     # the app and the backend
 npm run build         # the production build, offline
 ```
@@ -328,7 +328,7 @@ The first 90 days, in one city, measured as we go:
 
 ## Repository
 
-**History.** PlusOne Events is an early-stage startup being built in semi-stealth, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (26 October 2026, 14:58 IST), is the product as it stood before the hackathon. Kickoff was 26 October at 9:30 PM IST: eleven commits made that afternoon, before kickoff, are privacy and trust groundwork, and every commit from 27 October (`608627f`) on was made during the hackathon. [`devlog.md`](devlog.md) sets out each day's work.
+**History.** PlusOne Events is an early-stage startup, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (26 October 2026, 14:58 IST), is the product as it stood before the hackathon. Kickoff was 26 October at 9:30 PM IST: eleven commits made that afternoon, before kickoff, are privacy and trust groundwork, and every commit from 27 October (`608627f`) on was made during the hackathon. [`devlog.md`](devlog.md) sets out each day's work.
 
 | Path | What it is |
 |---|---|

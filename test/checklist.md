@@ -11,7 +11,7 @@ see goes first.
 **Every page, every time:** no sideways scroll on a phone; no text cut off or overlapping; buttons reachable with a
 thumb; nothing says "AI", "model" or a model's name in the app's own words (Under the hood is the one place that
 names Meta's models); customers are "families, teams and event managers", never one of them alone; money is in
-rupees for a visit from India; any error reads as a plain sentence with what to do next.
+the visitor's own currency; any error reads as a plain sentence with what to do next.
 
 Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.site`, Partner
 `https://partner.plusoneevents.site`, Ops `https://app.plusoneevents.site/ops`.
@@ -20,20 +20,20 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 
 ## 1. The judge's first two minutes (do this first, as a stranger)
 
-- [ ] The repository's README opens with the banner, the buttons and the logo row; every button goes where it says (Live site, For the judges, Try the demo, Meta's models, How it works, Run it yourself, Measured results, Coming next).
+- [ ] The repository's README opens with the banner, the buttons and the logo row; every button goes where it says (Watch the demo, Live site, For the judges, Try the demo, Meta's models, How it works, Run it yourself, Measured results, Coming next).
 - [ ] The architecture diagram shows, and its dots move (GitHub, laptop and phone).
 - [ ] Every screenshot in the README matches today's app.
 - [ ] `app.plusoneevents.site/demo` opens Amma's 60th with no sign-up, in under 10 seconds on a phone on mobile data.
 - [ ] The demo bar says it's a sample and points at Under the hood; the dot on Under the hood shows until it's opened.
 - [ ] Following the README's "Try it in two minutes" word for word works: Overview → Vendors → Compare → the vendors' demo → Under the hood → "We're now 140 people".
-- [ ] The demo video link plays (once it exists) and is public or unlisted.
+- [ ] The README's Watch the demo button plays the video (public).
 
 ## 2. Home site (plusoneevents.site)
 
 - [ ] The hero reads "Plan it all in one place. Know what you're paying for." with Plan an event and See the demo; both work.
 - [ ] The line drawing sits behind the hero; the page moves gently (hero rises in, sections rise into view) and nothing jumps.
 - [ ] Theme: Light, Dark and Device each apply, and the choice carries into the app (dark and light).
-- [ ] The example and prices show rupees from India (and dollars from the US, with a VPN if available).
+- [ ] The example and prices show the visitor's currency (rupees or dollars by region).
 - [ ] The consent bar appears once; Allow and Decline both close it and are remembered.
 - [ ] `/pricing`: Basic free until launch then ₹1,000 a month; Premium ₹2,500 after launch; every feature listed.
 - [ ] `/how-it-works`, `/privacy`, `/terms` open and read correctly.
@@ -54,7 +54,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 - [ ] It asks what the event is called, not who hosts it.
 - [ ] Try each kind of event the launch is for: a birthday, a 60th, a housewarming, a naming ceremony, a baby shower, an engagement, an office party. The words follow the event (functions and guests; sessions and attendees for a conference).
 - [ ] `/new/manual`: the step-by-step form makes the same event.
-- [ ] The microphone in the planning chat records a spoken plan in English, in Tamil, and in both mixed; the words land in the box to check before sending (allow the microphone when asked).
+- [ ] The microphone in the planning chat records a spoken plan in English, in a local language, and mixed; the words land in the box to check before sending (allow the microphone when asked).
 
 ## 5. Overview
 
@@ -82,7 +82,7 @@ Addresses: home `https://plusoneevents.site`, app `https://app.plusoneevents.sit
 - [ ] "Ask verified vendors" on a need sends the brief to Partner vendors in that trade and city.
 - [ ] Writing to a vendor sends from the event's own inbox address.
 - [ ] Inbox (`inbox`): each conversation shows its status; opening one shows the thread; follow-ups are scheduled, at most three.
-- [ ] WhatsApp opens with the first message written for the event ("Hello …, I'm planning … on … in Chennai"); Call dials. In the demo, the buttons say what would happen instead.
+- [ ] WhatsApp opens with the first message written for the event ("Hello …, I'm planning … on … in the sample city"); Call dials. In the demo, the buttons say what would happen instead.
 - [ ] A vendor who says "please don't contact me" is never written to again.
 
 ## 8. Quotes that didn't come by email

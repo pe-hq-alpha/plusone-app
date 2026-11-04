@@ -1,6 +1,6 @@
 # Photo-check evaluation set
 
-36 photos, marked by hand (Claude Code, 29 Oct 2026) from the photos themselves. `key.json` holds one entry per photo.
+36 photos, marked by hand on 29 Oct 2026 from the photos themselves. `key.json` holds one entry per photo.
 
 - 8 photos generated for the app's sample vendors (not real work).
 - 22 free-licence Unsplash photos, standing in for vendors' own work (see `../sample-photos.json` for sources).

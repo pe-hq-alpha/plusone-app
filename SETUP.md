@@ -7,12 +7,12 @@
 ```bash
 git clone https://github.com/pe-hq-alpha/plusone-app.git plusone && cd plusone
 npm ci
-npm test              # 832 tests, no network, no keys
+npm test              # 859 tests, no network, no keys
 npm run typecheck     # the app and the backend
 npm run build         # the production build, offline
 ```
 
-The evaluations' raw results are in `scripts/*-run*.json` beside the scripts that made them, so every number in [Evaluations](EVALUATIONS.md#evaluation-missing-charges) can be checked without calling a model.
+The evaluations' raw results are in `scripts/*-run*.json`, `scripts/compare-run1/` and `scripts/vendor-check-run1/` beside the scripts that made them, so every number in [Evaluations](EVALUATIONS.md#evaluation-missing-charges) can be checked without calling a model.
 
 **To run the whole app**, you need Node 20 or later, a Convex account and a Clerk application with a JWT template named `convex` (claims `aud: convex`, `name`, `email`, `email_verified`).
 
@@ -23,7 +23,7 @@ npx convex dev --once     # first run: sign in and create a dev deployment (writ
 node scripts/auth-keys.mjs                                   # once: JWT_PRIVATE_KEY and JWKS for the demo's guest tokens
 npx convex env set SITE_URL http://localhost:5173            # where links in emails point
 npx convex env set CLERK_JWT_ISSUER_DOMAIN https://<your-clerk-frontend-api>
-npx convex env set MODEL_API_KEY <meta-key>   # Meta's models; or ANTHROPIC_API_KEY for Claude
+npx convex env set MODEL_API_KEY <meta-key>   # Meta's models (Claude is only an optional fallback)
 echo 'VITE_CLERK_PUBLISHABLE_KEY=pk_test_…' >> .env.local     # the app's Clerk key
 npm run dev               # the app on http://localhost:5173, and the backend watching for changes
 ```
@@ -40,7 +40,7 @@ VITE_CONVEX_URL=https://<deployment>.convex.cloud \
 VITE_HOME_ORIGIN=https://<home> VITE_APP_ORIGIN=https://app.<home> VITE_PARTNER_ORIGIN=https://partner.<home> \
 VITE_CLERK_PUBLISHABLE_KEY=pk_live_… npx vite build                     # the app, built against it
 npx wrangler pages deploy dist --project-name <pages-project>          # served from Cloudflare Pages
-node scripts/agentmail-setup.mjs https://<deployment>.convex.site <pod-id>   # once: the inbox webhook
+AGENTMAIL_API_KEY=… node scripts/agentmail-setup.mjs https://<deployment>.convex.site <pod-id>   # once: the inbox webhook
 ```
 
 The app can also be served by Convex itself: `npm run deploy`.
