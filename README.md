@@ -61,7 +61,7 @@
 
 Two sides meet on the same lines: families and event managers plan in PlusOne, and verified vendors answer the same brief on PlusOne Partner.
 
-**Built during the hackathon (27 Oct – 4 Nov):** Meta's six models at its core, the standard sheet with missing charges flagged, Compare with the market range, PlusOne Partner and Ops, voice and call reading, the venue view, photo and vendor checks, the open directory and map, and Under the hood. Before it, PlusOne was a planner: the planning chat, vendor search, the event's inbox and follow-ups, the budget, guests and RSVPs (tag `pre-hackathon`). Every addition, dated: [WHATS-NEW.md](WHATS-NEW.md).
+**Built during the hackathon (27 Oct – 4 Nov):** six Meta models at its core, the standard sheet with missing charges flagged, Compare with the market range, PlusOne Partner and Ops, voice and call reading, the venue view, photo and vendor checks, the open directory and map, and Under the hood. Before it, PlusOne was a planner: the planning chat, vendor search, the event's inbox and follow-ups, the budget, guests and RSVPs (tag `pre-hackathon`). Every addition, dated: [WHATS-NEW.md](WHATS-NEW.md).
 
 Planning an event means juggling: vendors on calls and WhatsApp, quotes in email and PDFs, the budget in a spreadsheet, the guests in another list. And no two quotes are written alike, so nobody can tell what's included until the extra charges arrive. PlusOne solves both:
 
@@ -114,7 +114,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 385 commits, the code from about 41,000 lines to about 72,000, and the backend from 124 files to 238. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 400 commits, the code from about 41,000 lines to about 72,000, and the backend from 124 files to 238. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
 
 | What | Meta model | Status |
 |---|---|---|
