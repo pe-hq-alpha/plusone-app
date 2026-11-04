@@ -30,10 +30,10 @@
   display: grid; justify-items: start; text-decoration: none; line-height: 1;
 }
 .rs__mark { font-family: var(--font-display); font-size: calc(61 / 20.48 * 1cqw); color: var(--color-ink-deep); letter-spacing: -0.01em; }
-.rs__mark em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-accent); }
+.rs__mark em { font-family: var(--font-display-italic); font-style: italic; color: var(--color-highlight); }
 .rs__events {
   margin: calc(6 / 20.48 * 1cqw) 0 0 calc(56 / 20.48 * 1cqw);
-  font-family: var(--font-sans); font-size: calc(17 / 20.48 * 1cqw); letter-spacing: 0.32em; text-transform: uppercase; color: var(--color-accent);
+  font-family: var(--font-sans); font-size: calc(17 / 20.48 * 1cqw); letter-spacing: 0.32em; text-transform: uppercase; color: var(--color-highlight);
 }
 .rs__links {
   position: absolute; right: 3%; top: calc(57 / 20.48 * 1cqw);
