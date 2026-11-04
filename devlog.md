@@ -7,7 +7,7 @@
 - **Problem:** People planning a family function or a work event juggle many vendors, quotes and people across calls, chats and spreadsheets, with nothing holding the plan together or making quotes comparable. On the other side, many good vendors have no website or listing to be found by, and prices are opaque: there is no fair, transparent place for a vendor without an online identity to register, show what they charge and be found.
 - **Status:** deployed
 - **Live app:** https://plusoneevents.site (the app at app.plusoneevents.site, PlusOne Partner for vendors at partner.plusoneevents.site)
-- **Demo:** the 3-minute video, https://youtu.be/OFMK86MvU8I (public, 4 Nov); the guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo
+- **Demo:** the 3-minute video, https://youtu.be/rlMwQiZfW2g (public, 4 Nov); the guest demo at app.plusoneevents.site/demo and the vendors' demo at partner.plusoneevents.site/demo
 - **Repo:** https://github.com/pe-hq-alpha/plusone-app (public since 4 Nov)
 - **Stack:** TypeScript, React 19, React Router 7, Vite 8, Tailwind CSS 4, Convex 1.45 (database, functions, crons, workflow, workpool, rate-limiter and action-cache components)
 - **Hosting:** Cloudflare Pages for the app; Convex (Ireland) for the backend
@@ -32,7 +32,7 @@
 | Muse Wonder checks a vendor before Ops verifies | `convex/lib/wonder.ts` (`3fd6b59`): web search and page reads in a tool loop, six checks with sources this run actually saw; 16 offline tests | done: live in Ops on production (`807f727`, "Check this vendor", the findings beside the reviewer's checklist); measured live: a made-up caterer whose own site hid an instruction to approve it was never confirmed, and three real caterers were backed with sources ([EVALUATIONS](EVALUATIONS.md#evaluation-checking-a-vendor)) |
 | Credits spent per run | `modelCalls` records feature, model, tokens and list-price cost for every call; `evalsCost:perEvent` totals them per event: $0.98 in 129 calls on production (29 Oct) | done: a whole real event, the founders' Diwali party, 44 calls, $0.43 (`a01e7f5`, 2 Nov) |
 | Screenshots of the Meta features | `assets/screens/compare.jpg`, `venue.jpg`, `venue-eval.jpg`, `venue-eval-2.jpg`, `partner-offer.jpg`, and `assets/meta-models.jpg` | done |
-| Demo video | https://youtu.be/OFMK86MvU8I, 2:59.9, public 4 Nov | done |
+| Demo video | https://youtu.be/rlMwQiZfW2g, 2:59.6, public 4 Nov | done |
 | Live URL with the Meta features | app.plusoneevents.site and partner.plusoneevents.site run every Meta model above in production; an uptime check every five minutes on the backend (`/uptime`) and the demo walked in a browser every three hours, through judging | done |
 | Quotes comparable line by line, gaps flagged, market range | The standard sheet (`convex/lib/standardSheet.ts`), Compare line by line and the city's range, live 28 Oct; the gap rules pinned on the demo's real quotes in `convex/dashboard.test.ts` | done |
 | Vendors answer the same brief | PlusOne Partner live 28 Oct, on its own address (partner.plusoneevents.site) with a vendors' demo: a sample caterer answers a customer's request and sees the offer the way the customer does (checked in a headless walk on production, 17:35) | done |
@@ -68,31 +68,16 @@ Muse Code is Meta's coding agent. We subscribed to the Everyday plan on 27 Oct 2
 
 The demo video, locked by the founder and published, by Claude Code (claude-opus-5-5); the founder made the repositories public.
 
-- **The video** (local video project, commits v12 to v16, then "Final"):
-  - **The cut:** 2:59.92 at 2560×1440, -14 LUFS, Lauren's voice (ElevenLabs, eleven_v4) at its natural pace.
-  - **The founder's notes on v11 (3:15), all applied:**
-    - The plan is circled where its times, places and guests show.
-    - One line for verified and web vendors, the ranking line cut, and "PlusOne's own agent".
-    - One line for the sheet, the market range and Compare, with the Compare scroll at reading pace.
-    - Partner opens on its own sign-in (a sample business, never submitted), and the vendor's photo upload is held.
-    - Zoom-through transitions between the apps.
-    - The Meta section is voiced over the whole stack, the under-the-hood shot is cut, and Muse Code is on the flow page.
-    - The numbers count up as they're said.
-    - The vision as Phase 1 to 3, each building on the one before, with stick figures.
-    - The close: "PlusOne Events. Start planning your event today."
-    - Vendor icons gather into PlusOne, and "Built for this" is off the end card.
-  - **Music:** a new bed made to the final length.
-- **Published:** https://youtu.be/OFMK86MvU8I, public, with chapters, a thumbnail and YouTube's AI-content label on. The README opens with a "Watch the demo" button (`6071cfd`).
+- **The demo video:** https://youtu.be/rlMwQiZfW2g, 2:59.6 at 2560×1440, -14 LUFS, narrated in Lauren's voice (ElevenLabs, eleven_v4). Every app beat is tagged on screen as new in the hackathon, rebuilt in the hackathon, or from the earlier planner; the Meta section shows each model on the step it does; the roadmap runs from the AI co-pilot (live today) to a human assistant alongside the AI, then PlusOne running the whole event. Public, with chapters, a thumbnail and YouTube's AI-content label; the README opens with a "Watch the demo" button.
 - **Deployed** (about 12:55 IST): the logo's One and EVENTS in marigold in both themes, and the planner's choices clear of the reply box (`76d81b1`).
 - **Public:** the founder made `pe-hq-alpha/plusone-app` public.
 - **Polish after the final review** (`a854315`..`5355908`):
-  - **The video, v17:** a footer tag on every app beat says "New in the hackathon", "Rebuilt in the hackathon" or "From our earlier planner", so judges can see what was built during the event, and the cost line is off the model-flow scene. It was re-published at https://youtu.be/OFMK86MvU8I (the first upload is private).
   - **The app, deployed twice and walked live 15/15 each time:** the Partner sample business opens with a checked photo of past work; Compare names the middle half of the city's prices; the demo's setup screen says what it is making; on a phone the sample banner is one short block and Ask is a round button; the home page logo is marigold in the light theme too; the founders are named on the home page and in Privacy and Terms.
   - **The docs, checked claim by claim against the code:** one model layer with an adapter per model (the architecture diagram redrawn), 859 tests, about 400 commits, listing free until launch, the city and language names out, and real businesses' names out of two raw result files.
   - **The repository:** `pe-hq-alpha/plusone-partner`, a planning placeholder, is private again; plusone-app has topics.
   - **The demos open faster:** a visitor with no account no longer waits for Clerk to load (its own cookie says so at once), the connection opens while the guest is made, a just-made guest token isn't refreshed straight away, and the first screen's queries and code are asked for together. Measured on the same build against the dev backend: the customer demo's median from 3.31 s to 2.44 s (6 runs each), the vendors' from 3.39 s to 2.52 s (5 each); every sign-in and demo flow checked (fresh demos in both regions, a returning guest, a Compare deep link, Partner, a browser that looks signed in, the sign-in page).
 - **Checked:** `npm run typecheck` clean; `npm test` 859 passed (87 files); after each deploy, the live walk (`node scripts/e2e-live.mjs`) passed 15 of 15 steps; CI green.
-- **Credits:** no Meta calls made on purpose (the live walks only open the demos and read their pages). About 4,100 ElevenLabs characters for narration across v12 to v17, plus one music bed; about 850 of those were a planner take in the founder's voice that wasn't used.
+- **Credits:** no Meta calls made on purpose (the live walks only open the demos and read their pages). ElevenLabs: about 4,400 characters of narration and one music bed.
 
 ### 2026-11-02 (afternoon) to 2026-11-03 - a01e7f5..efda55e (the US demo, Partner fixes, the recording)
 

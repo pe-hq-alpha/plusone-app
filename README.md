@@ -4,7 +4,7 @@
 
 # PlusOne Events
 
-[![Watch the demo](https://img.shields.io/badge/Watch_the-demo_(3_min)-ff0033?style=for-the-badge&logo=youtube&logoColor=white&labelColor=11141c)](https://youtu.be/OFMK86MvU8I)
+[![Watch the demo](https://img.shields.io/badge/Watch_the-demo_(3_min)-ff0033?style=for-the-badge&logo=youtube&logoColor=white&labelColor=11141c)](https://youtu.be/rlMwQiZfW2g)
 [![Live site](https://img.shields.io/badge/Live-plusoneevents.site-f4b53a?style=for-the-badge&labelColor=11141c)](https://plusoneevents.site)
 [![For the judges](https://img.shields.io/badge/For_the-judges-1f2a5c?style=for-the-badge)](#for-the-judges)
 [![Try the demo](https://img.shields.io/badge/Try_the-demo-f4b53a?style=for-the-badge&labelColor=11141c)](https://app.plusoneevents.site/demo)
@@ -146,7 +146,7 @@ Before the event, PlusOne was a planner that talked a plan through, wrote to ven
 | **Impact (30%)**: real-world potential, who benefits, could people use it, fit to the problem statement | Families, teams and event managers plan across calls, chats and spreadsheets, with quotes no two alike and charges that arrive later; vendors with no website can't be found. PlusOne is one app for the whole plan, with every quote on the same lines. Live, free until launch, with a no-sign-up demo; on a real event, charges outside the headline prices came to about 10% of the quoted total. It earns from subscriptions first and, in the end, a disclosed commission on bookings made through PlusOne | [The business](#the-business), [How it works](#how-it-works) |
 | **Use of Meta AI tooling (25%)**: creative, beyond a basic integration, surprising capabilities | Six Meta models, each on the job it suits, chained in one flow, two of them open weights we host (Muse Glimmer on our own GPU, Muse Spark Open on Baseten). Every call shows in Under the hood with its model, time and cost | [Meta's models in PlusOne](#metas-models-in-plusone) |
 | **Technical depth and execution (20%)**: sound, refined engineering, real craft | The model reads; fixed, tested rules decide (what a quote leaves out, the market range, when a quote may move the budget). One model layer: schema-checked output, retries honouring `Retry-After`, a logged fallback, a cost row per call. 859 tests, CI that builds the app, the live demo walked in a browser after every push and every three hours, an uptime check every five minutes, and evaluations with raw results, including a held-out set written by a separate agent | [Architecture](#architecture), [Measured results](#measured-results) |
-| **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The video](https://youtu.be/OFMK86MvU8I), [the demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
+| **Demo (25%)**: working, impressive, holds up live, a video worth watching | Two demos with no sign-up, the customers' and the vendors', on the live site, with made-up vendors so nothing is really sent; retries, a fallback, rate limits and checks through judging; a three-minute video of the new work | [The video](https://youtu.be/rlMwQiZfW2g), [the demo](https://app.plusoneevents.site/demo), [the vendors' demo](https://partner.plusoneevents.site/demo) |
 
 ### Questions a judge will ask
 
