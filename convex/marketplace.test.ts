@@ -743,6 +743,35 @@ describe("a demo guest trying Partner", () => {
     }));
     expect(left).toEqual({ profiles: [["Anjali Caterers", null, "pending"]], offerings: 0, offers: 0, claims: 0 });
   });
+
+  test("a guest's sample business shows a sample caterer's photo, and clearing the guest keeps the shared file", async () => {
+    const t = setup();
+    const { familyId } = await familyEvent(t, { demo: true });
+    await t.run(async (ctx) => await ctx.db.patch(familyId, { isAnonymous: true }));
+    const { storageId } = await t.run(async (ctx) => {
+      const storageId = await ctx.storage.store(new Blob(["jpeg"], { type: "image/jpeg" }));
+      const now = Date.now();
+      const sampleId = await ctx.db.insert("vendorProfiles", {
+        name: "Kaveri Feast Co.", categories: ["Catering"], city: "Chennai", cityKey: "chennai", serviceArea: ["Adyar"], languages: ["English"],
+        about: "A sample caterer.", source: "vendor_signup", status: "verified", statusAt: now, joinedAt: now, completedEvents: 0, sample: true,
+      });
+      await ctx.db.insert("vendorPhotos", { profileId: sampleId, storageId, sampleKey: "sample-work-1", addedAt: now, status: "checked" });
+      return { storageId };
+    });
+    const profileId = await as(t, familyId).mutation(api.marketplace.partner.trySample, {});
+    const copies = await t.run(async (ctx) => await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profileId)).collect());
+    expect(copies.map((c) => [c.storageId, c.status, c.sampleKey])).toEqual([[storageId, "checked", "guest-copy:sample-work-1"]]);
+
+    await t.run(async (ctx) => {
+      const { deleteUserRecords } = await import("./lib/accounts");
+      await deleteUserRecords(ctx, familyId);
+    });
+    const after = await t.run(async (ctx) => ({
+      file: (await ctx.storage.getUrl(storageId)) !== null,
+      photos: (await ctx.db.query("vendorPhotos").collect()).map((p) => p.sampleKey),
+    }));
+    expect(after).toEqual({ file: true, photos: ["sample-work-1"] });
+  });
 });
 
 function checkResponseJson(body: unknown, init: ResponseInit = {}) {

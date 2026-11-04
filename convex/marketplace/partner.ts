@@ -315,6 +315,28 @@ export async function ensureSampleBusiness(ctx: MutationCtx, userId: Id<"users">
     sample: true,
   });
   await ctx.db.insert("vendorOfferings", { profileId, category: "Catering", unit: "per_person", priceUnit: "per_plate", ...sample.offering });
+  // One photo of past work, so the sample business looks like a working one: a sample caterer's checked photo in the
+  // same city. It shares that photo's file and is marked as a sample, so clearing the demo never deletes the file.
+  const caterers = await ctx.db
+    .query("vendorProfiles")
+    .withIndex("by_cityKey_and_status", (q) => q.eq("cityKey", sample.cityKey).eq("status", "verified"))
+    .take(200);
+  for (const p of caterers) {
+    if (p.sample !== true || p.ownerUserId || !p.categories.includes("Catering")) continue;
+    const photos = await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", p._id)).take(12);
+    const photo = photos.find((ph) => ph.sampleKey && ph.status === "checked" && ph.review?.decision !== "removed");
+    if (!photo) continue;
+    await ctx.db.insert("vendorPhotos", {
+      profileId,
+      storageId: photo.storageId,
+      sampleKey: `guest-copy:${photo.sampleKey}`,
+      addedAt: now,
+      status: "checked",
+      ...(photo.check ? { check: photo.check } : {}),
+      ...(photo.review ? { review: photo.review } : {}),
+    });
+    break;
+  }
   return profileId;
 }
 

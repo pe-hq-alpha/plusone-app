@@ -109,7 +109,8 @@ async function deleteProfile(ctx: MutationCtx, profileId: Id<"vendorProfiles">):
     await ctx.db.delete(c._id);
   }
   for (const ph of await ctx.db.query("vendorPhotos").withIndex("by_profileId", (q) => q.eq("profileId", profileId)).take(100)) {
-    await ctx.storage.delete(ph.storageId).catch(() => undefined);
+    // A sample photo's file is shared with the sample vendor it came from: only the row goes.
+    if (!ph.sampleKey) await ctx.storage.delete(ph.storageId).catch(() => undefined);
     await ctx.db.delete(ph._id);
   }
   for (const status of ["waiting", "approved", "rejected"] as const) {
