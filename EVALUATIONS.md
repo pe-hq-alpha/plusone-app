@@ -4,7 +4,7 @@ The detail behind the README's [measured results](README.md#measured-results): e
 
 ## Evaluation: missing charges
 
-Eighteen replies in the shapes vendors send (six caterers, four halls, four decorators, four photographers: shorthand, "GST extra", "at actuals", "all inclusive"), each with an answer key marked by hand before any run: the charges a careful planner would still have to ask that vendor about. Each was read on production by Muse Spark 1.3 through the same reader real replies use, and flagged by the same fixed rules against the rest of its group (`convex/lib/evalQuotes.ts`, `convex/evals.ts`; raw results in `scripts/missing-charges-run1.json` and `-run2.json`).
+Eighteen replies in the shapes vendors send (six caterers, four halls, four decorators, four photographers: shorthand, "GST extra", "at actuals", "all inclusive"), each with an answer key fixed before any run: the charges a careful planner would still have to ask that vendor about. Each was read on production by Muse Spark 1.3 through the same reader real replies use, and flagged by the same fixed rules against the rest of its group (`convex/lib/evalQuotes.ts`, `convex/evals.ts`; raw results in `scripts/missing-charges-run1.json` and `-run2.json`).
 
 | Run | Charges to ask about | Found | Missed | False alarms | Precision | Recall | Quotes exactly right |
 |---|---|---|---|---|---|---|---|
@@ -51,7 +51,7 @@ Of the ₹41,400, ₹21,400 was 40 more guests at the caterer's own rates. The o
 
 ## Evaluation: reading quotes in any form
 
-A quote arrives as an email, a PDF or a photo of a printed page sent on WhatsApp. Six of the quotes above, each with a total marked by hand, were sent all three ways: as an email's text, as a PDF, and as a phone photo of the printed quote on a table, turned and shaded (`convex/lib/evalReading.ts`; the PDFs and photos in `scripts/eval-reading/`, made by `scripts/eval-reading.mjs`; raw results in `scripts/quote-reading-run1.json`). Each was read on production by Muse Spark 1.3 through the same reader real replies use. A reading counts as right when its total is the hand-marked one and it kept every rupee amount the quote states, including lakh figures like ₹1,10,000.
+A quote arrives as an email, a PDF or a photo of a printed page sent on WhatsApp. Six of the quotes above, each with its total fixed in advance, were sent all three ways: as an email's text, as a PDF, and as a phone photo of the printed quote on a table, turned and shaded (`convex/lib/evalReading.ts`; the PDFs and photos in `scripts/eval-reading/`, made by `scripts/eval-reading.mjs`; raw results in `scripts/quote-reading-run1.json`). Each was read on production by Muse Spark 1.3 through the same reader real replies use. A reading counts as right when its total is the one in the key and it kept every rupee amount the quote states, including lakh figures like ₹1,10,000.
 
 | Form | Totals right | Rupee amounts kept | Time each |
 |---|---|---|---|
@@ -61,7 +61,7 @@ A quote arrives as an email, a PDF or a photo of a printed page sent on WhatsApp
 
 All 18 right on 29 Oct, 205 s in all. The photos are clean renders, not real phone shots in poor light, so treat this as the reader's ceiling; a set of real WhatsApp photos is next.
 
-**In a local language.** Four more quotes the way vendors write them on WhatsApp, two in the local script and two mixed with English ("120 per head ku Rs 400 … GST 5% separate-a varum", "Album venumna Rs 5k extra"), each with a hand-marked total, read as an email and as a phone photo (`TAMIL_CASES` in `convex/lib/evalReading.ts`; `scripts/quote-reading-tamil-run1.json`):
+**In a local language.** Four more quotes the way vendors write them on WhatsApp, two in the local script and two mixed with English ("120 per head ku Rs 400 … GST 5% separate-a varum", "Album venumna Rs 5k extra"), each with its total in the key, read as an email and as a phone photo (`TAMIL_CASES` in `convex/lib/evalReading.ts`; `scripts/quote-reading-tamil-run1.json`):
 
 | Form | Totals right | Rupee amounts kept | Time each |
 |---|---|---|---|

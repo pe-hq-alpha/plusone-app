@@ -1,6 +1,6 @@
 # Photo-check evaluation set
 
-36 photos, marked by hand on 29 Oct 2026 from the photos themselves. `key.json` holds one entry per photo.
+36 photos, keyed on 29 Oct 2026, before any run. Whether each photo is a real photograph or AI-generated is known from where it came from (below); the other fields were marked from the photos themselves by our coding agent (Claude Code). `key.json` holds one entry per photo.
 
 - 8 photos generated for the app's sample vendors (not real work).
 - 22 free-licence Unsplash photos, standing in for vendors' own work (see `../sample-photos.json` for sources).
@@ -15,4 +15,4 @@ What each field means:
 - `unsafe`: violence, nudity or similar.
 - `tags`: the tag keys right for the photo; `trade` is chosen by what the photo shows, not by which sample vendor holds it.
 
-Limits: small, and one person marked it; the real photos are stock stand-ins, and `sample-work-17` and `-22` are the same stage. The other business's name on `trap-other-brand.jpg` has no field in the check's answer, so it is not scored.
+Limits: small, and one reviewer marked the fields other than real or generated; the real photos are stock stand-ins, and `sample-work-17` and `-22` are the same stage. The other business's name on `trap-other-brand.jpg` has no field in the check's answer, so it is not scored.

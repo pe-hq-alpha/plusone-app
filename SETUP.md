@@ -32,7 +32,7 @@ Open `http://localhost:5173/demo` for the sample events; they need only the step
 
 Or run `./start.sh`, which checks Node, installs what's missing, warns about any backend key not yet set on the deployment, and then starts both.
 
-Backend keys are set on the deployment, for example `npx convex env set ANTHROPIC_API_KEY …`, never in a file. **Model calls run on Meta's models** once `npx convex env set MODEL_API_KEY …` (a Meta Model API key) is set; without it, or with `MODEL_PROVIDER=claude`, every call runs on Claude. The minimum to try it is what the block above sets. To deploy (run `node scripts/auth-keys.mjs --prod` once for the production deployment first):
+Backend keys are set on the deployment, for example `npx convex env set FIRECRAWL_API_KEY …`, never in a file. **Model calls run on Meta's models** once `npx convex env set MODEL_API_KEY …` (a Meta Model API key) is set; without it, or with `MODEL_PROVIDER=claude`, every call runs on Claude. The minimum to try it is what the block above sets. To deploy (run `node scripts/auth-keys.mjs --prod` once for the production deployment first):
 
 ```bash
 npx convex deploy -y                                                    # the backend

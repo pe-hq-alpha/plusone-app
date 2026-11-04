@@ -82,7 +82,7 @@ export const EXCLUDED_DOMAINS = [
 ];
 
 /**
- * Hosts that are never a vendor's own site. The eval (docs/research/firecrawl-eval.json)
+ * Hosts that are never a vendor's own site. The eval (our research notes, kept outside this repository)
  * surfaced portland.gov, university pages and blog platforms among the 40% non-vendor
  * candidates, so they are dropped before we spend a scrape on them.
  */
@@ -102,7 +102,7 @@ const NON_VENDOR_HOST_PATTERNS: RegExp[] = [
  * Review directories are excluded from discovery but are exactly where ratings live.
  * The second block was added after measuring: the first eight covered the US and India
  * and found nothing at all for Brighton caterers or Dublin florists.
- * See docs/research/reviews-eval.json.
+ * Measured in our research notes, kept outside this repository.
  */
 const ALL_REVIEW_DOMAINS = [
   "theknot.com",
@@ -589,7 +589,7 @@ const REVIEW_JSON_SCHEMA = {
  * 19 reviews is better evidence than 5.0 from 2, and taking the first hit picked the
  * wrong one for two of sixteen vendors in testing. A rating is never invented, never
  * taken from the vendor's own site, and never taken from a page rating them as an
- * employer. Measured in docs/research/reviews-eval.json.
+ * employer. Measured in our research notes, kept outside this repository.
  */
 export const lookupReviews = internalAction({
   args: {

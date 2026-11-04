@@ -84,7 +84,7 @@ One platform, with layers that feed each other:
 
 More vendors on Partner widen what customers can compare; more customers bring vendors work; every quote read into the same lines sharpens the market range for the next event. It is built for the events people actually hold: birthdays and sixtieths, housewarmings, naming ceremonies, poojas, baby showers, engagements, office parties, offsites, launches, conferences, college fests and community festivals. Weddings are one of the sixteen types too.
 
-**How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The families, planners and vendors we spoke to all pointed at the same gap: there is no organised way to plan an event and know what you're paying for. For the Meta Global AI Developer Hackathon (Startup track), PlusOne is built on Meta's models, with the pieces that make prices comparable at the source.
+**How it started.** PlusOne began as a small wedding-planning app and placed second at Convex's All Gas hackathon in September 2026. The families, event managers and vendors we spoke to all pointed at the same gap: there is no organised way to plan an event and know what you're paying for. For the Meta Global AI Developer Hackathon (Startup track), PlusOne is built on Meta's models, with the pieces that make prices comparable at the source.
 
 **Team:** Padmanabhan Rajendrakumar, Founder, who built this entry and submits it, with Sharmila Raghu, Co-Founder of PlusOne.
 
@@ -213,7 +213,7 @@ Tested against a trap: a made-up caterer's own site hid an instruction telling A
 > "It was incredibly helpful to see everything in one place and also compare the prices… Putting in the WhatsApp screenshots directly, and then the app capturing them all… gave me a clear picture of what the fair price was and what I paid."
 > — Padmanabhan Rajendrakumar, Founder
 
-Every model step is measured on production against keys marked by hand before any run; raw results are in `scripts/*-run*.json`, and the write-ups, every live run with its time and cost, and the tech part by part are in [EVALUATIONS.md](EVALUATIONS.md). The sets are small and marked by hand (8 to 37 items each): enough to show each step works and where it fails, not an accuracy for every quote in the market; the pilot measures that on real events.
+Every model step is measured on production against answer keys fixed before any run; raw results are in `scripts/*-run*.json`, and the write-ups, every live run with its time and cost, and the tech part by part are in [EVALUATIONS.md](EVALUATIONS.md). The sets are small, with their keys fixed in advance (8 to 37 items each): enough to show each step works and where it fails, not an accuracy for every quote in the market; the pilot measures that on real events.
 
 | What was tested | Result |
 |---|---|
@@ -222,7 +222,7 @@ Every model step is measured on production against keys marked by hand before an
 | [Quotes in any form](EVALUATIONS.md#evaluation-reading-quotes-in-any-form): the same quote as an email, a PDF and a phone photo | Read right 18 of 18 times; quotes in a local language or mixed with English, 7 of 8 |
 | [Finding the stage](EVALUATIONS.md#evaluation-finding-the-stage) in a hall photo | Found and cut out in 9 of 10 kinds of hall; one living room's sofa was taken for a stage |
 | [Checking a vendor](EVALUATIONS.md#evaluation-checking-a-vendor) with Muse Wonder | Never confirmed a made-up vendor, even one whose own site hid an instruction telling AI reviewers to approve it; backed three real ones with sources |
-| [Checking vendors' photos](EVALUATIONS.md#evaluation-checking-vendors-photos), open weights against Muse Spark, on 36 hand-marked photos | Muse Glimmer caught 11 of 14 AI-generated photos to Muse Spark's 7 |
+| [Checking vendors' photos](EVALUATIONS.md#evaluation-checking-vendors-photos), open weights against Muse Spark, on 36 photos of known origin | Muse Glimmer caught 11 of 14 AI-generated photos to Muse Spark's 7 |
 | [Every live run](EVALUATIONS.md#real-runs), with its time and cost at list price | Reading a quote about $0.011, a hall's stage about $0.009, a 47-second call $0.002, a photo check about $0.006 warm; a whole event, the founders' own Diwali party planned end to end: 44 model calls, $0.43 ([unit economics](BUSINESS.md#unit-economics)) |
 
 ## The business

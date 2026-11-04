@@ -9,7 +9,7 @@ import { offeringUnit, placeValidator } from "../schema";
 import { customerPhoto, photosForCustomers } from "./photos";
 
 /**
- * What PlusOne Events reads from PlusOne Partner (docs/marketplace-contract.md): listed
+ * What PlusOne Events reads from PlusOne Partner (the contract in our internal notes): listed
  * vendors for a need in a city, a city's price range, and the listing behind a website.
  * Internal only: Events calls these from its own functions, after its own access checks.
  */
