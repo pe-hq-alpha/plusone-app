@@ -27,7 +27,7 @@ const STEP: Record<string, string> = {
   suggestPalette: "Suggested palettes from your pictures",
   findStage: "Found the stage in your hall photo",
   vendorCall: "Heard a call with a vendor, speaker by speaker",
-  voiceBrief: "Heard what you said, in Tamil, English or both",
+  voiceBrief: "Heard what you said, in your own words, any mix of languages",
   vendorPhotoCheck: "Checked a vendor's photo of past work",
   vendorSearchRead: "Read a vendor search in your own words",
   vendorCheck: "Checked a vendor's public evidence for our team",

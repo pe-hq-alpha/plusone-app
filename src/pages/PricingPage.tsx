@@ -49,7 +49,7 @@ const ALL: { group: string; rows: Row[] }[] = [
     group: "Planning",
     rows: [
       { feature: "Tell us about the event in your own words; the plan is set out for you", basic: true, premium: true },
-      { feature: "Speak instead of typing, in Tamil, English or both", basic: true, premium: true },
+      { feature: "Speak instead of typing, in your own words, any mix of languages", basic: true, premium: true },
       { feature: "Overview: the budget first, then what's done, under way and next", basic: true, premium: true },
       { feature: "Changes made by just saying them", basic: true, premium: true },
       { feature: "The budget, deposits and deadlines in one list", basic: true, premium: true },
