@@ -22,7 +22,7 @@
 
 <table align="center">
 <tr>
-<td align="center" colspan="8"><a href="#metas-models-in-plusone"><img src="assets/logos/meta.svg" width="40" height="40" alt="Meta"></a><br><b><a href="#metas-models-in-plusone">Meta's models</a></b><br><sub>Muse Spark, Muse Voice Transcribe, Muse Wonder, SAM 3.1, and the open-weights Muse Glimmer and Muse Spark Open, with Muse Code as our pair programmer. <a href="#metas-models-in-plusone">What each one does</a></sub></td>
+<td align="center" colspan="7"><a href="#metas-models-in-plusone"><img src="assets/logos/meta.svg" width="40" height="40" alt="Meta"></a><br><b><a href="#metas-models-in-plusone">Meta's models</a></b><br><sub>Muse Spark, Muse Voice Transcribe, Muse Wonder, SAM 3.1, and the open-weights Muse Glimmer and Muse Spark Open, with Muse Code as our pair programmer. <a href="#metas-models-in-plusone">What each one does</a></sub></td>
 </tr>
 <tr>
 <td align="center" width="80"><img src="assets/logos/modal.svg" width="26" height="26" alt="Modal"><br><sub><b>Modal</b><br>Muse Glimmer's GPU</sub></td>
@@ -35,7 +35,6 @@
 </tr>
 <tr>
 <td align="center" width="80"><img src="assets/logos/react.svg" width="26" height="26" alt="React"><br><sub><b>React</b><br>Screens</sub></td>
-<td align="center" width="80"><img src="assets/logos/vite.svg" width="26" height="26" alt="Vite"><br><sub><b>Vite</b><br>Build</sub></td>
 <td align="center" width="80"><img src="assets/logos/tailwind.svg" width="26" height="26" alt="Tailwind CSS"><br><sub><b>Tailwind CSS</b><br>Styling</sub></td>
 <td align="center" width="80"><img src="assets/logos/vitest.svg" width="26" height="26" alt="Vitest"><br><sub><b>Vitest</b><br>Tests</sub></td>
 <td align="center" width="80"><img src="assets/logos/resend.svg" width="26" height="26" alt="Resend"><br><sub><b>Resend</b><br>App emails</sub></td>
