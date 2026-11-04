@@ -95,10 +95,11 @@ export function AssistantDrawer({ eventId, canEdit, sessions, currency }: { even
           data-tour="ask"
           aria-label={`Ask ${BRAND.name}`}
           onClick={() => setOpen(true)}
-          className={`no-print fixed bottom-[78px] right-3 z-40 md:hidden ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex items-center gap-2 rounded-full bg-accent py-3 pl-4 pr-5 text-[0.95rem] font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] ring-4 ring-accent/15 transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep`}
+          className={`no-print fixed bottom-[78px] right-3 z-40 md:hidden ${onBoard ? "max-md:hidden" : ""} ${tucked ? "max-md:pointer-events-none max-md:translate-y-4 max-md:opacity-0" : ""} flex h-12 w-12 items-center justify-center rounded-full bg-accent text-[0.95rem] font-medium text-paper shadow-[0_16px_34px_-14px_rgb(var(--shadow-rgb)/0.6)] ring-4 ring-accent/15 transition duration-200 hover:-translate-y-0.5 hover:bg-accent-deep`}
           style={{ marginBottom: "env(safe-area-inset-bottom)" }}
         >
-          <Icon name="heart" size={17} /> <span>Ask {BRAND.name}</span>
+          {/* A round icon on a phone: it covers as little of the page as it can. */}
+          <Icon name="heart" size={20} />
         </button>
       )}
       {open && (

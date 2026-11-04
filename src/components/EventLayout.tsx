@@ -238,15 +238,18 @@ export function EventLayout() {
 
       {event.demo && (
         <div className="no-print border-b border-line bg-wash">
-          <div className="demo-banner mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 text-sm md:px-6">
+          <div className="demo-banner mx-auto flex max-w-[1240px] items-center max-md:gap-3 md:flex-wrap justify-between gap-x-4 gap-y-1.5 px-4 py-2 text-[0.8125rem] md:px-6 md:py-2.5 md:text-sm">
             <p className="min-w-0 text-muted">
-              <span className="font-medium text-ink">A sample plan.</span> Click anything; the vendors are made up, so emails to them are simulated.{" "}
+              <span className="font-medium text-ink">A sample plan.</span>{" "}
+              {/* On a phone the banner stays one or two short lines, so each page starts near the top. */}
+              <span className="hidden md:inline">Click anything; the vendors are made up, so emails to them are simulated.</span>
+              <span className="md:hidden">Vendors are made up.</span>{" "}
               <span>
-                Judging?{" "}
+                <span className="hidden md:inline">Judging? </span>
                 <button type="button" onClick={() => setHood(true)} className="text-accent underline-offset-4 hover:underline">
                   Under the hood
                 </button>
-                , the chip icon at the top, shows the Meta model behind every step.{" "}
+                <span className="hidden md:inline">, the chip icon at the top, shows the Meta model behind every step.</span><span className="md:hidden"> shows each Meta model.</span>{" "}
               </span>
               {/* The other samples are Indian (a griha pravesam, a Diwali office party), so the American one doesn't offer them. */}
               {event.currency !== "USD" && <span className="hidden lg:inline">
@@ -261,7 +264,7 @@ export function EventLayout() {
                 .
               </span>}
             </p>
-            <Link to="/new" className="btn-primary btn-sm shrink-0" data-tour="plan-own">Plan your own</Link>
+            <Link to="/new" className="btn-primary btn-sm shrink-0 max-md:px-3" data-tour="plan-own">Plan your own</Link>
           </div>
         </div>
       )}
