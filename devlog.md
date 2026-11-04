@@ -20,7 +20,7 @@
 - **Credits spent:** about $9.60 of model calls recorded on production by the morning of 2 Nov at list price (`evalsCost:perEvent`): $8.92 in evaluations, vendor checks and directory searches, and well under $1 across real and sample events; the founders' own Diwali party, planned end to end, came to $0.43 in 44 calls. GPU time for Muse Glimmer (Modal) and Muse Spark Open (Baseten) is billed on those platforms' credits. Earlier detail: about $3.70 by the evening of 29 Oct. No further Meta calls to 4 Nov beyond about $0.01.
 - **Product started:** 2026-09-15, as an entry to Convex's All Gas hackathon (placed second); built on since in private
 - **Pre-hackathon cutoff:** kickoff, 26 Oct 2026 at 9:30 PM IST. The repository's first commit, tagged `pre-hackathon` (`06fa77b`, 26 Oct 14:58 IST), is the product as it stood before the event; 11 commits that afternoon, before kickoff (`ab4d141`..`d4e1712`, 17:35–17:45 IST), are privacy and trust groundwork and are not shown as hackathon work. Everything from `608627f` (27 Oct) on is new during the hackathon
-- **Last updated:** 2026-11-04T14:30:00+05:30
+- **Last updated:** 2026-11-04T15:00:00+05:30
 
 ## Evidence
 
@@ -85,9 +85,13 @@ The demo video, locked by the founder and published, by Claude Code (claude-opus
 - **Published:** https://youtu.be/OFMK86MvU8I, public, with chapters, a thumbnail and YouTube's AI-content label on. The README opens with a "Watch the demo" button (`6071cfd`).
 - **Deployed** (about 12:55 IST): the logo's One and EVENTS in marigold in both themes, and the planner's choices clear of the reply box (`76d81b1`).
 - **Public:** the founder made `pe-hq-alpha/plusone-app` public.
-- **Polish after the final review:** the form and the YouTube description say which demo beats are new and which build on the earlier planner; the city and language names are out of the public docs; on a phone the sample banner is one short block and Ask is a round button (`a854315`); the founders are named on the site and in Privacy and Terms.
-- **Checked:** `npm run typecheck` clean; `npm test` 858 passed (87 files); after the deploy, the live walk (`node scripts/e2e-live.mjs`) passed 15 of 15 steps.
-- **Credits:** no Meta calls. About 3,900 ElevenLabs characters for narration across v12 to v16, plus one music bed; about 850 of those were a planner take in the founder's voice that wasn't used.
+- **Polish after the final review** (`a854315`..`5355908`):
+  - **The video, v17:** a footer tag on every app beat says "New in the hackathon", "Rebuilt in the hackathon" or "From our earlier planner", so judges can see what was built during the event, and the cost line is off the model-flow scene. It was re-published at https://youtu.be/OFMK86MvU8I (the first upload is private).
+  - **The app, deployed twice and walked live 15/15 each time:** the Partner sample business opens with a checked photo of past work; Compare names the middle half of the city's prices; the demo's setup screen says what it is making; on a phone the sample banner is one short block and Ask is a round button; the home page logo is marigold in the light theme too; the founders are named on the home page and in Privacy and Terms.
+  - **The docs, checked claim by claim against the code:** one model layer with an adapter per model (the architecture diagram redrawn), 859 tests, about 400 commits, listing free until launch, the city and language names out, and real businesses' names out of two raw result files.
+  - **The repository:** `pe-hq-alpha/plusone-partner`, a planning placeholder, is private again; plusone-app has topics.
+- **Checked:** `npm run typecheck` clean; `npm test` 859 passed (87 files); after each deploy, the live walk (`node scripts/e2e-live.mjs`) passed 15 of 15 steps; CI green.
+- **Credits:** no Meta calls made on purpose (the live walks only open the demos and read their pages). About 4,100 ElevenLabs characters for narration across v12 to v17, plus one music bed; about 850 of those were a planner take in the founder's voice that wasn't used.
 
 ### 2026-11-02 (afternoon) to 2026-11-03 - a01e7f5..efda55e (the US demo, Partner fixes, the recording)
 
