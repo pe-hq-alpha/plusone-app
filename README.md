@@ -114,7 +114,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: over 330 commits, the code from about 41,000 lines to about 70,000, and the backend from 124 files to 232. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 385 commits, the code from about 41,000 lines to about 70,000, and the backend from 124 files to 232. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
 
 | What | Meta model | Status |
 |---|---|---|
@@ -262,18 +262,18 @@ Each step says what came before the hackathon and what is new.
 <table>
 <tr>
 <td width="50%" valign="top"><img src="assets/screens/today.jpg" alt="Overview for the sample 60th birthday: the budget, vendors booked and guests coming at the top, then where things stand and a box to tell PlusOne a change"></td>
-<td width="50%" valign="top"><img src="assets/screens/near-venue.jpg" alt="Flowers and decoration for the sample 60th: Near your venue, with Thamarai Hall in Mylapore pinned as the booked hall, a 5 km circle on the map of Chennai, and the decorators numbered by distance beside it"></td>
+<td width="50%" valign="top"><img src="assets/screens/near-venue.jpg" alt="Flowers and decoration for the sample 60th: Near your venue, with Thamarai Hall in Mylapore pinned as the booked hall, a 5 km circle on the map, and the decorators numbered by distance beside it"></td>
 </tr>
 </table>
 
-<img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering: the Chennai range from Value to Luxury with the five quotes pinned on it by number, then line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
+<img src="assets/screens/compare.jpg" width="100%" alt="Compare for the sample birthday's catering: the city's range from Value to Luxury with the five quotes pinned on it by number, then line by line: three caterers' emailed quotes and two verified sample vendors' offers in columns, with the total, where each sits in the city's range, GST, service staff, transport, crockery and water for each, unstated lines marked, and the gaps to ask about">
 
 <img src="assets/screens/venue.jpg" width="100%" alt="The sample hall with its bare stage dressed in the marigold and mango leaf look: a red pleated drape with marigold swags and hanging strands behind the stage, and a gold skirt along the stage's front, with the chairs in front left as they are">
 <sub>See it on your venue: the stage found by Muse Spark and cut out by SAM 3.1 in the hall's own photo, then dressed in a look, to judge decorators' quotes against. The look is drawn by the app on SAM's masks, since Muse Image isn't available in our region.</sub>
 
 **Finding vendors, free.** At [/vendors](https://app.plusoneevents.site/vendors), anyone can search in their own words, on a list or a map, with no sign-in: each listed vendor's packages on the standard sheet, checked photos and track record, plus vendors' own sites on the open web. Until real vendors join, the directory holds 26 sample vendors, marked Sample.
 
-<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and the caterers numbered on a map of Chennai inside a 5 km circle around Mylapore">
+<img src="assets/screens/find-vendors.jpg" width="100%" alt="Find vendors with the search 'caterers near Mylapore under 450' read as Catering near Mylapore up to ₹450, and the caterers numbered on a map inside a 5 km circle around Mylapore">
 
 **Answering as a vendor.** On PlusOne Partner, a vendor sets up or claims their business, pins where they work by pasting their Google Maps link, and can run several businesses from one login. They price packages the way their trade charges, or bring the price list they already send, and say every charge on each one: GST, service staff, transport, crockery, water and any other they name, each in the price, added at a fixed amount, at cost or not provided, so customers see it before they ask; answer customers' requests on the same sheet, never seeing the customer's name or budget; and land beside the customer's other quotes. A person checks every business before customers see it.
 
