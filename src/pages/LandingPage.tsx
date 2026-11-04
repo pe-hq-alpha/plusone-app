@@ -373,7 +373,7 @@ export function LandingPage() {
           </nav>
         </div>
         <div className="wrap site-foot__base">
-          <p>&copy; {new Date().getFullYear()} {BRAND.name} Events</p>
+          <p>&copy; {new Date().getFullYear()} {BRAND.name} Events · Founded by Padmanabhan Rajendrakumar and Sharmila Raghu</p>
           <ThemeSwitch compact />
         </div>
       </footer>
