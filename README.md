@@ -113,7 +113,7 @@ More vendors on Partner widen what customers can compare; more customers bring v
 
 ### Built during the hackathon (27 Oct – 4 Nov 2026)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 400 commits, the code from about 41,000 lines to about 72,000, and the backend from 124 files to 238. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In nine days it grew into a two-sided platform with six Meta models at its core: about 410 commits, the code from about 42,000 lines to about 74,000, and the backend from 125 files to 239. Everything below was built during the event; **[the full list, with dates, files and measured runs, is in WHATS-NEW.md](WHATS-NEW.md)**. In the video, every app shot is tagged: **New in the hackathon** (built 27 Oct – 4 Nov), **Rebuilt in the hackathon** (the feature existed before 27 Oct and was reworked or extended during the event, each change dated in WHATS-NEW) or **From our earlier planner** (as it was before 27 Oct).
 
 | What | Meta model | Status |
 |---|---|---|
@@ -327,7 +327,7 @@ The first 90 days, in one city, measured as we go:
 
 ## Repository
 
-**History.** PlusOne Events is an early-stage startup, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (26 October 2026, 14:58 IST), is the product as it stood before the hackathon. Kickoff was 26 October at 9:30 PM IST: eleven commits made that afternoon, before kickoff, are privacy and trust groundwork, and every commit from 27 October (`608627f`) on was made during the hackathon. [`devlog.md`](devlog.md) sets out each day's work.
+**History.** PlusOne Events is an early-stage startup, so this repository starts from a snapshot of earlier private work rather than its full history. The first commit, tagged [`pre-hackathon`](../../tree/pre-hackathon) (26 October 2026, 14:58 IST), is the product as it stood before the hackathon. Kickoff was 26 October at 9:30 PM IST: eleven commits made that afternoon, before kickoff, are privacy and trust groundwork and are not claimed; the tag [`kickoff`](../../tree/kickoff) marks the last of them, so `git log kickoff..main` lists exactly the hackathon's commits, from 27 October (`608627f`) on. [`devlog.md`](devlog.md) sets out each day's work.
 
 | Path | What it is |
 |---|---|

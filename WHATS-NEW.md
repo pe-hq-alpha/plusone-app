@@ -2,7 +2,7 @@
 
 [← Back to the README](README.md)
 
-Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In the nine days it grew into a two-sided platform with six Meta models at its core: about 400 commits, the code from about 41,000 lines to about 70,000, and the backend from 124 files to 232. Everything below was built during the event.
+Before the event, PlusOne was a planner that talked a plan through, wrote to vendors and put their quotes in one unit (tag `pre-hackathon`). In the nine days it grew into a two-sided platform with six Meta models at its core: about 410 commits, the code from about 42,000 lines to about 74,000, and the backend from 125 files to 239. Everything below was built during the event (`git log kickoff..main`; the eleven commits between the `pre-hackathon` and `kickoff` tags, made on 26 Oct before kickoff, are privacy groundwork and not claimed). In the video, every app shot is tagged: **New in the hackathon** (built 27 Oct – 4 Nov), **Rebuilt in the hackathon** (the feature existed before 27 Oct and was reworked or extended during the event, each change dated in WHATS-NEW) or **From our earlier planner** (as it was before 27 Oct).
 
 | What | Meta model | Status |
 |---|---|---|
